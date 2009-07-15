@@ -1252,7 +1252,10 @@ class orpgApp(wx.App):
     def OnExit(self):
         #Clean up approot files on exit.
         self.log.log("Removing approot files\n", ORPG_DEBUG)
-        os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.py')
-        os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.pyc')
+        try:
+            os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.py')
+            os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.pyc')
+        except:
+            pass
         #Exit
         self.log.log("Main Application Exit\n\n", ORPG_DEBUG)
