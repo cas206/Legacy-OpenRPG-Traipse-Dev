@@ -598,42 +598,54 @@ class orpgFrame(wx.Frame):
 
     #Help Menu
     def OnMB_HelpAbout(self):
-        "The about box.  We're making it n HTML about box because it's pretty cool!"
-        "Inspired by the wxWindows about.cpp sample."
-        topSizer = wx.BoxSizer( wx.VERTICAL )
-        dlg = wx.Dialog( self, -1, "About" )
-        html = AboutHTMLWindow( dlg, -1, wx.DefaultPosition, wx.Size(400, 200), wx.html.HW_SCROLLBAR_NEVER )
-        html.SetBorders( 0 )
-        replace_text = "VeRsIoNrEpLaCeMeNtStRiNg"
-        about_file = open(orpg.dirpath.dir_struct["template"]+"about.html","r")
-        about_text = about_file.read()
-        about_file.close()
-        display_text = string.replace(about_text,replace_text,VERSION)
-        html.SetPage(display_text)
-        html.SetSize( wx.Size(html.GetInternalRepresentation().GetWidth(),
-                             html.GetInternalRepresentation().GetHeight()) )
-        topSizer.Add( html, 1, wx.ALL, 10 )
-        topSizer.Add( wx.StaticLine( dlg, -1), 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10 )
-        Okay = wx.Button( dlg, wx.ID_OK, "Okay" )
-        Okay.SetDefault()
-        topSizer.Add( Okay, 0, wx.ALL | wx.ALIGN_RIGHT, 15 )
-        dlg.SetAutoLayout( True )
-        dlg.SetSizer( topSizer )
-        topSizer.Fit( dlg )
-        dlg.ShowModal()
-        dlg.Destroy()
+
+        description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table
+top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb 
+functionality.  OpenRPG is originally designed by Chris Davis."""
+
+        license = """OpenRPG is free software; you can redistribute it and/or modify it 
+under the terms of the GNU General Public License as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any later version.
+
+OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+See the GNU General Public License for more details. You should have received a copy of 
+the GNU General Public License along with Traipse 'OpenRPG'; if not, write to 
+the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+'Traipse' and the 'Traipse' Logo are trademarks of Mad Mathematics Laboratories."""
+
+        info = wx.AboutDialogInfo()
+        info.SetIcon(wx.Icon(orpg.dirpath.dir_struct["icon"]+'splash.gif', wx.BITMAP_TYPE_GIF))
+        info.SetName('Traipse')
+        info.SetVersion('OpenRPG ' + VERSION)
+        info.SetDescription(description)
+        info.SetCopyright('(C) 2009 Mad Math Labs')
+        info.SetWebSite('http://www.openrpg.com')
+        info.SetLicence(license)
+        orpg_devs = ['Thomas Baleno', 'Andrew Bennett', 'Lex Berezhny', 'Ted Berg',
+		'Bernhard Bergbauer', 'Chris Blocher', 'David Byron', 'Ben Collins-Sussman', 'Robin Cook', 'Greg Copeland',
+		'Chris Davis', 'Michael Edwards', 'Andrew Ettinger', 'Todd Faris', 'Dj Gilcrease',
+        'Christopher Hickman', 'Paul Hosking', 'Brian Manning', 'Scott Mackay', 'Jesse McConnell', 
+		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain']
+        for dev in orpg_devs:
+            info.AddDeveloper(dev)
+        #info.AddDocWriter('jan bodnar')
+        #info.AddArtist('The Tango crew')
+        #info.AddTranslator('jan bodnar')
+        wx.AboutBox(info)
 
     def OnMB_HelpOnlineUserGuide(self):
         wb = webbrowser.get()
-        wb.open("https://www.assembla.com/wiki/show/openrpg/User_Manual")
+        wb.open("https://www.assembla.com/wiki/show/traipse/User_Manual")
 
     def OnMB_HelpChangeLog(self):
         wb = webbrowser.get()
-        wb.open("http://www.assembla.com/spaces/milestones/index/openrpg?spaces_tool_id=Milestones")
+        wb.open("http://www.assembla.com/spaces/milestones/index/traipse_dev?spaces_tool_id=Milestones")
 
     def OnMB_HelpReportaBug(self):
         wb = webbrowser.get()
-        wb.open("http://www.assembla.com/spaces/tickets/index/openrpg?spaces_tool_id=Tickets")
+        wb.open("http://www.assembla.com/spaces/tickets/index/traipse_dev?spaces_tool_id=Tickets")
 
 
     #################################
