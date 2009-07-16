@@ -494,8 +494,20 @@ class miniature_layer(layer_base):
         self.log.log("Enter miniature_layer", ORPG_DEBUG)
         self.settings = self.canvas.settings
         layer_base.__init__(self)
+
+        self.id = -1 #added.
+
         self.miniatures = []
         self.serial_number = 0
+
+        # Set the font of the labels to be the same as the chat window
+        # only smaller.
+        font_size = int(self.settings.get_setting('defaultfontsize'))
+        if (font_size >= 10):
+            font_size -= 2
+        self.label_font = wx.Font(font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
+                                  False, self.settings.get_setting('defaultfont'))
+
         self.log.log("Exit miniature_layer", ORPG_DEBUG)
 
     def next_serial(self):
@@ -589,6 +601,9 @@ class miniature_layer(layer_base):
 
     def layerDraw(self, dc, topleft, size):
         self.log.log("Enter miniature_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
+
+        dc.SetFont(self.label_font)
+
         sorted_miniatures = self.miniatures[:]
         sorted_miniatures.sort(cmp_zorder)
         for m in sorted_miniatures:

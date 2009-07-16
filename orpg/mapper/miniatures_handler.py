@@ -583,10 +583,13 @@ class miniatures_handler(base_layer_handler):
                 return
             self.sel_min = mini
             self.sel_min.selected = True
+            """
             dc = wx.ClientDC(self.canvas)
             self.canvas.PrepareDC(dc)
             dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
             self.sel_min.draw(dc, self.canvas.layers['miniatures'])
+            """
+            self.canvas.Refresh()
         else:
             self.drag_mini = None
             pos = self.getLogicalPosition(evt)

@@ -599,18 +599,17 @@ class orpgFrame(wx.Frame):
     #Help Menu
     def OnMB_HelpAbout(self):
 
-        description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table
-top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb 
-functionality.  OpenRPG is originally designed by Chris Davis."""
+        description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb functionality.  
 
-        license = """OpenRPG is free software; you can redistribute it and/or modify it 
-under the terms of the GNU General Public License as published by the Free Software Foundation; 
-either version 2 of the License, or (at your option) any later version.
+OpenRPG is originally designed by Chris Davis."""
 
-OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-See the GNU General Public License for more details. You should have received a copy of 
-the GNU General Public License along with Traipse 'OpenRPG'; if not, write to 
+        license = """OpenRPG is free software; you can redistribute it and/or modify it under the terms of the GNU General 
+Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any 
+later version.
+
+OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+details. You should have received a copy of the GNU General Public License along with Traipse 'OpenRPG'; if not, write to 
 the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 'Traipse' and the 'Traipse' Logo are trademarks of Mad Mathematics Laboratories."""
