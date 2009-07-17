@@ -38,6 +38,7 @@ import wx
 from grid import GRID_RECTANGLE
 from grid import GRID_HEXAGON
 from grid import GRID_ISOMETRIC
+
 LABEL_TOOL = wx.NewId()
 LAYER_TOOL = wx.NewId()
 MIN_LIST_TOOL = wx.NewId()
@@ -159,7 +160,10 @@ class miniatures_handler(base_layer_handler):
             y = dc.DeviceToLogicalY(0)
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, dlg.GetPath()), {'pos':cmpPoint(x,y)})
         else:
-            min_url = self.settings.get_setting('LocalImageBaseURL') + filename
+            try:
+                min_url = open_rpg.get_component("cherrypy") + filename
+            except:
+                return
             if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Textures' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Textures': min_url = self.settings.get_setting('LocalImageBaseURL') + 'Textures/' + filename
             if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Maps' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Maps': min_url = self.settings.get_setting('ImageServerBaseURL') + 'Maps/' + filename
             if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Miniatures' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Miniatures': min_url = self.settings.get_setting('LocalImageBaseURL') + 'Miniatures/' + filename

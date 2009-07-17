@@ -79,9 +79,10 @@ class background_handler(base_layer_handler):
             if self.settings.get_setting('LocalorRemote') == 'Remote':
                 thread.start_new_thread(self.canvas.layers['bg'].upload, (postdata, dlg.GetPath(), self.bg_type.GetStringSelection()))
             else:
-                url = self.settings.get_setting('LocalImageBaseURL')
-                print dlg.GetDirectory()
-                print orpg.dirpath.dir_struct["user"]
+                try:
+                    min_url = open_rpg.get_component("cherrypy") + filename
+                except:
+                    return
                 if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Textures' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Textures': url = self.settings.get_setting('LocalImageBaseURL') + 'Textures/'
                 if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Maps' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Maps': url = self.settings.get_setting('LocalImageBaseURL') + 'Maps/'
                 if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles/Miniatures' or dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles\Miniatures': url = self.settings.get_setting('LocalImageBaseURL') + 'Miniatures/'

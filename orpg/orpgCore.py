@@ -69,6 +69,12 @@ class ORPGStorage(object):
         else:
             return None
 
+    def del_component(self, key):
+        if self.__components.has_key(key):
+            del self.__components[key]
+        else:
+            return
+
 def singleton(cls):
     instances = {}
     def getinstance():
