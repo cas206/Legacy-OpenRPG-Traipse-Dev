@@ -162,8 +162,8 @@ class Connections(wx.ListCtrl):
         self.InsertColumn(3, "Room")
         self.InsertColumn(4, "Version")
         self.InsertColumn(5, "Role")
-	self.InsertColumn(6, "IP")
-	self.InsertColumn(7, "Ping")
+        self.InsertColumn(6, "IP")
+        self.InsertColumn(7, "Ping")
 
         # Set the column widths
         self.AutoAjust()
