@@ -83,18 +83,12 @@ class background_handler(base_layer_handler):
                     min_url = open_rpg.get_component("cherrypy") + filename
                 except:
                     return
-                if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep + 'Textures': 
-                    min_url = open_rpg.get_component("cherrypy") + 'Textures/' + filename
-                if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep + 'Maps': 
-                    min_url = open_rpg.get_component("cherrypy") + 'Maps/' + filename
-                if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep + 'Miniatures': 
-                    min_url = open_rpg.get_component("cherrypy") + 'Miniatures/' + filename
-                print min_url
+                min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, open_rpg.get_component("cherrypy")) + '/' + filename
 
                 if self.bg_type.GetStringSelection() == 'Texture':
-                    self.canvas.layers['bg'].set_texture(str(min_url))
+                    self.canvas.layers['bg'].set_texture(min_url)
                 elif self.bg_type.GetStringSelection() == 'Image':
-                    self.size = self.canvas.layers['bg'].set_image(str(min_url),1)
+                    self.size = self.canvas.layers['bg'].set_image(min_url,1)
                 self.update_info()
                 self.canvas.send_map_data()
                 self.canvas.Refresh(False)

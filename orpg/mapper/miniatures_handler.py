@@ -165,13 +165,7 @@ class miniatures_handler(base_layer_handler):
                 min_url = open_rpg.get_component("cherrypy") + filename
             except:
                 return
-            if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep +' Textures': 
-                min_url = open_rpg.get_component("cherrypy") + 'Textures/' + filename
-            if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep + 'Maps': 
-                min_url = open_rpg.get_component("cherrypy") + 'Maps/' + filename
-            if dlg.GetDirectory() == orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep + 'Miniatures': 
-                min_url = open_rpg.get_component("cherrypy") + 'Miniatures/' + filename
-
+            min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, open_rpg.get_component("cherrypy")) + '/' + filename
             # build url
             if min_url == "" or min_url == "http://":
                 return
