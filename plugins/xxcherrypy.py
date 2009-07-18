@@ -38,15 +38,18 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         if self.toggle.IsChecked() == False: self.on_cherrypy("off")
 
     def plugin_enabled(self):
-        self.port = 6775
+        cpport = 0 # Container object so we can call port instead of an assigned ##
+        self.port = 6775 if not int(self.plugindb.GetString("xxcherrypy", "port", cpport)) else int(self.plugindb.GetString("xxcherrypy", "port", cpport)); del cpport #Deletes port container.
         self.plugin_addcommand('/cherrypy', self.on_cherrypy, '[on | off | port | status] - This controls the CherryPy Web Server')
         import urllib
         url = urllib.URLopener()
         resp = url.open('http://www.knowledgearcana.com/vgt/ip_scrape.php')
         html = resp.read(19+19)
         ip = html[19:]; self.host = ip[1:len(ip)-1]
-        #if str(self.plugindb.GetString("xxcherrypy", "auto_start", "off")) == "on":  # VEG
-        #    self.on_cherrypy("on")                                                   # VEG
+        cpobj = 0
+        if str(self.plugindb.GetString("xxcherrypy", "auto_start", cpobj)) == "on":  # VEG
+            self.on_cherrypy("on")                                                   # VEG
+        del cpobj
         self.cherryhost = 'http://' + self.host + ':' + str(self.port) + '/webfiles/'
         open_rpg.add_component("cherrypy", self.cherryhost)
 
@@ -83,13 +86,14 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
         elif args[0] == 'port':
             if self.isServerRunning == 'on':
-                self.port = int(args[1])
-                server.stop()
-                self.webserver = thread.start_new_thread(self.startServer, (self.port,))
+                self.chat.InfoPost('Please turn CherryPy off first!')
+                return
             self.port = int(args[1])
-            self.plugindb.SetString("xxcherrypy", "port", str(self.port)) # VEG
+            self.plugindb.SetString("xxcherrypy", "port", str(self.port)) # TAS
             self.chat.InfoPost("CherryPy Web Server is currently: " + self.isServerRunning)
-            self.chat.InfoPost("CherryPy Web Server address is: http://" + str(self.host) + ':' + str(self.port) + '/webfiles/')
+            self.cherryhost = 'http://' + self.host + ':' + str(self.port) + '/webfiles/'
+            open_rpg.del_component("cherrypy"); open_rpg.add_component("cherrypy", self.cherryhost)
+            self.chat.InfoPost('CherryPy Web Server address is: ' + self.cherryhost)
 
 
     def startServer(self, port):
