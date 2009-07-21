@@ -44,7 +44,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
             urllib.urlopen("http://orpgmeta.appspot.com/myip").read()
         ).documentElement.getAttribute("ip")
 
-        self.port = int(self.plugindb.GetString("xxcherrypy", "port", None)) or 6775
+        self.port = int(self.plugindb.GetString("xxcherrypy", "port", 8080)) or 6775
 
         self.plugin_addcommand('/cherrypy', self.on_cherrypy, 
             '[on | off | port | status] - This controls the CherryPy Web Server')
