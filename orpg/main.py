@@ -27,7 +27,7 @@
 # Description: This is the main entry point of the oprg application
 #
 
-__version__ = "$Id: main.py,v 1.153 2008/01/24 03:52:03 digitalxero Exp $"
+__version__ = "$Id: main.py,v 1.154 2009/07/19 03:52:03 madmathlabs Exp $"
 
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
@@ -232,7 +232,7 @@ class orpgFrame(wx.Frame):
             self.mainmenu.SetMenuState("GameServerServerHeartbeat", True)
         tabtheme = self.settings.get_setting('TabTheme') 
 
-	#This change is stable. TaS.
+        #This change is stable. TaS.
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", tabtheme == 'slanted&aqua')
@@ -599,17 +599,18 @@ class orpgFrame(wx.Frame):
     #Help Menu
     def OnMB_HelpAbout(self):
 
-        description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb functionality.  
+        description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table
+top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb 
+functionality.  OpenRPG is originally designed by Chris Davis."""
 
-OpenRPG is originally designed by Chris Davis."""
+        license = """OpenRPG is free software; you can redistribute it and/or modify it 
+under the terms of the GNU General Public License as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any later version.
 
-        license = """OpenRPG is free software; you can redistribute it and/or modify it under the terms of the GNU General 
-Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any 
-later version.
-
-OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
-details. You should have received a copy of the GNU General Public License along with Traipse 'OpenRPG'; if not, write to 
+OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+See the GNU General Public License for more details. You should have received a copy of 
+the GNU General Public License along with Traipse 'OpenRPG'; if not, write to 
 the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 'Traipse' and the 'Traipse' Logo are trademarks of Mad Mathematics Laboratories."""
@@ -619,7 +620,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         info.SetName('Traipse')
         info.SetVersion('OpenRPG ' + VERSION)
         info.SetDescription(description)
-        info.SetCopyright('(C) 2009 Mad Math Labs')
+        info.SetCopyright('(C) Copyright 2009 Mad Math Labs')
         info.SetWebSite('http://www.openrpg.com')
         info.SetLicence(license)
         orpg_devs = ['Thomas Baleno', 'Andrew Bennett', 'Lex Berezhny', 'Ted Berg',
@@ -629,9 +630,6 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain']
         for dev in orpg_devs:
             info.AddDeveloper(dev)
-        #info.AddDocWriter('jan bodnar')
-        #info.AddArtist('The Tango crew')
-        #info.AddTranslator('jan bodnar')
         wx.AboutBox(info)
 
     def OnMB_HelpOnlineUserGuide(self):
@@ -851,7 +849,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         wndinfo.Layer(int(layer))
         wndinfo.Caption(cap)
 
-# Lambda here should work! (future dev)
+        # Lambda here should work! (future dev)
         if dir.lower() == 'top':
             wndinfo.Top()
         elif dir.lower() == 'bottom':
@@ -1152,12 +1150,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
             self.map.canvas.zoom_display_timer.Stop()
             self.map.canvas.image_timer.Stop()
             self.status.timer.Stop()
-            del self.ping_timer
-            del self.poll_timer
-            del self.chat.parent.chat_timer
-            del self.map.canvas.zoom_display_timer
-            del self.map.canvas.image_timer
-            del self.status.timer
+            del self.ping_timer; del self.poll_timer; del self.chat.parent.chat_timer
+            del self.map.canvas.zoom_display_timer; del self.map.canvas.image_timer; del self.status.timer
         except:
             self.log.log("some timer didn't die properly.",ORPG_GENERAL, True)
         self._mgr.UnInit()
@@ -1248,13 +1242,22 @@ class orpgApp(wx.App):
             wx.CallAfter(self.splash.Close)
             return True
 
-    def OnExit(self):
-        #Clean up approot files on exit.
-        self.log.log("Removing approot files\n", ORPG_DEBUG)
+    def OnExit_CleanUp(self):
+        self.log.log("Preforming cleanup\n", ORPG_DEBUG)
+        try:
+            del os.environ["OPENRPG_BASE"]
+        except:
+            pass
         try:
             os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.py')
+        except:
+            pass
+        try:
             os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.pyc')
         except:
             pass
+
+    def OnExit(self):
+        self.OnExit_CleanUp()
         #Exit
         self.log.log("Main Application Exit\n\n", ORPG_DEBUG)

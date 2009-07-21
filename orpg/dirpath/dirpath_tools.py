@@ -23,7 +23,6 @@ def load_paths(dir_struct, root_dir):
     dir_struct["SWd20"] = dir_struct["data"] + "SWd20" + os.sep
     dir_struct["icon"] = dir_struct["home"] + "images" + os.sep
     dir_struct["template"] = dir_struct["core"] + "templates" + os.sep
-
     dir_struct["plugins"] = dir_struct["home"] + "plugins" + os.sep
     dir_struct["nodes"] = dir_struct["template"] + "nodes" + os.sep
     dir_struct["rollers"] = dir_struct["core"] + "dieroller" + os.sep + "rollers" + os.sep
@@ -77,7 +76,6 @@ def verify_home_path( path ):
         return 0
 
     #all files and directories exist.
-    write_approot(path)
     return 1
 
 
@@ -112,7 +110,7 @@ def get_user_located_root():
         dir = None
 
         try:
-            msg = "OpenRPG cannot locate critical files.\nPlease locate the openrpg1 directory in the following window"
+            msg = "OpenRPG cannot locate critical files.\nPlease locate the /System/ directory in the following window"
             alert= wx.MessageDialog(None,msg,"Warning",wx.OK|wx.ICON_ERROR)
             alert.Show()
             if alert.ShowModal() == wx.OK:
@@ -131,27 +129,3 @@ def get_user_located_root():
         dir = raw_input("Enter the full path to your openrpg folder:  ")
         return dir
 
-
-
-#-------------------------------------------------------
-# void write_approot( orpg_root_path )
-# added by snowdog 3-10-05
-#-------------------------------------------------------
-
-def write_approot( orpg_root_path):
-    try:
-        #if a trailing path separator is on the path string remove it.
-        if (orpg_root_path[(len(orpg_root_path)-len(os.sep)):] == os.sep):
-            orpg_root_path = orpg_root_path[:(len(orpg_root_path)-len(os.sep))]
-        fn = orpg_root_path + os.sep + "orpg" + os.sep + "dirpath" + os.sep + "approot.py"
-        f = open(fn, "w")
-        #trim off the appended os.sep character(s) to avoid duplicating them on re-loading of path
-        code = 'basedir = "' + orpg_root_path + '"' + "\n"
-        #fix path string for windows boxes that lamely use an escape character for a path separator
-        code = str.replace(code,'\\','\\\\')
-        f.write(code)
-        f.close()
-    except IOError:
-        print "[WARNING] Could not create approot file."
-        print "[WARNING] Automatic directory resolution not configured."
-    return

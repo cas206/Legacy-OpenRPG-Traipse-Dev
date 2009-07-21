@@ -2234,7 +2234,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
        return rank
 
     def get_unique_tag(self, name):
-        m = hashlib.new()
+        m = hashlib.md5()
         m.update(str(random.random()) + str(name))
         return m.hexdigest()
 

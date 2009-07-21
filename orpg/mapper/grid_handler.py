@@ -44,6 +44,8 @@ class grid_handler(base_layer_handler):
         self.apply_button = wx.Button(self, wx.ID_OK, "Apply", style=wx.BU_EXACTFIT)
         self.color_button.SetBackgroundColour(wx.BLACK)
         self.color_button.SetForegroundColour(wx.WHITE)
+
+        """
         self.sizer.Add(wx.StaticText(self, -1, "Size: "), 0, wx.ALIGN_CENTER|wx.ALL, 3)
         self.sizer.Add(self.grid_size, 0, wx.EXPAND|wx.ALL, 2)
         self.sizer.Add(wx.StaticText(self, -1, "Ratio: "), 0, wx.ALIGN_CENTER|wx.ALL, 3)
@@ -54,6 +56,24 @@ class grid_handler(base_layer_handler):
         self.sizer.Add(self.color_button, 0, wx.EXPAND|wx.ALL, 2)
         self.sizer.Add(self.apply_button, 0, wx.EXPAND|wx.ALL, 3)
         self.sizer.Add(wx.Size(20,25),1)
+        """
+
+        self.sizer.Add(wx.StaticText(self, -1, "Size: "), 0, wx.ALIGN_CENTER)
+        self.sizer.Add(self.grid_size, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(wx.StaticText(self, -1, "Ratio: "), 0, wx.ALIGN_CENTER)
+        self.sizer.Add(self.grid_ratio, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(self.line_type, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(self.grid_mode, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(self.grid_snap, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(self.color_button, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6,0))
+        self.sizer.Add(self.apply_button, 0, wx.ALIGN_CENTER)
+
         self.Bind(wx.EVT_BUTTON, self.on_bg_color, self.color_button)
         self.Bind(wx.EVT_BUTTON, self.on_apply, self.apply_button)
         self.update_info()

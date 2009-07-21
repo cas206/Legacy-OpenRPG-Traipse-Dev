@@ -42,12 +42,14 @@ class base_layer_handler(wx.Panel):
         self.chat = open_rpg.get_component("chat")
         self.build_ctrls()
         self.build_menu()
-        self.Bind(wx.EVT_SIZE, self.on_size)
+        #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
 
+    """
     def on_size(self,evt):
         s = self.GetClientSizeTuple()
         self.basesizer.SetDimension(0,0,s[0],s[1])
+    """
 
     def build_ctrls(self):
         self.basesizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -59,21 +61,43 @@ class base_layer_handler(wx.Panel):
         props = createMaskedButton( self, orpg.dirpath.dir_struct["icon"]+'compass.gif', 'Edit map properties', wx.ID_ANY )
         mapopen = createMaskedButton( self, orpg.dirpath.dir_struct["icon"]+'open.bmp', 'Load a map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
         mapsave = createMaskedButton( self, orpg.dirpath.dir_struct["icon"]+'save.bmp', 'Save the map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
+
+        """
         self.buttonsizer.Add(self.zoom_in_button, 0, wx.EXPAND )
         self.buttonsizer.Add(self.zoom_out_button, 0, wx.EXPAND )
         self.buttonsizer.Add(props, 0, wx.EXPAND )
         self.buttonsizer.Add(mapopen, 0, wx.EXPAND )
         self.buttonsizer.Add(mapsave, 0, wx.EXPAND )
+        """
+
+        self.buttonsizer.Add(self.zoom_in_button, 0, wx.ALIGN_CENTER )
+        self.buttonsizer.Add(self.zoom_out_button, 0, wx.ALIGN_CENTER )
+        self.buttonsizer.Add(props, 0, wx.ALIGN_CENTER )
+        self.buttonsizer.Add(mapopen, 0, wx.ALIGN_CENTER )
+        self.buttonsizer.Add(mapsave, 0, wx.ALIGN_CENTER )
+
+        """
         self.SetSizer(self.basesizer)
         self.SetAutoLayout(True)
         self.Fit()
+        """
+
+        self.basesizer.Add((3, 0))
         self.basesizer.Add( self.sizer, 1, wx.EXPAND)
-        self.basesizer.Add( self.buttonsizer, 0, wx.ALIGN_RIGHT)
+
+        #self.basesizer.Add( self.buttonsizer, 0, wx.ALIGN_RIGHT)
+
+        self.basesizer.Add((12, 0))
+        self.basesizer.Add( self.buttonsizer, 0, wx.EXPAND | wx.ALIGN_RIGHT)
+        self.basesizer.Add((3, 0))
+
         self.Bind(wx.EVT_BUTTON, self.canvas.on_zoom_in, self.zoom_in_button)
         self.Bind(wx.EVT_BUTTON, self.canvas.on_zoom_out, self.zoom_out_button)
         self.Bind(wx.EVT_BUTTON, self.map_frame.on_open, mapopen)
         self.Bind(wx.EVT_BUTTON, self.map_frame.on_save, mapsave)
         self.Bind(wx.EVT_BUTTON, self.canvas.on_prop, props)
+
+        self.SetSizer(self.basesizer)
 
     def build_menu(self,label = "Map"):
         "Menu is built based on the type of grid (rectangle or hex) we have in use."

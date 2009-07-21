@@ -125,15 +125,18 @@ class miniatures_handler(base_layer_handler):
         self.auto_label_cb = wx.CheckBox(self, wx.ID_ANY, ' Auto Label ', (-1,-1),(-1,-1))
         self.auto_label_cb.SetValue(self.auto_label)
         self.min_url = wx.ComboBox(self, wx.ID_ANY, "http://", style=wx.CB_DROPDOWN | wx.CB_SORT)
-        self.localBrowse = wx.Button(self, wx.ID_ANY, 'Browse')
+        self.localBrowse = wx.Button(self, wx.ID_ANY, 'Browse', style=wx.BU_EXACTFIT)
         minilist = createMaskedButton( self, orpg.dirpath.dir_struct["icon"]+'questionhead.gif', 'Edit miniature properties', wx.ID_ANY)
         miniadd = wx.Button(self, wx.ID_OK, "Add Miniature", style=wx.BU_EXACTFIT)
         self.sizer.Add(self.auto_label_cb,0,wx.ALIGN_CENTER)
+        self.sizer.Add((6, 0))
         self.sizer.Add(self.min_url, 1, wx.ALIGN_CENTER)
-        self.sizer.Add(miniadd, 0, wx.EXPAND)
-        self.sizer.Add(self.localBrowse, 0, wx.EXPAND)
-        self.sizer.Add(wx.Size(20,25))
-        self.sizer.Add(minilist, 0, wx.EXPAND )
+        self.sizer.Add((6, 0))
+        self.sizer.Add(miniadd, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6, 0))
+        self.sizer.Add(self.localBrowse, 0, wx.ALIGN_CENTER)
+        self.sizer.Add((6, 0))
+        self.sizer.Add(minilist, 0, wx.ALIGN_CENTER)
         self.Bind(wx.EVT_BUTTON, self.on_min_list, minilist)
         self.Bind(wx.EVT_BUTTON, self.on_miniature, miniadd)
         self.Bind(wx.EVT_BUTTON, self.on_browse, self.localBrowse)
@@ -577,7 +580,7 @@ class miniatures_handler(base_layer_handler):
     def on_left_down(self, evt):
         if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
             return
-        mini = self.find_mini(evt, evt.ControlDown() and self.role_is_gm())
+        mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
         if mini:
             deselecting_selected_mini = (mini == self.sel_min) #clicked on the selected mini
             self.deselectAndRefresh()
@@ -603,7 +606,7 @@ class miniatures_handler(base_layer_handler):
         if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
             return
         self.last_rclick_pos = self.getLogicalPosition(evt)
-        mini = self.find_mini(evt, evt.ControlDown() and self.role_is_gm())
+        mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
         if mini:
             self.sel_rmin = mini
             if self.sel_min:
@@ -728,7 +731,7 @@ class miniatures_handler(base_layer_handler):
     def on_left_dclick(self,evt):
         if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
             return
-        mini = self.find_mini(evt, evt.ControlDown() and self.role_is_gm())
+        mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
         if mini:
             self.on_mini_dclick(evt, mini)
         else:# pass it on

@@ -49,8 +49,12 @@ class fog_handler(base_layer_handler):
         self.fogshow = wx.RadioButton(self, wx.ID_ANY, "Show", style=wx.RB_GROUP)
         self.foghide = wx.RadioButton(self, wx.ID_ANY, "Hide")
 
-        self.sizer.Add(self.foghide)
-        self.sizer.Add(self.fogshow)
+        #self.sizer.Add(self.foghide)
+        #self.sizer.Add(self.fogshow)
+
+        self.sizer.Add(self.foghide, 0, wx.ALIGN_CENTER)
+        self.sizer.Add(self.fogshow, 0, wx.ALIGN_CENTER)
+
         self.sizer.Add(wx.Size(20,25),1)
 
 

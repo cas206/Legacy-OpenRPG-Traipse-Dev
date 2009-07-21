@@ -11,6 +11,10 @@
 # * Reworked path verification process to attempt to fall back on the
 #   current working directory if approot fails to verify before
 #   asking the user to locate the root directory -- Snowdog 12-20-05
+# -----------------------------
+# * Removed reference to approot. It was a superflous creation that carried an object
+#   that dirpath_tools already creates. It wasted system resources by creating a files
+#   and by referencing a file to fill an object that was already created. -- SirEbral 07-19-09
 
 import sys
 import os
@@ -18,16 +22,11 @@ from dirpath_tools import *
 
 root_dir = None
 
-try:
-    import approot
-    root_dir = approot.basedir
-except:
-    #attempt to load default path
-    t = __file__.split(os.sep)
-    if len(t) > 2:
-        root_dir = os.sep.join(t[:-3])
-    else:
-        root_dir = os.getcwd()   #default ORPG root dir
+t = __file__.split(os.sep)
+if len(t) > 2:
+    root_dir = os.sep.join(t[:-3])
+else:
+    root_dir = os.getcwd()   #default ORPG root dir
 
 dir_struct = {}
 
