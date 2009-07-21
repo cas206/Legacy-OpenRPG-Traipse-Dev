@@ -38,8 +38,7 @@ class orpgLog:
         if self.logToConsol or to_consol or type == ORPG_CRITICAL:
             print msg
 
-        if type & self.logLevel:
-        #if type & self.logLevel or to_consol: #Arbitrary removal TaS.
+        if type & self.logLevel or to_consol:
             logMsg = time.strftime( '[%x %X] ', time.localtime( time.time() ) ) + msg + "\n"
             logFile = open(self.logName, "a")
             logFile.write(logMsg)
