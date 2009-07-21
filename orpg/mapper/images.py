@@ -121,7 +121,7 @@ class ImageHandlerClass(object):
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, ORPG_GENERAL, False)
+            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, ORPG_GENERAL, True)
         finally:
             self.__lock.release()
 
