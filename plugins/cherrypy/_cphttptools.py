@@ -418,7 +418,7 @@ def generateSessionId():
     for i in range(50):
         s += random.choice(string.letters+string.digits)
     s += '%s'%time.time()
-    return hashlib.hashlib(s).hexdigest()
+    return hashlib.shal(s).hexdigest()
 
 def getObjFromPath(objPathList, objCache):
     """ For a given objectPathList (like ['root', 'a', 'b', 'index']),

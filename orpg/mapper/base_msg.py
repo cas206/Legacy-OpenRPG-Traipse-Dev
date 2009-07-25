@@ -36,7 +36,8 @@ class map_element_msg_base:
     def __init__(self,reentrant_lock_object = None):
 
         if not hasattr(self,"tagname"):
-            raise Exception, "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
+            raise Exception, 
+                "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
 
         self._props = {}
         #  This is a dictionary that holds (value,changed) 2-tuples, indexed by attribute

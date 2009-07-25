@@ -86,7 +86,8 @@ class map_msg(map_element_msg_base):
                     continue
         else:
             self.p_lock.release()
-            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
+            raise Exception, 
+                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
@@ -123,7 +124,8 @@ class map_msg(map_element_msg_base):
                     continue
         else:
             self.p_lock.release()
-            raise Exception, "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element in map"
+            raise Exception, 
+                "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element in map"
         self.p_lock.release()
 
     def get_all_xml(self, action="new", output_action=1):

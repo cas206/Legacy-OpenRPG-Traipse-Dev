@@ -211,9 +211,9 @@ class general_map_prop_dialog(wx.Dialog):
             self.size = (int(self.ctrls[CTRL_WIDTH].GetValue()),int(self.ctrls[CTRL_HEIGHT].GetValue()))
         except:
             pass
-#            dlg = wx.MessageDialog(frame, 'Invalid Size',"Error")
-#            dlg.ShowModal()
-#            dlg.Destroy()
+            #dlg = wx.MessageDialog(frame, 'Invalid Size',"Error")
+            #dlg.ShowModal()
+            #dlg.Destroy()
         if self.ctrls[CTRL_BG_COLOR].GetValue() == True:
             self.bg_layer.set_color(self.ctrls[CTRL_BG_COLOR_VALUE].GetBackgroundColour())
         elif self.ctrls[CTRL_TEXTURE].GetValue() == True:

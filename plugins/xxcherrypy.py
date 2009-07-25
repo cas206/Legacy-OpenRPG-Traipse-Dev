@@ -49,7 +49,10 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.plugin_addcommand('/cherrypy', self.on_cherrypy, 
             '[on | off | port | status] - This controls the CherryPy Web Server')
 
-        self.on_cherrypy(self.plugindb.GetString("xxcherrypy", "auto_start", None))  # VEG
+        cherry_start = str(self.plugindb.GetString("xxcherrypy", "auto_start", None)) #VEG, DJG, TAS
+        if cherry_start == "on": self.on_cherrypy("on")
+        else: pass
+        del cherry_start
 
         self.cherryhost = 'http://' + self.host + ':' + str(self.port) + '/webfiles/'
         open_rpg.add_component("cherrypy", self.cherryhost)

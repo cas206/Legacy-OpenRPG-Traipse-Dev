@@ -78,8 +78,9 @@ PLAYER_COMMAND_ROOM_RENAME = wx.NewId()
 
 class player_list(wx.ListCtrl):
     def __init__( self, parent):
-##        wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND )
-        wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
+        ##wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND )
+        wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, 
+            wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
         self.session = open_rpg.get_component("session")
         self.settings = open_rpg.get_component('settings')
         self.chat = open_rpg.get_component('chat')
@@ -198,7 +199,8 @@ class player_list(wx.ListCtrl):
         self.chat = open_rpg.get_component("chat")
         boot_pwd = self.password_manager.GetPassword("admin",int(self.session.group_id))
         if boot_pwd != None:
-            alter_pwd_dialog = wx.TextEntryDialog(self,"Enter new room password: (blank for no password)","Alter Room Password")
+            alter_pwd_dialog = wx.TextEntryDialog(self,
+                "Enter new room password: (blank for no password)","Alter Room Password")
             if alter_pwd_dialog.ShowModal() == wx.ID_OK:
                 new_pass = alter_pwd_dialog.GetValue()
                 self.chat.InfoPost( "Requesting password change on server..." )
@@ -257,8 +259,7 @@ class player_list(wx.ListCtrl):
                 WG_MENU_LIST[mid]["menu"].Destroy()
             except:
                 self.wgMenu.UpdateUI()
-        if self.wgMenu.GetMenuItemCount() == 2:
-            WG_MENU_LIST.clear()
+        if self.wgMenu.GetMenuItemCount() == 2: WG_MENU_LIST.clear()
         return
 
     def on_menu_whispergroup( self, evt ):
@@ -275,23 +276,13 @@ class player_list(wx.ListCtrl):
                 group_name = create_new_group_dialog.GetValue()
                 WG_LIST[group_name] = {}
             return
-        elif id == PLAYER_WG_CLEAR_ALL:
-            WG_LIST.clear()
-            return
+        elif id == PLAYER_WG_CLEAR_ALL: WG_LIST.clear(); return
         #Check Sub Menus
         for mid in WG_MENU_LIST:
-            if id == WG_MENU_LIST[mid]["add"]:
-                WG_LIST[mid][int(item.GetText())] = int(item.GetText())
-                return
-            elif id == WG_MENU_LIST[mid]["remove"]:
-                del WG_LIST[mid][int(item.GetText())]
-                return
-            elif id == WG_MENU_LIST[mid]["clear"]:
-                WG_LIST[mid].clear()
-                return
-            elif id == WG_MENU_LIST[mid]["whisper"]:
-                self.chat.set_chat_text("/gw " + mid + "=")
-                return
+            if id == WG_MENU_LIST[mid]["add"]: WG_LIST[mid][int(item.GetText())] = int(item.GetText()); return
+            elif id == WG_MENU_LIST[mid]["remove"]: del WG_LIST[mid][int(item.GetText())]; return
+            elif id == WG_MENU_LIST[mid]["clear"]: WG_LIST[mid].clear(); return
+            elif id == WG_MENU_LIST[mid]["whisper"]: self.chat.set_chat_text("/gw " + mid + "="); return
         return
 
 #---------------------------------------------------------
@@ -378,17 +369,15 @@ class player_list(wx.ListCtrl):
             id = str(self.GetItemData(self.selected_item))
             self.chat = open_rpg.get_component("chat")
             (result,id,name) = self.session.toggle_ignore(id)
-            if result == 0:
-                self.chat.Post(self.chat.colorize(self.chat.syscolor, "Player " + name + " with ID:" + id +" no longer ignored"))
-            else:
-                self.chat.Post(self.chat.colorize(self.chat.syscolor, "Player " + name + " with ID:" + id +" now being ignored"))
+            if result == 0: self.chat.Post(self.chat.colorize(self.chat.syscolor, 
+                "Player " + name + " with ID:" + id +" no longer ignored"))
+            else: self.chat.Post(self.chat.colorize(self.chat.syscolor, 
+                "Player " + name + " with ID:" + id +" now being ignored"))
         elif id == PLAYER_SHOW_VERSION:
             id = str(self.GetItemData(self.selected_item))
             version_string = self.session.players[id][6]
-            if version_string:
-                wx.MessageBox("Running client version " + version_string,"Version")
-            else:
-                wx.MessageBox("No client version available for this player","Version")
+            if version_string: wx.MessageBox("Running client version " + version_string,"Version")
+            else: wx.MessageBox("No client version available for this player","Version")
 
     def on_menu(self, evt):
         pos = wx.Point(evt.GetX(),evt.GetY())
@@ -408,12 +397,9 @@ class player_list(wx.ListCtrl):
 #---------------------------------------------------------
             self.menu.Enable(PLAYER_WG_MENU, True)
             item = self.GetItem( self.selected_item )
-            if len(WG_MENU_LIST) > len(WG_LIST):
-                self.clean_sub_menus()
-            if len(WG_LIST) == 0:
-                self.wgMenu.Enable(PLAYER_WG_CLEAR_ALL, False)
-            else:
-                self.wgMenu.Enable(PLAYER_WG_CLEAR_ALL, True)
+            if len(WG_MENU_LIST) > len(WG_LIST): self.clean_sub_menus()
+            if len(WG_LIST) == 0: self.wgMenu.Enable(PLAYER_WG_CLEAR_ALL, False)
+            else: self.wgMenu.Enable(PLAYER_WG_CLEAR_ALL, True)
             for gid in WG_LIST:
                 if not WG_MENU_LIST.has_key(gid):
                     WG_MENU_LIST[gid] = {}
@@ -542,26 +528,20 @@ class player_list(wx.ListCtrl):
         self.DeleteAllItems()
 
     def strip_html(self,player):
-        ret_string = ""
-        x = 0
-        in_tag = 0
+        ret_string = ""; x = 0; in_tag = 0
         for x in range(len(player[0])) :
             if player[0][x] == "<" or player[0][x] == ">" or in_tag == 1 :
-                if player[0][x] == "<" :
-                    in_tag = 1
-                elif player[0][x] == ">" :
-                    in_tag = 0
-                else :
-                    pass
-            else :
-                ret_string = ret_string + player[0][x]
+                if player[0][x] == "<": in_tag = 1
+                elif player[0][x] == ">": in_tag = 0
+                else: pass
+            else: ret_string = ret_string + player[0][x]
         return ret_string
 
     def size_cols(self):
-##        # moved skip here to see if it breaks
-##        w,h = self.GetClientSizeTuple()
-##        w /= 8
-##        self.SetColumnWidth( 0, w*2 )
-##        self.SetColumnWidth( 1, w*2 )
-##        self.SetColumnWidth( 2, w*3 )
+        ##moved skip here to see if it breaks
+        ## w,h = self.GetClientSizeTuple()
+        ## w /= 8
+        ## self.SetColumnWidth( 0, w*2 )
+        ## self.SetColumnWidth( 1, w*2 )
+        ## self.SetColumnWidth( 2, w*3 )
         pass

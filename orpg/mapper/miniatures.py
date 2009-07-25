@@ -69,7 +69,9 @@ def cmp_zorder(first,second):
     return value
 
 class BmpMiniature:
-    def __init__(self, id,path, bmp, pos=cmpPoint(0,0), heading=FACE_NONE, face=FACE_NONE, label="", locked=False, hide=False, snap_to_align=SNAPTO_ALIGN_CENTER, zorder=0, width=0, height=0, log=None, local=False, localPath='', localTime=-1):
+    def __init__(self, id,path, bmp, pos=cmpPoint(0,0), heading=FACE_NONE, face=FACE_NONE, label="", 
+                locked=False, hide=False, snap_to_align=SNAPTO_ALIGN_CENTER, zorder=0, width=0, height=0, 
+                log=None, local=False, localPath='', localTime=-1):
         self.log = log
         self.log.log("Enter BmpMiniature", ORPG_DEBUG)
         self.heading = heading
@@ -115,7 +117,8 @@ class BmpMiniature:
         self.log.log("Exit BmpMiniature->set_bmp(self, bmp)", ORPG_DEBUG)
 
     def set_min_props(self, heading=FACE_NONE, face=FACE_NONE, label="", locked=False, hide=False, width=0, height=0):
-        self.log.log("Enter BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", ORPG_DEBUG)
+        self.log.log("Enter BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", 
+            ORPG_DEBUG)
         self.heading = heading
         self.face = face
         self.label = label
@@ -130,7 +133,8 @@ class BmpMiniature:
         self.width = int(width)
         self.height = int(height)
         self.isUpdated = True
-        self.log.log("Exit BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", ORPG_DEBUG)
+        self.log.log("Exit BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", 
+            ORPG_DEBUG)
 
     def hit_test(self, pt):
         self.log.log("Enter BmpMiniature->hit_test(self, pt)", ORPG_DEBUG)
@@ -162,7 +166,8 @@ class BmpMiniature:
                     tmp_image.Rescale(int(self.width), int(self.height))
                     tmp_image.ConvertAlphaToMask()
                     self.bmp = tmp_image.ConvertToBitmap()
-                    mask = wx.Mask(self.bmp, wx.Colour(tmp_image.GetMaskRed(), tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
+                    mask = wx.Mask(self.bmp, wx.Colour(tmp_image.GetMaskRed(), 
+                        tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
                     self.bmp.SetMask(mask)
                     del tmp_image
                     del mask
@@ -183,7 +188,9 @@ class BmpMiniature:
                     yoffset = 1
                 else:
                     yoffset = 5
-                dc.DrawRectangle(self.pos.x + xoffset, self.pos.y + yoffset, self.bmp.GetWidth() - (xoffset * 2), self.bmp.GetHeight() - (yoffset * 2))
+                dc.DrawRectangle(self.pos.x + xoffset, 
+                    self.pos.y + yoffset, self.bmp.GetWidth() - (xoffset * 2), 
+                    self.bmp.GetHeight() - (yoffset * 2))
                 dc.SetBrush(wx.NullBrush)
                 dc.SetPen(wx.NullPen)
                 ## draw label in the center of the mini
@@ -226,7 +233,8 @@ class BmpMiniature:
                     tmp_image.Rescale(int(self.width), int(self.height))
                     tmp_image.ConvertAlphaToMask()
                     self.bmp = tmp_image.ConvertToBitmap()
-                    mask = wx.Mask(self.bmp, wx.Colour(tmp_image.GetMaskRed(), tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
+                    mask = wx.Mask(self.bmp, wx.Colour(tmp_image.GetMaskRed(), 
+                        tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
                     self.bmp.SetMask(mask)
                     if self.gray:
                         tmp_image = tmp_image.ConvertToGreyscale()
@@ -554,12 +562,16 @@ class miniature_layer(layer_base):
         self.serial_number -= 1
         self.log.log("Exit miniature_layer->rollback_serial(self)", ORPG_DEBUG)
 
-    def add_miniature(self, id, path, pos=cmpPoint(0,0), label="", heading=FACE_NONE, face=FACE_NONE, width=0, height=0, local=False, localPath='', localTime=-1):
-        self.log.log("Enter miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", ORPG_DEBUG)
+    def add_miniature(self, id, path, pos=cmpPoint(0,0), label="", heading=FACE_NONE, 
+            face=FACE_NONE, width=0, height=0, local=False, localPath='', localTime=-1):
+        self.log.log("Enter miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", 
+            ORPG_DEBUG)
         self.log.log("Before mini creation: " + str(self.get_next_highest_z()), ORPG_DEBUG)
         bmp = ImageHandler.load(path, 'miniature', id)
         if bmp:
-            mini = BmpMiniature(id, path, bmp, pos, heading, face, label, zorder=self. get_next_highest_z(), width=width, height=height, log=self.log, local=local, localPath=localPath, localTime=localTime)
+            mini = BmpMiniature(id, path, bmp, pos, heading, face, label, 
+                zorder=self. get_next_highest_z(), width=width, 
+                height=height, log=self.log, local=local, localPath=localPath, localTime=localTime)
             self.log.log("After mini creation:" + str(self.get_next_highest_z()), ORPG_DEBUG)
             self.miniatures.append(mini)
             self.log.log("After mini addition:" + str(self.get_next_highest_z()), ORPG_DEBUG)
@@ -569,7 +581,8 @@ class miniature_layer(layer_base):
             self.canvas.frame.session.send(xml_str)
         else:
             self.log.log("Invalid image " + path + " has been ignored!", ORPG_DEBUG)
-        self.log.log("Exit miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", ORPG_DEBUG)
+        self.log.log("Exit miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", 
+            ORPG_DEBUG)
 
     def get_miniature_by_id(self, id):
         self.log.log("Enter miniature_layer->get_miniature_by_id(self, id)", ORPG_DEBUG)
@@ -601,9 +614,7 @@ class miniature_layer(layer_base):
 
     def layerDraw(self, dc, topleft, size):
         self.log.log("Enter miniature_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
-
         dc.SetFont(self.label_font)
-
         sorted_miniatures = self.miniatures[:]
         sorted_miniatures.sort(cmp_zorder)
         for m in sorted_miniatures:
@@ -691,7 +702,8 @@ class miniature_layer(layer_base):
                     snap_to_align = int(c.getAttribute('align'))
                 if c.getAttribute('zorder'):
                     zorder = int(c.getAttribute('zorder'))
-                min = BmpMiniature(id, path, ImageHandler.load(path, 'miniature', id), pos, heading, face, label, locked, hide, snap_to_align, zorder, width, height, self.log)
+                min = BmpMiniature(id, path, ImageHandler.load(path, 'miniature', id), pos, heading, 
+                    face, label, locked, hide, snap_to_align, zorder, width, height, self.log)
                 self.miniatures.append(min)
                 if c.hasAttribute('local') and c.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(c.getAttribute('localPath'))):
                     localPath = urllib.unquote(c.getAttribute('localPath'))
@@ -735,7 +747,8 @@ class miniature_layer(layer_base):
                     else:
                         min_label = ""
                     id = 'mini-' + self.canvas.frame.session.get_next_id()
-                    self.add_miniature(id, path, pos=pos, label=min_label, local=True, localPath=filename, localTime=time.time())
+                    self.add_miniature(id, path, pos=pos, label=min_label, local=True, 
+                        localPath=filename, localTime=time.time())
                 else:
                     self.miniatures[len(self.miniatures)-1].local = True
                     self.miniatures[len(self.miniatures)-1].localPath = filename

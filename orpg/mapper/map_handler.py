@@ -34,33 +34,10 @@ class map_handler(base_layer_handler):
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)
-
-        """
-        self.width = wx.TextCtrl(self, wx.ID_ANY, size=(75,25))
-        self.height = wx.TextCtrl(self, wx.ID_ANY, size=(75,25))
-        self.apply_button = wx.Button(self, wx.ID_OK, "Apply", style=wx.BU_EXACTFIT)
-        """
-
         self.width = wx.TextCtrl(self, wx.ID_ANY)
         self.height = wx.TextCtrl(self, wx.ID_ANY)
         self.apply_button = wx.Button(self, wx.ID_OK, "Apply", style=wx.BU_EXACTFIT)
-
         self.load_default = wx.Button(self, wx.ID_ANY, "Default Map", style=wx.BU_EXACTFIT)
-
-        """
-        self.sizer.Prepend(wx.Size(20,25),1)
-        self.sizer.Prepend(self.load_default, 0, wx.EXPAND)
-        self.sizer.Prepend(wx.Size(20,25))
-        self.sizer.Prepend(self.apply_button, 0, wx.EXPAND)
-        self.sizer.Prepend(wx.Size(20,25))
-        self.sizer.Prepend(self.height, 0, wx.EXPAND)
-        self.sizer.Prepend(wx.StaticText(self, -1, "Height: "),0,wx.ALIGN_CENTER)
-        self.sizer.Prepend(wx.Size(10,25))
-        self.sizer.Prepend(self.width, 0, wx.EXPAND)
-        self.sizer.Prepend(wx.StaticText(self, -1, "Width: "),0,wx.ALIGN_CENTER)
-        self.sizer.Prepend(wx.Size(10,25))
-        """
-
         self.sizer.Add(wx.StaticText(self, -1, "Width: "),0, wx.ALIGN_CENTER)
         self.sizer.Add(self.width, 0, wx.ALIGN_CENTER)
         self.sizer.Add((6, 0))
@@ -70,7 +47,6 @@ class map_handler(base_layer_handler):
         self.sizer.Add(self.apply_button, 0, wx.ALIGN_CENTER)
         self.sizer.Add((6, 0))
         self.sizer.Add(self.load_default, 0, wx.ALIGN_CENTER)
-
         self.Bind(wx.EVT_BUTTON, self.on_apply, self.apply_button)
         self.Bind(wx.EVT_BUTTON, self.on_load_default, self.load_default)
         self.update_info()

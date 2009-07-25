@@ -54,7 +54,8 @@ class grid_layer(layer_base):
         self.mapscale = 1.0
         self.unit_size = 100
         self.unit_size_y = 100
-        #unit_widest and unit_offset are for the Hex Grid only. these are mathmatics to figure out the exact center of the hex
+        #unit_widest and unit_offset are for the Hex Grid only. 
+        #These are mathematics to figure out the exact center of the hex
         self.unit_widest = 100
         self.unit_offset = 100
         #size_ratio is the size ajustment for Hex and ISO to make them more accurate

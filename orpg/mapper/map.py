@@ -59,7 +59,8 @@ class MapCanvas(wx.ScrolledWindow):
         self.log.log("Enter MapCanvas", ORPG_DEBUG)
         self.settings = open_rpg.get_component("settings")
         self.session = open_rpg.get_component("session")
-        wx.ScrolledWindow.__init__(self, parent, ID, style=wx.HSCROLL | wx.VSCROLL | wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER )
+        wx.ScrolledWindow.__init__(self, parent, ID, 
+            style=wx.HSCROLL | wx.VSCROLL | wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER )
         self.frame = parent
         self.MAP_MODE = 1      #Mode 1 = MINI, 2 = DRAW, 3 = TAPE MEASURE
         self.layers = {}
@@ -164,7 +165,8 @@ class MapCanvas(wx.ScrolledWindow):
                 self.cacheSize = int(cacheSize)
             else:
                 self.log.log("Default cache size being used.", ORPG_GENERAL)
-            self.log.log("Current image cache size is set at " + str(self.cacheSize) + " images, using random purge.", ORPG_GENERAL)
+            self.log.log("Current image cache size is set at " + str(self.cacheSize) + " images, using random purge.", 
+                ORPG_GENERAL)
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
             img = wx.ImageFromMime(path[1], path[2]).ConvertToBitmap()
@@ -300,8 +302,10 @@ class MapCanvas(wx.ScrolledWindow):
             dc.SetDeviceOrigin(-topleft[0], -topleft[1])
             dc.SetUserScale(scale, scale)
             self.layers['bg'].layerDraw(dc, scale, topleft, clientsize)
-            self.layers['grid'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], [clientsize[0]/scale, clientsize[1]/scale])
-            self.layers['miniatures'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], [clientsize[0]/scale, clientsize[1]/scale])
+            self.layers['grid'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
+                [clientsize[0]/scale, clientsize[1]/scale])
+            self.layers['miniatures'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
+                [clientsize[0]/scale, clientsize[1]/scale])
             self.layers['whiteboard'].layerDraw(dc)
             self.layers['fog'].layerDraw(dc, topleft, clientsize)
             dc.SetPen(wx.NullPen)
@@ -902,15 +906,6 @@ class map_wnd(wx.Panel):
         #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeave)
         self.load_default()
-
-        """
-        # size of tabs is diffrent on windows and linux :(
-        if wx.Platform == '__WXMSW__':
-            self.toolbar_height = 50
-        else:
-            self.toolbar_height = 55
-        """
-
         self.log.log("Exit map_wnd", ORPG_DEBUG)
 
     def OnLeave(self, evt):
@@ -1132,12 +1127,3 @@ class map_wnd(wx.Panel):
         self.build_menu()
         self.log.log("Exit map_wnd->get_hot_keys(self)", ORPG_DEBUG)
         return []
-
-    """
-    def on_size(self, evt):
-        self.log.log("Enter map_wnd->on_size(self, evt)", ORPG_DEBUG)
-        s = self.GetClientSizeTuple()
-        self.canvas.SetDimensions(0,0,s[0],s[1]-self.toolbar_height)
-        self.layer_tabs.SetDimensions(0,s[1]-self.toolbar_height,s[0],self.toolbar_height)
-        self.log.log("Exit map_wnd->on_size(self, evt)", ORPG_DEBUG)
-    """

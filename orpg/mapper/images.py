@@ -75,10 +75,12 @@ class ImageHandlerClass(object):
                 self.__cache[path] = (path, d[0], d[1].gettype(), None)
                 return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
             else:
-                open_rpg.get_component('log').log("Image refused to load or URI did not reference a valid image: " + path, ORPG_GENERAL, True)
+                open_rpg.get_component('log').log("Image refused to load or URI did not reference a valid image: " + path, 
+                    ORPG_GENERAL, True)
                 return None
         except IOError:
-            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, ORPG_GENERAL, True)
+            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, 
+                ORPG_GENERAL, True)
             return None
 
     def cleanCache(self):
@@ -117,11 +119,13 @@ class ImageHandlerClass(object):
                 if self.__fetching.has_key(path):
                     del self.__fetching[path]
             else:
-                open_rpg.get_component('log').log("Image refused to load or URI did not reference a valid image: " + path, ORPG_GENERAL, True)
+                open_rpg.get_component('log').log("Image refused to load or URI did not reference a valid image: " + path, 
+                    ORPG_GENERAL, True)
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, ORPG_GENERAL, True)
+            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, 
+                ORPG_GENERAL, True)
         finally:
             self.__lock.release()
 
@@ -135,7 +139,8 @@ class ImageHandlerClass(object):
                     break
         except:
             self.__fetching[path] = False
-            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, ORPG_GENERAL, True)
+            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, 
+                ORPG_GENERAL, True)
             return 
         self.__lock.acquire()
         try:

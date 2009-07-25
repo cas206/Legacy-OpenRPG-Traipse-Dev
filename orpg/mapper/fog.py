@@ -200,7 +200,8 @@ class fog_layer(layer_base):
             mdc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
             mdc.DrawRectangle(0,0,size[0],size[1])
             srct = [int(topleft[0]/(sc[0]*COURSE)), int(topleft[1]/(sc[1]*COURSE))]
-            srcsz = [int((int(size[0]/COURSE+1)*COURSE)/(sc[0]*COURSE))+2, int((int(size[1]/COURSE+1)*COURSE)/(sc[1]*COURSE))+2]
+            srcsz = [int((int(size[0]/COURSE+1)*COURSE)/(sc[0]*COURSE))+2, 
+                int((int(size[1]/COURSE+1)*COURSE)/(sc[1]*COURSE))+2]
             if (srct[0]+srcsz[0] > self.width):
                 srcsz[0] = self.width-srct[0]
             if (srct[1]+srcsz[1] > self.height):

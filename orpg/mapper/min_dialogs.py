@@ -151,7 +151,7 @@ class min_list_panel(wx.Dialog):
             min_index.append(item-loop_count+1)
         if len(min_list) > 0:
             for sel_rmin in min_list:
-#############
+             #############
                 min_xml = sel_rmin.toxml(action="new")
                 node_begin = "<nodehandler module='map_miniature_nodehandler' class='map_miniature_handler' name='"
 
@@ -165,7 +165,7 @@ class min_list_panel(wx.Dialog):
                 node_xml = node_begin + min_xml + '</nodehandler>'
                 print "Sending this XML to insert_xml:" + node_xml
                 gametree.insert_xml(node_xml)
-##########
+             #############
         self.listctrl.DeleteAllItems()
         self.refresh()
         event.Skip()
@@ -244,22 +244,27 @@ class min_list_edit_panel(wx.Panel):
         listsizer.Add(wx.StaticText(self, -1, "Path:"), 0, wx.EXPAND)
         listsizer.Add(self.pathcombo, 0, wx.EXPAND)
         listsizer.Add(wx.Size(10,10))
-        self.heading = wx.RadioBox(self, MIN_HEADING, "Heading", choices=["None","N","NE","E","SE","S","SW","W","NW","no change"], majorDimension=5, style=wx.RA_SPECIFY_COLS)
+        self.heading = wx.RadioBox(self, MIN_HEADING, "Heading", 
+            choices=["None","N","NE","E","SE","S","SW","W","NW","no change"], majorDimension=5, style=wx.RA_SPECIFY_COLS)
         self.heading.SetSelection( 9 )
         listsizer.Add( self.heading, 0, wx.EXPAND )
         listsizer.Add(wx.Size(10,10))
-        self.face = wx.RadioBox(self, MIN_FACE, "Facing", choices=["None","N","NE","E","SE","S","SW","W","NW","no change"], majorDimension=5, style=wx.RA_SPECIFY_COLS)
+        self.face = wx.RadioBox(self, MIN_FACE, "Facing", 
+            choices=["None","N","NE","E","SE","S","SW","W","NW","no change"], majorDimension=5, style=wx.RA_SPECIFY_COLS)
         self.face.SetSelection(9)
         listsizer.Add(self.face, 0, wx.EXPAND)
-###
-###    Group together locked, Hide, and snap radioboxes in group2 box
-###
+        ###
+        ###Group together locked, Hide, and snap radioboxes in group2 box
+        ###
         group2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.locked = wx.RadioBox(self, MIN_LOCK, "Lock", choices=["Don't lock","Lock","no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
+        self.locked = wx.RadioBox(self, MIN_LOCK, "Lock", 
+            choices=["Don't lock","Lock","no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
         self.locked.SetSelection(2)
-        self.hide = wx.RadioBox(self, MIN_HIDE, "Hide", choices=["Don't hide", "Hide", "no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
+        self.hide = wx.RadioBox(self, MIN_HIDE, "Hide", 
+            choices=["Don't hide", "Hide", "no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
         self.hide.SetSelection(2)
-        self.snap = wx.RadioBox(self,MIN_ALIGN,"Snap",choices=["Center","Top left","no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
+        self.snap = wx.RadioBox(self,MIN_ALIGN,"Snap",
+            choices=["Center","Top left","no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
         self.snap.SetSelection(2)
         group2.Add(self.locked, 0, wx.EXPAND)
         group2.Add(wx.Size(10,0))
@@ -268,9 +273,9 @@ class min_list_edit_panel(wx.Panel):
         group2.Add(self.snap, 0, wx.EXPAND)
         group2.Add(wx.Size(10,0))
         listsizer.Add(group2,0,0)
-###
-###     group together the postion radiobox and the and its selection elements
-###
+        ###
+        ###Group together the postion radiobox and the and its selection elements
+        ###
         xpos = int(min_list[0].pos[0])
         #xpos = int(`min_list[0].pos`[1:`min_list[0].pos`.index(',')])
         ypos = int(min_list[0].pos[1])
@@ -283,7 +288,8 @@ class min_list_edit_panel(wx.Panel):
         self.scy.SetValue(1)
         self.scy.SetValue(ypos)
         positionbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.poschoice = wx.RadioBox(self,MIN_POS,"Position",choices=["Manual", "Existing", "no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
+        self.poschoice = wx.RadioBox(self,MIN_POS,"Position",
+            choices=["Manual", "Existing", "no change"],majorDimension=1,style=wx.RA_SPECIFY_COLS)
         self.poschoice.SetSelection(2)
         positionbox.Add(self.poschoice,0,0)
         ###
@@ -303,9 +309,9 @@ class min_list_edit_panel(wx.Panel):
         spinbox.Add(self.scy, 0, 0)
         poschoicebox.Add(wx.Size(0,15))
         poschoicebox.Add(spinbox,0,0)
-            ###
-            ### kludge is just a way to horizontaly position text.  .Add doesn't seem to work.
-            ###
+        ###
+        ### kludge is just a way to horizontaly position text.  .Add doesn't seem to work.
+        ###
         kluge = wx.BoxSizer(wx.HORIZONTAL)
         klugetext = wx.StaticText(self, -1, "            ")
         kluge.Add(klugetext,0,0)
@@ -356,7 +362,8 @@ class min_list_edit_panel(wx.Panel):
                     image[-1] = -1
                     while image[1] == -1:
                         image = 0
-                        self.dlg = wx.TextEntryDialog(self, 'You entered an invalid URL for the image path.  Please Enter a valid URL or cancel to leave the old url unchanged')
+                        self.dlg = wx.TextEntryDialog(self, 
+                            'You entered an invalid URL for the image path.  Please Enter a valid URL or cancel to leave the old url unchanged')
                         if self.dlg.ShowModal() == wx.ID_OK:
                             path = self.dlg.GetValue()
                             image = self.evaluate(path)
@@ -432,9 +439,11 @@ class min_edit_panel(wx.Panel):
         sizer.Add(wx.StaticText(self, -1, "Label:"), 0, wx.EXPAND)
         sizer.Add(self.label, 0, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
-        self.heading = wx.RadioBox(self, MIN_HEADING, "Heading", choices=["None","N","NE","E","SE","S","SW","W","NW"],majorDimension=5,style=wx.RA_SPECIFY_COLS)
+        self.heading = wx.RadioBox(self, MIN_HEADING, "Heading", 
+            choices=["None","N","NE","E","SE","S","SW","W","NW"],majorDimension=5,style=wx.RA_SPECIFY_COLS)
         self.heading.SetSelection(min.heading)
-        self.face = wx.RadioBox(self, MIN_FACE, "Facing", choices=["None","N","NE","E","SE","S","SW","W","NW"],majorDimension=5,style=wx.RA_SPECIFY_COLS)
+        self.face = wx.RadioBox(self, MIN_FACE, "Facing", 
+            choices=["None","N","NE","E","SE","S","SW","W","NW"],majorDimension=5,style=wx.RA_SPECIFY_COLS)
         self.face.SetSelection(min.face)
         self.locked = wx.CheckBox(self, MIN_LOCK, " Lock")
         self.locked.SetValue(min.locked)
@@ -487,9 +496,9 @@ class min_edit_panel(wx.Panel):
         if self.min_scaling.GetValue() == False:
             return
         elif self.min_width.GetValue() and wxID_MIN_WIDTH == evt.GetId() and self.min_width.GetInsertionPoint():
-            self.min_height.SetValue ( str(int((float(self.min_width.GetValue()) / float(self.min_width_old_value)) * float(self.min_height_old_value))) )
+            self.min_height.SetValue(str(int((float(self.min_width.GetValue()) / float(self.min_width_old_value)) * float(self.min_height_old_value))) )
         elif self.min_height.GetValue() and wxID_MIN_HEIGHT == evt.GetId() and self.min_height.GetInsertionPoint():
-            self.min_width.SetValue ( str(int((float(self.min_height.GetValue()) / float(self.min_height_old_value)) * float(self.min_width_old_value))) )
+            self.min_width.SetValue(str(int((float(self.min_height.GetValue()) / float(self.min_height_old_value)) * float(self.min_width_old_value))) )
 
     def update_min(self):
         self.min.set_min_props(self.heading.GetSelection(),
@@ -514,7 +523,7 @@ class min_edit_panel(wx.Panel):
 
 class min_edit_dialog(wx.Dialog):
     def __init__(self,parent,min):
-#520,265
+        #520,265
         wx.Dialog.__init__(self,parent,-1,"Miniature",wx.DefaultPosition,wx.Size(520,350))
         (w,h) = self.GetClientSizeTuple()
         mastersizer = wx.BoxSizer(wx.VERTICAL)

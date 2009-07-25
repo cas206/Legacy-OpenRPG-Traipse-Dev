@@ -67,7 +67,8 @@ class whiteboard_handler(base_layer_handler):
         self.radius.SetValue("15")
         self.live_refresh = wx.CheckBox(self, wx.ID_ANY, " Live Refresh")
         self.live_refresh.SetValue(True)
-        self.widthList= wx.Choice(self, wx.ID_ANY, size= wx.Size(40, 20), choices=['1','2','3','4','5','6','7','8','9','10'])
+        self.widthList= wx.Choice(self, wx.ID_ANY, size= wx.Size(40, 20), 
+            choices=['1','2','3','4','5','6','7','8','9','10'])
         self.widthList.SetSelection(0) #always start showing "1"
         self.sizer.Add(wx.StaticText(self, wx.ID_ANY, "Line Width: "),0,wx.ALIGN_CENTER)
         self.sizer.Add(self.widthList, 0, wx.EXPAND)
@@ -103,7 +104,8 @@ class whiteboard_handler(base_layer_handler):
         self.txt_boxer.Add(self.text_control,1,wx.EXPAND)
         self.point_boxer = wx.BoxSizer(wx.HORIZONTAL)
         self.point_static = wx.StaticText(self.text_properties_dialog, -1, "Text Size: ")
-        self.point_control = wx.SpinCtrl(self.text_properties_dialog, wx.ID_ANY, value = "12",min = 1, initial = 12, name = "Font Size: ")
+        self.point_control = wx.SpinCtrl(self.text_properties_dialog, wx.ID_ANY, value = "12",
+            min = 1, initial = 12, name = "Font Size: ")
         self.point_boxer.Add(self.point_static,1,wx.EXPAND)
         self.point_boxer.Add(wx.Size(10,10))
         self.point_boxer.Add(self.point_control,0,wx.EXPAND)

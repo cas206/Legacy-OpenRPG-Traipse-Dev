@@ -117,7 +117,8 @@ class minis_msg(map_element_msg_base):
 
         else:
             self.p_lock.release()
-            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
+            raise Exception, 
+                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
 
 

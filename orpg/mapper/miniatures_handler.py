@@ -168,7 +168,8 @@ class miniatures_handler(base_layer_handler):
                 min_url = open_rpg.get_component("cherrypy") + filename
             except:
                 return
-            min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, open_rpg.get_component("cherrypy")) + '/' + filename
+            min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, 
+                open_rpg.get_component("cherrypy")) + '/' + filename
             # build url
             if min_url == "" or min_url == "http://":
                 return
@@ -388,11 +389,17 @@ class miniatures_handler(base_layer_handler):
                 self.sel_min.selected = False
                 self.sel_min.isUpdated = True
                 self.sel_min = None
-	recycle_bin = {MIN_HEADING_NONE: FACE_NONE, MIN_HEADING_NORTH: FACE_NORTH, MIN_HEADING_NORTHWEST: FACE_NORTHWEST, MIN_HEADING_NORTHEAST: FACE_NORTHEAST, MIN_HEADING_EAST: FACE_EAST, MIN_HEADING_SOUTHEAST: FACE_SOUTHEAST, MIN_HEADING_SOUTHWEST: FACE_SOUTHWEST, MIN_HEADING_SOUTH: FACE_SOUTH, MIN_HEADING_WEST: FACE_WEST}
+	recycle_bin = {MIN_HEADING_NONE: FACE_NONE, MIN_HEADING_NORTH: FACE_NORTH, 
+        MIN_HEADING_NORTHWEST: FACE_NORTHWEST, MIN_HEADING_NORTHEAST: FACE_NORTHEAST, 
+        MIN_HEADING_EAST: FACE_EAST, MIN_HEADING_SOUTHEAST: FACE_SOUTHEAST, MIN_HEADING_SOUTHWEST: FACE_SOUTHWEST, 
+        MIN_HEADING_SOUTH: FACE_SOUTH, MIN_HEADING_WEST: FACE_WEST}
 	if recycle_bin.has_key(id):
 	    self.sel_rmin.heading = recycle_bin[id]
 	    recycle_bin = {}
-	recycle_bin = {MIN_FACING_NONE: FACE_NONE, MIN_FACING_NORTH: FACE_NORTH, MIN_FACING_NORTHWEST: FACE_NORTHWEST, MIN_FACING_NORTHEAST: FACE_NORTHEAST, MIN_FACING_EAST: FACE_EAST, MIN_FACING_SOUTHEAST: FACE_SOUTHEAST, MIN_FACING_SOUTHWEST: FACE_SOUTHWEST, MIN_FACING_SOUTH: FACE_SOUTH, MIN_FACING_WEST: FACE_WEST}
+	recycle_bin = {MIN_FACING_NONE: FACE_NONE, MIN_FACING_NORTH: FACE_NORTH, 
+        MIN_FACING_NORTHWEST: FACE_NORTHWEST, MIN_FACING_NORTHEAST: FACE_NORTHEAST, 
+        MIN_FACING_EAST: FACE_EAST, MIN_FACING_SOUTHEAST: FACE_SOUTHEAST, MIN_FACING_SOUTHWEST: FACE_SOUTHWEST, 
+        MIN_FACING_SOUTH: FACE_SOUTH, MIN_FACING_WEST: FACE_WEST}
 	if recycle_bin.has_key(id):
 	    self.sel_rmin.face = recycle_bin[id]
 	    recycle_bin = {}
@@ -589,12 +596,6 @@ class miniatures_handler(base_layer_handler):
                 return
             self.sel_min = mini
             self.sel_min.selected = True
-            """
-            dc = wx.ClientDC(self.canvas)
-            self.canvas.PrepareDC(dc)
-            dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
-            self.sel_min.draw(dc, self.canvas.layers['miniatures'])
-            """
             self.canvas.Refresh()
         else:
             self.drag_mini = None
@@ -636,7 +637,7 @@ class miniatures_handler(base_layer_handler):
         filename = filepath[start1:]
         pos = filename.rfind('.')
         ext = filename[pos:].lower()
-   	# ext = filename[-4:].lower()
+        #ext = filename[-4:].lower()
         if(ext != ".bmp" and ext != ".gif" and ext != ".jpg" and ext != ".jpeg" and ext != ".png"):
             self.infoPost("Supported file extensions are: *.bmp, *.gif, *.jpg, *.jpeg, *.png")
             return
@@ -671,10 +672,12 @@ class miniatures_handler(base_layer_handler):
                 drag_bmp = self.drag_mini.bmp
                 if self.drag_mini.width and self.drag_mini.height:
                     tmp_image = drag_bmp.ConvertToImage()
-                    tmp_image.Rescale(int(self.drag_mini.width * self.canvas.layers['grid'].mapscale), int(self.drag_mini.height * self.canvas.layers['grid'].mapscale))
+                    tmp_image.Rescale(int(self.drag_mini.width * self.canvas.layers['grid'].mapscale), 
+                        int(self.drag_mini.height * self.canvas.layers['grid'].mapscale))
                     tmp_image.ConvertAlphaToMask()
                     drag_bmp = tmp_image.ConvertToBitmap()
-                    mask = wx.Mask(drag_bmp, wx.Colour(tmp_image.GetMaskRed(), tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
+                    mask = wx.Mask(drag_bmp, wx.Colour(tmp_image.GetMaskRed(), 
+                        tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
                     drag_bmp.SetMask(mask)
                     tmp_image = tmp_image.ConvertToGreyscale()
                     self.drag_mini.gray = True
@@ -685,7 +688,8 @@ class miniatures_handler(base_layer_handler):
                     wx.CallAfter(refresh)
                 self.canvas.drag = wx.DragImage(drag_bmp)
                 self.drag_offset = self.getLogicalPosition(evt)- self.drag_mini.pos
-                self.canvas.drag.BeginDrag((int(self.drag_offset.x * self.canvas.layers['grid'].mapscale), int(self.drag_offset.y * self.canvas.layers['grid'].mapscale)), self.canvas, False)
+                self.canvas.drag.BeginDrag((int(self.drag_offset.x * self.canvas.layers['grid'].mapscale), 
+                    int(self.drag_offset.y * self.canvas.layers['grid'].mapscale)), self.canvas, False)
             elif self.canvas.drag is not None:
                 self.canvas.drag.Move(evt.GetPosition())
                 self.canvas.drag.Show()

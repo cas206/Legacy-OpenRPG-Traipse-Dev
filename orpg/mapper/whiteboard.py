@@ -209,7 +209,8 @@ class WhiteboardLine:
         self.highlighted = highlight
         self.log.log("Enter WhiteboardLine->highlight(self, highlight)", ORPG_DEBUG)
 
-    def set_line_props(self, line_string="", upperleftx=0, upperlefty=0, lowerrightx=0, lowerrighty=0, color="#000000", width=1):
+    def set_line_props(self, line_string="", upperleftx=0, upperlefty=0, 
+            lowerrightx=0, lowerrighty=0, color="#000000", width=1):
         self.log.log("Enter WhiteboardLine->set_line_props(self, line_string, upperleftx, upperlefty, lowerrightx, lowerrighty, color, width)", ORPG_DEBUG)
         self.line_string = line_string
         self.upperleft.x = upperleftx
@@ -655,7 +656,8 @@ class whiteboard_layer(layer_base):
         #self.canvas.send_map_data()
 
     def add_temp_line(self, line_string):
-        line = WhiteboardLine(0, line_string, wx.Point(0,0), wx.Point(0,0), color=self.color, width=self.width, log=self.log)
+        line = WhiteboardLine(0, line_string, wx.Point(0,0), wx.Point(0,0), 
+            color=self.color, width=self.width, log=self.log)
         self.lines.append(line)
         return line
 

@@ -52,14 +52,6 @@ class background_handler(base_layer_handler):
         self.color_button.SetBackgroundColour(wx.BLACK)
         self.color_button.SetForegroundColour(wx.WHITE)
         self.apply_button = wx.Button(self, wx.ID_ANY, "Apply", style=wx.BU_EXACTFIT)
-        """
-        self.sizer.Add(self.bg_type, 0, wx.EXPAND)
-        self.sizer.Add(self.url_path, 1, wx.EXPAND)
-        self.sizer.Add(self.color_button, 0, wx.EXPAND)
-        self.sizer.Add(self.localBrowse, 0, wx.EXPAND)
-        self.sizer.Add(self.apply_button, 0, wx.EXPAND)
-        """
-
         self.sizer.Add(self.bg_type, 0, wx.ALIGN_CENTER)
         self.sizer.Add((6, 0))
         self.sizer.Add(self.url_path, 1, wx.ALIGN_CENTER)
@@ -69,7 +61,6 @@ class background_handler(base_layer_handler):
         self.sizer.Add(self.localBrowse, 0, wx.ALIGN_CENTER)
         self.sizer.Add((6, 0))
         self.sizer.Add(self.apply_button, 0, wx.ALIGN_CENTER)
-
         self.Bind(wx.EVT_BUTTON, self.on_bg_color, self.color_button)
         self.Bind(wx.EVT_BUTTON, self.on_apply, self.apply_button)
         self.Bind(wx.EVT_BUTTON, self.on_browse, self.localBrowse)
@@ -78,7 +69,9 @@ class background_handler(base_layer_handler):
 
     def on_browse(self, evt):
         if self.bg_type.GetStringSelection() == 'Texture' or self.bg_type.GetStringSelection() == 'Image':
-            dlg = wx.FileDialog(None, "Select a Miniature to load", orpg.dirpath.dir_struct["user"]+'webfiles/', wildcard="Image files (*.bmp, *.gif, *.jpg, *.png)|*.bmp;*.gif;*.jpg;*.png", style=wx.OPEN)
+            dlg = wx.FileDialog(None, "Select a Miniature to load", 
+                orpg.dirpath.dir_struct["user"]+'webfiles/', 
+                wildcard="Image files (*.bmp, *.gif, *.jpg, *.png)|*.bmp;*.gif;*.jpg;*.png", style=wx.OPEN)
             if not dlg.ShowModal() == wx.ID_OK:
                 dlg.Destroy()
                 return
@@ -90,13 +83,15 @@ class background_handler(base_layer_handler):
             postdata = urllib.urlencode({'filename':filename, 'imgdata':imgdata, 'imgtype':imgtype})
 
             if self.settings.get_setting('LocalorRemote') == 'Remote':
-                thread.start_new_thread(self.canvas.layers['bg'].upload, (postdata, dlg.GetPath(), self.bg_type.GetStringSelection()))
+                thread.start_new_thread(self.canvas.layers['bg'].upload, 
+                    (postdata, dlg.GetPath(), self.bg_type.GetStringSelection()))
             else:
                 try:
                     min_url = open_rpg.get_component("cherrypy") + filename
                 except:
                     return
-                min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, open_rpg.get_component("cherrypy")) + '/' + filename
+                min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, 
+                    open_rpg.get_component("cherrypy")) + '/' + filename
 
                 if self.bg_type.GetStringSelection() == 'Texture':
                     self.canvas.layers['bg'].set_texture(min_url)

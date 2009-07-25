@@ -103,7 +103,8 @@ class whiteboard_msg(map_element_msg_base):
                         self.children[id].init_props(item.get_all_props())
         else:
             self.p_lock.release()
-            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element in whiteboard"
+            raise Exception, 
+                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element in whiteboard"
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
