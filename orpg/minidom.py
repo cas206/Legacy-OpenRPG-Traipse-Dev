@@ -43,14 +43,12 @@ class Node:
         if Node._debug:
             index = repr(id(self)) + repr(self.__class__)
             Node.allnodes[index] = repr(self.__dict__)
-            if Node.debug is None:
-                Node.debug = StringIO()
+            if Node.debug is None: Node.debug = StringIO()
                 #open( "debug4.out", "w" )
             Node.debug.write("create %s\n" % index)
 
     def __getattr__(self, key):
-        if key[0:2] == "__":
-            raise AttributeError
+        if key[0:2] == "__": raise AttributeError
         # getattr should never call getattr!
         if self.__dict__.has_key("inGetAttr"):
             del self.inGetAttr
@@ -67,10 +65,8 @@ class Node:
                 raise AttributeError, key
         else:
             self.inGetAttr = 1
-            try:
-                func = getattr(self, "_get_" + key)
-            except AttributeError:
-                raise AttributeError, key
+            try: func = getattr(self, "_get_" + key)
+            except AttributeError: raise AttributeError, key
             del self.inGetAttr
             return func()
 
@@ -83,26 +79,21 @@ class Node:
         return str(writer.getvalue())
 
     def hasChildNodes(self):
-        if self.childNodes:
-            return 1
-        else:
-            return 0
+        if self.childNodes: return 1
+        else: return 0
 
     def getChildren(self):
         return self.childNodes
 
     def _get_firstChild(self):
-        if self.hasChildNodes():
-            return self.childNodes[0]
-        else:
-            return None
+        if self.hasChildNodes(): return self.childNodes[0]
+        else: return None
 
     def _get_lastChild(self):
         return self.childNodes[-1]
 
     def insertBefore(self, newChild, refChild):
-        if refChild == None:
-            return self.appendChild(newChild)
+        if refChild == None: return self.appendChild(newChild)
         index = self.childNodes.index(refChild)
         self.childNodes.insert(index, newChild)
         if self._makeParentNodes:
@@ -115,8 +106,7 @@ class Node:
             last = self.lastChild
             node.previousSibling = last
             last.nextSibling = node
-        else:
-            node.previousSibling = None
+        else: node.previousSibling = None
         node.nextSibling = None
         node.ownerDocument = self.ownerDocument
         node.parentNode = self
@@ -136,8 +126,7 @@ class Node:
 
     def cloneNode(self, deep=0):
         newNode = Node()
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
     def deep_clone(self, newNode):
@@ -163,8 +152,7 @@ class Node:
                     i = i - 1
                     del self.childNodes[i]
                 continue
-            elif cn.nodeType == Node.ELEMENT_NODE:
-                cn.normalize()
+            elif cn.nodeType == Node.ELEMENT_NODE: cn.normalize()
             i = i + 1
 
     def unlink(self):
@@ -176,8 +164,7 @@ class Node:
         self.previousSibling = None
         self.nextSibling = None
         if self.attributes:
-            for attr in self._attrs.values():
-                self.removeAttributeNode(attr)
+            for attr in self._attrs.values(): self.removeAttributeNode(attr)
             assert not len(self._attrs)
             assert not len(self._attrsNS)
         if Node._debug:
@@ -223,17 +210,14 @@ class Attr(Node):
         # nodeValue and value are set elsewhere
 
     def __setattr__(self, name, value):
-        if name in ("value", "nodeValue"):
-            self.__dict__["value"] = self.__dict__["nodeValue"] = value
-        else:
-            self.__dict__[name] = value
+        if name in ("value", "nodeValue"): self.__dict__["value"] = self.__dict__["nodeValue"] = value
+        else: self.__dict__[name] = value
 
     def cloneNode(self, deep=0):
         newNode = Attr(self.__dict__["name"],self.__dict__["namespaceURI"],
                         self.__dict__["localName"],self.__dict__["prefix"])
         newNode.__dict__["value"] = newNode.__dict__["nodeValue"] = self.value
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
 class AttributeList:
@@ -250,10 +234,8 @@ class AttributeList:
         return clone
 
     def item(self, index):
-        try:
-            return self[self.keys()[index]]
-        except IndexError:
-            return None
+        try: return self[self.keys()[index]]
+        except IndexError: return None
 
     def items(self):
         return map(lambda node: (node.tagName, node.value),
@@ -276,17 +258,13 @@ class AttributeList:
         return self.length
 
     def __cmp__(self, other):
-        if self._attrs is getattr(other, "_attrs", None):
-            return 0
-        else:
-            return cmp(id(self), id(other))
+        if self._attrs is getattr(other, "_attrs", None): return 0
+        else: return cmp(id(self), id(other))
 
     #FIXME: is it appropriate to return .value?
     def __getitem__(self, attname_or_tuple):
-        if type(attname_or_tuple) is types.TupleType:
-            return self._attrsNS[attname_or_tuple]
-        else:
-            return self._attrs[attname_or_tuple]
+        if type(attname_or_tuple) is types.TupleType: return self._attrsNS[attname_or_tuple]
+        else: return self._attrs[attname_or_tuple]
 
     # same as set
     def __setitem__(self, attname, value):
@@ -297,8 +275,7 @@ class AttributeList:
             assert isinstance(value, Attr) or type(value) is types.StringType
             node = value
         old = self._attrs.get(attname, None)
-        if old:
-            old.unlink()
+        if old: old.unlink()
         self._attrs[node.name] = node
         self._attrsNS[(node.namespaceURI, node.localName)] = node
 
@@ -332,8 +309,7 @@ class Element(Node):
         for k in keys:
             attr = self._attrs[k].cloneNode(1)
             newNode.setAttributeNode(attr)
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
     def _get_tagName(self):
@@ -341,16 +317,12 @@ class Element(Node):
 
     def getAttributeKeys(self):
         result = []
-        if self._attrs:
-            return self._attrs.keys()
-        else:
-            return None
+        if self._attrs: return self._attrs.keys()
+        else: return None
 
     def getAttribute(self, attname):
-        if self.hasAttribute(attname):
-            return str(self._attrs[attname].value)
-        else:
-            return ""
+        if self.hasAttribute(attname): return str(self._attrs[attname].value)
+        else: return ""
 
     def getAttributeNS(self, namespaceURI, localName):
         return self._attrsNS[(namespaceURI, localName)].value
@@ -377,8 +349,7 @@ class Element(Node):
 
     def setAttributeNode(self, attr):
         old = self._attrs.get(attr.name, None)
-        if old:
-            old.unlink()
+        if old: old.unlink()
         self._attrs[attr.name] = attr
         self._attrsNS[(attr.namespaceURI, attr.localName)] = attr
         # FIXME: return old value if something changed
@@ -432,8 +403,7 @@ class Element(Node):
             if self.childNodes[0].nodeType == Node.TEXT_NODE:
                 tab_str = ""
             writer.write(tab_str + "</%s>" % self.tagName)
-        else:
-            writer.write("/>")
+        else: writer.write("/>")
 
     def _get_attributes(self):
         return AttributeList(self._attrs, self._attrsNS)
@@ -452,8 +422,7 @@ class Comment(Node):
 
     def cloneNode(self, deep=0):
         newNode = Comment(self.data)
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
 class ProcessingInstruction(Node):
@@ -470,8 +439,7 @@ class ProcessingInstruction(Node):
 
     def cloneNode(self, deep=0):
         newNode = ProcessingInstruction(self.target, self.data)
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
 class Text(Node):
@@ -484,10 +452,8 @@ class Text(Node):
         self.attributes = None
 
     def __repr__(self):
-        if len(self.data) > 10:
-            dotdotdot = "..."
-        else:
-            dotdotdot = ""
+        if len(self.data) > 10: dotdotdot = "..."
+        else: dotdotdot = ""
         return "<DOM Text node \"%s%s\">" % (self.data[0:10], dotdotdot)
 
     def writexml(self, writer, tabs=0):
@@ -501,16 +467,13 @@ class Text(Node):
 
     def cloneNode(self, deep=0):
         newNode = Text(self.data)
-        if deep:
-            self.deep_clone(newNode)
+        if deep: self.deep_clone(newNode)
         return newNode
 
 def _nssplit(qualifiedName):
     fields = string.split(qualifiedName,':', 1)
-    if len(fields) == 2:
-        return fields
-    elif len(fields) == 1:
-        return ('', fields[0])
+    if len(fields) == 2: return fields
+    elif len(fields) == 1: return ('', fields[0])
 
 class Document(Node):
     nodeType = Node.DOCUMENT_NODE
@@ -525,10 +488,8 @@ class Document(Node):
 
     def appendChild(self, node):
         if node.nodeType == Node.ELEMENT_NODE:
-            if self.documentElement:
-                raise TypeError, "Two document elements disallowed"
-            else:
-                self.documentElement = node
+            if self.documentElement: raise TypeError, "Two document elements disallowed"
+            else: self.documentElement = node
         Node.appendChild(self, node)
         return node
     createElement = Element
@@ -558,8 +519,7 @@ class Document(Node):
         return rc
 
     def writexml(self, writer):
-        for node in self.childNodes:
-            node.writexml(writer)
+        for node in self.childNodes: node.writexml(writer)
 
 def _doparse(func, args, kwargs):
     events = apply(func, args, kwargs)

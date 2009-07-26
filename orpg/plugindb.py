@@ -16,12 +16,9 @@ class PluginDB:
                 for child in plugin._dir:
                     if child._name == strname:
                         #str() on this to make sure it's ASCII, not unicode, since orpg can't handle unicode.
-                        if verbose:
-                            print "successfully found the value"
-                        if len(child):
-                            return str( self.normal(child[0]) )
-                        else:
-                            return ""
+                        if verbose: print "successfully found the value"
+                        if len(child): return str( self.normal(child[0]) )
+                        else: return ""
         else:
             if verbose:
                 print "plugindb: no value has been stored for " + strname + " in " + plugname + " so the default has been returned"
@@ -43,24 +40,16 @@ class PluginDB:
 
     def FetchList(self, parent):
         retlist = []
-        if not len(parent):
-            return []
+        if not len(parent): return []
         for litem in parent[0]._dir:
             if len(litem):
-                if litem._attrs["type"] == "int":
-                    retlist += [int(litem[0])]
-                elif litem._attrs["type"] == "long":
-                    retlist += [long(litem[0])]
-                elif litem._attrs["type"] == "float":
-                    retlist += [float(litem[0])]
-                elif litem._attrs["type"] == "list":
-                    retlist += [self.FetchList(litem)]
-                elif litem._attrs["type"] == "dict":
-                    retlist += [self.FetchDict(litem)]
-                else:
-                    retlist += [str( self.normal(litem[0]) )]
-            else:
-                retlist += [""]
+                if litem._attrs["type"] == "int": retlist += [int(litem[0])]
+                elif litem._attrs["type"] == "long": retlist += [long(litem[0])]
+                elif litem._attrs["type"] == "float": retlist += [float(litem[0])]
+                elif litem._attrs["type"] == "list": retlist += [self.FetchList(litem)]
+                elif litem._attrs["type"] == "dict": retlist += [self.FetchDict(litem)]
+                else: retlist += [str( self.normal(litem[0]) )]
+            else: retlist += [""]
         return retlist
 
     def GetList(self, plugname, listname, defaultval, verbose=0):
@@ -70,8 +59,7 @@ class PluginDB:
                 for child in plugin._dir:
                     if child._name == listname and child._attrs["type"] == "list":
                         retlist = self.FetchList(child)
-                        if verbose:
-                            print "successfully found the value"
+                        if verbose: print "successfully found the value"
                         return retlist
         else:
             if verbose:
@@ -157,20 +145,13 @@ class PluginDB:
         for ditem in parent[0]._dir:
             if len(ditem):
                 ditem._attrs["name"] = self.normal(ditem._attrs["name"])
-                if ditem._attrs["type"] == "int":
-                    retdict[ditem._attrs["name"]] = int(ditem[0])
-                elif ditem._attrs["type"] == "long":
-                    retdict[ditem._attrs["name"]] = long(ditem[0])
-                elif ditem._attrs["type"] == "float":
-                    retdict[ditem._attrs["name"]] = float(ditem[0])
-                elif ditem._attrs["type"] == "list":
-                    retdict[ditem._attrs["name"]] = self.FetchList(ditem)
-                elif ditem._attrs["type"] == "dict":
-                    retdict[ditem._attrs["name"]] = self.FetchDict(ditem)
-                else:
-                    retdict[ditem._attrs["name"]] = str( self.normal(ditem[0]) )
-            else:
-                retdict[ditem._attrs["name"]] = ""
+                if ditem._attrs["type"] == "int": retdict[ditem._attrs["name"]] = int(ditem[0])
+                elif ditem._attrs["type"] == "long": retdict[ditem._attrs["name"]] = long(ditem[0])
+                elif ditem._attrs["type"] == "float": retdict[ditem._attrs["name"]] = float(ditem[0])
+                elif ditem._attrs["type"] == "list": retdict[ditem._attrs["name"]] = self.FetchList(ditem)
+                elif ditem._attrs["type"] == "dict": retdict[ditem._attrs["name"]] = self.FetchDict(ditem)
+                else: retdict[ditem._attrs["name"]] = str( self.normal(ditem[0]) )
+            else: retdict[ditem._attrs["name"]] = ""
         return retdict
 
     def GetDict(self, plugname, dictname, defaultval, verbose=0):
@@ -178,8 +159,7 @@ class PluginDB:
         for plugin in self.xml_dom:
             if plugname == plugin._name:
                 for child in plugin._dir:
-                    if child._name == dictname and child._attrs["type"] == "dict":
-                        return self.FetchDict(child)
+                    if child._name == dictname and child._attrs["type"] == "dict": return self.FetchDict(child)
         else:
             if verbose:
                 print "plugindb: no value has been stored for " + dictname + " in " + plugname + " so the default has been returned"

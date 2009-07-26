@@ -53,10 +53,8 @@ def safe_get_text_node(xml_dom):
 def strip_unicode(txt):
     for i in xrange(len(txt)):
         if txt[i] not in string.printable:
-            try:
-                txt = txt.replace(txt[i], '&#' + str(ord(txt[i])) + ';')
-            except:
-                txt = txt.replace(txt[i], '{?}')
+            try: txt = txt.replace(txt[i], '&#' + str(ord(txt[i])) + ';')
+            except: txt = txt.replace(txt[i], '{?}')
     return txt
 
 def strip_text(txt):
@@ -65,10 +63,7 @@ def strip_text(txt):
     bad_txt_found = 0
     txt = strip_unicode(txt)
     for c in txt:
-        if ord(c) < 128:
-            u_txt += c
-        else:
-            bad_txt_found = 1
-    if bad_txt_found:
-        print "Some non 7-bit ASCII characters found and stripped"
+        if ord(c) < 128: u_txt += c
+        else: bad_txt_found = 1
+    if bad_txt_found: print "Some non 7-bit ASCII characters found and stripped"
     return u_txt

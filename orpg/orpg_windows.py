@@ -43,12 +43,9 @@ class img_helper:
         img_type = self.get_type(path)
         try:
             data = urllib.urlretrieve(path)
-            if data:
-                img = wx.Bitmap(data[0], img_type)
-            else:
-                raise IOError, "Image refused to load!"
-        except IOError, e:
-            img = None
+            if data: img = wx.Bitmap(data[0], img_type)
+            else: raise IOError, "Image refused to load!"
+        except IOError, e: img = None
         return img
 
     def load_file(self,path):
@@ -60,12 +57,11 @@ class img_helper:
         ext = string.lower(file_name[pos+1:])
         img_type = 0
 	# TaS - sirebral.  Replaces 10 lines with 6 lines.
-	recycle_bin = {"gif": wx.BITMAP_TYPE_GIF, "jpg": wx.BITMAP_TYPE_JPEG, "jpeg": wx.BITMAP_TYPE_JPEG, "bmp": wx.BITMAP_TYPE_BMP, "png": wx.BITMAP_TYPE_PNG}
-	if recycle_bin.has_key(ext):
-	    img_type = recycle_bin[ext]
-	else:
-	    img_type = None ## this was imf_type = None.  imf?
-	recycle_bin = {}; return img_type
+	recycle_bin = {"gif": wx.BITMAP_TYPE_GIF, "jpg": wx.BITMAP_TYPE_JPEG, 
+        "jpeg": wx.BITMAP_TYPE_JPEG, "bmp": wx.BITMAP_TYPE_BMP, "png": wx.BITMAP_TYPE_PNG}
+	if recycle_bin.has_key(ext): img_type = recycle_bin[ext]
+	else: img_type = None ## this was imf_type = None.  imf?
+	del recycle_bin; return img_type
 
 ################################
 ## Tabs
@@ -85,10 +81,11 @@ class orpgTabberWnd(FNB.FlatNotebook):
         tabbedwindows.append(self)
         open_rpg.add_component("tabbedWindows", tabbedwindows)
 
-        theme_dict = {'slanted&aqua': FNB.FNB_VC8, 'slanted&bw': FNB.FNB_VC8, 'flat&aqua': FNB.FNB_FANCY_TABS, 'flat&bw': FNB.FNB_FANCY_TABS, 'customflat': FNB.FNB_FANCY_TABS, 'customslant': FNB.FNB_VC8, 'slanted&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS, 'slant&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS}
+        theme_dict = {'slanted&aqua': FNB.FNB_VC8, 'slanted&bw': FNB.FNB_VC8, 'flat&aqua': FNB.FNB_FANCY_TABS, 
+            'flat&bw': FNB.FNB_FANCY_TABS, 'customflat': FNB.FNB_FANCY_TABS, 'customslant': FNB.FNB_VC8, 
+            'slanted&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS, 'slant&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS}
         nbstyle |= theme_dict[tabtheme]
-        if style:
-            nbstyle |= style
+        if style: nbstyle |= style
         self.SetWindowStyleFlag(nbstyle)
 
 	#Tas - sirebral.  Planned changes to the huge statement below.  
@@ -179,8 +176,7 @@ class orpgFocusSplitterWindow(wx.SplitterWindow):
             (screen_x,screen_y) = wx.GetMousePosition()
             (x,y) = self.ScreenToClientXY(screen_x,screen_y) # translate coordinates
             (w,h) = self.GetSizeTuple()
-            if x >= 0 and x < w and y >= 0 and y < h:
-                self.OnMotion(x,y)
+            if x >= 0 and x < w and y >= 0 and y < h: self.OnMotion(x,y)
         event.Skip()
 
     def OnMotion(self,mouse_X,mouse_Y):
@@ -276,21 +272,17 @@ class html_text_edit(wx.Panel):
 
     def on_text_format(self,event):
         id = event.GetId()
-        if wx.Platform == '__WXMSW__':
-            txt = self.text.GetLabel()
-        else:
-            txt = self.text.GetValue()
+        if wx.Platform == '__WXMSW__': txt = self.text.GetLabel()
+        else: txt = self.text.GetValue()
         (beg,end) = self.text.GetSelection()
-        if beg != end:
-            sel_txt = txt[beg:end]
-        else:
-            return
+        if beg != end: sel_txt = txt[beg:end]
+        else: return
         print txt
 	# TaS - sirebral. Replaces 6 lines with 4 lines.
 	recycle_bin = {self.BOLD: "b", self.ITALIC: "i", self.UNDER: "u"}
 	if recycle_bin.has_key(id):
 	    sel_txt = "<" + recycle_bin[id] + ">" + sel_txt + "</" + recycle_bin[id] + ">"
-	    recycle_bin = {}
+	    del recycle_bin
 
         elif id == self.COLOR:
             hexcolor = self.r_h.do_hex_color_dlg(self)
@@ -299,11 +291,8 @@ class html_text_edit(wx.Panel):
                 self.color_button.SetBackgroundColour(hexcolor)
 
         txt = txt[:beg] + sel_txt + txt[end:]
-       # print txt
-        if wx.Platform == '__WXMSW__':
-            txt = self.text.SetLabel(txt)
-        else:
-            txt = self.text.SetValue(txt)
+        if wx.Platform == '__WXMSW__': txt = self.text.SetLabel(txt)
+        else: txt = self.text.SetValue(txt)
         self.text.SetInsertionPoint(beg)
         self.text.SetFocus()
         self.callback(wx.Event(self.text.GetId()))
@@ -336,10 +325,8 @@ class http_html_window(wx.html.HtmlWindow):
         if address[:4] == "http":
             self.load_url(address)
             self.local = 0
-        elif address[0] == "#" or self.local:
-            self.base_OnLinkClicked(linkinfo)
-        else:
-            self.load_url(self.path+address)
+        elif address[0] == "#" or self.local: self.base_OnLinkClicked(linkinfo)
+        else: self.load_url(self.path+address)
 
     def load_url(self,path):
         print path
@@ -352,9 +339,7 @@ class http_html_window(wx.html.HtmlWindow):
             self.SetPage(file.read())
             i = string.rfind(path,"/")
             self.path = path[:i+1]
-        except:
-            wx.MessageBox("Invalid URL","Browser Error",wx.OK)
-            #self.SetPage("<h3>Invalid URL</h3>")
+        except: wx.MessageBox("Invalid URL","Browser Error",wx.OK)
         dlg.Update(3)
         dlg.Destroy()
 
@@ -373,8 +358,7 @@ class orpgMultiCheckBoxDlg(wx.Dialog):
         sizers = { 'ctrls' : wx.BoxSizer(wx.VERTICAL), 'buttons' : wx.BoxSizer(wx.HORIZONTAL) }
         self.opts = opts
         self.list = wx.CheckListBox(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,opts)
-        for s in selected:
-            self.list.Check(s,1)
+        for s in selected: self.list.Check(s,1)
         sizers['ctrls'].Add(wx.StaticText(self, -1, text), 0, 0)
         sizers['ctrls'].Add(wx.Size(10,10))
         sizers['ctrls'].Add(self.list, 1, wx.EXPAND)
@@ -390,8 +374,7 @@ class orpgMultiCheckBoxDlg(wx.Dialog):
     def on_ok(self,evt):
         checked = []
         for i in range(len(self.opts)):
-            if self.list.IsChecked(i):
-                checked.append(i)
+            if self.list.IsChecked(i): checked.append(i)
         self.checked = checked
         self.EndModal(wx.ID_OK)
 
@@ -432,8 +415,7 @@ class orpgMultiTextEntry(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_ok, id=wx.ID_OK)
 
     def on_ok(self,evt):
-        for i in range(len(self.ctrls)):
-            self.vlist[i] = self.ctrls[i].GetValue()
+        for i in range(len(self.ctrls)): self.vlist[i] = self.ctrls[i].GetValue()
         self.EndModal(wx.ID_OK)
 
     def get_values(self):
@@ -537,8 +519,7 @@ class orpgProgressDlg(wx.Dialog):
 
     def Update(self,pos,text=None):
         self.gauge.SetValue(pos)
-        if text:
-            self.text.SetLabel(text)
+        if text: self.text.SetLabel(text)
 
 #########################
 #status frame window
@@ -590,10 +571,8 @@ class status_bar(wx.StatusBar):
         self.connect_status = connect
 
     def Notify(self, event):
-        if self.window == 1:
-            self.bar0()
-        elif self.window == 2:
-            self.bar1()
+        if self.window == 1: self.bar0()
+        elif self.window == 2: self.bar1()
         pass
 
     def bar1(self):
@@ -633,8 +612,7 @@ def do_progress_dlg(parent,title,text,range):
         dlg.Centre()
         dlg.Show(1)
         dlg.Raise()
-    else:
-        dlg = wx.ProgressDialog(title,text,range,parent)
+    else: dlg = wx.ProgressDialog(title,text,range,parent)
     return dlg
 
 def parseXml_with_dlg(parent,s,ownerDocument=None):

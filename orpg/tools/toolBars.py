@@ -80,13 +80,11 @@ class MapToolBar(wx.Panel):
         if id == TB_MAP_MODE:
             mode = 1
             self.mapmode +=1
-            if self.mapmode >3:
-                self.mapmode = 1
+            if self.mapmode >3: self.mapmode = 1
             bm = wx.Image(self.modeicons[self.mapmode-1],wx.BITMAP_TYPE_GIF).ConvertToBitmap()
             self.butt= wx.BitmapButton(self,TB_MAP_MODE,bm)
             data = self.mapmode
-        if self.callback != None:
-            self.callback(mode,data)
+        if self.callback != None: self.callback(mode,data)
 
 class DiceToolBar(wx.Panel):
     """This is where all of the dice related tools belong for quick reference."""
@@ -142,18 +140,13 @@ class DiceToolBar(wx.Panel):
         numDie = self.numDieText.GetValue()
         dieMod = self.dieModText.GetValue()
         # Init the die roll text
-        if not len(numDie):
-            numDie = 1
+        if not len(numDie): numDie = 1
         dieRoll = str(numDie)
         # Figure out which die roll was selected
         id = evt.GetId()
-	recycle_bin = {TB_IDC_D4: "d4", TB_IDC_D6: "d6", TB_IDC_D8: "d8", TB_IDC_D10: "d10", TB_IDC_D12: "d12", TB_IDC_D20: "d20", TB_IDC_D100: "d100"}
-	dieType = recycle_bin[id]; recycle_bin = {}
-        # To appease tdb...I personally disagree with this!
-        if len(dieMod) and dieMod[0] not in "*/-+":
-            dieMod = "+" + dieMod
-        # Build the complete die roll text now
-        rollString = "[" + dieRoll + dieType + dieMod + "]"
-        # Now, call the post method to send everything off with
-        if self.callBack != None:
-            self.callBack( rollString,1,1 )
+	recycle_bin = {TB_IDC_D4: "d4", TB_IDC_D6: "d6", TB_IDC_D8: "d8", TB_IDC_D10: "d10", 
+        TB_IDC_D12: "d12", TB_IDC_D20: "d20", TB_IDC_D100: "d100"}
+	dieType = recycle_bin[id]; del recycle_bin
+        if len(dieMod) and dieMod[0] not in "*/-+": dieMod = "+" + dieMod #Add Modifier
+        rollString = "[" + dieRoll + dieType + dieMod + "]" # Build the complete die roll text now
+        if self.callBack != None: self.callBack( rollString,1,1 ) # Now, call the post method to send everything off with

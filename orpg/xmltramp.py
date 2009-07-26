@@ -37,12 +37,9 @@ class Element:
     def __repr__(self, recursive=0, multiline=0, inprefixes=None):
         def qname(name, inprefixes):
             if islst(name):
-                if inprefixes[name[0]] is not None:
-                    return inprefixes[name[0]]+':'+name[1]
-                else:
-                    return name[1]
-            else:
-                return name
+                if inprefixes[name[0]] is not None: return inprefixes[name[0]]+':'+name[1]
+                else: return name[1]
+            else: return name
 
         def arep(a, inprefixes, addns=1):
             out = ''
@@ -67,26 +64,21 @@ class Element:
         out += '>'
         if recursive:
             content = 0
-            for x in self._dir:
-                if isinstance(x, Element): content = 1
+            for x in self._dir: if isinstance(x, Element): content = 1
             pad = '\n' + ('\t' * recursive)
             for x in self._dir:
                 if multiline and content: out +=  pad
                 if isstr(x): out += quote(x)
-                elif isinstance(x, Element):
-                    out += x.__repr__(recursive+1, multiline, inprefixes.copy())
-                else:
-                    raise TypeError, "I wasn't expecting "+`x`+"."
+                elif isinstance(x, Element): out += x.__repr__(recursive+1, multiline, inprefixes.copy())
+                else: raise TypeError, "I wasn't expecting "+`x`+"."
             if multiline and content: out += '\n' + ('\t' * (recursive-1))
-        else:
-            if self._dir: out += '...'
+        else: if self._dir: out += '...'
         out += '</'+qname(self._name, inprefixes)+'>'
         return out
 
     def __unicode__(self):
         text = ''
-        for x in self._dir:
-            text += unicode(x)
+        for x in self._dir: text += unicode(x)
         return ' '.join(text.split())
 
     def __str__(self):
@@ -170,12 +162,9 @@ class Element:
         if _set:
             for k in _set.keys(): self._attrs[k] = _set[k]
         if len(_pos) > 1:
-            for i in range(0, len(_pos), 2):
-                self._attrs[_pos[i]] = _pos[i+1]
-        if len(_pos) == 1 is not None:
-            return self._attrs[_pos[0]]
-        if len(_pos) == 0:
-            return self._attrs
+            for i in range(0, len(_pos), 2): self._attrs[_pos[i]] = _pos[i+1]
+        if len(_pos) == 1 is not None: return self._attrs[_pos[0]]
+        if len(_pos) == 0: return self._attrs
 
     def __len__(self): return len(self._dir)
 
@@ -214,10 +203,8 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
         ch = self.ch; self.ch = ''
         if ch and not ch.isspace(): self.stack[-1]._dir.append(ch)
         element = self.stack.pop()
-        if self.stack:
-            self.stack[-1]._dir.append(element)
-        else:
-            self.result = element
+        if self.stack: self.stack[-1]._dir.append(element)
+        else: self.result = element
 
 from xml.sax import make_parser
 from xml.sax.handler import feature_namespaces
