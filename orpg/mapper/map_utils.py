@@ -44,16 +44,13 @@ def proximity_test( start_point, end_point, test_point, threshold ):
    yt = float(yt)
 
    # Coincident points?
-   if x1 == x2 and y1 == y2:
-       d = distance_between(xt, yt, x1, y1)
+   if x1 == x2 and y1 == y2: d = distance_between(xt, yt, x1, y1)
    else:
        dx = x2 - x1
        dy = y2 - y1
        u = ((xt - x1) * dx + (yt - y1) * dy) / (dx*dx + dy*dy)
-       if u < 0:
-           d = distance_between(xt, yt, x1, y1)
-       elif u > 1:
-           d = distance_between(xt, yt, x2, y2)
+       if u < 0: d = distance_between(xt, yt, x1, y1)
+       elif u > 1: d = distance_between(xt, yt, x2, y2)
        else:
            xr = x1 + u * dx
            yr = y1 + u * dy

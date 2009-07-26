@@ -143,9 +143,9 @@ class miniatures_handler(base_layer_handler):
         self.Bind(wx.EVT_CHECKBOX, self.on_label, self.auto_label_cb)
 
     def on_browse(self, evt):
-        if not self.role_is_gm_or_player():
-            return
-        dlg = wx.FileDialog(None, "Select a Miniature to load", orpg.dirpath.dir_struct["user"]+'webfiles/', wildcard="Image files (*.bmp, *.gif, *.jpg, *.png)|*.bmp;*.gif;*.jpg;*.png", style=wx.OPEN)
+        if not self.role_is_gm_or_player(): return
+        dlg = wx.FileDialog(None, "Select a Miniature to load", orpg.dirpath.dir_struct["user"]+'webfiles/', 
+            wildcard="Image files (*.bmp, *.gif, *.jpg, *.png)|*.bmp;*.gif;*.jpg;*.png", style=wx.OPEN)
         if not dlg.ShowModal() == wx.ID_OK:
             dlg.Destroy()
             return
@@ -164,27 +164,20 @@ class miniatures_handler(base_layer_handler):
             y = dc.DeviceToLogicalY(0)
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, dlg.GetPath()), {'pos':cmpPoint(x,y)})
         else:
-            try:
-                min_url = open_rpg.get_component("cherrypy") + filename
-            except:
-                return
+            try: min_url = open_rpg.get_component("cherrypy") + filename
+            except: return
             min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, 
                 open_rpg.get_component("cherrypy")) + '/' + filename
             # build url
-            if min_url == "" or min_url == "http://":
-                return
-            if min_url[:7] != "http://" :
-                min_url = "http://" + min_url
+            if min_url == "" or min_url == "http://": return
+            if min_url[:7] != "http://": min_url = "http://" + min_url
             # make label
             if self.auto_label and min_url[-4:-3] == '.':
                 start = min_url.rfind("/") + 1
                 min_label = min_url[start:len(min_url)-4]
-                if self.use_serial:
-                    min_label = '%s %d' % ( min_label, self.canvas.layers['miniatures'].next_serial() )
-            else:
-                min_label = ""
-            if self.min_url.FindString(min_url) == -1:
-                self.min_url.Append(min_url)
+                if self.use_serial: min_label = '%s %d' % ( min_label, self.canvas.layers['miniatures'].next_serial() )
+            else: min_label = ""
+            if self.min_url.FindString(min_url) == -1: self.min_url.Append(min_url)
             try:
                 id = 'mini-' + self.canvas.frame.session.get_next_id()
                 # make the new mini appear in top left of current viewable map
@@ -247,8 +240,7 @@ class miniatures_handler(base_layer_handler):
         align_menu.Append(MIN_ALIGN_GRID_CENTER,"&Center")
         align_menu.Append(MIN_ALIGN_GRID_TL,"&Top-Left")
         #  This is a hack to simulate a menu title, due to problem in Linux
-        if wx.Platform == '__WXMSW__':
-            self.min_menu.SetTitle(label)
+        if wx.Platform == '__WXMSW__': self.min_menu.SetTitle(label)
         else:
             self.min_menu.Append(MIN_TITLE_HACK,label)
             self.min_menu.AppendSeparator()
@@ -312,8 +304,7 @@ class miniatures_handler(base_layer_handler):
         ######### add plugin added menu items #########
         if len(self.mini_rclick_menu_extra_items)>0:
             self.min_menu.AppendSeparator()
-            for item in self.mini_rclick_menu_extra_items.items():
-                self.min_menu.Append(item[1], item[0])
+            for item in self.mini_rclick_menu_extra_items.items(): self.min_menu.Append(item[1], item[0])
         if len(self.background_rclick_menu_extra_items)>0:
             self.main_menu.AppendSeparator()
             for item in self.background_rclick_menu_extra_items.items():
@@ -331,8 +322,7 @@ class miniatures_handler(base_layer_handler):
         try:
             for m in min_list:
                 # Either use the miniatures label for the selection list
-                if m.label:
-                    self.min_select_menu.Append(loop_count, m.label)
+                if m.label: self.min_select_menu.Append(loop_count, m.label)
                 # Or use part of the images filename as an identifier
                 else:
                     string_split = string.split(m.path,"/",)
@@ -341,8 +331,7 @@ class miniatures_handler(base_layer_handler):
                 self.canvas.Bind(wx.EVT_MENU, self.min_selected, id=loop_count)
                 loop_count += 1
             self.canvas.PopupMenu(self.min_select_menu,pos)
-        except:
-            pass
+        except: pass
 
     def min_selected(self,evt):
         # this is the callback function for the menu that is used to choose
@@ -359,30 +348,23 @@ class miniatures_handler(base_layer_handler):
                 self.moveSelectedMini(self.last_rclick_pos)
                 self.deselectAndRefresh()
             return
-        elif id == MIN_REMOVE:
-            self.canvas.layers['miniatures'].del_miniature(self.sel_rmin)
+        elif id == MIN_REMOVE: self.canvas.layers['miniatures'].del_miniature(self.sel_rmin)
         elif id == MIN_TO_GAMETREE:
             min_xml = self.sel_rmin.toxml(action="new")
             node_begin = "<nodehandler module='map_miniature_nodehandler' class='map_miniature_handler' name='"
-            if self.sel_rmin.label:
-                node_begin += self.sel_rmin.label + "'"
-            else:
-                node_begin += "Unnamed Miniature'"
+            if self.sel_rmin.label: node_begin += self.sel_rmin.label + "'"
+            else:  node_begin += "Unnamed Miniature'"
             node_begin += ">"
 	    gametree = open_rpg.get_component('tree')
             node_xml = node_begin + min_xml + '</nodehandler>'
             #print "Sending this XML to insert_xml:" + node_xml
             gametree.insert_xml(node_xml)
         elif id == MIN_SHOW_HIDE:
-            if self.sel_rmin.hide:
-                self.sel_rmin.hide = 0
-            else:
-                self.sel_rmin.hide = 1
+            if self.sel_rmin.hide:  self.sel_rmin.hide = 0
+            else: self.sel_rmin.hide = 1
         elif id == MIN_LOCK_UNLOCK:
-            if self.sel_rmin.locked:
-                self.sel_rmin.locked = False
-            else:
-                self.sel_rmin.locked = True
+            if self.sel_rmin.locked: self.sel_rmin.locked = False
+            else: self.sel_rmin.locked = True
             if self.sel_rmin == self.sel_min:
                 # when we lock / unlock the selected mini make sure it isn't still selected
                 # or it might easily get moved by accident and be hard to move back
@@ -395,18 +377,16 @@ class miniatures_handler(base_layer_handler):
         MIN_HEADING_SOUTH: FACE_SOUTH, MIN_HEADING_WEST: FACE_WEST}
 	if recycle_bin.has_key(id):
 	    self.sel_rmin.heading = recycle_bin[id]
-	    recycle_bin = {}
+	    del recycle_bin
 	recycle_bin = {MIN_FACING_NONE: FACE_NONE, MIN_FACING_NORTH: FACE_NORTH, 
         MIN_FACING_NORTHWEST: FACE_NORTHWEST, MIN_FACING_NORTHEAST: FACE_NORTHEAST, 
         MIN_FACING_EAST: FACE_EAST, MIN_FACING_SOUTHEAST: FACE_SOUTHEAST, MIN_FACING_SOUTHWEST: FACE_SOUTHWEST, 
         MIN_FACING_SOUTH: FACE_SOUTH, MIN_FACING_WEST: FACE_WEST}
 	if recycle_bin.has_key(id):
 	    self.sel_rmin.face = recycle_bin[id]
-	    recycle_bin = {}
-        elif id == MIN_ALIGN_GRID_CENTER:
-            self.sel_rmin.snap_to_align = SNAPTO_ALIGN_CENTER
-        elif id == MIN_ALIGN_GRID_TL:
-            self.sel_rmin.snap_to_align = SNAPTO_ALIGN_TL
+	    del recycle_bin
+        elif id == MIN_ALIGN_GRID_CENTER: self.sel_rmin.snap_to_align = SNAPTO_ALIGN_CENTER
+        elif id == MIN_ALIGN_GRID_TL: self.sel_rmin.snap_to_align = SNAPTO_ALIGN_TL
         elif id == MIN_PROP_DLG:
             old_lock_value = self.sel_rmin.locked
             dlg = min_edit_dialog(self.canvas.frame.GetParent(),self.sel_rmin)
@@ -494,16 +474,10 @@ class miniatures_handler(base_layer_handler):
 
         elif id == MIN_FRONTBACK_UNLOCK:
             #print "Unlocked/ unstickified..."
-            if self.sel_rmin.zorder == MIN_STICKY_BACK:
-                self.sel_rmin.zorder = MIN_STICKY_BACK + 1
-            elif self.sel_rmin.zorder == MIN_STICKY_FRONT:
-                self.sel_rmin.zorder = MIN_STICKY_FRONT - 1
-        elif id == MIN_LOCK_BACK:
-            #print "lock back"
-            self.sel_rmin.zorder = MIN_STICKY_BACK
-        elif id == MIN_LOCK_FRONT:
-            #print "lock front"
-            self.sel_rmin.zorder = MIN_STICKY_FRONT
+            if self.sel_rmin.zorder == MIN_STICKY_BACK: self.sel_rmin.zorder = MIN_STICKY_BACK + 1
+            elif self.sel_rmin.zorder == MIN_STICKY_FRONT: self.sel_rmin.zorder = MIN_STICKY_FRONT - 1
+        elif id == MIN_LOCK_BACK: self.sel_rmin.zorder = MIN_STICKY_BACK
+        elif id == MIN_LOCK_FRONT: self.sel_rmin.zorder = MIN_STICKY_FRONT
         # Pretty much, we always want to refresh when we go through here
         # This helps us remove the redundant self.Refresh() on EVERY menu event
         # that we process above.
@@ -518,20 +492,16 @@ class miniatures_handler(base_layer_handler):
             return
         min_url = self.min_url.GetValue()
         # build url
-        if min_url == "" or min_url == "http://":
-            return
-        if min_url[:7] != "http://" :
-            min_url = "http://" + min_url
+        if min_url == "" or min_url == "http://": return
+        if min_url[:7] != "http://" : min_url = "http://" + min_url
         # make label
         if self.auto_label and min_url[-4:-3] == '.':
             start = min_url.rfind("/") + 1
             min_label = min_url[start:len(min_url)-4]
             if self.use_serial:
                 min_label = '%s %d' % ( min_label, self.canvas.layers['miniatures'].next_serial() )
-        else:
-            min_label = ""
-        if self.min_url.FindString(min_url) == -1:
-            self.min_url.Append(min_url)
+        else: min_label = ""
+        if self.min_url.FindString(min_url) == -1: self.min_url.Append(min_url)
         try:
             id = 'mini-' + self.canvas.frame.session.get_next_id()
             # make the new mini appear in top left of current viewable map
@@ -567,8 +537,7 @@ class miniatures_handler(base_layer_handler):
             return
         #d = min_list_panel(self.frame.GetParent(),self.canvas.layers,"Miniature list")
         d = min_list_panel(self.canvas.frame,self.canvas.layers,"Miniature list")
-        if d.ShowModal() == wx.ID_OK:
-            d.Destroy()
+        if d.ShowModal() == wx.ID_OK: d.Destroy()
         self.canvas.Refresh(False)
 
     def on_serial(self, evt):
@@ -585,15 +554,13 @@ class miniatures_handler(base_layer_handler):
     ## old functions, changed an awful lot
 
     def on_left_down(self, evt):
-        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
-            return
+        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu(): return
         mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
         if mini:
             deselecting_selected_mini = (mini == self.sel_min) #clicked on the selected mini
             self.deselectAndRefresh()
             self.drag_mini = mini
-            if deselecting_selected_mini:
-                return
+            if deselecting_selected_mini: return
             self.sel_min = mini
             self.sel_min.selected = True
             self.canvas.Refresh()
@@ -604,23 +571,18 @@ class miniatures_handler(base_layer_handler):
             self.deselectAndRefresh()
 
     def on_right_down(self, evt):
-        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
-            return
+        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu(): return
         self.last_rclick_pos = self.getLogicalPosition(evt)
         mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
         if mini:
             self.sel_rmin = mini
-            if self.sel_min:
-                self.min_menu.Enable(MIN_MOVE, True)
-            else:
-                self.min_menu.Enable(MIN_MOVE, False)
+            if self.sel_min: self.min_menu.Enable(MIN_MOVE, True)
+            else: self.min_menu.Enable(MIN_MOVE, False)
             self.prepare_mini_rclick_menu(evt)
             self.do_min_menu(evt.GetPosition())
         else:# pass it on
-            if self.sel_min:
-                self.main_menu.Enable(MIN_MOVE, True)
-            else:
-                self.main_menu.Enable(MIN_MOVE, False)
+            if self.sel_min: self.main_menu.Enable(MIN_MOVE, True)
+            else: self.main_menu.Enable(MIN_MOVE, False)
             self.prepare_background_rclick_menu(evt)
             base_layer_handler.on_right_down(self, evt)
 
@@ -632,8 +594,7 @@ class miniatures_handler(base_layer_handler):
         filepath = filepaths[0]
         start1 = filepath.rfind("\\") + 1 # check for both slashes in path to be on the safe side
         start2 = filepath.rfind("/") + 1
-        if start1 < start2:
-            start1 = start2
+        if start1 < start2: start1 = start2
         filename = filepath[start1:]
         pos = filename.rfind('.')
         ext = filename[pos:].lower()
@@ -663,8 +624,7 @@ class miniatures_handler(base_layer_handler):
         if len(mini_list) > 0:
             tooltip = self.get_mini_tooltip(mini_list)
             self.canvas.SetToolTipString(tooltip)
-        else:
-            self.canvas.SetToolTipString("")
+        else: self.canvas.SetToolTipString("")
 
     def on_motion(self,evt):
         if evt.Dragging() and evt.LeftIsDown():
@@ -709,13 +669,11 @@ class miniatures_handler(base_layer_handler):
                 if self.canvas.layers['grid'].mode != GRID_ISOMETRIC:
                     if self.drag_mini.snap_to_align == SNAPTO_ALIGN_CENTER:
                         pos = pos + (int(self.drag_mini.bmp.GetWidth()/2),int(self.drag_mini.bmp.GetHeight()/2))
-                    else:
-                        pos = pos + (nudge, nudge)
+                    else: pos = pos + (nudge, nudge)
                 else:# GRID_ISOMETRIC
                     if self.drag_mini.snap_to_align == SNAPTO_ALIGN_CENTER:
                         pos = pos + (int(self.drag_mini.bmp.GetWidth()/2), self.drag_mini.bmp.GetHeight())
-                    else:
-                        pass # no nudge for the isomorphic / top-left
+                    else: pass # no nudge for the isomorphic / top-left
             self.sel_min = self.drag_mini
             # check to see if the mouse is inside the window still
             w = self.canvas.GetClientSizeTuple() # this is the window size, minus any scrollbars
@@ -733,13 +691,10 @@ class miniatures_handler(base_layer_handler):
         self.drag_mini = None
 
     def on_left_dclick(self,evt):
-        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
-            return
+        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu(): return
         mini = self.find_mini(evt, evt.CmdDown() and self.role_is_gm())
-        if mini:
-            self.on_mini_dclick(evt, mini)
-        else:# pass it on
-            base_layer_handler.on_left_dclick(self, evt)
+        if mini: self.on_mini_dclick(evt, mini)
+        else: base_layer_handler.on_left_dclick(self, evt)
 
 
 ####################################################################
@@ -769,8 +724,7 @@ class miniatures_handler(base_layer_handler):
         # mini_handler.sel_rmin.isUpdated = True
         # canvas.Refresh(False)
         # canvas.send_map_data()
-        if callback_function == None:
-            del self.mini_rclick_menu_extra_items[label]
+        if callback_function == None: del self.mini_rclick_menu_extra_items[label]
         else:
             if not self.mini_rclick_menu_extra_items.has_key(label):
                 self.mini_rclick_menu_extra_items[label]=wx.NewId()
@@ -779,8 +733,7 @@ class miniatures_handler(base_layer_handler):
         self.build_menu()
 
     def set_background_rclick_menu_item(self, label, callback_function):
-        if callback_function == None:
-            del self.background_rclick_menu_extra_items[label]
+        if callback_function == None: del self.background_rclick_menu_extra_items[label]
         else:
             if not self.background_rclick_menu_extra_items.has_key(label):
                 self.background_rclick_menu_extra_items[label]=wx.NewId()
@@ -804,8 +757,7 @@ class miniatures_handler(base_layer_handler):
 
     def role_is_gm(self):
         session = self.canvas.frame.session
-        if (session.my_role() <> session.ROLE_GM) and (session.use_roles()):
-            return False
+        if (session.my_role() <> session.ROLE_GM) and (session.use_roles()): return False
         return True
 
     def alreadyDealingWithMenu(self):
@@ -831,8 +783,7 @@ class miniatures_handler(base_layer_handler):
             mini_list.append(self.sel_min)
             return mini_list
         mini_list = self.canvas.layers['miniatures'].find_miniature(pos, (not include_locked))
-        if mini_list:
-            return mini_list
+        if mini_list: return mini_list
         mini_list = []
         return mini_list
 
@@ -845,29 +796,23 @@ class miniatures_handler(base_layer_handler):
             self.sel_min = None
 
     def moveSelectedMini(self, pos):
-        if self.sel_min:
-            self.moveMini(pos, self.sel_min)
+        if self.sel_min: self.moveMini(pos, self.sel_min)
 
     def moveMini(self, pos, mini):
         grid = self.canvas.layers['grid']
         mini.pos = grid.get_snapped_to_pos(pos, mini.snap_to_align, mini.bmp.GetWidth(), mini.bmp.GetHeight())
 
     def find_mini(self, evt, include_locked):
-        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu():
-            return
+        if not self.role_is_gm_or_player() or self.alreadyDealingWithMenu(): return
         pos = self.getLogicalPosition(evt)
         mini_list = self.getMiniListOrSelectedMini(pos, include_locked)
         mini = None
         if len(mini_list) > 1:
-            try:
-                self.do_min_select_menu(mini_list, evt.GetPosition())
-            except:
-                pass
+            try: self.do_min_select_menu(mini_list, evt.GetPosition())
+            except: pass
             choice = self.getLastMenuChoice()
-            if choice == None:
-                return None # left menu without making a choice, eg by clicking outside menu
+            if choice == None: return None # left menu without making a choice, eg by clicking outside menu
             mini = mini_list[choice]
-        elif len(mini_list) == 1:
-            mini = mini_list[0]
+        elif len(mini_list) == 1: mini = mini_list[0]
         return mini
 

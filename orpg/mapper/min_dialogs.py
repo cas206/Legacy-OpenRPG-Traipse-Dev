@@ -97,10 +97,8 @@ class min_list_panel(wx.Dialog):
             self.listctrl.SetStringItem(self.min.index(m),5,`self.min[self.min.index(m)].pos`)
             oldcolumnwidth = self.listctrl.GetColumnWidth(0)
             self.listctrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-            if oldcolumnwidth < self.listctrl.GetColumnWidth(0):
-                self.listctrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-            else:
-                self.listctrl.SetColumnWidth(0, oldcolumnwidth)
+            if oldcolumnwidth < self.listctrl.GetColumnWidth(0): self.listctrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            else: self.listctrl.SetColumnWidth(0, oldcolumnwidth)
         self.list_sizer=self.list_sizer
 
     def onEdit(self,event):
@@ -111,14 +109,11 @@ class min_list_panel(wx.Dialog):
         while True:
             loop_count += 1
             item = self.listctrl.GetNextItem(item,wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-            if item == -1:
-                break
+            if item == -1: break
             min_list.append(self.min[item])
             min_index.append(item-loop_count+1)
-        if len(min_list) > 0:
-            dlg = min_list_edit_dialog(self.parent,min_index, min_list,self.layers)
-        if dlg.ShowModal() == wx.ID_OK:
-            pass
+        if len(min_list) > 0: dlg = min_list_edit_dialog(self.parent,min_index, min_list,self.layers)
+        if dlg.ShowModal() == wx.ID_OK: pass
         self.listctrl.DeleteAllItems()
         self.refresh()
         event.Skip()
@@ -129,9 +124,7 @@ class min_list_panel(wx.Dialog):
         while True:
             loop_count += 1
             item = self.listctrl.GetNextItem(item,wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-            if item == -1:
-                break
-            #self.min.remove(self.min[item-loop_count+1])
+            if item == -1: break
             self.layers["miniatures"].del_miniature(self.min[item-loop_count+1])
         self.listctrl.DeleteAllItems()
         self.refresh()
@@ -145,8 +138,7 @@ class min_list_panel(wx.Dialog):
         while True:
             loop_count += 1
             item = self.listctrl.GetNextItem(item,wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
-            if item == -1:
-                break
+            if item == -1: break
             min_list.append(self.min[item])
             min_index.append(item-loop_count+1)
         if len(min_list) > 0:
@@ -155,10 +147,8 @@ class min_list_panel(wx.Dialog):
                 min_xml = sel_rmin.toxml(action="new")
                 node_begin = "<nodehandler module='map_miniature_nodehandler' class='map_miniature_handler' name='"
 
-                if sel_rmin.label:
-                    node_begin += sel_rmin.label + "'"
-                else:
-                    node_begin += "Unnamed Miniature'"
+                if sel_rmin.label: node_begin += sel_rmin.label + "'"
+                else: node_begin += "Unnamed Miniature'"
 
                 node_begin += ">"
                 gametree = open_rpg.get_component('tree')
@@ -336,22 +326,14 @@ class min_list_edit_panel(wx.Panel):
     def on_ok(self,min):
         self.min = min
         for m in self.min_list:
-            if self.hide.GetSelection() !=2:
-                m.hide = self.hide.GetSelection()
-            if self.heading.GetSelection() !=9:
-                m.heading = self.heading.GetSelection()
-            if self.face.GetSelection() !=9:
-                m.face = self.face.GetSelection()
-            if self.locked.GetSelection() !=2:
-                m.locked = self.locked.GetSelection()
-            if self.snap.GetSelection() !=2:
-                m.snap_to_align = self.snap.GetSelection()
+            if self.hide.GetSelection() !=2: m.hide = self.hide.GetSelection()
+            if self.heading.GetSelection() !=9: m.heading = self.heading.GetSelection()
+            if self.face.GetSelection() !=9: m.face = self.face.GetSelection()
+            if self.locked.GetSelection() !=2: m.locked = self.locked.GetSelection()
+            if self.snap.GetSelection() !=2: m.snap_to_align = self.snap.GetSelection()
             if self.labelcombo.GetValue() != "no change":
                 m.label = self.labelcombo.GetValue()
-                if self.labelcheck.GetValue():
-                    m.label += " " + `self.layers['miniatures'].next_serial()`
-                    # self.layers['miniatures'].serial_number +=1
-                    # m.label += " " + `self.layers['miniatures'].serial_number`
+                if self.labelcheck.GetValue(): m.label += " " + `self.layers['miniatures'].next_serial()`
             if self.pathcombo.GetValue() != "no change":
                 path = self.pathcombo.GetValue()
                 image = self.evaluate(path)
@@ -371,11 +353,9 @@ class min_list_edit_panel(wx.Panel):
                                 m.path = image[0]
                                 m.bmp = image[1]
                             self.dlg.Destroy()
-                        else:
-                            break
+                        else: break
             if self.poschoice.GetSelection() !=2:
-                if self.poschoice.GetSelection() == 0:
-                    m.pos = cmpPoint(self.scx.GetValue(),self.scy.GetValue())
+                if self.poschoice.GetSelection() == 0: m.pos = cmpPoint(self.scx.GetValue(),self.scy.GetValue())
                 else:
                     pos = self.positioncombo.GetValue()
                     m.pos = cmpPoint(int(`pos`[2:`pos`.index(",")]),int(`pos`[`pos`.rfind(',')+1:len(`pos`)-2]))
@@ -383,17 +363,14 @@ class min_list_edit_panel(wx.Panel):
 
     def evaluate(self, ckpath):
         path = []
-        if ckpath[:7] != "http://":
-            ckpath = "http://" + ckpath
+        if ckpath[:7] != "http://": ckpath = "http://" + ckpath
         path = self.check_path(ckpath)
         return [ckpath, path]
 
     def check_path(self, path):
-        if ImageHandler.Cache.has_key(path):
-            return ImageHandler.Cache[path]
+        if ImageHandler.Cache.has_key(path): return ImageHandler.Cache[path]
         img = ImageHandler.directLoad(path)
-        if img is None:
-            return -1
+        if img is None: return -1
         return img
 
     def on_text(self,evt):
@@ -493,8 +470,7 @@ class min_edit_panel(wx.Panel):
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=MIN_FACE)
 
     def on_scaling(self, evt):
-        if self.min_scaling.GetValue() == False:
-            return
+        if self.min_scaling.GetValue() == False: return
         elif self.min_width.GetValue() and wxID_MIN_WIDTH == evt.GetId() and self.min_width.GetInsertionPoint():
             self.min_height.SetValue(str(int((float(self.min_width.GetValue()) / float(self.min_width_old_value)) * float(self.min_height_old_value))) )
         elif self.min_height.GetValue() and wxID_MIN_HEIGHT == evt.GetId() and self.min_height.GetInsertionPoint():

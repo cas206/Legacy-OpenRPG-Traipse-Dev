@@ -36,8 +36,7 @@ class map_element_msg_base:
     def __init__(self,reentrant_lock_object = None):
 
         if not hasattr(self,"tagname"):
-            raise Exception, 
-                "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
+            raise Exception, "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
 
         self._props = {}
         #  This is a dictionary that holds (value,changed) 2-tuples, indexed by attribute
@@ -51,10 +50,8 @@ class map_element_msg_base:
         #    Using a passed in object is useful to protect an entire <map/> element from
         #    being changed by another thread when any part of it is being change by another
         #    thread.  Just pass the map_msg's p_lock object in to it's descendents.
-        if reentrant_lock_object:
-            self.p_lock = reentrant_lock_object
-        else:
-            self.p_lock = RLock()
+        if reentrant_lock_object: self.p_lock = reentrant_lock_object
+        else: self.p_lock = RLock()
 
     def clear(self):
         self.p_lock.acquire()
@@ -64,11 +61,9 @@ class map_element_msg_base:
             self.children[child] = None
             del self.children[child]
 
-        for p in self._props.keys():
-            self._props[p] = None
+        for p in self._props.keys(): self._props[p] = None
 
         self.p_lock.release()
-
 
     #########################################
     #  Accessor functions begin
@@ -91,9 +86,7 @@ class map_element_msg_base:
             (p,c) = self._props[prop]
             self.p_lock.release()
             return p
-        else:
-            self.p_lock.release()
-            return None
+        else: self.p_lock.release(); return None
 
     def is_prop_changed(self,prop):  # returns None if prop not found
         self.p_lock_acquire()
@@ -101,9 +94,7 @@ class map_element_msg_base:
             (p,c) = self._props[prop]
             self.p_lock.release()
             return c
-        else:
-            self.p_lock.release()
-            return None
+        else: self.p_lock.release(); return None
 
     def get_child(self,key):         # returns None if key not found in children list
         self.p_lock_acquire()
@@ -118,14 +109,12 @@ class map_element_msg_base:
 
     def init_props(self,props):               # same as init_prop(), but takes dictionary of props
         self.p_lock.acquire()
-        for k in props.keys():
-            self._props[k] = (props[k],0)
+        for k in props.keys(): self._props[k] = (props[k],0)
         self.p_lock.release()
 
     def set_props(self,props):                # same as set_prop(), but takes dictionary of props
         self.p_lock.acquire()
-        for k in props.keys():
-            self._props[k] = (props[k],1)
+        for k in props.keys(): self._props[k] = (props[k],1)
         self.p_lock.release()
 
     def get_all_props(self):                  # returns dictionary of all properties, regardless of change
@@ -144,14 +133,12 @@ class map_element_msg_base:
         result = {}
         for k in self._props.keys():
             (p,c) = self._props[k]
-            if c:
-                result[k] = p
+            if c: result[k] = p
         self.p_lock.release()
         return result
 
     def get_children(self):                 # returns dictionary of children
         return self.children
-
 
     #  Accessor functions end
     #########################################
@@ -161,19 +148,15 @@ class map_element_msg_base:
     def get_all_xml(self,action="new",output_action = 0):    # outputs a tag with all attributes it contains
         self.p_lock.acquire()
         xml_str = "<" + self.tagname
-        if action and output_action:
-            xml_str += " action='" + action + "'"
+        if action and output_action: xml_str += " action='" + action + "'"
         for k in self._props.keys():
             (p,c) = self._props[k]
-            if k != "action" or not action:
-                xml_str += " " + k + "='" + p + "'"
+            if k != "action" or not action: xml_str += " " + k + "='" + p + "'"
         if self.children:
             xml_str += ">"
-            for child in self.children.keys():
-                xml_str += self.children[child].get_all_xml(action)
+            for child in self.children.keys(): xml_str += self.children[child].get_all_xml(action)
             xml_str += "</" + self.tagname + ">"
-        else:
-            xml_str += "/>"
+        else: xml_str += "/>"
         self.p_lock.release()
         return xml_str
 
@@ -189,15 +172,12 @@ class map_element_msg_base:
             xml_str += " id='" + p + "'"
         for k in self._props.keys():
             (p,c) = self._props[k]
-            if (k != "id" or k != "action") and c == 1:  # don't duplicate the id attribute
-                xml_str += " " + k + "='" + p + "'"
+            if (k != "id" or k != "action") and c == 1: xml_str += " " + k + "='" + p + "'"
         if self.children:
             xml_str += ">"
-            for child in self.children.keys():
-                xml_str += self.children[child].get_changed_xml(action)
+            for child in self.children.keys(): xml_str += self.children[child].get_changed_xml(action)
             xml_str += "</" + self.tagname + ">"
-        else:
-            xml_str += "/>"
+        else: xml_str += "/>"
         self.p_lock.release()
         return xml_str
 
@@ -237,24 +217,18 @@ class map_element_msg_base:
     def init_from_xml(self,xml):
         xml_dom = parseXml(xml)
         node_list = xml_dom.getElementsByTagName(self.tagname)
-        if len(node_list) < 1:
-            print "Warning: no <" + self.tagname + "/> elements found in DOM."
+        if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
-            while len(node_list):
-                self.init_from_dom(node_list.pop())
-        if xml_dom:
-            xml_dom.unlink()
+            while len(node_list): self.init_from_dom(node_list.pop())
+        if xml_dom: xml_dom.unlink()
 
     def set_from_xml(self,xml):
         xml_dom = parseXml(xml)
         node_list = xml_dom.getElementsByTagName(self.tagname)
-        if len(node_list) < 1:
-            print "Warning: no <" + self.tagname + "/> elements found in DOM."
+        if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
-            while len(node_list):
-                self.set_from_dom(node_list.pop())
-        if xml_dom:
-            xml_dom.unlink()
+            while len(node_list): self.set_from_dom(node_list.pop())
+        if xml_dom: xml_dom.unlink()
 
     # XML importers end
     #########################################

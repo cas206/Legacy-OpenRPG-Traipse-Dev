@@ -109,8 +109,7 @@ class layer_back_ground(layer_base):
                 if self.bg_bmp == None:
                     self.log.log("Invalid image type!", ORPG_GENERAL)
                     raise Exception, "Invalid image type!"
-            except:
-                self.error_loading_image(path)
+            except: self.error_loading_image(path)
         self.img_path = path
         self.log.log("Enter layer_back_ground->set_texture(self, path)", ORPG_DEBUG)
 
@@ -125,8 +124,7 @@ class layer_back_ground(layer_base):
                 if self.bg_bmp == None:
                     self.log.log("Invalid image type!", ORPG_GENERAL)
                     raise Exception, "Invalid image type!"
-            except:
-                self.error_loading_image(path)
+            except: self.error_loading_image(path)
         self.img_path = path
         self.log.log("Exit layer_back_ground->set_image(self, path, scale)", ORPG_DEBUG)
         return (self.bg_bmp.GetWidth(),self.bg_bmp.GetHeight())
@@ -149,10 +147,8 @@ class layer_back_ground(layer_base):
         dc2.SelectObject(self.bg_bmp)
         topLeft = [int(topleft[0]/scale), int(topleft[1]/scale)]
         topRight = [int((topleft[0]+size[0]+1)/scale)+1, int((topleft[1]+size[1]+1)/scale)+1]
-        if (topRight[0] > self.canvas.size[0]):
-            topRight[0] = self.canvas.size[0]
-        if (topRight[1] > self.canvas.size[1]):
-            topRight[1] = self.canvas.size[1]
+        if (topRight[0] > self.canvas.size[0]): topRight[0] = self.canvas.size[0]
+        if (topRight[1] > self.canvas.size[1]): topRight[1] = self.canvas.size[1]
         bmpW = self.bg_bmp.GetWidth()
         bmpH = self.bg_bmp.GetHeight()
         if self.type == BG_TEXTURE:
@@ -165,10 +161,8 @@ class layer_back_ground(layer_base):
                 cl = 0
                 posx = x
             while x < topRight[0]:
-                if x+bmpW > topRight[0]:
-                    cr = x+bmpW-topRight[0]
-                else:
-                    cr = 0
+                if x+bmpW > topRight[0]: cr = x+bmpW-topRight[0]
+                else: cr = 0
                 y = int(topLeft[1]/bmpH)*bmpH
                 if y < topLeft[1]:
                     posy = topLeft[1]
@@ -177,16 +171,12 @@ class layer_back_ground(layer_base):
                     ct = 0
                     posy = y
                 while y < topRight[1]:
-                    if y+bmpH > topRight[1]:
-                        cb = y+bmpH-topRight[1]
-                    else:
-                        cb = 0
+                    if y+bmpH > topRight[1]: cb = y+bmpH-topRight[1]
+                    else: cb = 0
                     newW = bmpW-cr-cl
                     newH = bmpH-cb-ct
-                    if newW < 0:
-                        newW = 0
-                    if newH < 0:
-                        newH = 0
+                    if newW < 0: newW = 0
+                    if newH < 0:  newH = 0
                     dc.DrawBitmap(self.bg_bmp, posx, posy)
                     dc.Blit(posx, posy, newW, newH, dc2, cl, ct)
                     ct = 0
@@ -204,27 +194,20 @@ class layer_back_ground(layer_base):
             else:
                 cl = 0
                 posx = x
-
             if y < topLeft[1]:
                 posy = topLeft[1]
                 ct = topLeft[1]-y
             else:
                 ct = 0
                 posy = y
-            if x+bmpW > topRight[0]:
-                cr = x+bmpW-topRight[0]
-            else:
-                cr = 0
-            if y+bmpH > topRight[1]:
-                cb = y+bmpH-topRight[1]
-            else:
-                cb = 0
+            if x+bmpW > topRight[0]: cr = x+bmpW-topRight[0]
+            else: cr = 0
+            if y+bmpH > topRight[1]: cb = y+bmpH-topRight[1]
+            else: cb = 0
             newW = bmpW-cr-cl
             newH = bmpH-cb-ct
-            if newW < 0:
-                newW = 0
-            if newH < 0:
-                newH = 0
+            if newW < 0: newW = 0
+            if newH < 0: newH = 0
             dc.DrawBitmap(self.bg_bmp, posx, posy)
             dc.Blit(posx, posy, newW, newH, dc2, cl, ct)
         dc2.SelectObject(wx.NullBitmap)
@@ -239,10 +222,8 @@ class layer_back_ground(layer_base):
             (red,green,blue) = self.bg_color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
             xml_str += ' color="' + hexcolor + '"'
-        if self.img_path != None:
-            xml_str += ' path="' + urllib.quote(self.img_path).replace('%3A', ':') + '"'
-        if self.type != None:
-            xml_str += ' type="' + str(self.type) + '"'
+        if self.img_path != None: xml_str += ' path="' + urllib.quote(self.img_path).replace('%3A', ':') + '"'
+        if self.type != None: xml_str += ' type="' + str(self.type) + '"'
         if self.local and self.img_path != None:
             xml_str += ' local="True"'
             xml_str += ' localPath="' + urllib.quote(self.localPath).replace('%3A', ':') + '"'
@@ -253,8 +234,7 @@ class layer_back_ground(layer_base):
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
             return xml_str
-        else:
-            return ''
+        else: return ''
 
     def layerTakeDOM(self, xml_dom):
         self.log.log("Enter layer_back_ground->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
@@ -274,15 +254,12 @@ class layer_back_ground(layer_base):
             self.log.log("type=" + str(type), ORPG_DEBUG)
 
         if type == BG_TEXTURE:
-            if path != "":
-                self.set_texture(path)
+            if path != "": self.set_texture(path)
 
         elif type == BG_IMAGE:
-            if path != "":
-                self.set_image(path, 1)
+            if path != "": self.set_image(path, 1)
 
-        elif type == BG_NONE:
-            self.clear()
+        elif type == BG_NONE: self.clear()
 
         if xml_dom.hasAttribute('local') and xml_dom.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.getAttribute('localPath'))):
             self.localPath = urllib.unquote(xml_dom.getAttribute('localPath'))
@@ -310,12 +287,8 @@ class layer_back_ground(layer_base):
                 if xml_dom.nodeName == 'path':
                     path = xml_dom.getAttribute('url')
                     path = urllib.unquote(path)
-
-                    if type == 'Image':
-                        self.set_image(path, 1)
-                    else:
-                        self.set_texture(path)
-
+                    if type == 'Image': self.set_image(path, 1)
+                    else: self.set_texture(path)
                     self.localPath = filename
                     self.local = True
                     self.localTime = time.time()

@@ -117,8 +117,7 @@ class fog_handler(base_layer_handler):
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetColourData()
             color = data.GetColour()
-            if "__WXGTK__" not in wx.PlatformInfo:
-                color = wx.Color(color.Red(), color.Green(), color.Blue(), 128)
+            if "__WXGTK__" not in wx.PlatformInfo: color = wx.Color(color.Red(), color.Green(), color.Blue(), 128)
             self.canvas.layers['fog'].color = color
         dlg.Destroy()
         self.canvas.layers['fog'].fill_fog()
@@ -180,11 +179,8 @@ class fog_handler(base_layer_handler):
                 wx.BeginBusyCursor()
                 # This prevents the divide by zero error by not even 
                 # sending the line to be proccessed if it contains less then 3 points
-                if (len(self.line)>1):
-                    self.canvas.layers['fog'].createregn(self.line, showmode)
-                else:
-                    #print "Error Divide by zero, ignoring this section"
-                    pass
+                if (len(self.line)>1): self.canvas.layers['fog'].createregn(self.line, showmode)
+                else: pass
                 wx.EndBusyCursor()
                 del dc
             self.canvas.Refresh(False)

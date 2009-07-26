@@ -84,19 +84,14 @@ class general_map_prop_dialog(wx.Dialog):
         self.ctrls[CTRL_IMAGE].SetValue(False)
 
         # Begin ted's changes for map bg persistency.
-        if bg_layer.bg_color != None:
-            self.ctrls[CTRL_BG_COLOR_VALUE].SetBackgroundColour(bg_layer.bg_color)
+        if bg_layer.bg_color != None: self.ctrls[CTRL_BG_COLOR_VALUE].SetBackgroundColour(bg_layer.bg_color)
         if bg_layer.img_path != None:
             self.ctrls[CTRL_TEXTURE_PATH].SetValue(bg_layer.img_path)
             self.ctrls[CTRL_IMAGE_PATH].SetValue(bg_layer.img_path)
         # End ted's changes
 
-        if bg_layer.type == BG_COLOR:
-            self.ctrls[CTRL_BG_COLOR].SetValue(True)
-            # self.ctrls[CTRL_BG_COLOR_VALUE].SetBackgroundColour(bg_layer.bg_color)
-        elif bg_layer.type == BG_TEXTURE:
-            self.ctrls[CTRL_TEXTURE].SetValue(True)
-            # self.ctrls[CTRL_TEXTURE_PATH].SetValue(bg_layer.img_path)
+        if bg_layer.type == BG_COLOR: self.ctrls[CTRL_BG_COLOR].SetValue(True)
+        elif bg_layer.type == BG_TEXTURE: self.ctrls[CTRL_TEXTURE].SetValue(True)
         elif bg_layer.type == BG_IMAGE:
             self.ctrls[CTRL_WIDTH].Enable(False)
             self.ctrls[CTRL_HEIGHT].Enable(False)
@@ -207,31 +202,20 @@ class general_map_prop_dialog(wx.Dialog):
                 self.ctrls[CTRL_GRID_COLOR].SetBackgroundColour(data.GetColour())
             dlg.Destroy()
     def on_ok(self,evt):
-        try:
-            self.size = (int(self.ctrls[CTRL_WIDTH].GetValue()),int(self.ctrls[CTRL_HEIGHT].GetValue()))
-        except:
-            pass
-            #dlg = wx.MessageDialog(frame, 'Invalid Size',"Error")
-            #dlg.ShowModal()
-            #dlg.Destroy()
+        try: self.size = (int(self.ctrls[CTRL_WIDTH].GetValue()),int(self.ctrls[CTRL_HEIGHT].GetValue()))
+        except: pass
         if self.ctrls[CTRL_BG_COLOR].GetValue() == True:
             self.bg_layer.set_color(self.ctrls[CTRL_BG_COLOR_VALUE].GetBackgroundColour())
         elif self.ctrls[CTRL_TEXTURE].GetValue() == True:
             self.bg_layer.set_texture(self.ctrls[CTRL_TEXTURE_PATH].GetValue())
         elif self.ctrls[CTRL_IMAGE].GetValue() == True:
             self.size = self.bg_layer.set_image(self.ctrls[CTRL_IMAGE_PATH].GetValue(),self.grid_layer.mapscale)
-        else:
-            self.bg_layer.clear()
-        if self.ctrls[CTRL_GRID_MODE_RECT].GetValue() == True:
-            grid_mode = GRID_RECTANGLE
-        else:
-            grid_mode = GRID_HEXAGON
-        if self.ctrls[CTRL_GRID_LINE_NONE].GetValue() == True:
-            grid_line = LINE_NONE
-        elif self.ctrls[CTRL_GRID_LINE_DOTTED].GetValue() == True:
-            grid_line = LINE_DOTTED
-        else:
-            grid_line = LINE_SOLID
+        else: self.bg_layer.clear()
+        if self.ctrls[CTRL_GRID_MODE_RECT].GetValue() == True: grid_mode = GRID_RECTANGLE
+        else: grid_mode = GRID_HEXAGON
+        if self.ctrls[CTRL_GRID_LINE_NONE].GetValue() == True: grid_line = LINE_NONE
+        elif self.ctrls[CTRL_GRID_LINE_DOTTED].GetValue() == True: grid_line = LINE_DOTTED
+        else: grid_line = LINE_SOLID
         self.grid_layer.set_grid(int(self.ctrls[CTRL_GRID].GetValue()),
                                  self.ctrls[CTRL_GRID_SNAP].GetValue(),
                                  self.ctrls[CTRL_GRID_COLOR].GetBackgroundColour(),

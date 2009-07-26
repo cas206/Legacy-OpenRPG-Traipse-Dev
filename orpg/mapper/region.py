@@ -42,24 +42,18 @@ class Edge:
         self.cx=self.startx
         self.bottom=0
         self.dir = 0
-        if self.endx>self.startx:
-            self.dx = int((self.endx-self.startx)/self.dy)
-        else:
-            self.dx = -int((self.startx-self.endx)/self.dy)
+        if self.endx>self.startx: self.dx = int((self.endx-self.startx)/self.dy)
+        else: self.dx = -int((self.startx-self.endx)/self.dy)
         self.error = 0
-        if self.endx >= self.startx:
-            self.inc = (self.endx-self.startx)%self.dy
-        else:
-            self.inc = (self.startx-self.endx)%self.dy
+        if self.endx >= self.startx: self.inc = (self.endx-self.startx)%self.dy
+        else: self.inc = (self.startx-self.endx)%self.dy
 
     def advance(self):
         self.cx += self.dx
         self.error += self.inc
         if (self.error>=self.dy):
-            if (self.endx<self.startx):
-                self.cx -= 1
-            else:
-                self.cx += 1
+            if (self.endx<self.startx): self.cx -= 1
+            else: self.cx += 1
             self.error -= self.dy
 
 # Utilitarian class for describing a coordinate in 2D space
@@ -85,18 +79,15 @@ class IPoint:
         return self
 
     def equals(self,b):
-        if self.X==b.X and self.Y==b.Y:
-            return 1
+        if self.X==b.X and self.Y==b.Y: return 1
         return 0
 
     def less(self,b):
-        if self.Y<b.Y or (self.Y==b.Y and self.X<b.X):
-            return 1
+        if self.Y<b.Y or (self.Y==b.Y and self.X<b.X): return 1
         return 0
 
     def greater(self,b):
-        if self.Y>b.Y or (self.Y==b.Y and self.X>b.X):
-            return 1
+        if self.Y>b.Y or (self.Y==b.Y and self.X>b.X): return 1
         return 0
 
 # generic rectangle class
@@ -155,8 +146,7 @@ class IRect:
         sel.bottom+=nB
 
     def IsValid(self):
-        if (self.left<=self.right and self.top<=self.bottom):
-            return 1
+        if (self.left<=self.right and self.top<=self.bottom): return 1
         return 0
 
     def add(self,pt):
@@ -172,8 +162,7 @@ class IRect:
         return IRect().make(min(self.left,rect.left),min(self.top,rect.top),max(self.right,rect.right),max(self.bottom,rect.bottom))
 
     def equals(self,rect):
-        if (self.top==rect.top and self.bottom==rect.bottom and self.left==rect.left and self.right==rect.right):
-            return 1
+        if (self.top==rect.top and self.bottom==rect.bottom and self.left==rect.left and self.right==rect.right): return 1
         return 0
 
     def make(self,l,t,r,b):
@@ -213,8 +202,7 @@ class ClipRectList:
 
     def __str__(self):
         x="["
-        for y in self.GetList():
-            x+=" "+str(y.bounds)+" "
+        for y in self.GetList(): x+=" "+str(y.bounds)+" "
         x+="]"
         return x
 
@@ -231,42 +219,33 @@ class ClipRectList:
     def AddRect(self,rect):
         rect.prev=None
         rect.next=self.first
-        if not (self.first is None):
-            self.first.prev=rect
+        if not (self.first is None): self.first.prev=rect
         self.first=rect
-        if self.last is None:
-            self.last=rect
+        if self.last is None: self.last=rect
         self.count += 1
 
 #removes the passed clipping rectangle from the list
     def RemoveRect(self,rect):
-        if not (rect.prev is None):
-            rect.prev.next=rect.next
-        else:
-            self.first=rect.next
-        if not (rect.next is None):
-            rect.next.prev=rect.prev
-        else:
-            self.last=rect.prev
+        if not (rect.prev is None): rect.prev.next=rect.next
+        else: self.first=rect.next
+        if not (rect.next is None): rect.next.prev=rect.prev
+        else: self.last=rect.prev
         self.count -= 1
 
 # find the clipping rectangle at the the beginning of the list, remove it,
 # and return it
     def RemoveHead(self):
-        if self.count==0:
-            return None
+        if self.count==0: return None
         rect=self.first
         self.first=rect.next
-        if (self.first is None):
-            self.last=None
+        if (self.first is None): self.last=None
         self.count -= 1
         return rect
 
 # stealrects -- appends the list of clipping rectangles in pclist to the current
 # list.  removes the entries from pclist
     def StealRects(self,pclist):
-        if pclist.first is None:
-            return
+        if pclist.first is None: return
         if self.first is None:
             self.first=pclist.first
             self.last=pclist.last
@@ -292,25 +271,17 @@ class ClipRectList:
 # efficiency
 
 def _hSortCmp(rect1,rect2):
-    if (rect1.bounds.left<rect2.bounds.left):
-        return -1
-    if (rect1.bounds.left>rect2.bounds.left):
-        return 1
-    if (rect1.bounds.top<rect2.bounds.top):
-        return -1
-    if (rect1.bounds.top>rect2.bounds.top):
-        return 1
+    if (rect1.bounds.left<rect2.bounds.left): return -1
+    if (rect1.bounds.left>rect2.bounds.left): return 1
+    if (rect1.bounds.top<rect2.bounds.top): return -1
+    if (rect1.bounds.top>rect2.bounds.top): return 1
     return 0
 
 def _vSortCmp(rect1,rect2):
-    if (rect1.bounds.top<rect2.bounds.top):
-        return -1
-    if (rect1.bounds.top>rect2.bounds.top):
-        return 1
-    if (rect1.bounds.left<rect2.bounds.left):
-        return -1
-    if (rect1.bounds.left>rect2.bounds.left):
-        return 1
+    if (rect1.bounds.top<rect2.bounds.top): return -1
+    if (rect1.bounds.top>rect2.bounds.top): return 1
+    if (rect1.bounds.left<rect2.bounds.left): return -1
+    if (rect1.bounds.left>rect2.bounds.left): return 1
     return 0
 
 # this is the class for which this whole source file is designed!
@@ -335,8 +306,7 @@ class IRegion:
         self.crects.Clear()
 
     def isEmpty(self):
-        if self.crects.first:
-            return 0
+        if self.crects.first: return 0
         return 1
 
     def Copy(self,dest):
@@ -383,8 +353,7 @@ class IRegion:
                         newclip=self.__AllocClipRect()
                         newclip.bounds=i
                         newlist.AddRect(newclip)
-            else:
-                newlist.AddRect(p)
+            else: newlist.AddRect(p)
         self.crects.StealRects(newlist)
 
     def __IncludeRect(self,rect):
@@ -430,8 +399,7 @@ class IRegion:
         while not (self.crects.first is None):
             pcclip=self.crects.RemoveHead()
             hide=rect.intersect(pcclip.bounds)
-            if not hide.IsValid():
-                newlist.AddRect(pcclip)
+            if not hide.IsValid(): newlist.AddRect(pcclip)
             else:
                 #make 4 new rectangles to replace the one taken out
                 #
@@ -476,8 +444,7 @@ class IRegion:
         while not self.crects.first is None:
             pcclip=self.crects.RemoveHead()
             hide=rect.intersect(pcclip.bounds)
-            if not hide.IsValid():
-                newlist.AddRect(pcclip)
+            if not hide.IsValid(): newlist.AddRect(pcclip)
             else:
                 cnew=[IRect().make(pcclip.bounds.left,hide.top,hide.left-1,hide.bottom),
                       IRect().make(hide.right+1,hide.top,pcclip.bounds.right,hide.bottom),
@@ -540,8 +507,7 @@ class IRegion:
                     self.crects.RemoveRect(x)
                     self.__FreeClipRect(x)
                     keepgoing=1
-            if len(clist)<=1:
-                break
+            if len(clist)<=1: break
             clist.sort(lambda a,b:_hSortCmp(a,b))
             keys=range(len(clist)-1)
             keys.reverse()
@@ -563,8 +529,7 @@ class IRegion:
             if mode:
                 self.__Examine(r)
                 self.__IncludeRect(r)
-            else:
-                self.__ExcludeRect(r)
+            else: self.__ExcludeRect(r)
         self.Optimize()
 
     def GetRectList(self):
@@ -605,18 +570,12 @@ class IRegion:
                 result.append(ISpan(sx,ex,polypt[i].Y))
         size = len(polylines)
         for i in xrange(size):
-            if i == 0 and polylines[i].dir == -1:
-                n = size-1
-            elif (polylines[i].dir == -1):
-                n = i-1
-            else:
-                n = (i+1) % size
-            if (polylines[i].dir != polylines[n].dir): #find out if at bottom end
-                polylines[i].bottom = 1
-            if i == 0 or polylines[i].starty < y:
-                y = polylines[i].starty
-            if not ET.has_key(polylines[i].starty):
-                ET[polylines[i].starty] = []
+            if i == 0 and polylines[i].dir == -1: n = size-1
+            elif (polylines[i].dir == -1): n = i-1
+            else: n = (i+1) % size
+            if (polylines[i].dir != polylines[n].dir): polylines[i].bottom = 1
+            if i == 0 or polylines[i].starty < y: y = polylines[i].starty
+            if not ET.has_key(polylines[i].starty): ET[polylines[i].starty] = []
             ET[polylines[i].starty].append(polylines[i]) #add to edge table, indexed by smaller y coordinate
         AET = [] #active edge table
         while len(AET) > 0 or len(ET) > 0:

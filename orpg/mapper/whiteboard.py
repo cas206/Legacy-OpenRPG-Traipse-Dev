@@ -34,16 +34,11 @@ from orpg.mapper.map_utils import *
 def cmp_zorder(first,second):
     f = first.zorder
     s = second.zorder
-    if f == None:
-        f = 0
-    if s == None:
-        s = 0
-    if f == s:
-        value = 0
-    elif f < s:
-        value = -1
-    else:
-        value = 1
+    if f == None: f = 0
+    if s == None: s = 0
+    if f == s: value = 0
+    elif f < s: value = -1
+    else: value = 1
     return value
 
 class WhiteboardText:
@@ -103,14 +98,10 @@ class WhiteboardText:
     def draw(self, parent, dc, op=wx.COPY):
         self.log.log("Enter WhiteboardText->draw(self, parent, dc, op)", ORPG_DEBUG)
         self.scale = parent.canvas.layers['grid'].mapscale
-        if self.highlighted:
-            textcolor = self.highlight_color
-        else:
-            textcolor = self.textcolor
-        try:
-            dc.SetTextForeground(textcolor)
-        except Exception,e:
-            dc.SetTextForeground('#000000')
+        if self.highlighted: textcolor = self.highlight_color
+        else: textcolor = self.textcolor
+        try: dc.SetTextForeground(textcolor)
+        except Exception,e: dc.SetTextForeground('#000000')
         dc.SetUserScale(self.scale, self.scale)
 
         # Draw text
@@ -130,28 +121,20 @@ class WhiteboardText:
         xml_str = "<text"
         xml_str += " action='" + action + "'"
         xml_str += " id='" + str(self.id) + "'"
-        if self.pointsize != None:
-            xml_str += " pointsize='" + str(self.pointsize) + "'"
-        if self.style != None:
-            xml_str += " style='" + str(self.style) + "'"
-        if self.weight != None:
-            xml_str += " weight='" + str(self.weight) + "'"
-        if self.posx != None:
-            xml_str+= " posx='" + str(self.posx) + "'"
-        if not (self.posy is None):
-            xml_str += " posy='" + str(self.posy) + "'"
-        if self.text_string != None:
-            xml_str+= " text_string='" + self.text_string + "'"
-        if self.textcolor != None:
-            xml_str += " color='" + self.textcolor + "'"
+        if self.pointsize != None: xml_str += " pointsize='" + str(self.pointsize) + "'"
+        if self.style != None: xml_str += " style='" + str(self.style) + "'"
+        if self.weight != None: xml_str += " weight='" + str(self.weight) + "'"
+        if self.posx != None: xml_str+= " posx='" + str(self.posx) + "'"
+        if not (self.posy is None): xml_str += " posy='" + str(self.posy) + "'"
+        if self.text_string != None: xml_str+= " text_string='" + self.text_string + "'"
+        if self.textcolor != None: xml_str += " color='" + self.textcolor + "'"
         xml_str += "/>"
         self.log.log(xml_str, ORPG_DEBUG)
         self.log.log("Exit WhiteboardText->toxml(self, " + action + ")", ORPG_DEBUG)
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
             return xml_str
-        else:
-            return ''
+        else: return ''
 
     def takedom(self, xml_dom):
         self.log.log("Enter WhiteboardText->takedom(self, xml_dom)", ORPG_DEBUG)
@@ -179,8 +162,7 @@ class WhiteboardText:
             self.log.log("self.pointsize=" + str(self.pointsize), ORPG_DEBUG)
         if xml_dom.hasAttribute("color") and xml_dom.getAttribute("color") != '':
             self.textcolor = xml_dom.getAttribute("color")
-            if self.textcolor == '#0000000':
-                self.textcolor = '#000000'
+            if self.textcolor == '#0000000': self.textcolor = '#000000'
             self.log.log("self.textcolor=" + self.textcolor, ORPG_DEBUG)
         self.log.log("Exit WhiteboardText->takedom(self, xml_dom)", ORPG_DEBUG)
 
@@ -190,8 +172,7 @@ class WhiteboardLine:
         self.log.log("Enter WhiteboardLine", ORPG_DEBUG)
         self.scale = 1
         self.r_h = RGBHex()
-        if color == '':
-            color = "#000000"
+        if color == '': color = "#000000"
         self.linecolor = color
         self.linewidth = width
         self.lowerright = lowerright
@@ -242,15 +223,11 @@ class WhiteboardLine:
     def draw(self, parent, dc, op=wx.COPY):
         self.log.log("Enter WhiteboardLine->draw(self, parent, dc, op=wx.COPY)", ORPG_DEBUG)
         self.scale = parent.canvas.layers['grid'].mapscale
-        if self.highlighted:
-            linecolor = self.highlight_color
-        else:
-            linecolor = self.linecolor
+        if self.highlighted: linecolor = self.highlight_color
+        else: linecolor = self.linecolor
         pen = wx.BLACK_PEN
-        try:
-            pen.SetColour(linecolor)
-        except Exception,e:
-            pen.SetColour('#000000')
+        try: pen.SetColour(linecolor)
+        except Exception,e: pen.SetColour('#000000')
         pen.SetWidth( self.linewidth )
         dc.SetPen( pen )
         dc.SetBrush(wx.BLACK_BRUSH)
@@ -263,8 +240,7 @@ class WhiteboardLine:
             points = x.split(",")
             x1 = int(points[0])
             y1 = int(points[1])
-            if x2 != -999:
-                dc.DrawLine(x2,y2,x1,y1)
+            if x2 != -999: dc.DrawLine(x2,y2,x1,y1)
             x2 = x1
             y2 = y1
         pen.SetColour(wx.Colour(0,0,0))
@@ -299,8 +275,7 @@ class WhiteboardLine:
         xml_str += "/>"
         self.log.log(xml_str, ORPG_DEBUG)
         self.log.log("Exit WhiteboardLine->toxml(self, " + action + ")", ORPG_DEBUG)
-        if action == "new":
-            return xml_str
+        if action == "new": return xml_str
         return ''
 
     def takedom(self, xml_dom):
@@ -444,10 +419,8 @@ class whiteboard_layer(layer_base):
 
     def layerDraw(self, dc):
         self.log.log("Enter whiteboard_layer->layerDraw(self, dc)", ORPG_DEBUG)
-        for m in self.lines:
-            m.draw(self, dc)
-        for m in self.texts:
-            m.draw(self,dc)
+        for m in self.lines: m.draw(self, dc)
+        for m in self.texts: m.draw(self,dc)
         self.log.log("Exit whiteboard_layer->layerDraw(self, dc)", ORPG_DEBUG)
 
     def hit_test_text(self, pos, dc):
@@ -458,8 +431,7 @@ class whiteboard_layer(layer_base):
                 self.log.log("Exit whiteboard_layer->hit_test_text(self, pos, dc)", ORPG_DEBUG)
                 return list_of_texts_matching
         for m in self.texts:
-            if m.hit_test(pos,dc):
-                list_of_texts_matching.append(m)
+            if m.hit_test(pos,dc): list_of_texts_matching.append(m)
         self.log.log("Exit whiteboard_layer->hit_test_text(self, pos, dc)", ORPG_DEBUG)
         return list_of_texts_matching
 
@@ -471,8 +443,7 @@ class whiteboard_layer(layer_base):
                 self.log.log("Exit whiteboard_layer->hit_test_lines(self, pos, dc)", ORPG_DEBUG)
                 return list_of_lines_matching
         for m in self.lines:
-            if m.hit_test(pos):
-                list_of_lines_matching.append(m)
+            if m.hit_test(pos): list_of_lines_matching.append(m)
         self.log.log("Exit whiteboard_layer->hit_test_lines(self, pos, dc)", ORPG_DEBUG)
         return list_of_lines_matching
 
@@ -553,11 +524,9 @@ class whiteboard_layer(layer_base):
         self.log.log("Enter whiteboard_layer->layerToXML(self, " + action + ")", ORPG_DEBUG)
         white_string = ""
         if self.lines:
-            for l in self.lines:
-                white_string += l.toxml(action)
+            for l in self.lines: white_string += l.toxml(action)
         if self.texts:
-            for l in self.texts:
-                white_string += l.toxml(action)
+            for l in self.texts: white_string += l.toxml(action)
         if len(white_string):
             s = "<whiteboard"
             s += " serial='" + str(self.serial_number) + "'"
@@ -574,8 +543,7 @@ class whiteboard_layer(layer_base):
     def layerTakeDOM(self, xml_dom):
         self.log.log("Enter whiteboard_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
         serial_number = xml_dom.getAttribute('serial')
-        if serial_number != "":
-            self.serial_number = int(serial_number)
+        if serial_number != "": self.serial_number = int(serial_number)
         children = xml_dom._get_childNodes()
         for l in children:
             nodename = l._get_nodeName()
@@ -584,18 +552,13 @@ class whiteboard_layer(layer_base):
             if action == "del":
                 if nodename == 'line':
                     line = self.get_line_by_id(id)
-                    if line != None:
-                        self.lines.remove(line)
-                    else:
-                        self.log.log("Whiteboard error: Deletion of unknown line object attempted.", ORPG_GENERAL)
+                    if line != None: self.lines.remove(line)
+                    else: self.log.log("Whiteboard error: Deletion of unknown line object attempted.", ORPG_GENERAL)
                 elif nodename == 'text':
                     text = self.get_text_by_id(id)
-                    if text != None:
-                        self.texts.remove(text)
-                    else:
-                        self.log.log("Whiteboard error: Deletion of unknown text object attempted.", ORPG_GENERAL)
-                else:
-                    self.log.log("Whiteboard error: Deletion of unknown whiteboard object attempted.", ORPG_GENERAL)
+                    if text != None: self.texts.remove(text)
+                    else: self.log.log("Whiteboard error: Deletion of unknown text object attempted.", ORPG_GENERAL)
+                else: self.log.log("Whiteboard error: Deletion of unknown whiteboard object attempted.", ORPG_GENERAL)
             elif action == "new":
                 if nodename == "line":
                     try:
@@ -607,8 +570,7 @@ class whiteboard_layer(layer_base):
                         upperleft = wx.Point(int(upperleftx),int(upperlefty))
                         lowerright = wx.Point(int(lowerrightx),int(lowerrighty))
                         color = l.getAttribute('color')
-                        if color == '#0000000':
-                            color = '#000000'
+                        if color == '#0000000': color = '#000000'
                         id = l.getAttribute('id')
                         width = int(l.getAttribute('width'))
                     except:
@@ -625,8 +587,7 @@ class whiteboard_layer(layer_base):
                         pointsize = l.getAttribute('pointsize')
                         weight = l.getAttribute('weight')
                         color = l.getAttribute('color')
-                        if color == '#0000000':
-                            color = '#000000'
+                        if color == '#0000000': color = '#000000'
                         id = l.getAttribute('id')
                         posx = l.getAttribute('posx')
                         posy = l.getAttribute('posy')
@@ -642,16 +603,12 @@ class whiteboard_layer(layer_base):
             else:
                 if nodename == "line":
                     line = self.get_line_by_id(id)
-                    if line:
-                        line.takedom(l)
-                    else:
-                        self.log.log("Whiteboard error: Update of unknown line attempted.", ORPG_GENERAL)
+                    if line: line.takedom(l)
+                    else: self.log.log("Whiteboard error: Update of unknown line attempted.", ORPG_GENERAL)
                 if nodename == "text":
                     text = self.get_text_by_id(id)
-                    if text:
-                        text.takedom(l)
-                    else:
-                        self.log.log("Whiteboard error: Update of unknown text attempted.", ORPG_GENERAL)
+                    if text: text.takedom(l)
+                    else: self.log.log("Whiteboard error: Update of unknown text attempted.", ORPG_GENERAL)
         self.log.log("Enter whiteboard_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
         #self.canvas.send_map_data()
 
@@ -662,5 +619,4 @@ class whiteboard_layer(layer_base):
         return line
 
     def del_temp_line(self, line):
-        if line:
-            self.lines.remove(line)
+        if line: self.lines.remove(line)

@@ -161,14 +161,10 @@ class whiteboard_handler(base_layer_handler):
 
     def on_text_properties(self,evt):
         text_string = self.text_control.GetValue()
-        if self.style_control.GetStringSelection() == 'Normal':
-            style = wx.NORMAL
-        else:
-            style = wx.ITALIC
-        if self.weight_control.GetStringSelection() == 'Normal':
-            weight = wx.NORMAL
-        else:
-            weight = wx.BOLD
+        if self.style_control.GetStringSelection() == 'Normal': style = wx.NORMAL
+        else: style = wx.ITALIC
+        if self.weight_control.GetStringSelection() == 'Normal': weight = wx.NORMAL
+        else: weight = wx.BOLD
         point = str(self.point_control.GetValue())
         c = self.text_color_control.GetForegroundColour()
         color = self.canvas.layers['whiteboard'].r_h.hexstring(c.Red(), c.Green(), c.Blue())
@@ -197,21 +193,16 @@ class whiteboard_handler(base_layer_handler):
         self.text_color_control.SetForegroundColour(self.text_selected_item.textcolor)
         self.text_control.SetValue(self.text_selected_item.text_string)
         self.point_control.SetValue(int(self.text_selected_item.pointsize))
-        if int(self.text_selected_item.weight) == wx.NORMAL:
-            self.weight_control.SetSelection(0)
-        else:
-            self.weight_control.SetSelection(1)
+        if int(self.text_selected_item.weight) == wx.NORMAL: self.weight_control.SetSelection(0)
+        else: self.weight_control.SetSelection(1)
 
-        if int(self.text_selected_item.style) == wx.NORMAL:
-            self.style_control.SetSelection(0)
-        else:
-            self.style_control.SetSelection(1)
+        if int(self.text_selected_item.style) == wx.NORMAL: self.style_control.SetSelection(0)
+        else: self.style_control.SetSelection(1)
         self.text_properties_dialog.Center()
         self.text_properties_dialog.Show(True)
 
     def do_text_menu(self, pos, items=None):
-        if items == None:
-            self.canvas.PopupMenu(self.text_menu)
+        if items == None: self.canvas.PopupMenu(self.text_menu)
         else:
             menu = wx.Menu()
             self.ItemList = items
@@ -226,8 +217,7 @@ class whiteboard_handler(base_layer_handler):
         id = evt.GetId()-1
         self.text_selected_item = self.ItemList[id]
         self.text_selected_item.selected = True
-        if self.tmpPos == 'right':
-            self.canvas.PopupMenu(self.text_menu)
+        if self.tmpPos == 'right': self.canvas.PopupMenu(self.text_menu)
         self.ItemList = None
         self.tmpPos = None
 
@@ -238,8 +228,7 @@ class whiteboard_handler(base_layer_handler):
         self.canvas.PrepareDC(dc)
         dc.SetUserScale(scale,scale)
         pos = evt.GetLogicalPosition(dc)
-        if self.drawing_mode == 'Text':
-            self.on_text_right_down(evt, dc)
+        if self.drawing_mode == 'Text': self.on_text_right_down(evt, dc)
         elif self.drawing and ((self.drawing_mode == 'Circle') or (self.drawing_mode == 'Cone')):
             self.check_draw_mode()
             self.drawing = False
@@ -250,10 +239,8 @@ class whiteboard_handler(base_layer_handler):
                 if self.sel_rline:
                     self.do_line_menu(evt.GetPosition())
                     self.canvas.Refresh(False)
-            else:
-                base_layer_handler.on_right_down(self,evt)
-        else:
-            base_layer_handler.on_right_down(self,evt)
+            else: base_layer_handler.on_right_down(self,evt)
+        else: base_layer_handler.on_right_down(self,evt)
         del dc
 
     def on_pen_color(self,evt):
@@ -288,8 +275,7 @@ class whiteboard_handler(base_layer_handler):
             open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
             return
         dlg = wx.MessageDialog(self, "Are you sure you want to delete all lines?","Delete All Lines",wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        if dlg.ShowModal() != wx.ID_YES:
-            return
+        if dlg.ShowModal() != wx.ID_YES: return
         self.canvas.layers['whiteboard'].del_all_lines()
         dc = self.create_dc()
         self.un_highlight(dc)
@@ -326,8 +312,7 @@ class whiteboard_handler(base_layer_handler):
         self.line_string = "0,0;"
         if self.temp_circle:
             self.canvas.layers['whiteboard'].del_temp_line(self.temp_circle)
-            if self.selected == self.temp_circle:
-                self.selected = None
+            if self.selected == self.temp_circle: self.selected = None
             self.canvas.Refresh(True)
         self.temp_circle = None
         self.cone_start  = None
@@ -336,22 +321,14 @@ class whiteboard_handler(base_layer_handler):
     # drawing modes freeform vs polyline
     # 05-09-2003  Snowdog
     def on_left_down(self,evt):
-        if not self.drawing:
-            self.check_draw_mode()
-        if self.drawing_mode == 'Freeform':
-            #Freeform mode ignores the inital down click
-            pass
-        elif self.drawing_mode == 'Polyline':
-            self.polyline_add_point( evt )
-        elif self.drawing_mode == 'Text':
-            self.on_text_left_down(evt)
+        if not self.drawing: self.check_draw_mode()
+        if self.drawing_mode == 'Freeform': pass
+        elif self.drawing_mode == 'Polyline': self.polyline_add_point( evt )
+        elif self.drawing_mode == 'Text': self.on_text_left_down(evt)
         elif self.drawing_mode == 'Cone':
-            if self.cone_start == None:
-                self.on_start_cone(evt)
-            else:
-                self.draw_temporary_cone(evt)
-        elif self.drawing_mode == 'Circle':
-            self.draw_temporary_circle(evt)
+            if self.cone_start == None: self.on_start_cone(evt)
+            else: self.draw_temporary_cone(evt)
+        elif self.drawing_mode == 'Circle': self.draw_temporary_circle(evt)
 
     # Added handling for double clicks within the map
     # 05-09-2003  Snowdog
@@ -359,10 +336,8 @@ class whiteboard_handler(base_layer_handler):
         if self.drawing_mode == 'Freeform':
             #Freeform mode ignores the double click
             pass
-        elif self.drawing_mode == 'Polyline':
-            self.polyline_last_point( evt )
-        elif self.drawing_mode == 'Text':
-            pass
+        elif self.drawing_mode == 'Polyline': self.polyline_last_point( evt )
+        elif self.drawing_mode == 'Text': pass
         elif self.drawing_mode == 'Circle' or self.drawing_mode == 'Cone':
             self.canvas.layers['whiteboard'].del_temp_line(self.temp_circle)
             #pointArray = self.temp_circle.line_string.split(";")
@@ -375,14 +350,9 @@ class whiteboard_handler(base_layer_handler):
     # drawing modes freeform vs polyline
     # 05-09-2003  Snowdog
     def on_left_up(self,evt):
-        if self.drawing_mode == 'Freeform':
-            self.on_freeform_left_up(evt)
-        elif self.drawing_mode == 'Polyline':
-            #Polyline mode relies on the down click
-            #not the mouse button release
-            pass
-        elif self.drawing_mode == 'Text':
-            pass
+        if self.drawing_mode == 'Freeform': self.on_freeform_left_up(evt)
+        elif self.drawing_mode == 'Polyline': pass
+        elif self.drawing_mode == 'Text': pass
 
     # Altered on_left_up to toggle between
     # drawing modes freeform vs polyline
@@ -394,23 +364,18 @@ class whiteboard_handler(base_layer_handler):
             and (session.use_roles()):
             return
         if self.drawing_mode == 'Freeform':
-            if evt.m_leftDown:
-                self.freeform_motion(evt)
+            if evt.m_leftDown: self.freeform_motion(evt)
         elif self.drawing_mode == 'Polyline':
-            if self.drawing:
-                self.polyline_preview( evt )
+            if self.drawing: self.polyline_preview( evt )
         dc = self.create_dc()
         pos = evt.GetLogicalPosition(dc)
         hit = self.canvas.layers['whiteboard'].hit_test_lines(pos,dc)
-        if hit:
-            self.highlight(hit,dc)
+        if hit: self.highlight(hit,dc)
         else:
             self.un_highlight(dc)
             hit = self.canvas.layers['whiteboard'].hit_test_text(pos,dc)
-            if hit:
-                self.highlight(hit,dc)
-            else:
-                self.un_highlight(dc)
+            if hit: self.highlight(hit,dc)
+            else: self.un_highlight(dc)
         del dc
 
     def create_dc(self):
@@ -443,14 +408,10 @@ class whiteboard_handler(base_layer_handler):
         dc.SetUserScale(scale,scale)
         pos = evt.GetLogicalPosition(dc)
         #reset the bounding points
-        if pos.x < self.upperleft.x:
-            self.upperleft.x = pos.x
-        elif pos.x > self.lowerright.x:
-            self.lowerright.x = pos.x
-        if pos.y < self.upperleft.y:
-            self.upperleft.y = pos.y
-        elif pos.y > self.lowerright.y:
-            self.lowerright.y = pos.y
+        if pos.x < self.upperleft.x: self.upperleft.x = pos.x
+        elif pos.x > self.lowerright.x: self.lowerright.x = pos.x
+        if pos.y < self.upperleft.y: self.upperleft.y = pos.y
+        elif pos.y > self.lowerright.y: self.lowerright.y = pos.y
 
         #if this point doens't end the line
         #add a new point into the line string
@@ -469,9 +430,7 @@ class whiteboard_handler(base_layer_handler):
                 self.drawing = True
         else: #end of line. Send and reset vars for next line
             self.drawing = False
-            if self.polypoints < 2:
-                #not enough points to form a line. Ignore line
-                pass
+            if self.polypoints < 2: pass
             else:
                 #have enough points to create valid line
                 #check to role to make sure user can draw at all....
@@ -479,9 +438,7 @@ class whiteboard_handler(base_layer_handler):
                 if (session.my_role() != session.ROLE_GM) and (session.my_role()!=session.ROLE_PLAYER) and (session.use_roles()):
                     open_rpg.get_component("chat").InfoPost("You must be either a player or GM to use this feature")
                     self.canvas.Refresh(False)
-                else:
-                    #user allowed to draw on whiteboard.. send polyline
-                    line = self.canvas.layers['whiteboard'].add_line(self.line_string,self.upperleft,self.lowerright)
+                else: line = self.canvas.layers['whiteboard'].add_line(self.line_string,self.upperleft,self.lowerright)
             #resetting variables for next line
             self.upperleft.x = self.upperleft.y = 0
             self.lowerright.x = self.lowerright.y = 0
@@ -493,30 +450,23 @@ class whiteboard_handler(base_layer_handler):
     # 05-09-2003  Snowdog
     def polyline_last_point(self, evt):
         #if we haven't started a line already. Ignore the click
-        if self.drawing != True:
-            return
+        if self.drawing != True: return
         scale = self.canvas.layers['grid'].mapscale
         dc = wx.ClientDC( self.canvas )
         self.canvas.PrepareDC( dc )
         dc.SetUserScale(scale,scale)
         pos = evt.GetLogicalPosition(dc)
         #reset the bounding points
-        if pos.x < self.upperleft.x:
-            self.upperleft.x = pos.x
-        elif pos.x > self.lowerright.x:
-            self.lowerright.x = pos.x
-        if pos.y < self.upperleft.y:
-            self.upperleft.y = pos.y
-        elif pos.y > self.lowerright.y:
-            self.lowerright.y = pos.y
+        if pos.x < self.upperleft.x: self.upperleft.x = pos.x
+        elif pos.x > self.lowerright.x: self.lowerright.x = pos.x
+        if pos.y < self.upperleft.y: self.upperleft.y = pos.y
+        elif pos.y > self.lowerright.y: self.lowerright.y = pos.y
         self.polypoints += 1 #add one to the point counter.
         self.line_string += `pos.x` + "," + `pos.y` + ";"
         self.canvas.layers['whiteboard'].draw_working_line(dc,self.line_string)
         #end of line. Send and reset vars for next line
         self.drawing = False
-        if self.polypoints < 2:
-            #not enough points to form a line. Ignore line
-            pass
+        if self.polypoints < 2: pass
         else:
             #have enough points to create valid line
             #check to role to make sure user can draw at all....
@@ -524,9 +474,7 @@ class whiteboard_handler(base_layer_handler):
             if (session.my_role() != session.ROLE_GM) and (session.my_role()!=session.ROLE_PLAYER) and (session.use_roles()):
                 open_rpg.get_component("chat").InfoPost("You must be either a player or GM to use this feature")
                 self.canvas.Refresh(False)
-            else:
-                #user allowed to draw on whiteboard.. send polyline
-                line = self.canvas.layers['whiteboard'].add_line(self.line_string,self.upperleft,self.lowerright)
+            else: line = self.canvas.layers['whiteboard'].add_line(self.line_string,self.upperleft,self.lowerright)
         #resetting variables for next line
         self.upperleft.x = self.upperleft.y = 0
         self.lowerright.x = self.lowerright.y = 0
@@ -548,17 +496,10 @@ class whiteboard_handler(base_layer_handler):
         tol = 5
 
         #first point check
-        if type(self.lastpoint) == type(None):
-            self.lastpoint = wx.Point(pos.x,pos.y)
-            return 0 #not end of line
-        if ((self.lastpoint.x -tol) <= pos.x <= (self.lastpoint.x)):
-            x_in = 1
-        if ((self.lastpoint.y -tol) <= pos.y <= (self.lastpoint.y)):
-            y_in = 1
-        if x_in and y_in:
-            #point within tolerance. End line
-            self.lastpoint = None
-            return 1
+        if type(self.lastpoint) == type(None): self.lastpoint = wx.Point(pos.x,pos.y); return 0 #not end of line
+        if ((self.lastpoint.x -tol) <= pos.x <= (self.lastpoint.x)): x_in = 1
+        if ((self.lastpoint.y -tol) <= pos.y <= (self.lastpoint.y)): y_in = 1
+        if x_in and y_in: self.lastpoint = None; return 1
         #if we've reached here the point is NOT a terminal point. Reset the lastpoint and return False
         self.lastpoint.x = pos.x
         self.lastpoint.y = pos.y
@@ -569,12 +510,8 @@ class whiteboard_handler(base_layer_handler):
     # from the last point to mouse position
     # 05-09-2003  Snowdog
     def polyline_preview(self, evt):
-        if self.drawing != True:
-            #not enough points to form a line. Ignore line
-            return
-        if self.live_refresh.GetValue() == 0:
-            #not using live redraw
-            return
+        if self.drawing != True: return
+        if self.live_refresh.GetValue() == 0: return
         scale = self.canvas.layers['grid'].mapscale
         dc = wx.ClientDC( self.canvas )
         self.canvas.PrepareDC( dc )
@@ -582,14 +519,10 @@ class whiteboard_handler(base_layer_handler):
         pos = evt.GetLogicalPosition(dc)
 
         #reset the bounding points
-        if pos.x < self.upperleft.x:
-            self.upperleft.x = pos.x
-        elif pos.x > self.lowerright.x:
-            self.lowerright.x = pos.x
-        if pos.y < self.upperleft.y:
-            self.upperleft.y = pos.y
-        elif pos.y > self.lowerright.y:
-            self.lowerright.y = pos.y
+        if pos.x < self.upperleft.x: self.upperleft.x = pos.x
+        elif pos.x > self.lowerright.x: self.lowerright.x = pos.x
+        if pos.y < self.upperleft.y: self.upperleft.y = pos.y
+        elif pos.y > self.lowerright.y: self.lowerright.y = pos.y
 
         #redraw the line with a line connected to the cursor
         temp_string = self.line_string
@@ -608,14 +541,10 @@ class whiteboard_handler(base_layer_handler):
         self.canvas.PrepareDC( dc )
         dc.SetUserScale(scale,scale)
         pos = evt.GetLogicalPosition(dc)
-        if pos.x < self.upperleft.x:
-            self.upperleft.x = pos.x
-        elif pos.x > self.lowerright.x:
-            self.lowerright.x = pos.x
-        if pos.y < self.upperleft.y:
-            self.upperleft.y = pos.y
-        elif pos.y > self.lowerright.y:
-            self.lowerright.y = pos.y
+        if pos.x < self.upperleft.x: self.upperleft.x = pos.x
+        elif pos.x > self.lowerright.x: self.lowerright.x = pos.x
+        if pos.y < self.upperleft.y: self.upperleft.y = pos.y
+        elif pos.y > self.lowerright.y: self.lowerright.y = pos.y
         if evt.m_leftDown:
             if self.drawing == True:
                 self.line_string += `pos.x` + "," + `pos.y` + ";"
@@ -665,8 +594,7 @@ class whiteboard_handler(base_layer_handler):
         pos = evt.GetLogicalPosition(dc)
         test_text = self.canvas.layers['whiteboard'].hit_test_text(pos,dc)
         if len(test_text) > 0:
-            if len(test_text) > 1:
-                self.do_text_menu('left', test_text)
+            if len(test_text) > 1: self.do_text_menu('left', test_text)
             else:
                 self.text_selected_item = test_text[0]
                 self.text_selected_item.selected = True
@@ -676,7 +604,8 @@ class whiteboard_handler(base_layer_handler):
                 dlg = wx.TextEntryDialog(self,"Text to add to whiteboard", caption="Enter text",defaultValue=" ")
                 if dlg.ShowModal() == wx.ID_OK:
                     text_string = dlg.GetValue()
-                    self.canvas.layers['whiteboard'].add_text(text_string,pos, self.style, self.pointsize, self.weight, self.canvas.layers['whiteboard'].color)
+                    self.canvas.layers['whiteboard'].add_text(text_string,pos, self.style, 
+                        self.pointsize, self.weight, self.canvas.layers['whiteboard'].color)
             else:
                 self.text_selected_item.posx = pos.x
                 self.text_selected_item.posy = pos.y
@@ -695,8 +624,7 @@ class whiteboard_handler(base_layer_handler):
         pos = evt.GetLogicalPosition(dc)
         test_text = self.canvas.layers['whiteboard'].hit_test_text(pos, dc)
         if len(test_text) > 0:
-            if len(test_text) > 1:
-                self.do_text_menu('right', test_text)
+            if len(test_text) > 1: self.do_text_menu('right', test_text)
             else:
                 self.text_selected_item = test_text[0]
                 self.do_text_menu('right')
@@ -730,23 +658,19 @@ class whiteboard_handler(base_layer_handler):
         pos = evt.GetLogicalPosition(dc)
         pos2 = self.get_snapped_to_logical_pos(evt)
         size = self.canvas.layers['grid'].unit_size #60
-        if abs(pos.x-pos2.x)<=size/10 and abs(pos.y-pos2.y)<=size/10:
-            pos = pos2
+        if abs(pos.x-pos2.x)<=size/10 and abs(pos.y-pos2.y)<=size/10: pos = pos2
         radius = int(int(self.radius.GetValue())/5) 
         curve  = self.calculate_circle(self.cone_start, radius, size)
         edge1 = []
         edge2 = []
         horizontal_inc = wx.Point(size,0)
-        if pos.x <= self.cone_start.x:
-            horizontal_inc = wx.Point(-size,0)
+        if pos.x <= self.cone_start.x: horizontal_inc = wx.Point(-size,0)
         vertical_inc = wx.Point(0,size)
-        if pos.y <= self.cone_start.y:
-            vertical_inc = wx.Point(0,-size)
+        if pos.y <= self.cone_start.y: vertical_inc = wx.Point(0,-size)
         x_diff = float(pos.x - self.cone_start.x)
         y_diff = float(pos.y - self.cone_start.y)
         ratio = float(1)
-        if abs(x_diff) <= abs(y_diff):
-            ratio = x_diff / y_diff
+        if abs(x_diff) <= abs(y_diff): ratio = x_diff / y_diff
         elif abs(y_diff) < abs(x_diff):
             ratio = -(y_diff / x_diff)
             horizontal_inc,vertical_inc = vertical_inc,horizontal_inc #swap
@@ -817,8 +741,7 @@ class whiteboard_handler(base_layer_handler):
         curve = `pos.x`+","+`pos.y`+";" + curve + `qos.x`+","+`qos.y`+";"
         if(self.temp_circle):
             self.canvas.layers['whiteboard'].del_temp_line(self.temp_circle)
-            if self.selected == self.temp_circle:
-                self.selected = None
+            if self.selected == self.temp_circle: self.selected = None
         self.temp_circle = self.canvas.layers['whiteboard'].add_temp_line(curve)
         self.canvas.Refresh(True)
 

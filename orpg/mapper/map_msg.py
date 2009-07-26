@@ -79,15 +79,13 @@ class map_msg(map_element_msg_base):
                     else:
                         print "Unrecognized tag " + name + " found in map_msg.init_from_dom - skipping"
                         continue
-                try:
-                    self.children[name].init_from_dom(c)
+                try: self.children[name].init_from_dom(c)
                 except Exception, e:
                     print "map_msg.init_from_dom() exception: "+str(e)
                     continue
         else:
             self.p_lock.release()
-            raise Exception, 
-                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
+            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
@@ -104,28 +102,21 @@ class map_msg(map_element_msg_base):
             for c in xml_dom._get_childNodes():
                 name = c._get_nodeName()
                 if not self.children.has_key(name):
-                    if name == "miniatures":
-                        self.children[name] = minis_msg(self.p_lock)
-                    elif name == "grid":
-                        self.children[name] = grid_msg(self.p_lock)
-                    elif name == "bg":
-                        self.children[name] = bg_msg(self.p_lock)
-                    elif name == "whiteboard":
-                        self.children[name] = whiteboard_msg(self.p_lock)
-                    elif name == "fog":
-                        self.children[name] = fog_msg(self.p_lock)
+                    if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
+                    elif name == "grid": self.children[name] = grid_msg(self.p_lock)
+                    elif name == "bg": self.children[name] = bg_msg(self.p_lock)
+                    elif name == "whiteboard": self.children[name] = whiteboard_msg(self.p_lock)
+                    elif name == "fog": self.children[name] = fog_msg(self.p_lock)
                     else:
                         print "Unrecognized tag " + name + " found in map_msg.init_from_dom - skipping"
                         continue
-                try:
-                    self.children[name].set_from_dom(c)
+                try: self.children[name].set_from_dom(c)
                 except Exception, e:
                     print "map_msg.set_from_dom() exception: "+str(e)
                     continue
         else:
             self.p_lock.release()
-            raise Exception, 
-                "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element in map"
+            raise Exception, "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element in map"
         self.p_lock.release()
 
     def get_all_xml(self, action="new", output_action=1):

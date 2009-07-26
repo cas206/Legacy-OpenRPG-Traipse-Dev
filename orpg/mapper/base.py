@@ -41,18 +41,12 @@ class cmpPoint(wx.Point):
 
     def __cmp__(self,other):
         try:
-            if self.x < other.x:
-                return -1
-            elif self.x > other.x:
-                return 1
-            elif self.y < other.y:
-                return -1
-            elif self.y > other.y:
-                return 1
-            else:
-                return 0
-        except:
-            return -2
+            if self.x < other.x: return -1
+            elif self.x > other.x: return 1
+            elif self.y < other.y: return -1
+            elif self.y > other.y: return 1
+            else: return 0
+        except: return -2
 
 class cmpColour(wx.Colour):
     def __init__(self,*_args,**_kwargs):
@@ -64,14 +58,10 @@ class cmpColour(wx.Colour):
             my_value = b*256*256 + g*256 + r
             (r,g,b) = other.Get()
             other_value = b*256*256 + g*256 + r
-            if my_value < other_value:
-                return -1
-            elif my_value > other_value:
-                return 1
-            else:  # they're equal
-                return 0
-        except:
-            return -2
+            if my_value < other_value: return -1
+            elif my_value > other_value: return 1
+            else: return 0
+        except: return -2
 
 class protectable_attributes:
 
@@ -86,19 +76,15 @@ class protectable_attributes:
             full_name = "_protect_" + name
             if hasattr(self,full_name):
                 (p,c) = getattr(self,full_name)
-                if p != value:
-                    self._set(full_name,(value,1))
-            else:
-                self._set(full_name,(value,1))
-        else:
-            self._set(name,value)
+                if p != value: self._set(full_name,(value,1))
+            else: self._set(full_name,(value,1))
+        else: self._set(name,value)
 
     def __getattr__(self,name):
         if name in self._protected_attr:
             (p,c) = self.__dict__["_protect_" + name]
             return p
-        else:
-            raise AttributeError
+        else: raise AttributeError
 
     def _clean_attr(self,name):
         if name in self._protected_attr:
@@ -114,8 +100,7 @@ class protectable_attributes:
         changed = {}
         for name in self._protected_attr:
             (p,c) = self.__dict__["_protect_" + name]
-            if c:
-                changed[name] = p
+            if c: changed[name] = p
         return changed
 
     def _clean_all_attr(self):

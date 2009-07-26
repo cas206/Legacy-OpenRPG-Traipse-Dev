@@ -108,8 +108,7 @@ class grid_layer(layer_base):
                 x = topLeft.x
                 y = topLeft.y
             return cmpPoint(int(x),int(y))                                           #  Set the pos attribute
-        else:
-            return cmpPoint(int(pos.x),int(pos.y))
+        else: return cmpPoint(int(pos.x),int(pos.y))
 
     def set_rect_mode(self):
         "switch grid to rectangular mode"
@@ -151,10 +150,8 @@ class grid_layer(layer_base):
 
     def grid_hit_test_rect(self,pos):
         "return grid pos (w,h) on rect map from pos"
-        if self.unit_size and self.snap:
-            return cmpPoint(int(pos.x/self.unit_size), int(pos.y/self.unit_size))
-        else:
-            return None
+        if self.unit_size and self.snap: return cmpPoint(int(pos.x/self.unit_size), int(pos.y/self.unit_size))
+        else: return None
 
     def grid_hit_test_hex(self,pos):
         "return grid pos (w,h) on hex map from pos"
@@ -176,21 +173,17 @@ class grid_layer(layer_base):
                 if py < half_height:
                     row = row - 1
                     py = py + half_height
-                else:
-                    py = py - half_height
+                else: py = py - half_height
             # adjust for top right corner
             if (px * height - py * hex_side) > height * hex_side:
-                if col % 2 == 0:
-                    row = row - 1
+                if col % 2 == 0: row = row - 1
                 col = col + 1
             # adjust for bottom right corner
             elif (px * height + py * hex_side) > 2 * height * hex_side:
-                if col%2==1:
-                    row = row + 1
+                if col%2==1: row = row + 1
                 col = col + 1
             return cmpPoint(col, row)
-        else:
-            return None
+        else: return None
 
     def grid_hit_test_iso(self,pos):
         "return grid pos (w,h) on isometric map from pos"
@@ -219,8 +212,7 @@ class grid_layer(layer_base):
 
             # the calculation is now as simple as the rectangle case, but using iso co-ords
             return cmpPoint(floor(iso_x/iso_unit_size), floor(iso_y/iso_unit_size))
-        else:
-            return None
+        else: return None
 
     def get_top_corner_iso(self, iso_pos):
         "return upper left of a iso grid pos"
@@ -232,15 +224,12 @@ class grid_layer(layer_base):
             grid_x = (iso_pos.y*half_width) + (iso_pos.x*half_width) + half_width
             grid_y = (iso_pos.y*half_height) - (iso_pos.x*half_height) + half_height
             return cmpPoint(int(grid_x), int(grid_y))
-        else:
-            return None
+        else: return None
 
     def get_top_corner_rect(self,grid_pos):
         "return upper left of a rect grid pos"
-        if self.unit_size:
-            return cmpPoint(grid_pos[0]*self.unit_size,grid_pos[1]*self.unit_size)
-        else:
-            return None
+        if self.unit_size: return cmpPoint(grid_pos[0]*self.unit_size,grid_pos[1]*self.unit_size)
+        else: return None
 
     def get_top_corner_hex(self,grid_pos):
         "return upper left of a hex grid pos"
@@ -252,33 +241,25 @@ class grid_layer(layer_base):
             if grid_pos[0] % 2:
                 temp_y += self.unit_size/2
             return cmpPoint(temp_x,temp_y)
-        else:
-            return None
+        else: return None
 
     def set_grid(self, unit_size, snap, color, mode, line, ratio=None):
         self.unit_size = unit_size
-        if ratio != None:
-            self.iso_ratio = ratio
+        if ratio != None: self.iso_ratio = ratio
         self.snap = snap
         self.set_color(color)
         self.SetMode(mode)
         self.SetLine(line)
 
     def SetLine(self,line):
-        if line == LINE_NONE:
-            self.set_line_none()
-        elif line == LINE_DOTTED:
-            self.set_line_dotted()
-        elif line == LINE_SOLID:
-            self.set_line_solid()
+        if line == LINE_NONE: self.set_line_none()
+        elif line == LINE_DOTTED: self.set_line_dotted()
+        elif line == LINE_SOLID: self.set_line_solid()
 
     def SetMode(self, mode):
-        if mode == GRID_RECTANGLE:
-            self.set_rect_mode()
-        elif mode == GRID_HEXAGON:
-            self.set_hex_mode()
-        elif mode == GRID_ISOMETRIC:
-            self.set_iso_mode()
+        if mode == GRID_RECTANGLE: self.set_rect_mode()
+        elif mode == GRID_HEXAGON: self.set_hex_mode()
+        elif mode == GRID_ISOMETRIC: self.set_iso_mode()
 
     def return_grid(self):
         return self.canvas.size
@@ -290,10 +271,8 @@ class grid_layer(layer_base):
     def draw_iso(self,dc,topleft,clientsize):
         if not self.unit_size: return
         if self.line == LINE_NONE: return
-        if self.line == LINE_SOLID:
-            dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
-        else:
-            dc.SetPen(wx.Pen(self.color,1,wx.DOT))
+        if self.line == LINE_SOLID: dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
+        else: dc.SetPen(wx.Pen(self.color,1,wx.DOT))
         sz = self.canvas.size
 
         # Enable DC optimizations if available on a platform
@@ -328,12 +307,9 @@ class grid_layer(layer_base):
         if self.unit_size:
             draw = 1
             # Enable pen/brush optimizations if available on a platform
-            if self.line == LINE_NONE:
-                draw = 0
-            elif self.line == LINE_SOLID:
-                dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
-            else:
-                dc.SetPen(wx.Pen(self.color,1,wx.DOT))
+            if self.line == LINE_NONE: draw = 0
+            elif self.line == LINE_SOLID: dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
+            else: dc.SetPen(wx.Pen(self.color,1,wx.DOT))
             if draw:
                 sz = self.canvas.size
                 # Enable DC optimizations if available on a platform
@@ -361,12 +337,9 @@ class grid_layer(layer_base):
         if self.unit_size:
             draw = 1
             # Enable pen/brush optimizations if available on a platform
-            if self.line == LINE_NONE:
-                draw = 0
-            elif self.line == LINE_SOLID:
-                dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
-            else:
-                dc.SetPen(wx.Pen(self.color,1,wx.DOT))
+            if self.line == LINE_NONE: draw = 0
+            elif self.line == LINE_SOLID: dc.SetPen(wx.Pen(self.color,1,wx.SOLID))
+            else: dc.SetPen(wx.Pen(self.color,1,wx.DOT))
             if draw:
                 sz = self.canvas.size
                 x = 0
@@ -420,25 +393,18 @@ class grid_layer(layer_base):
             (red,green,blue) = self.color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
             xml_str += " color='" + hexcolor + "'"
-        if self.unit_size != None:
-            xml_str += " size='" + str(self.unit_size) + "'"
-        if self.iso_ratio != None:
-            xml_str += " ratio='" + str(self.iso_ratio) + "'"
+        if self.unit_size != None: xml_str += " size='" + str(self.unit_size) + "'"
+        if self.iso_ratio != None: xml_str += " ratio='" + str(self.iso_ratio) + "'"
         if self.snap != None:
-            if self.snap:
-                xml_str += " snap='1'"
-            else:
-                xml_str += " snap='0'"
-        if self.mode != None:
-            xml_str+= "  mode='" + str(self.mode) + "'"
-        if self.line != None:
-            xml_str+= " line='" + str(self.line) + "'"
+            if self.snap: xml_str += " snap='1'"
+            else: xml_str += " snap='0'"
+        if self.mode != None: xml_str+= "  mode='" + str(self.mode) + "'"
+        if self.line != None: xml_str+= " line='" + str(self.line) + "'"
         xml_str += "/>"
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
             return xml_str
-        else:
-            return ''
+        else: return ''
 
     def layerTakeDOM(self, xml_dom):
         if xml_dom.hasAttribute("color"):
@@ -446,17 +412,14 @@ class grid_layer(layer_base):
             self.set_color(cmpColour(r,g,b))
         #backwards compatible with non-isometric map formated clients
         ratio = RATIO_DEFAULT
-        if xml_dom.hasAttribute("ratio"):
-            ratio = xml_dom.getAttribute("ratio")
+        if xml_dom.hasAttribute("ratio"): ratio = xml_dom.getAttribute("ratio")
         if xml_dom.hasAttribute("mode"):
             self.SetMode(int(xml_dom.getAttribute("mode")))
         if xml_dom.hasAttribute("size"):
             self.unit_size = int(xml_dom.getAttribute("size"))
             self.unit_size_y = self.unit_size
         if xml_dom.hasAttribute("snap"):
-            if (xml_dom.getAttribute("snap") == 'True') or (xml_dom.getAttribute("snap") == "1"):
-                self.snap = True
-            else:
-                self.snap = False
+            if (xml_dom.getAttribute("snap") == 'True') or (xml_dom.getAttribute("snap") == "1"): self.snap = True
+            else: self.snap = False
         if xml_dom.hasAttribute("line"):
             self.SetLine(int(xml_dom.getAttribute("line")))

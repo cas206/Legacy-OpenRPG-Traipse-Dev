@@ -67,11 +67,8 @@ class map_handler(base_layer_handler):
         if (session.my_role() != session.ROLE_GM):
             open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
             return
-        try:
-            size = (int(self.width.GetValue()),int(self.height.GetValue()))
-        except:
-            wx.MessageBox("Invalide Map Size!","Map Properties")
-            return
+        try: size = (int(self.width.GetValue()),int(self.height.GetValue()))
+        except: wx.MessageBox("Invalid Map Size!","Map Properties"); return
         self.canvas.set_size(size)
         self.update_info()
         self.canvas.send_map_data()

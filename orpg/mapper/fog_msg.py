@@ -41,10 +41,8 @@ class fog_msg(map_element_msg_base):
 
     def get_line(self,outline,action,output_act):
         elem = Element( "poly" )
-        if ( output_act ):
-            elem.setAttribute( "action", action )
-        if ( outline == 'all' ) or ( outline == 'none' ):
-            elem.setAttribute( "outline", outline )
+        if ( output_act ): elem.setAttribute( "action", action )
+        if ( outline == 'all' ) or ( outline == 'none' ): elem.setAttribute( "outline", outline )
         else:
             elem.setAttribute( "outline", "points" )
             for pair in string.split( outline, ";" ):
@@ -77,11 +75,9 @@ class fog_msg(map_element_msg_base):
         #print "use_fog :",self.use_fog
         #print "output_action :",output_action
         #print "action :",action
-        if not (self.use_fog):
-            return ""
+        if not (self.use_fog): return ""
         fog_string = ""
-        if self.fogregion.isEmpty():
-            fog_string=self.get_line("all","del",output_action)
+        if self.fogregion.isEmpty(): fog_string=self.get_line("all","del",output_action)
         for ri in self.fogregion.GetRectList():
             x1=ri.GetX()
             x2=x1+ri.GetW()-1
@@ -96,8 +92,7 @@ class fog_msg(map_element_msg_base):
             s += ">"
             s += fog_string
             s += "</fog>"
-        else:
-            s+="/>"
+        else: s+="/>"
         return s
 
     def interpret_dom(self,xml_dom):
@@ -127,10 +122,8 @@ class fog_msg(map_element_msg_base):
                 #     polyline.append(IPoint().make(int(pt[0]),int(pt[1])))
             #print "length of polyline", len(polyline)
             if (len(polyline)>2):
-                if action=="del":
-                    self.fogregion.FromPolygon(polyline,0)
-                else:
-                    self.fogregion.FromPolygon(polyline,1)
+                if action=="del": self.fogregion.FromPolygon(polyline,0)
+                else: self.fogregion.FromPolygon(polyline,1)
 
     def init_from_dom(self,xml_dom):
         self.interpret_dom(xml_dom)

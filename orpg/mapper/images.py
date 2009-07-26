@@ -51,21 +51,20 @@ class ImageHandlerClass(object):
 
     def load(self, path, image_type, imageId):
         # Load an image, with a intermideary fetching image shown while it loads in a background thread
-        if self.__cache.has_key(path):
-            return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
+        if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
+                                                self.__cache[path][2]).ConvertToBitmap()
         if not self.__fetching.has_key(path):
             self.__fetching[path] = True
             #Start Image Loading Thread
             thread.start_new_thread(self.__loadThread, (path, image_type, imageId))
         else:
-            if self.__fetching[path] is True:
-                thread.start_new_thread(self.__loadCacheThread, (path, image_type, imageId))
+            if self.__fetching[path] is True: thread.start_new_thread(self.__loadCacheThread, (path, image_type, imageId))
         return wx.Bitmap(open_rpg.get_component("dir_struct")["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
 
     def directLoad(self, path):
         # Directly load an image, no threads
-        if self.__cache.has_key(path):
-            return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
+        if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
+                                                self.__cache[path][2]).ConvertToBitmap()
         uriPath = urllib.unquote(path)
         try:
             d = urllib.urlretrieve(uriPath)
@@ -85,24 +84,19 @@ class ImageHandlerClass(object):
 
     def cleanCache(self):
         # Shrinks the Cache down to the proper size
-        try:
-            cacheSize = int(open_rpg.get_component('settings').get_setting("ImageCacheSize"))
-        except:
-            cacheSize = 32
+        try: cacheSize = int(open_rpg.get_component('settings').get_setting("ImageCacheSize"))
+        except: cacheSize = 32
         cache = self.__cache.keys()
         cache.sort()
-        for key in cache[cacheSize:]:
-            del self.__cache[key]
+        for key in cache[cacheSize:]: del self.__cache[key]
 
     def flushCache(self):
         #    This function will flush all images contained within the image cache.
         self.__lock.acquire()
         try:
             keyList = self.__cache.keys()
-            for key in keyList:
-                del self.__cache[key]
-        finally:
-            self.__lock.release()
+            for key in keyList: del self.__cache[key]
+        finally: self.__lock.release()
         urllib.urlcleanup()
 
 #Private Methods
@@ -116,8 +110,7 @@ class ImageHandlerClass(object):
             if d[0] and d[1].getmaintype() == "image":
                 self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
                 self.__queue.put((self.__cache[path], image_type, imageId))
-                if self.__fetching.has_key(path):
-                    del self.__fetching[path]
+                if self.__fetching.has_key(path): del self.__fetching[path]
             else:
                 open_rpg.get_component('log').log("Image refused to load or URI did not reference a valid image: " + path, 
                     ORPG_GENERAL, True)
@@ -126,8 +119,7 @@ class ImageHandlerClass(object):
             del self.__fetching[path]
             open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, 
                 ORPG_GENERAL, True)
-        finally:
-            self.__lock.release()
+        finally: self.__lock.release()
 
     def __loadCacheThread(self, path, image_type, imageId):
         try:
@@ -146,8 +138,7 @@ class ImageHandlerClass(object):
         try:
             open_rpg.get_component('log').log("Adding Image to Queue from Cache: " + str(self.__cache[path]), ORPG_DEBUG)
             self.__queue.put((self.__cache[path], image_type, imageId))
-        finally:
-            self.__lock.release()
+        finally: self.__lock.release()
 
 #Property Methods
     def _getCache(self):

@@ -71,6 +71,7 @@ class item_msg(map_element_msg_base):
     def get_changed_xml(self,action="update",output_action=1):
         return map_element_msg_base.get_changed_xml(self,action,output_action)
 
+
 class whiteboard_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
@@ -85,26 +86,22 @@ class whiteboard_msg(map_element_msg_base):
                     self.init_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 item = item_msg(self.p_lock,c._get_nodeName())
-                try:
-                    item.init_from_dom(c)
+                try: item.init_from_dom(c)
                 except Exception, e:
                     print e
                     continue
                 id = item.get_prop("id")
                 action = item.get_prop("action")
-                if action == "new":
-                    self.children[id] = item
+                if action == "new": self.children[id] = item
                 elif action == "del":
                     if self.children.has_key(id):
                         self.children[id] = None
                         del self.children[id]
                 elif action == "update":
-                    if self.children.has_key(id):
-                        self.children[id].init_props(item.get_all_props())
+                    if self.children.has_key(id): self.children[id].init_props(item.get_all_props())
         else:
             self.p_lock.release()
-            raise Exception, 
-                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element in whiteboard"
+            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element in whiteboard"
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
@@ -115,22 +112,19 @@ class whiteboard_msg(map_element_msg_base):
                     self.set_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 item = item_msg(self.p_lock, c._get_nodeName())
-                try:
-                    item.set_from_dom(c)
+                try: item.set_from_dom(c)
                 except Exception, e:
                     print e
                     continue
                 id = item.get_prop("id")
                 action = item.get_prop("action")
-                if action == "new":
-                    self.children[id] = item
+                if action == "new": self.children[id] = item
                 elif action == "del":
                     if self.children.has_key(id):
                         self.children[id] = None
                         del self.children[id]
                 elif action == "update":
-                    if self.children.has_key(id):
-                        self.children[id].set_props(item.get_all_props())
+                    if self.children.has_key(id): self.children[id].set_props(item.get_all_props())
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element"

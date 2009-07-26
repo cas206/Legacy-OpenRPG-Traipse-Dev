@@ -36,8 +36,6 @@ class mini_msg(map_element_msg_base):
         self.tagname = "miniature"   # set this to be for minis.  Tagname gets used in some base class functions.
         map_element_msg_base.__init__(self,reentrant_lock_object)   # call base class
 
-
-
     # convenience method to use if only this mini is modified
     #   outputs a <map/> element containing only the changes to this mini
     def standalone_update_text(self,update_id_string):
@@ -51,13 +49,11 @@ class mini_msg(map_element_msg_base):
     #   outputs a <map/> element that deletes this mini
     def standalone_delete_text(self,update_id_string):
         buffer = None
-
         if self._props.has_key("id"):
             buffer = "<map id='" + update_id_string + "'>"
             buffer += "<miniatures>"
             buffer += "<miniature action='del' id='" + self._props("id") + "'/>"
             buffer += "</miniatures></map>"
-
         return buffer
 
     # convenience method to use if only this mini is modified
@@ -75,8 +71,6 @@ class mini_msg(map_element_msg_base):
     def get_changed_xml(self,action="update",output_action=1):
         return map_element_msg_base.get_changed_xml(self,action,output_action)
 
-
-
 class minis_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
@@ -92,20 +86,12 @@ class minis_msg(map_element_msg_base):
 
             for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
-
-                try:
-                    mini.init_from_dom(c)
-                except Exception, e:
-                    print e
-                    continue
-
+                try: mini.init_from_dom(c)
+                except Exception, e: print e; continue
                 id = mini.get_prop("id")
                 action = mini.get_prop("action")
 
-
-                if action == "new":
-                    self.children[id] = mini
-
+                if action == "new": self.children[id] = mini
                 elif action == "del":
                     if self.children.has_key(id):
                         self.children[id] = None
@@ -114,14 +100,10 @@ class minis_msg(map_element_msg_base):
                 elif action == "update":
                     if self.children.has_key(id):
                         self.children[id].init_props(mini.get_all_props())
-
         else:
             self.p_lock.release()
-            raise Exception, 
-                "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
+            raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
-
-
 
     def set_from_dom(self,xml_dom):
         self.p_lock.acquire()
@@ -133,27 +115,18 @@ class minis_msg(map_element_msg_base):
             for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
 
-                try:
-                    mini.set_from_dom(c)
-                except Exception, e:
-                    print e
-                    continue
-
+                try: mini.set_from_dom(c)
+                except Exception, e: print e; continue
                 id = mini.get_prop("id")
                 action = mini.get_prop("action")
-
-                if action == "new":
-                    self.children[id] = mini
-
+                if action == "new": self.children[id] = mini
                 elif action == "del":
                     if self.children.has_key(id):
                         self.children[id] = None
                         del self.children[id]
-
                 elif action == "update":
                     if self.children.has_key(id):
                         self.children[id].set_props(mini.get_all_props())
-
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to set a " + self.tagname + " from a non-<" + self.tagname + "/> element"

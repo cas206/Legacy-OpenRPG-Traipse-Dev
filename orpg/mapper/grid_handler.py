@@ -93,7 +93,8 @@ class grid_handler(base_layer_handler):
             return
 
         self.canvas.layers['grid'].set_grid(int(self.grid_size.GetValue()),self.grid_snap.GetValue(),
-            self.color_button.GetBackgroundColour(),self.grid_mode.GetSelection(),self.line_type.GetSelection(),float(self.grid_ratio.GetValue()))
+            self.color_button.GetBackgroundColour(),self.grid_mode.GetSelection(),
+            self.line_type.GetSelection(),float(self.grid_ratio.GetValue()))
         self.update_info()
         self.canvas.send_map_data()
         self.canvas.Refresh()

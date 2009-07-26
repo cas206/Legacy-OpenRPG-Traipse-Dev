@@ -161,10 +161,8 @@ class MapCanvas(wx.ScrolledWindow):
         if not self.cacheSizeSet:
             self.cacheSizeSet = True
             cacheSize = self.settings.get_setting("ImageCacheSize")
-            if len(cacheSize):
-                self.cacheSize = int(cacheSize)
-            else:
-                self.log.log("Default cache size being used.", ORPG_GENERAL)
+            if len(cacheSize): self.cacheSize = int(cacheSize)
+            else: self.log.log("Default cache size being used.", ORPG_GENERAL)
             self.log.log("Current image cache size is set at " + str(self.cacheSize) + " images, using random purge.", 
                 ORPG_GENERAL)
         if not ImageHandler.Queue.empty():
@@ -177,10 +175,8 @@ class MapCanvas(wx.ScrolledWindow):
                     min.set_bmp(img)
                 elif image_type == "background" or image_type == "texture":
                     self.layers['bg'].bg_bmp = img
-                    if image_type == "background":
-                        self.set_size([img.GetWidth(), img.GetHeight()])
-            except:
-                pass
+                    if image_type == "background": self.set_size([img.GetWidth(), img.GetHeight()])
+            except: pass
             # Flag that we now need to refresh!
             self.requireRefresh += 1
 
@@ -199,23 +195,19 @@ class MapCanvas(wx.ScrolledWindow):
                     self.lastRefreshValue = 0
                     self.lastRefreshTime = time.time()
                     self.Refresh(True)
-            else:
-                self.lastRefreshValue = self.requireRefresh
+            else: self.lastRefreshValue = self.requireRefresh
         self.log.log("Exit MapCanvas->processImages(self)", ORPG_DEBUG)
 
     def on_scroll(self, evt):
         self.log.log("Enter MapCanvas->on_scroll(self, evt)", ORPG_DEBUG)
-        if self.drag:
-            self.drag.Hide()
-        if self.settings.get_setting("AlwaysShowMapScale") == "1":
-            self.printscale()
+        if self.drag: self.drag.Hide()
+        if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
         self.log.log("Exit MapCanvas->on_scroll(self, evt)", ORPG_DEBUG)
 
     def on_char(self, evt):
         self.log.log("Enter MapCanvas->on_char(self, evt)", ORPG_DEBUG)
-        if self.settings.get_setting("AlwaysShowMapScale") == "1":
-            self.printscale()
+        if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
         self.log.log("Exit MapCanvas->on_char(self, evt)", ORPG_DEBUG)
 
@@ -234,8 +226,7 @@ class MapCanvas(wx.ScrolledWindow):
         wx.BeginBusyCursor()
         send_text = self.toxml(action)
         if send_text:
-            if not self.isEditor:
-                self.frame.session.send(send_text)
+            if not self.isEditor: self.frame.session.send(send_text)
         wx.EndBusyCursor()
         self.log.log("Exit MapCanvas->send_map_data(self, " + action +")", ORPG_DEBUG)
 
@@ -246,10 +237,8 @@ class MapCanvas(wx.ScrolledWindow):
 
     def set_size(self, size):
         self.log.log("Enter MapCanvas->set_size(self, size)", ORPG_DEBUG)
-        if size[0] < 300:
-            size = (300, size[1])
-        if size[1] < 300:
-            size = (size[0], 300)
+        if size[0] < 300: size = (300, size[1])
+        if size[1] < 300: size = (size[0], 300)
         self.size_changed = 1
         self.size = size
         self.fix_scroll()
@@ -316,10 +305,8 @@ class MapCanvas(wx.ScrolledWindow):
             wdc.DrawBitmap(bmp, topleft[0], topleft[1])
             if self.frame.settings.get_setting("AlwaysShowMapScale") == "1":
                 self.showmapscale(wdc)
-        try:
-            evt.Skip()
-        except:
-            pass
+        try: evt.Skip()
+        except: pass
         self.log.log("Exit MapCanvas->on_paint(self, evt)", ORPG_DEBUG)
 
     def preppaint(self):
@@ -356,8 +343,7 @@ class MapCanvas(wx.ScrolledWindow):
             # This means we need to determine where to snap our line.  We will support
             # snapping to four different snapPoints per square for now.
             # TODO!!!
-            if self.layers['grid'].mode == GRID_HEXAGON:
-                size = self.layers['grid'].unit_size_y
+            if self.layers['grid'].mode == GRID_HEXAGON: size = self.layers['grid'].unit_size_y
             else:
                 size = int(self.layers['grid'].unit_size)
                 # Find the uppper left hand corner of the grid we are to snap to
@@ -369,15 +355,11 @@ class MapCanvas(wx.ScrolledWindow):
                 # Now, figure our what quadrant (x, y) we need to snap to
                 snapSize = size / 2
                 # Figure out the X snap placement
-                if deltaX <= snapSize:
-                    quadXPos = offsetX
-                else:
-                    quadXPos = offsetX + size
+                if deltaX <= snapSize: quadXPos = offsetX
+                else: quadXPos = offsetX + size
                 # Now, figure out the Y snap placement
-                if deltaY <= snapSize:
-                    quadYPos = offsetY
-                else:
-                    quadYPos = offsetY + size
+                if deltaY <= snapSize: quadYPos = offsetY
+                else: quadYPos = offsetY + size
                 # Create our snap snapPoint and return it
                 snapPoint = wx.Point( quadXPos, quadYPos )
         self.log.log("Exit MapCanvas->snapMarker(self, snapPoint)", ORPG_DEBUG)
@@ -387,10 +369,8 @@ class MapCanvas(wx.ScrolledWindow):
     def calcSlope(self, start, stop):
         """Calculates the slop of a line and returns it."""
         self.log.log("Enter MapCanvas->calcSlope(self, start, stop)", ORPG_DEBUG)
-        if start.x == stop.x:
-            s = 0.0001
-        else:
-            s = float((stop.y - start.y)) / float((stop.x - start.x))
+        if start.x == stop.x: s = 0.0001
+        else: s = float((stop.y - start.y)) / float((stop.x - start.x))
         self.log.log("Exit MapCanvas->calcSlope(self, start, stop)", ORPG_DEBUG)
         return s
 
@@ -400,14 +380,9 @@ class MapCanvas(wx.ScrolledWindow):
         # See if the slope is neg or positive
         if slope == abs(slope):
             # Slope is positive, so make sure it's not zero
-            if slope == 0:
-                a = 0
-            else:
-                # We are positive and NOT zero
-                a = 360 - atan(slope) * (180.0/pi)
-        else:
-            # Slope is negative so work on the abs of it
-            a = atan(abs(slope)) * (180.0/pi)
+            if slope == 0: a = 0
+            else: a = 360 - atan(slope) * (180.0/pi)
+        else: a = atan(abs(slope)) * (180.0/pi)
         self.log.log("Exit MapCanvas->calcSlopeToAngle(self, slope)", ORPG_DEBUG)
         return a
 
@@ -432,15 +407,11 @@ class MapCanvas(wx.ScrolledWindow):
         distance = self.calcPixelDistance( start, stop )
         ln = "%0.2f" % lineAngle
         if self.layers['grid'].mode == GRID_HEXAGON:
-            if ln == "0.00" or ln == "359.99":
-                ud = distance / self.layers['grid'].unit_size_y
-            else:
-                ud = (sqrt(abs((stop.x - start.x)**2 + (stop.y - start.y)**2))) / self.layers['grid'].unit_size_y
+            if ln == "0.00" or ln == "359.99": ud = distance / self.layers['grid'].unit_size_y
+            else: ud = (sqrt(abs((stop.x - start.x)**2 + (stop.y - start.y)**2))) / self.layers['grid'].unit_size_y
         else:
-            if ln == "0.00" or ln == "359.99":
-                ud = distance / self.layers['grid'].unit_size
-            else:
-                ud = (sqrt(abs((stop.x - start.x)**2 + (stop.y - start.y)**2))) / self.layers['grid'].unit_size
+            if ln == "0.00" or ln == "359.99": ud = distance / self.layers['grid'].unit_size
+            else: ud = (sqrt(abs((stop.x - start.x)**2 + (stop.y - start.y)**2))) / self.layers['grid'].unit_size
             #ud = sqrt( abs((stop.x - start.x)**2 - (stop.y - start.y)**2) )
         self.log.log("Exit MapCanvas->calcUnitDistance(self, start, stop, lineAngle)", ORPG_DEBUG)
         return ud
@@ -555,50 +526,39 @@ class MapCanvas(wx.ScrolledWindow):
     # MODE 1 = MOVE, MODE 2 = whiteboard, MODE 3 = Tape measure
     def on_left_down(self, evt):
         self.log.log("Enter MapCanvas->on_left_down(self, evt)", ORPG_DEBUG)
-        if evt.ShiftDown():
-            self.on_tape_down (evt)
-        else:
-            self.frame.on_left_down(evt)
+        if evt.ShiftDown(): self.on_tape_down (evt)
+        else: self.frame.on_left_down(evt)
         self.log.log("Exit MapCanvas->on_left_down(self, evt)", ORPG_DEBUG)
 
     def on_right_down(self, evt):
         self.log.log("Enter MapCanvas->on_right_down(self, evt)", ORPG_DEBUG)
-        if evt.ShiftDown():
-            pass
-        else:
-            self.frame.on_right_down(evt)
+        if evt.ShiftDown(): pass
+        else: self.frame.on_right_down(evt)
         self.log.log("Exit MapCanvas->on_right_down(self, evt)", ORPG_DEBUG)
 
     def on_left_dclick(self, evt):
         self.log.log("Enter MapCanvas->on_left_dclick(self, evt)", ORPG_DEBUG)
-        if evt.ShiftDown():
-            pass
-        else:
-            self.frame.on_left_dclick(evt)
+        if evt.ShiftDown(): pass
+        else: self.frame.on_left_dclick(evt)
         self.log.log("Exit MapCanvas->on_left_dclick(self, evt)", ORPG_DEBUG)
 
     def on_left_up(self, evt):
         self.log.log("Enter MapCanvas->on_left_up(self, evt)", ORPG_DEBUG)
-        if evt.ShiftDown():
-            self.on_tape_up(evt)
+        if evt.ShiftDown(): self.on_tape_up(evt)
         elif open_rpg.get_component("tree").dragging:
             tree = open_rpg.get_component("tree")
             if tree.drag_obj.map_aware():
                 tree.drag_obj.on_send_to_map(evt)
                 tree.dragging = False
                 tree.drag_obj = None
-        else:
-            self.frame.on_left_up(evt)
+        else: self.frame.on_left_up(evt)
         self.log.log("Exit MapCanvas->on_left_up(self, evt)", ORPG_DEBUG)
 
     def on_motion(self, evt):
         self.log.log("Enter MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
-        if evt.ShiftDown():
-            self.on_tape_motion(evt)
-        elif evt.LeftIsDown() and open_rpg.get_component("tree").dragging:
-            pass
-        else:
-            self.frame.on_motion(evt)
+        if evt.ShiftDown(): self.on_tape_motion(evt)
+        elif evt.LeftIsDown() and open_rpg.get_component("tree").dragging: pass
+        else: self.frame.on_motion(evt)
         self.log.log("Exit MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
 
     def on_zoom_out(self, evt):
@@ -685,23 +645,17 @@ class MapCanvas(wx.ScrolledWindow):
 
     def add_miniature(self, min_url, min_label='', min_unique=-1):
         self.log.log("Enter MapCanvas->add_miniature(self, min_url, min_label, min_unique)", ORPG_DEBUG)
-        if min_unique == -1:
-            min_unique = not self.use_serial
-        if min_url == "" or min_url == "http://":
-            return
-        if min_url[:7] != "http://" :
-            min_url = "http://" + min_url
+        if min_unique == -1: min_unique = not self.use_serial
+        if min_url == "" or min_url == "http://": return
+        if min_url[:7] != "http://" : min_url = "http://" + min_url
         # make label
         wx.BeginBusyCursor()
         if self.auto_label:
-            if min_label == '':
-                min_label = self.get_label_from_url( min_url )
+            if min_label == '': min_label = self.get_label_from_url( min_url )
             if not min_unique and self.use_serial:
                 min_label = '%s %d' % ( min_label, self.layers['miniatures'].next_serial() )
-        else:
-            min_label = ""
-        if self.frame.min_url.FindString(min_url) == -1:
-            self.frame.min_url.Append(min_url)
+        else: min_label = ""
+        if self.frame.min_url.FindString(min_url) == -1: self.frame.min_url.Append(min_url)
         try:
             id = 'mini-' + self.frame.session.get_next_id()
             self.layers['miniatures'].add_miniature(id, min_url, label=min_label)
@@ -736,8 +690,7 @@ class MapCanvas(wx.ScrolledWindow):
         s = ""
         keys = self.layers.keys()
         for k in keys:
-            if (k != "fog" or action != "update"):
-                s += self.layers[k].layerToXML(action)
+            if (k != "fog" or action != "update"): s += self.layers[k].layerToXML(action)
         self.size_changed = 0
         if s:
             self.log.log("Exit MapCanvas->toxml(self, " + action + ")", ORPG_DEBUG)
@@ -768,34 +721,23 @@ class MapCanvas(wx.ScrolledWindow):
                 self.log.log("Exit MapCanvas->takexml(self, xml)", ORPG_DEBUG)
                 return
             node_list = xml_dom.getElementsByTagName("map")
-            if len(node_list) < 1:
-                self.log.log("Invalid XML format for mapper", ORPG_INFO)
+            if len(node_list) < 1: self.log.log("Invalid XML format for mapper", ORPG_INFO)
             else:
                 # set map version to incoming data so layers can convert
                 self.map_version = node_list[0].getAttribute("version")
                 action = node_list[0].getAttribute("action")
                 if action == "new":
                     self.layers = {}
-                    try:
-                        self.layers['bg'] = layer_back_ground(self)
-                    except:
-                        pass
-                    try:
-                        self.layers['grid'] = grid_layer(self)
-                    except:
-                        pass
-                    try:
-                        self.layers['miniatures'] = miniature_layer(self)
-                    except:
-                        pass
-                    try:
-                        self.layers['whiteboard'] = whiteboard_layer(self)
-                    except:
-                        pass
-                    try:
-                        self.layers['fog'] = fog_layer(self)
-                    except:
-                        pass
+                    try: self.layers['bg'] = layer_back_ground(self)
+                    except: pass
+                    try: self.layers['grid'] = grid_layer(self)
+                    except: pass
+                    try: self.layers['miniatures'] = miniature_layer(self)
+                    except: pass
+                    try: self.layers['whiteboard'] = whiteboard_layer(self)
+                    except: pass
+                    try: self.layers['fog'] = fog_layer(self)
+                    except: pass
                 sizex = node_list[0].getAttribute("sizex")
                 if sizex != "":
                     sizex = int(float(sizex))
@@ -812,12 +754,10 @@ class MapCanvas(wx.ScrolledWindow):
                 #fog layer must be computed first, so that no data is inadvertently revealed
                 for c in children:
                     name = c._get_nodeName()
-                    if name == "fog":
-                        self.layers[name].layerTakeDOM(c)
+                    if name == "fog": self.layers[name].layerTakeDOM(c)
                 for c in children:
                     name = c._get_nodeName()
-                    if name != "fog":
-                        self.layers[name].layerTakeDOM(c)
+                    if name != "fog": self.layers[name].layerTakeDOM(c)
                 # all map data should be converted, set map version to current version
                 self.map_version = MAP_VERSION
                 self.Refresh(False)
@@ -833,8 +773,7 @@ class MapCanvas(wx.ScrolledWindow):
         tmp_map = map_msg()
         xml_dom = parseXml(str(xml))
         node_list = xml_dom.getElementsByTagName("map")
-        if len(node_list) < 1:
-            self.log.log("Invalid XML format for mapper", ORPG_INFO)
+        if len(node_list) < 1: self.log.log("Invalid XML format for mapper", ORPG_INFO)
         else:
             tmp_map.init_from_dom(node_list[0])
             if tmp_map.children.has_key("miniatures"):
@@ -856,16 +795,12 @@ class MapCanvas(wx.ScrolledWindow):
                     if lines:
                         for line in lines:
                             l = whiteboard_layer.children[line]
-                            if l.tagname == 'line':
-                                id = 'line-' + self.frame.session.get_next_id()
-                            elif l.tagname == 'text':
-                                id = 'text-' + self.frame.session.get_next_id()
-                            elif l.tagname == 'circle':
-                                id = 'circle-' + self.frame.session.get_next_id()
+                            if l.tagname == 'line': id = 'line-' + self.frame.session.get_next_id()
+                            elif l.tagname == 'text': id = 'text-' + self.frame.session.get_next_id()
+                            elif l.tagname == 'circle': id = 'circle-' + self.frame.session.get_next_id()
                             l.init_prop("id", id)
             new_xml = tmp_map.get_all_xml()
-        if xml_dom:
-            xml_dom.unlink()
+        if xml_dom: xml_dom.unlink()
         self.log.log("Exit MapCanvas->re_ids_in_xml(self, xml)", ORPG_DEBUG)
         return str(new_xml)
 
@@ -896,12 +831,10 @@ class map_wnd(wx.Panel):
         self.layer_handlers.append(map_handler(self.layer_tabs,-1,self.canvas))
         self.layer_tabs.AddPage(self.layer_handlers[5],"General")
         self.layer_tabs.SetSelection(2)
-
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, 1, wx.EXPAND)
         self.sizer.Add(self.layer_tabs, 0, wx.EXPAND)
         self.SetSizer(self.sizer)
-
         self.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.on_layer_change)
         #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeave)
@@ -909,8 +842,7 @@ class map_wnd(wx.Panel):
         self.log.log("Exit map_wnd", ORPG_DEBUG)
 
     def OnLeave(self, evt):
-        if "__WXGTK__" in wx.PlatformInfo:
-            wx.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+        if "__WXGTK__" in wx.PlatformInfo: wx.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
     def load_default(self):
         self.log.log("Enter map_wnd->load_default(self)", ORPG_DEBUG)
@@ -991,14 +923,11 @@ class map_wnd(wx.Panel):
         self.log.log("Enter map_wnd->on_layer_change(self, evt)", ORPG_DEBUG)
         layer = self.layer_tabs.GetPage(evt.GetSelection())
         for i in xrange(0, len(self.layer_handlers)):
-            if layer == self.layer_handlers[i]:
-                self.current_layer = i
+            if layer == self.layer_handlers[i]: self.current_layer = i
         if self.current_layer == 0:
             bg = self.layer_handlers[0]
-            if (self.session.my_role() != self.session.ROLE_GM):
-                bg.url_path.Show(False)
-            else:
-                bg.url_path.Show(True)
+            if (self.session.my_role() != self.session.ROLE_GM): bg.url_path.Show(False)
+            else: bg.url_path.Show(True)
         self.canvas.Refresh(False)
         evt.Skip()
         self.log.log("Exit map_wnd->on_layer_change(self, evt)", ORPG_DEBUG)
@@ -1062,18 +991,12 @@ class map_wnd(wx.Panel):
         self.log.log("Enter map_wnd->on_hk_map_layer(self, evt)", ORPG_DEBUG)
         id = self.top_frame.mainmenu.GetHelpString(evt.GetId())
         #print evt.GetMenu().GetTitle()
-        if id == "Background Layer":
-            self.current_layer = self.get_tab_index("Background")
-        if id == "Grid Layer":
-            self.current_layer = self.get_tab_index("Grid")
-        if id == "Miniature Layer":
-            self.current_layer = self.get_tab_index("Miniatures")
-        elif id == "Whiteboard Layer":
-            self.current_layer = self.get_tab_index("Whiteboard")
-        elif id == "Fog Layer":
-            self.current_layer = self.get_tab_index("Fog")
-        elif id == "General Properties":
-            self.current_layer = self.get_tab_index("General")
+        if id == "Background Layer": self.current_layer = self.get_tab_index("Background")
+        if id == "Grid Layer": self.current_layer = self.get_tab_index("Grid")
+        if id == "Miniature Layer": self.current_layer = self.get_tab_index("Miniatures")
+        elif id == "Whiteboard Layer": self.current_layer = self.get_tab_index("Whiteboard")
+        elif id == "Fog Layer": self.current_layer = self.get_tab_index("Fog")
+        elif id == "General Properties": self.current_layer = self.get_tab_index("General")
         self.layer_tabs.SetSelection(self.current_layer)
         self.log.log("Exit map_wnd->on_hk_map_layer(self, evt)", ORPG_DEBUG)
 
