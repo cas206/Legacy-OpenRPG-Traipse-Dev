@@ -64,7 +64,8 @@ class Element:
         out += '>'
         if recursive:
             content = 0
-            for x in self._dir: if isinstance(x, Element): content = 1
+            for x in self._dir: 
+                if isinstance(x, Element): content = 1
             pad = '\n' + ('\t' * recursive)
             for x in self._dir:
                 if multiline and content: out +=  pad
@@ -72,7 +73,8 @@ class Element:
                 elif isinstance(x, Element): out += x.__repr__(recursive+1, multiline, inprefixes.copy())
                 else: raise TypeError, "I wasn't expecting "+`x`+"."
             if multiline and content: out += '\n' + ('\t' * (recursive-1))
-        else: if self._dir: out += '...'
+        else: 
+            if self._dir: out += '...'
         out += '</'+qname(self._name, inprefixes)+'>'
         return out
 
