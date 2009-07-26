@@ -614,7 +614,8 @@ class miniature_layer(layer_base):
         for c in children:
             action = c.getAttribute("action")
             id = c.getAttribute('id')
-            if action == "del": mini = self.get_miniature_by_id(id)
+            if action == "del": 
+                mini = self.get_miniature_by_id(id)
                 if mini:
                     self.miniatures.remove(mini)
                     del mini
