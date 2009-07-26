@@ -122,23 +122,23 @@ class ImageHandlerClass(object):
         finally: self.__lock.release()
 
     def __loadCacheThread(self, path, image_type, imageId):
-        try:
-            st = time.time()
-            while self.__fetching.has_key(path) and self.__fetching[path] is not False:
-                time.sleep(0.025)
-                if (time.time()-st) > 120:
-                    open_rpg.get_component('log').log("Timeout: " + path, ORPG_GENERAL, True)
-                    break
-        except:
-            self.__fetching[path] = False
-            open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, 
-                ORPG_GENERAL, True)
-            return 
-        self.__lock.acquire()
-        try:
-            open_rpg.get_component('log').log("Adding Image to Queue from Cache: " + str(self.__cache[path]), ORPG_DEBUG)
-            self.__queue.put((self.__cache[path], image_type, imageId))
-        finally: self.__lock.release()
+        if self.__cache.has_key(path):
+            try:
+                st = time.time()
+                while self.__fetching.has_key(path) and self.__fetching[path] is not False:
+                    time.sleep(0.025)
+                    if (time.time()-st) > 120:
+                        open_rpg.get_component('log').log("Timeout: " + path, ORPG_GENERAL, True)
+                        break
+            except:
+                del self.__fetching[path]
+                open_rpg.get_component('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, ORPG_GENERAL, True)
+                return 
+            self.__lock.acquire()
+            try:
+                open_rpg.get_component('log').log("Adding Image to Queue from Cache: " + str(self.__cache[path]), ORPG_DEBUG)
+                self.__queue.put((self.__cache[path], image_type, imageId))
+            finally: self.__lock.release()
 
 #Property Methods
     def _getCache(self):
