@@ -257,8 +257,7 @@ class player_list(wx.ListCtrl):
             try:
                 self.wgMenu.Remove(WG_MENU_LIST[mid]["menuid"])
                 WG_MENU_LIST[mid]["menu"].Destroy()
-            except:
-                self.wgMenu.UpdateUI()
+            except: self.wgMenu.UpdateUI()
         if self.wgMenu.GetMenuItemCount() == 2: WG_MENU_LIST.clear()
         return
 
@@ -359,8 +358,7 @@ class player_list(wx.ListCtrl):
         if id == PLAYER_BOOT:
             id = str(self.GetItemData(self.selected_item))
             boot_pwd = self.password_manager.GetPassword("admin",int(self.session.group_id))
-            if boot_pwd != None:
-                self.session.boot_player(id,boot_pwd)
+            if boot_pwd != None: self.session.boot_player(id,boot_pwd)
         elif id == PLAYER_WHISPER:
             id = self.GetItemText(self.selected_item)
             self.chat = open_rpg.get_component("chat")
@@ -385,7 +383,7 @@ class player_list(wx.ListCtrl):
         if item > -1:
             self.selected_item = item
             #  This if-else block makes the menu item to boot players active or inactive, as appropriate
-	    # This block is enabled for 1.7.8. Ver. 1.7.9 will boast Admin features.
+            # This block is enabled for 1.7.8. Ver. 1.7.9 will boast Admin features.
             #if open_rpg.get_component("session").group_id == "0":
             #    self.menu.Enable(PLAYER_BOOT,0)
             #    self.menu.SetLabel(PLAYER_BOOT,"Can't boot from Lobby")
@@ -460,8 +458,7 @@ class player_list(wx.ListCtrl):
 # [START] Digitalxero Multi Whisper Group 1/1/05
 #---------------------------------------------------------
         for gid in WG_LIST:
-            if WG_LIST[gid].has_key(int(player[2])):
-                del WG_LIST[gid][int(player[2])]
+            if WG_LIST[gid].has_key(int(player[2])): del WG_LIST[gid][int(player[2])]
 #---------------------------------------------------------
 # [END] Digitalxero Multi Whisper Group 1/1/05
 #---------------------------------------------------------
@@ -477,8 +474,7 @@ class player_list(wx.ListCtrl):
         index = 0
         while index < ic:
             item = self.GetItem( index )
-            if item.GetImage():
-                self.whisperCount += 1
+            if item.GetImage(): self.whisperCount += 1
             index += 1
         self.colorize_player_list()
         self.Refresh()
@@ -492,7 +488,7 @@ class player_list(wx.ListCtrl):
     #
     def update_player(self,player):
         i = self.FindItemData(-1,int(player[2]))  #  finds the right list box index
-        self.SetStringItem(i,1,self.strip_html(player))
+        self.SetStringItem(i,1,player[0])
         self.SetStringItem(i,2,player[3])
         item = self.GetItem(i)
         self.colorize_player_list()
@@ -502,8 +498,7 @@ class player_list(wx.ListCtrl):
         session = open_rpg.get_component("session")
         settings = open_rpg.get_component('settings')
         mode = settings.get_setting("ColorizeRoles")
-        if mode.lower() == "0":
-            return
+        if mode.lower() == "0": return
         players = session.players
         for m in players.keys():
             item_list_location = self.FindItemData(-1,int(m))
@@ -512,8 +507,7 @@ class player_list(wx.ListCtrl):
             item = self.GetItem(item_list_location)
             role = player_info[7]
             color = wx.GREEN
-            if self.session.group_id != "0":
-                item.SetTextColour(settings.get_setting(role + "RoleColor"))
+            if self.session.group_id != "0": item.SetTextColour(settings.get_setting(role + "RoleColor"))
             self.SetItem(item)
 
     def reset(self):

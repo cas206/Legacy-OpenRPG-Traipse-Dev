@@ -45,16 +45,13 @@ class orpgSettings:
         temp_file.close()
         self.xml_dom = self.xml.parseXml(txt)
 
-        if self.xml_dom is None:
-            self.rebuildSettings()
+        if self.xml_dom is None: self.rebuildSettings()
         self.xml_dom = self.xml_dom._get_documentElement()
 
     def rebuildSettings(self):
         self.log.log("Settings file has be corrupted, rebuilding settings.", ORPG_INFO, True)
-        try:
-            os.remove(self.filename)
-        except:
-            pass
+        try: os.remove(self.filename)
+        except: pass
 
         self.validate.config_file("settings.xml","default_settings.xml")
         temp_file = open(self.filename)
@@ -63,10 +60,8 @@ class orpgSettings:
         self.xml_dom = self.xml.parseXml(txt)
 
     def get_setting(self, name):
-        try:
-            return self.xml_dom.getElementsByTagName(name)[0].getAttribute("value")
-        except:
-            return 0
+        try: return self.xml_dom.getElementsByTagName(name)[0].getAttribute("value")
+        except: return 0
 
     def get_setting_keys(self):
         keys = []
@@ -74,16 +69,14 @@ class orpgSettings:
         for i in xrange(0, len(tabs)):
             if tabs[i].getAttribute("type") == 'grid':
                 children = tabs[i]._get_childNodes()
-                for c in children:
-                    keys.append(c._get_tagName())
+                for c in children: keys.append(c._get_tagName())
         return keys
 
     def set_setting(self, name, value):
         self.xml_dom.getElementsByTagName(name)[0].setAttribute("value", value)
 
     def add_setting(self, tab, setting, value, options, help):
-        if len(self.xml_dom.getElementsByTagName(setting)) > 0:
-            return False
+        if len(self.xml_dom.getElementsByTagName(setting)) > 0: return False
         tabs = self.xml_dom.getElementsByTagName("tab")
         newsetting = self.xml.parseXml('<' + setting + ' value="' + value + '" options="' + options + '" help="' + help + '" />')._get_documentElement()
         for i in xrange(0, len(tabs)):
@@ -94,10 +87,8 @@ class orpgSettings:
 
     def add_tab(self, parent, tabname, tabtype):
         tab_xml = '<tab '
-        if tabtype == 'text':
-            tab_xml += 'name="' + tabname + '" type="text" />'
-        else:
-            tab_xml += 'name="' + tabname + '" type="' + tabtype + '"></tab>'
+        if tabtype == 'text': tab_xml += 'name="' + tabname + '" type="text" />'
+        else: tab_xml += 'name="' + tabname + '" type="' + tabtype + '"></tab>'
         newtab = self.xml.parseXml(tab_xml)._get_documentElement()
         if parent != None:
             tabs = self.xml_dom.getElementsByTagName("tab")
@@ -105,15 +96,13 @@ class orpgSettings:
                 if tabs[i].getAttribute("name") == parent and tabs[i].getAttribute("type") == 'tab':
                     children = tabs[i]._get_childNodes()
                     for c in children:
-                        if c.getAttribute("name") == tabname:
-                            return False
+                        if c.getAttribute("name") == tabname: return False
                     tabs[i].appendChild(newtab)
                     return True
         else:
             children = self.xml_dom._get_childNodes()
             for c in children:
-                if c.getAttribute("name") == tabname:
-                    return False
+                if c.getAttribute("name") == tabname: return False
             self.xml_dom.appendChild(newtab)
             return True
         return False
@@ -125,8 +114,7 @@ class orpgSettings:
         temp_file.close()
         default_dom = self.xml.parseXml(txt)._get_documentElement()
         for child in default_dom.getChildren():
-            if child._get_tagName() == 'tab' and child.hasChildNodes():
-                self.proccessChildren(child)
+            if child._get_tagName() == 'tab' and child.hasChildNodes(): self.proccessChildren(child)
         default_dom.unlink()
 
     def proccessChildren(self, dom, parent=None):
@@ -180,14 +168,12 @@ class orpgSettingsWnd(wx.Dialog):
         temp_file = open(filename)
         temp_file.close()
         children = self.settings.xml_dom._get_childNodes()
-        for c in children:
-            self.build_window(c,self.tabber)
+        for c in children: self.build_window(c,self.tabber)
 
     def build_window(self, xml_dom, parent_wnd):
         name = xml_dom._get_nodeName()
         #container = 0
-        if name=="tab":
-            temp_wnd = self.do_tab_window(xml_dom,parent_wnd)
+        if name=="tab": temp_wnd = self.do_tab_window(xml_dom,parent_wnd)
         return temp_wnd
 
     def do_tab_window(self, xml_dom, parent_wnd):
@@ -201,15 +187,13 @@ class orpgSettingsWnd(wx.Dialog):
             temp_wnd = orpgTabberWnd(parent_wnd, style=FNB.FNB_NO_X_BUTTON)
             children = xml_dom._get_childNodes()
             for c in children:
-                if c._get_nodeName() == "tab":
-                    self.do_tab_window(c, temp_wnd)
+                if c._get_nodeName() == "tab": self.do_tab_window(c, temp_wnd)
             temp_wnd.SetSelection(0)
             parent_wnd.AddPage(temp_wnd, name, False)
         elif type == "text":
             temp_wnd = wx.TextCtrl(parent_wnd,-1)
             parent_wnd.AddPage(temp_wnd, name, False)
-        else:
-            temp_wnd = None
+        else: temp_wnd = None
         return temp_wnd
 
     def do_grid_tab(self, xml_dom, parent_wnd):
@@ -233,8 +217,7 @@ class orpgSettingsWnd(wx.Dialog):
             try:
                 style = wnd.GetWindowStyleFlag()
                 new.append(wnd)
-            except:
-                pass
+            except: pass
         tabbedwindows = new
         open_rpg.add_component("tabbedWindows", tabbedwindows)
         rgbconvert = RGBHex()
@@ -277,27 +260,26 @@ class orpgSettingsWnd(wx.Dialog):
                     top_frame.players.SetForegroundColour('black')
                     top_frame.players.Refresh()
 
-            if self.changes[i][0] == 'GMWhisperTab' and self.changes[i][1] == '1':
-                self.chat.parent.create_gm_tab()
+            if self.changes[i][0] == 'GMWhisperTab' and self.changes[i][1] == '1': self.chat.parent.create_gm_tab()
             self.toggleToolBars(self.chat, self.changes[i])
-            try:
-                self.toggleToolBars(self.chat.parent.GMChatPanel, self.changes[i])
-            except:
-                pass
-            for panel in self.chat.parent.whisper_tabs:
-                self.toggleToolBars(panel, self.changes[i])
-            for panel in self.chat.parent.group_tabs:
-                self.toggleToolBars(panel, self.changes[i])
-            for panel in self.chat.parent.null_tabs:
-                self.toggleToolBars(panel, self.changes[i])
+            try: self.toggleToolBars(self.chat.parent.GMChatPanel, self.changes[i])
+            except: pass
+            for panel in self.chat.parent.whisper_tabs: self.toggleToolBars(panel, self.changes[i])
+            for panel in self.chat.parent.group_tabs: self.toggleToolBars(panel, self.changes[i])
+            for panel in self.chat.parent.null_tabs: self.toggleToolBars(panel, self.changes[i])
 
-            if self.changes[i][0] == 'player':
-                self.session.name = self.changes[i][1]
+            if self.changes[i][0] == 'player': self.session.name = str(self.changes[i][1])
 
-            if (self.changes[i][0] == 'TabTheme' and (self.changes[i][1] == 'customflat' or self.changes[i][1] == 'customslant')) or\
+            if (self.changes[i][0][:3] == 'Tab' and self.changes[i][1][:6] == 'custom') or\
+                (self.changes[i][0][:3] == 'Tab' and self.settings.get_setting('TabTheme')[:6] == 'custom'):
+
+                """ Old code.  Can be removed, staying in for Dev purposes.
+                if (self.changes[i][0] == 'TabTheme' and (self.changes[i][1] == 'customflat' or self.changes[i][1] == 'customslant')) or\
                 (self.changes[i][0] == 'TabTextColor' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')) or\
                 (self.changes[i][0] == 'TabGradientFrom' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')) or\
                 (self.changes[i][0] == 'TabGradientTo' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')):
+                """
+
                 gfrom = self.settings.get_setting('TabGradientFrom')
                 (fred, fgreen, fblue) = rgbconvert.rgb_tuple(gfrom)
 
@@ -311,10 +293,8 @@ class orpgSettingsWnd(wx.Dialog):
                     # remove old tabs style
                     mirror = ~(FNB.FNB_VC71 | FNB.FNB_VC8 | FNB.FNB_FANCY_TABS | FNB.FNB_COLORFUL_TABS)
                     style &= mirror
-                    if self.settings.get_setting('TabTheme') == 'customslant':
-                        style |= FNB.FNB_VC8
-                    else:
-                        style |= FNB.FNB_FANCY_TABS
+                    if self.settings.get_setting('TabTheme') == 'customslant': style |= FNB.FNB_VC8
+                    else: style |= FNB.FNB_FANCY_TABS
                     wnd.SetWindowStyleFlag(style)
                     wnd.SetGradientColourTo(wx.Color(tored, togreen, toblue))
                     wnd.SetGradientColourFrom(wx.Color(fred, fgreen, fblue))
@@ -330,12 +310,9 @@ class orpgSettingsWnd(wx.Dialog):
         self.Destroy()
 
     def toggleToolBars(self, panel, changes):
-        if changes[0] == 'AliasTool_On':
-            panel.toggle_alias(changes[1])
-        elif changes[0] == 'DiceButtons_On':
-            panel.toggle_dice(changes[1])
-        elif changes[0] == 'FormattingButtons_On':
-            panel.toggle_formating(changes[1])
+        if changes[0] == 'AliasTool_On': panel.toggle_alias(changes[1])
+        elif changes[0] == 'DiceButtons_On': panel.toggle_dice(changes[1])
+        elif changes[0] == 'FormattingButtons_On': panel.toggle_formating(changes[1])
 
 class settings_grid(wx.grid.Grid):
     """grid for gen info"""
@@ -354,15 +331,13 @@ class settings_grid(wx.grid.Grid):
         for i in range(len(settings)):
             self.SetCellValue(i,0,settings[i][0])
             self.SetCellValue(i,1,settings[i][1])
-            if settings[i][1] and settings[i][1][0] == '#':
-                self.SetCellBackgroundColour(i,1,settings[i][1])
+            if settings[i][1] and settings[i][1][0] == '#': self.SetCellBackgroundColour(i,1,settings[i][1])
             self.SetCellValue(i,2,settings[i][2])
 
     def on_left_click(self,evt):
         row = evt.GetRow()
         col = evt.GetCol()
-        if col == 2:
-            return
+        if col == 2: return
         elif col == 0:
             name = self.GetCellValue(row,0)
             str = self.settings[row][3]
@@ -379,14 +354,12 @@ class settings_grid(wx.grid.Grid):
                     self.Refresh()
                     setting = self.GetCellValue(row,0)
                     self.setting_data.append([setting, hexcolor])
-            else:
-                evt.Skip()
+            else: evt.Skip()
 
     def on_cell_change(self,evt):
         row = evt.GetRow()
         col = evt.GetCol()
-        if col != 1:
-            return
+        if col != 1: return
         setting = self.GetCellValue(row,0)
         value = self.GetCellValue(row,1)
         self.setting_data.append([setting, value])
@@ -395,8 +368,7 @@ class settings_grid(wx.grid.Grid):
         (w,h) = self.GetClientSizeTuple()
         rows = self.GetNumberRows()
         minh = 0
-        for i in range (0,rows):
-            minh += self.GetRowSize(i)
+        for i in range (0,rows): minh += self.GetRowSize(i)
         minh += 120
         return minh
 
@@ -404,6 +376,5 @@ class settings_grid(wx.grid.Grid):
         (w,h) = self.GetClientSizeTuple()
         cols = self.GetNumberCols()
         col_w = w/(cols)
-        for i in range(0,cols):
-            self.SetColSize(i,col_w)
+        for i in range(0,cols): self.SetColSize(i,col_w)
         self.Refresh()
