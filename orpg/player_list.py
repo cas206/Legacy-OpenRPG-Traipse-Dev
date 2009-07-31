@@ -488,7 +488,7 @@ class player_list(wx.ListCtrl):
     #
     def update_player(self,player):
         i = self.FindItemData(-1,int(player[2]))  #  finds the right list box index
-        self.SetStringItem(i,1,player[0])
+        self.SetStringItem(i,1,self.strip_html(player))
         self.SetStringItem(i,2,player[3])
         item = self.GetItem(i)
         self.colorize_player_list()

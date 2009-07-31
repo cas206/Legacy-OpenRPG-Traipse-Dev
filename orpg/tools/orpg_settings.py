@@ -273,13 +273,6 @@ class orpgSettingsWnd(wx.Dialog):
             if (self.changes[i][0][:3] == 'Tab' and self.changes[i][1][:6] == 'custom') or\
                 (self.changes[i][0][:3] == 'Tab' and self.settings.get_setting('TabTheme')[:6] == 'custom'):
 
-                """ Old code.  Can be removed, staying in for Dev purposes.
-                if (self.changes[i][0] == 'TabTheme' and (self.changes[i][1] == 'customflat' or self.changes[i][1] == 'customslant')) or\
-                (self.changes[i][0] == 'TabTextColor' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')) or\
-                (self.changes[i][0] == 'TabGradientFrom' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')) or\
-                (self.changes[i][0] == 'TabGradientTo' and (self.settings.get_setting('TabTheme') == 'customflat' or self.settings.get_setting('TabTheme') == 'customslant')):
-                """
-
                 gfrom = self.settings.get_setting('TabGradientFrom')
                 (fred, fgreen, fblue) = rgbconvert.rgb_tuple(gfrom)
 
@@ -288,6 +281,7 @@ class orpgSettingsWnd(wx.Dialog):
 
                 tabtext = self.settings.get_setting('TabTextColor')
                 (tred, tgreen, tblue) = rgbconvert.rgb_tuple(tabtext)
+
                 for wnd in tabbedwindows:
                     style = wnd.GetWindowStyleFlag()
                     # remove old tabs style

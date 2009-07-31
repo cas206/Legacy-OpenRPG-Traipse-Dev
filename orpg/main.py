@@ -216,9 +216,8 @@ class orpgFrame(wx.Frame):
         self.mainmenu = MenuBarEx(self, menu)
         if self.settings.get_setting('Heartbeat') == '1':
             self.mainmenu.SetMenuState("GameServerServerHeartbeat", True)
-        tabtheme = self.settings.get_setting('TabTheme') 
 
-        #This change is stable. TaS.
+        tabtheme = self.settings.get_setting('TabTheme')  #This change is stable. TaS.
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", tabtheme == 'slanted&aqua')
@@ -239,7 +238,7 @@ class orpgFrame(wx.Frame):
         self.pluginMenu.AppendItem(item)
         self.pluginMenu.AppendSeparator()
         self.mainmenu.Insert(2, self.pluginMenu, "&Plugins")
-        self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)
+        self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)       
 
     #################################
     ## All Menu Events
@@ -247,6 +246,16 @@ class orpgFrame(wx.Frame):
     #Tab Styles Menus
     def SetTabStyles(self, *args, **kwargs):
         self.log.log("Enter orpgFrame->SetTabStyles(self, *args, **kwargs)", ORPG_DEBUG)
+
+        tabtheme = self.settings.get_setting('TabTheme')  #This change is stable. TaS.
+        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", tabtheme == 'slanted&aqua')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatBlackandWhite", tabtheme == 'flat&bw')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatAqua", tabtheme == 'flat&aqua')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedCustom", tabtheme == 'customslant')
+        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatCustom", tabtheme == 'customflat')
+
         if kwargs.has_key('style'): newstyle = kwargs['style']
         else:
             try: newstyle = args[1]
@@ -262,18 +271,6 @@ class orpgFrame(wx.Frame):
         else: graidentFrom = None
         if kwargs.has_key('textColor'): textColor = kwargs['textColor']
         else: textColor = None
-
-        #Set all menu's to unchecked
-        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedCustom", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatBlackandWhite", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatAqua", False)
-        self.mainmenu.SetMenuState("OpenRPGTabStylesFlatCustom", False)
-
-        #check the proper menu
-        self.mainmenu.SetMenuState(menu, True)
 
         #Run though the current tabbed window list and remove those that have been closed
         tabbedwindows = open_rpg.get_component("tabbedWindows")
@@ -333,7 +330,6 @@ class orpgFrame(wx.Frame):
 
     def OnMB_OpenRPGTabStylesSlantedCustom(self):
         self.log.log("Enter orpgFrame->OnMB_OpenRPGTabStylesSlantedCustom(self)", ORPG_DEBUG)
-
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedCustom"):
             self.settings.set_setting('TabTheme', 'customslant')
             rgbc = orpg.tools.rgbhex.RGBHex()
