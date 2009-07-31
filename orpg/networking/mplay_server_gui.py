@@ -91,7 +91,7 @@ class ServerConfig:
     def __init__(self, owner ):
         """ Loads default configuration settings.
         """
-        OPENRPG_PORT = 9775
+        OPENRPG_PORT = 9557
         self.owner = owner
 
     def load_xml(self, xml):
@@ -122,8 +122,7 @@ class ServerMonitor(Thread):
         if type(mesg) == types.TupleType:
             func, msg = mesg
             event = MessageFunctionEvent( func, msg )
-        else:
-            event = MessageLogEvent( mesg )
+        else: event = MessageLogEvent( mesg )
         wx.PostEvent( self.conf.owner, event )
         del event
 
@@ -132,8 +131,7 @@ class ServerMonitor(Thread):
         self.server = mplay_server(self.log, self.serverName )
         self.server.initServer(bootPassword=self.bootPwd, reg="No")
         self.alive = 1
-        while self.alive:
-            time.sleep(3)
+        while self.alive: time.sleep(3)
 
     def stop(self):
         """ Stop the server. """
@@ -190,8 +188,8 @@ class Connections(wx.ListCtrl):
         self.SetStringItem( i, 3, "ROOM" )
         self.SetStringItem( i, 4, self.stripHtml( player["version"] ) )
         self.SetStringItem( i, 5, self.stripHtml( player["role"] ) )
-	self.SetStringItem( i, 6, self.stripHtml( player["ip"] ) )
-	self.SetStringItem (i, 7, "PING" )
+        self.SetStringItem( i, 6, self.stripHtml( player["ip"] ) )
+        self.SetStringItem (i, 7, "PING" )
         self.SetItemData( i, int(player["id"]) )
         self.AutoAjust()
 
@@ -207,8 +205,8 @@ class Connections(wx.ListCtrl):
         self.SetColumnWidth(3, -1)
         self.SetColumnWidth(4, -1)
         self.SetColumnWidth(5, -1)
-	self.SetColumnWidth(6, -1)
-	self.SetColumnWidth(7, -1)
+        self.SetColumnWidth(6, -1)
+        self.SetColumnWidth(7, -1)
         self.Refresh()
 
     def update(self, player):
@@ -217,8 +215,7 @@ class Connections(wx.ListCtrl):
             self.SetStringItem(i, 1, player["name"])
             self.SetStringItem(i, 2, self.stripHtml( player["status"] ) )
             self.AutoAjust()
-        else:
-            self.add(player)
+        else: self.add(player)
 
     def updateRoom( self, data ):
         (from_id, id) = data
@@ -237,14 +234,10 @@ class Connections(wx.ListCtrl):
         in_tag = 0
         for x in range( len(name) ):
             if name[x] == "<" or name[x] == ">" or in_tag == 1 :
-                if name[x] == "<" :
-                    in_tag = 1
-                elif name[x] == ">" :
-                    in_tag = 0
-                else :
-                    pass
-            else :
-                ret_string = ret_string + name[x]
+                if name[x] == "<": in_tag = 1
+                elif name[x] == ">": in_tag = 0
+                else: pass
+            else: ret_string = ret_string + name[x]
         return ret_string
 
     # When we right click, cause our popup menu to appear
@@ -271,14 +264,13 @@ class Connections(wx.ListCtrl):
             elif menuItem == MENU_PLAYER_SEND_MESSAGE:
                 print "send a message..."
                 msg = self.GetMessageInput( "Send a message to player" )
-                if len(msg):
-                    self.main.server.server.send( msg, playerID, str(groupID) )
-# Leave this in for now.
-#            elif menuItem == MENU_PLAYER_SEND_TO_ROOM:
-#                print "Send message to room..."
-#                msg = self.GetMessageInput( "Send message to room of this player")
-#                if len(msg):
-#                    self.main.server.server.send_to_group( 0, GroupID, msg )
+                if len(msg): self.main.server.server.send( msg, playerID, str(groupID) )
+            #Leave this in for now.
+            #elif menuItem == MENU_PLAYER_SEND_TO_ROOM:
+            #    print "Send message to room..."
+            #    msg = self.GetMessageInput( "Send message to room of this player")
+            #    if len(msg):
+            #        self.main.server.server.send_to_group( 0, GroupID, msg )
 
             elif menuItem == MENU_PLAYER_SEND_SERVER_MESSAGE:
                 print "broadcast a message..."
@@ -299,10 +291,8 @@ class ServerGUI(wx.Frame):
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size = (760, 560) )
-        if wx.Platform == '__WXMSW__':
-            icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
-        else:
-            icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
+        else: icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
         self.SetIcon(icon)
         self.serverName = "Server Name"
         self.bootPwd = ""
@@ -395,7 +385,8 @@ class ServerGUI(wx.Frame):
         nb = wx.Notebook( splitter, -1 )
         self.conns = Connections( nb, self )
         nb.AddPage( self.conns, "Players" )
-#Not sure why this is Remarked TaS - Sirebral
+
+        #Not sure why this is Remarked TaS - Sirebral
         #nb.AddPage( self.conns, "Rooms" )
         #self.msgWindow = HTMLMessageWindow( nb )
         #nb.AddPage( self.msgWindow, "Messages" )
@@ -463,12 +454,12 @@ class ServerGUI(wx.Frame):
     def OnCreateGroup( self, data ):
         print "room list: ", self.conns.roomList
         self.conns.roomList[id] = name
-	(id, name) = data
+        (id, name) = data
         print "room list: ", self.conns.roomList
 
     def OnDeleteGroup( self, data ):
         (from_id, id) = data
-#        del self.conns.roomList[id]
+        #del self.conns.roomList[id]
         print "OnDeleteGroup room list: ", self.conns.roomList, id
 
     def OnJoinGroup( self, data ):
@@ -484,12 +475,10 @@ class ServerGUI(wx.Frame):
         if self.STATUS == SERVER_STOPPED:
             serverNameEntry = wx.TextEntryDialog( self, "Please Enter The Server Name You Wish To Use:",
                                                  "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
-            if serverNameEntry.ShowModal() == wx.ID_OK:
-                self.serverName = serverNameEntry.GetValue()
+            if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             serverPasswordEntry = wx.TextEntryDialog(self, "Please Enter The Server Admin Password:",
                                                  "Server's Password", self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
-            if serverPasswordEntry.ShowModal() == wx.ID_OK:
-                self.bootPwd = serverPasswordEntry.GetValue()
+            if serverPasswordEntry.ShowModal() == wx.ID_OK: self.bootPwd = serverPasswordEntry.GetValue()
             if len(self.serverName):
                 wx.BeginBusyCursor()
                 self.server = ServerMonitor(self.callbacks, self.conf, self.serverName, self.bootPwd)
@@ -501,8 +490,7 @@ class ServerGUI(wx.Frame):
                 self.mainMenu.Enable( MENU_STOP_SERVER, True )
                 self.mainMenu.Enable( MENU_REGISTER_SERVER, True )
                 wx.EndBusyCursor()
-            else:
-                self.show_error("Server is already running.", "Error Starting Server")
+            else: self.show_error("Server is already running.", "Error Starting Server")
 
     def OnStop(self, event = None):
         """ Stop server. """
