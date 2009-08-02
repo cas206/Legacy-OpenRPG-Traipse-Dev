@@ -23,10 +23,9 @@ import orpg.tools.updater
 app = orpg.tools.updater.updateApp(0)
 app.MainLoop()
 
-"""
+
 if WXLOADED:
     mainapp = orpg.main.orpgApp(0)
     mainapp.MainLoop()
 else:
     print "You really really need wx!"
-"""
