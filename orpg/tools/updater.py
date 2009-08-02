@@ -1,9 +1,9 @@
 import wx
-import wx.html
-import webbrowser
-import urllib
-import zipfile
-import traceback
+#import wx.html
+#import webbrowser
+#import urllib
+#import zipfile
+#import traceback
 import hashlib
 import orpg.dirpath
 from orpg.orpgCore import *
@@ -15,42 +15,6 @@ import orpg.tools.orpg_settings
 import orpg.tools.validate
 from mercurial import ui, hg, commands, repo, revlog, cmdutil
 dir_struct = open_rpg.get_component("dir_struct")
-
-u = ui.ui()
-r = hg.repository(u, ".")
-c = r.changectx('tip')
-
-#repo = hg.repository(ui.ui(), 'http://hg.assembla.com/traipse')
-#b = []
-
-#b = commands.branches(u, r, True)
-#print b
-
-"""
-u = ui.ui()
-r = hg.repository(u, ".")
-l2 =[]
-b = r.branchtags()
-heads = dict.fromkeys(r.heads(), 1)
-l = [((n in heads), r.changelog.rev(n), n, t) for t, n in b.items()]
-l.sort()
-l.reverse()
-for ishead, r, n, t in l: l2.append(t)
-print l2
-"""
-
-#print heads
-#b = []
-#b = c.branch()
-#print c.branch()
-#print c.tags()
-
-##Process
-#Pull
-#Gather Changeset Info
-#Display window with Branch + Changesets
-#Update from Branch -Revision.
-
 
 
 
@@ -65,16 +29,9 @@ print l2
 #
 
 
-class AboutHTMLWindow(wx.Panel):
-    "Window used to display the About dialog box"
-    # Init using the derived from class
+class ChangeLog(wx.Panel):
     def __init__( self, parent, id):
         wx.Panel.__init__( self, parent, id, size=(400, -1))
-
-    def OnLinkClicked( self, ref ):
-        "Open an external browser to resolve our About box links!!!"
-        href = ref.GetHref()
-        webbrowser.open( href )
 
 
 class updaterFrame(wx.Frame):
@@ -82,9 +39,8 @@ class updaterFrame(wx.Frame):
 
         ### Update Manager
         self.ui = ui.ui()
-        self.repo = hg.repository(u, ".")
+        self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-
 
         self.openrpg = openrpg
         self.parent = parent
@@ -106,6 +62,10 @@ class updaterFrame(wx.Frame):
         self.buttons['progress_bar'] = wx.Gauge(self, wx.ID_ANY, 100)
         self.buttons['auto_text'] = wx.StaticText(self, wx.ID_ANY, "Auto Update")
         self.buttons['auto_check'] = wx.CheckBox(self, wx.ID_ANY)
+
+        self.buttons['no_text'] = wx.StaticText(self, wx.ID_ANY, "No Update")
+        self.buttons['no_check'] = wx.CheckBox(self, wx.ID_ANY)
+
         self.buttons['advanced'] = wx.Button(self, wx.ID_ANY, "Package Select")
         self.buttons['update'] = wx.Button(self, wx.ID_ANY, "Update Now")
         self.buttons['finish'] = wx.Button(self, wx.ID_ANY, "Finish")
@@ -114,18 +74,21 @@ class updaterFrame(wx.Frame):
         self.sizer.Add(self.filelist, (0,1), span=(1,3), flag=wx.EXPAND)
 
         self.sizer.Add(self.buttons['progress_bar'], (1,1), span=(1,3), flag=wx.EXPAND)
+
         self.sizer.Add(self.buttons['auto_text'], (2,1))
         self.sizer.Add(self.buttons['auto_check'], (2,2), flag=wx.EXPAND)
+
+        self.sizer.Add(self.buttons['no_text'], (3,1))
+        self.sizer.Add(self.buttons['no_check'], (3,2), flag=wx.EXPAND)
+
         self.sizer.Add(self.buttons['advanced'], (2,3), flag=wx.EXPAND)
-        self.sizer.Add(self.buttons['update'], (3,1), flag=wx.EXPAND)
-        self.sizer.Add(self.buttons['finish'], (3,2), span=(1,2), flag=wx.EXPAND)
+        self.sizer.Add(self.buttons['update'], (3,3), flag=wx.EXPAND)
+        self.sizer.Add(self.buttons['finish'], (4,3), span=(1,2), flag=wx.EXPAND)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.initPrefs()
-
-
 
         if self.package == None: wx.CallAfter(self.Advanced)
         #if self.autoupdate == "On": self.buttons['auto_check'].SetValue(True)
@@ -133,13 +96,9 @@ class updaterFrame(wx.Frame):
         ## Event Handlers
         self.Bind(wx.EVT_BUTTON, self.Update, self.buttons['update'])
         self.Bind(wx.EVT_BUTTON, self.Finish, self.buttons['finish'])
-        self.Bind(wx.EVT_BUTTON, self.Advanced, self.buttons['advanced'])
-        self.Bind(wx.EVT_CHECKBOX, self.ToggleAutoUpdate, self.buttons['auto_check'])
+        #self.Bind(wx.EVT_BUTTON, self.Advanced, self.buttons['advanced'])
+        #self.Bind(wx.EVT_CHECKBOX, self.ToggleAutoUpdate, self.buttons['auto_check'])
 
-        try:  self.check()
-        except:
-            self.buttons['finish'].Show()
-            self.buttons['update'].Show()
 
     def showFinish(self):
         if self.Updated: self.filelist.SetValue(self.filelist.GetValue() + "Finished ... \n")
@@ -169,122 +128,10 @@ class updaterFrame(wx.Frame):
             self.autoupdate = "Off"
             #self.settings.set_setting("AutoUpdate", "Off")
 
-    def check(self):
-        self.buttons['finish'].Hide()
-        self.buttons['update'].Hide()
-        self.updatelist = []
-        wx.CallAfter(self.showFinish)
-        #Do the MD5 Check & DL
-        files = self.package._get_childNodes()
-        self.buttons['progress_bar'].SetRange(len(files))
-        try:
-            i = 1
-            for file in files:
-                checksum = md5.new()
-                self.buttons['progress_bar'].SetValue(i)
-                if file._get_tagName() == 'file':
-                    file_name = file.getAttribute("name")
-                    file_url = file.getAttribute("url").replace(' ', '%20') + '/' + file_name
-                    file_path = file.getAttribute("path")
-                    read_type = file.getAttribute("read_type")
-                    file_checksum = file.getAttribute("checksum")
-                    full_path = self.dir_struct["home"].replace("\\","/") + file_path + os.sep + file_name
-                    full_path = full_path.replace("/", os.sep)
-
-                    if self.verify_file(full_path):
-                        if read_type == 'rb': f = open(full_path, "rb")
-                        else: f = open(full_path, "r")
-                        data = f.read()
-                        f.close()
-                        checksum.update(data)
-                        if(checksum.hexdigest() != file_checksum):
-                            self.log.log("Read Type: " + read_type, ORPG_DEBUG)
-                            self.log.log("Filename: " + file_name + "\n\tLocal Checksum:\t" + checksum.hexdigest() + "\n\tWeb Checksum:\t" + file_checksum, ORPG_DEBUG)
-                            self.updatelist.append((file_url, full_path, file_name, read_type))
-                    else: self.updatelist.append((file_url, full_path, file_name, read_type))
-                elif file._get_tagName() == 'dir':
-                    dir_path = file.getAttribute("path")
-                    full_path = self.dir_struct['home'] + dir_path
-                    if not self.verify_file(full_path):
-                        self.filelist.SetValue(self.filelist.GetValue() + "Creating Directory " + dir_path + " ...\n")
-                        os.makedirs(full_path)
-                i += 1
-            if len(self.updatelist) == 0:
-                wx.CallAfter(self.Finish)
-                return False
-        except: #error handing update check. Likely no internet connection. skip update check
-            self.log.log("[WARNING] Automatic update check failed.\n" + traceback.format_exc(), ORPG_GENERAL)
-            self.filelist.SetValue("[WARNING] Automatic update check failed.\n" + traceback.format_exc())
-            return False
-        dmsg = "A newer version is available.\n"
-        for file in self.updatelist: dmsg += file[2] + " is out of date\n"
-        dmsg += "Would you like to update Now?"
-        self.filelist.SetValue(dmsg)
-        data = urllib.urlretrieve(self.package.getAttribute("notes").replace(' ', '%20'))
-        file = open(data[0])
-        changelog = file.read()
-        file.close()
-        self.changelog.SetPage(changelog)
-
-        if self.autoupdate == "Off": self.buttons['update'].Show()
-        if self.autoupdate == "On": wx.CallAfter(self.Update)
-        return True
 
     def Update(self, evt=None):
 
         hg.clean(self.repo, self.current)
-
-        """old code
-        self.buttons['finish'].Hide()
-        self.buttons['update'].Hide()
-        self.buttons['advanced'].Hide()
-        self.buttons['progress_bar'].SetRange(len(self.updatelist))
-        self.filelist.SetValue("")
-        self.log.log("Starting Update Proccess!", ORPG_DEBUG)
-        i = 1
-        for file in self.updatelist:
-            self.downloadFile(file[0], file[1], file[2], i, file[3])
-            i += 1
-        self.Updated = True
-        self.parent.updated = True
-        wx.CallAfter(self.showFinish)
-        if self.autoupdate == 'On': wx.CallAfter(self.Finish)
-        """
-
-    def downloadFile(self, file_url, abs_path, file_name, i, read_type):
-        self.buttons['progress_bar'].SetValue(i)
-        self.buttons['finish'].Hide()
-        self.log.log("Downloading " + file_name, ORPG_DEBUG)
-        try:
-            self.filelist.SetValue(self.filelist.GetValue() + "Downloading " + file_name + " ...\n")
-            wx.Yield()
-            checksum = md5.new()
-            data = urllib.urlretrieve("http://openrpg.digitalxero.net/" + file_url)
-
-            if read_type == 'rb': file = open(data[0], "rb")
-            else: file = open(data[0], "r")
-
-            file_data = file.read()
-            file.close()
-            checksum.update(file_data)
-            self.log.log("Read Type: " + read_type, ORPG_DEBUG)
-            self.log.log("Downloaded filename: " + file_name + "\n\tDownloaded Checksum:\t" + checksum.hexdigest(), ORPG_DEBUG)
-
-            if read_type == 'rb': file = open(abs_path, 'wb')
-            else: file = open(abs_path, 'w')
-            file.write(file_data)
-            file.close()
-
-            #Debug Stuff
-            checksum = md5.new()
-            f = open(abs_path, read_type)
-            file_data = f.read()
-            f.close()
-            checksum.update(file_data)
-            self.log.log("Written filename: " + file_name + "\n\tWritten Checksum:\t" + checksum.hexdigest(), ORPG_DEBUG)
-        except:
-            self.log.log("Failed to download file: " + abs_path, ORPG_GENERAL)
-            self.log.log(traceback.format_exc(), ORPG_GENERAL)
 
     def Finish(self, evt=None):
         #self.settings.updateIni()
@@ -293,10 +140,9 @@ class updaterFrame(wx.Frame):
 
     def Advanced(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
-        icon = None
         if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
         else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
-        if icon != None: dlg.SetIcon(icon)
+        dlg.SetIcon(icon)
 
         dlgsizer = wx.GridBagSizer(hgap=1, vgap=1)
         Yes = wx.Button( dlg, wx.ID_OK, "Ok" )
@@ -309,12 +155,13 @@ class updaterFrame(wx.Frame):
 
 
         types = self.package_list
-        row=0
-        col=0
+        row=0; col=0
         self.current = self.c.branch()
         self.package_type = self.current
         self.btnlist = {}; self.btn = {}
         self.id = 1
+
+        self.PackageSet(None)
 
         for t in types:
             self.btnName = str(t)
@@ -386,9 +233,6 @@ class updaterFrame(wx.Frame):
             #    fc = c[f]
             #    self.filelist.AppendText(str(f + '\n'))
 
-            
-
-
     def verify_file(self, abs_path):
         """Returns True if file or directory exists"""
         try:
@@ -400,9 +244,6 @@ class updaterFrame(wx.Frame):
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
-
-
-
         self.package_list = []
         b = self.repo.branchtags()
         heads = dict.fromkeys(self.repo.heads(), 1)
@@ -416,18 +257,6 @@ class updaterFrame(wx.Frame):
         if self.packages == None: self.get_packages()
         if self.package_list == None: return None
         return None
-
-    def is_up2date(self, version, build):
-        if self.package == None:
-            self.SelectPackage == True
-            return False
-        vg = (version > self.package.getAttribute("version"))
-        ve = (version == self.package.getAttribute("version"))
-        b = (build >= self.package.getAttribute("build"))
-
-        if vg: return True
-        if (not ve) or (not b): return False
-        return True
 
 class updateApp(wx.App):
     def OnInit(self):
@@ -446,10 +275,8 @@ class updateApp(wx.App):
         #self.settings = orpg.tools.orpg_settings.orpgSettings(self.open_rpg)
         #self.open_rpg.add_component("settings", self.settings)
         #self.settings.updateIni()
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.1", self.open_rpg)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.2", self.open_rpg)
         self.updated = False
-
-
         try:
             self.updater.Show()
             self.SetTopWindow(self.updater)

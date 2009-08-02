@@ -8,8 +8,8 @@ HG = os.environ["HG"]
 import pyver
 pyver.checkPyVersion()
 
-#os.system(HG + ' pull "http://hg.assembla.com/traipse"')
-#os.system(HG + ' pull "http://hg.assembla.com/traipse_dev"')
+os.system(HG + ' pull "http://hg.assembla.com/traipse"')
+os.system(HG + ' pull "http://hg.assembla.com/traipse_dev"')
 #os.system(HG + ' pull "http://hg.assembla.com/openrpg"')
 #os.system(HG + ' pull "http://hg.assembla.com/openrpg_dev"')
 
