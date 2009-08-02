@@ -18,10 +18,12 @@ for key in sys.modules.keys():
         del sys.modules[key]
 
 from orpg.orpg_wx import *
-import orpg.main
-import orpg.tools.updater
-app = orpg.tools.updater.updateApp(0)
+
+import upmana.updatemana
+app = upmana.updatemana.updateApp(0)
 app.MainLoop()
+
+import orpg.main
 
 
 if WXLOADED:
