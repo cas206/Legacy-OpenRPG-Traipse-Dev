@@ -311,7 +311,7 @@ class Repos(wx.Panel):
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
-        #self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',') #Sets URL
+        self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',') #Sets URL
         repolist = self.manifest.GetList('UpdateManifest', 'repolist', ''); repo = repolist + repo
         self.manifest.SetList('UpdateManifest', 'repolist', repo)
 
