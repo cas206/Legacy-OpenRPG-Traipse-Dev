@@ -3,10 +3,10 @@ import orpg.dirpath
 import orpg.tools.validate
 from types import *
 
-class PluginDB:
+class ManifestChanges:
     def __init__(self, filename="updatemana.xml"):
         self.filename = orpg.dirpath.dir_struct["user"] + filename
-        #orpg.tools.validate.Validate().config_file(filename,"default_plugindb.xml")
+        orpg.tools.validate.Validate().config_file(filename,"default_manifest.xml")
         self.xml_dom = self.LoadDoc()
 
     def GetString(self, plugname, strname, defaultval, verbose=0):
@@ -21,7 +21,7 @@ class PluginDB:
                         else: return ""
         else:
             if verbose:
-                print "plugindb: no value has been stored for " + strname + " in " + plugname + " so the default has been returned"
+                print "manifest: no value has been stored for " + strname + " in " + plugname + " so the default has been returned"
             return defaultval
 
     def SetString(self, plugname, strname, val):
@@ -40,6 +40,7 @@ class PluginDB:
             self.xml_dom[plugname] = xmltramp.parse("<" + strname + " type=\"string\">" + val + "</" + strname + ">")
             self.SaveDoc()
             return "added plugin"
+
 
     def FetchList(self, parent):
         retlist = []

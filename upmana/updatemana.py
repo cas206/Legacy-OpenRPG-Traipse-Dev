@@ -1,37 +1,28 @@
 import wx
-#import wx.html
-#import webbrowser
-#import urllib
-#import zipfile
-#import traceback
 import manifest
-#import hashlib
 import orpg.dirpath
 from orpg.orpgCore import *
 import orpg.orpg_version
 import orpg.tools.orpg_log
 import orpg.orpg_xml
 import orpg.dirpath
-#import orpg.tools.orpg_settings
 import orpg.tools.validate
 from mercurial import ui, hg, commands, repo, revlog, cmdutil
 
 class Updater(wx.Panel):
-    def __init__(self, parent, openrpg):
+    def __init__(self, parent, open_rpg, manifest):
         wx.Panel.__init__(self, parent)
 
         ### Update Manager
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-        self.manifest = []
-        self.manifest = self.c.manifest().keys()
-        self.openrpg = openrpg
-        #self.settings = openrpg.get_component('settings')
-        self.xml = openrpg.get_component('xml')
-        self.dir_struct = self.openrpg.get_component("dir_struct")
+        self.manifest = manifest
+
+        self.xml = open_rpg.get_component('xml')
+        self.dir_struct = open_rpg.get_component("dir_struct")
         self.parent = parent
-        self.log = self.openrpg.get_component("log")
+        self.log = open_rpg.get_component("log")
         self.log.log("Enter updaterFrame", ORPG_DEBUG)
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
@@ -62,7 +53,7 @@ class Updater(wx.Panel):
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
-        self.initPrefs()
+        self.get_package
 
         self.current = self.c.branch()
         self.BranchInfo(self.current)
@@ -71,48 +62,41 @@ class Updater(wx.Panel):
         ## Event Handlers
         self.Bind(wx.EVT_BUTTON, self.Update, self.buttons['update'])
         self.Bind(wx.EVT_BUTTON, self.Finish, self.buttons['finish'])
-        self.Bind(wx.EVT_BUTTON, self.Advanced, self.buttons['advanced'])
-        #self.Bind(wx.EVT_CHECKBOX, self.ToggleAutoUpdate, self.buttons['auto_check'])
-
-    def showFinish(self):
-        if self.Updated: self.filelist.SetValue(self.filelist.GetValue() + "Finished ... \n")
-        self.buttons['finish'].Show()
-        self.buttons['advanced'].Show()
-
-    def initPrefs(self):
-        #self.list_url = self.settings.get_setting("PackagesURL")
-        #self.package_type = self.settings.get_setting("PackagesType")
-        #self.package_name = self.settings.get_setting("PackagesName")
-        self.SelectPackage = False
-        #self.autoupdate = self.settings.get_setting("AutoUpdate")
-        self.packages = None
-        self.package = self.get_package()
-        self.Updated = False
-        self.Finished = False
-
-    def isFinished(self):
-        return self.Finished
+        self.Bind(wx.EVT_BUTTON, self.ChooseBranch, self.buttons['advanced'])
+        self.Bind(wx.EVT_CHECKBOX, self.ToggleAutoUpdate, self.buttons['auto_check'])
+        self.Bind(wx.EVT_CHECKBOX, self.ToggleNoUpdate, self.buttons['no_check'])
 
     def ToggleAutoUpdate(self, event):
         if self.buttons['auto_check'].GetValue():
+            if self.buttons['no_check'].GetValue(): 
+                self.buttons['no_check'].SetValue(False)
+                self.manifest.SetString("updatemana", "no_update", "off")
             self.autoupdate = "On"
-            #self.settings.set_setting("AutoUpdate", "On")
-            #self.Update(None)
+            self.manifest.SetString("updatemana", "auto_update", "on")
         else:
             self.autoupdate = "Off"
-            #self.settings.set_setting("AutoUpdate", "Off")
+            self.manifest.SetString("updatemana", "auto_update", "off")
+
+    def ToggleNoUpdate(self, event):
+        if self.buttons['no_check'].GetValue():
+            if self.buttons['auto_check'].GetValue(): 
+                self.buttons['auto_check'].SetValue(False)
+                self.manifest.SetString("updatemana", "auto_update", "off")
+            self.autoupdate = "On"
+            self.manifest.SetString("updatemana", "no_update", "on")
+        else:
+            self.autoupdate = "Off"
+            self.manifest.SetString("updatemana", "no_update", "off")
 
     def Update(self, evt=None):
         hg.clean(self.repo, self.current)
 
     def Finish(self, evt=None):
-        #self.settings.updateIni()
         self.Finished = True
         self.Destroy() #destroys tab, pretty useless.
 
-    def Advanced(self, evt=None):
+    def ChooseBranch(self, evt=None):
 
-        ## This part sucks.  Do they need to see the Branch List everytime?  No!! Press the button.
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
         if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
         else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
@@ -192,7 +176,7 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "This is Dev Build 0.1 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here."
+        changelog = "This is Dev Build 0.3 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here."
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Update to " + branch + "\n\n The full release will show the files to be changed here.")
 
@@ -228,83 +212,109 @@ class Updater(wx.Panel):
         return None
 
 class Repos(wx.Panel):
-    def __init__(self, parent, openrpg):
+    def __init__(self, parent, openrpg, manifest):
         wx.Panel.__init__(self, parent)
-        self.openrpg = openrpg
-        self.settings = openrpg.get_component('settings')
-        self.xml = openrpg.get_component('xml')
 
+        mainpanel = self
+        self.openrpg = openrpg
+        self.manifest = manifest
         self.buttons = {}
         self.texts = {}
 
         ## Section Sizers (with frame edges and text captions)
         self.box_sizers = {}
-        self.box_sizers["newrepo"] = wx.StaticBox(self, -1, "Add New Repo")
+        self.box_sizers["newbutton"] = wx.StaticBox(self, -1)
         self.box_sizers["repolist"] = wx.StaticBox(self, -1, "Current Repo List")
 
         ## Layout Sizers
         self.sizers = {}
         self.sizers["main"] = wx.GridBagSizer(hgap=2, vgap=2)
-        self.sizers["newrepo"] = wx.StaticBoxSizer(self.box_sizers["newrepo"], wx.VERTICAL)
+        self.sizers["repo"] = wx.GridBagSizer(hgap=2, vgap=2)
+        self.sizers["button"] = wx.GridBagSizer(hgap=2, vgap=2)
+
+        self.sizers["newbutton"] = wx.StaticBoxSizer(self.box_sizers["newbutton"], wx.VERTICAL)
+
         self.sizers["repolist"] = wx.StaticBoxSizer(self.box_sizers["repolist"], wx.VERTICAL)
 
-        #Build Server Sizer Layout
-        self.sizers["newrepo_layout"] = wx.FlexGridSizer(rows=1, cols=2, hgap=2, vgap=1)
+        #Button Layout
+        #self.buttonpanel = wx.Panel(upmana.updatemana.Repos, -1)
+        self.sizers["newrepo_layout"] = wx.FlexGridSizer(rows=1, cols=2, hgap=2, vgap=5)
+        empty = wx.StaticText(self, -1, "")
         reponame = wx.StaticText(self, -1, "Name:")
-        self.texts["reponame"] = wx.TextCtrl(self, -1)
-        repodesc = wx.StaticText(self, -1, "Description:")
-        self.texts["repodesc"] = wx.TextCtrl(self, -1)
-        repoadd = wx.StaticText(self, -1, "Address:")
-        self.texts["repoadd"] = wx.TextCtrl(self, -1)
-        addrepo = wx.Button(self, wx.ID_ADD)
-
-        ##Put GUI Together.
-        self.sizers["newrepo_layout"].Add(reponame, -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+        self.texts["reponame"] = wx.TextCtrl(self, -1, '')
+        self.buttons['addrepo'] = wx.Button(self, wx.ID_NEW)
+        ##Build Button
+        self.sizers["newrepo_layout"].Add(self.buttons['addrepo'], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+        self.sizers["newrepo_layout"].Add(empty, -1)
+        self.sizers["newrepo_layout"].Add(reponame, -1, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
         self.sizers["newrepo_layout"].Add(self.texts["reponame"], -1, wx.EXPAND)
-        self.sizers["newrepo_layout"].Add(repodesc, -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-        self.sizers["newrepo_layout"].Add(self.texts["repodesc"], -1, wx.EXPAND)
-        self.sizers["newrepo_layout"].Add(repoadd, -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-        self.sizers["newrepo_layout"].Add(self.texts["repoadd"], -1, wx.EXPAND)
-        self.sizers["newrepo_layout"].Add(addrepo, -1)
         self.sizers["newrepo_layout"].AddGrowableCol(1)
-        self.sizers["newrepo"].Add(self.sizers["newrepo_layout"], -1, wx.EXPAND)
+        self.sizers["newbutton"].Add(self.sizers["newrepo_layout"], -1, wx.EXPAND)
 
         #Repo List Layout
-        self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=2, hgap=2, vgap=1)
-        #addrepo = wx.Button(self, wx.ID_ADD) ## Looks bad inside the Sizer, move out!
-        #self.sizers["repolist_layout"].Add(addrepo, -1)
-        self.sizers["repolist_layout"].AddGrowableCol(1)
+        ##Needs a new Panel
+
+        self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
+        self.manifest = manifest
+
+        self.repolist = []
+        for v in self.manifest.GetList('UpdateManifest', 'repolist', ''): self.repolist.append(v)
+
+        self.id = 1; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
+        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
+        self.defaultcheck = {}; self.default = {}
+
+        #wx.Yeild()  For future refrence.
+
+        #Repo Name; Static Text; URL; Button.
+        for repo in self.repolist:
+            self.box[self.id] = wx.StaticBox(self, -1, str(repo))
+            self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
+            self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
+
+            self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
+            self.name[self.id] = wx.StaticText(self, -1, 'URL')
+            self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
+            self.url[self.id] = wx.TextCtrl(self, -1, self.uri[self.id])
+            self.pull[self.id] = wx.Button(self, wx.ID_REFRESH)
+            self.delete[self.id] = wx.Button(self, wx.ID_DELETE)
+            self.defaultcheck[self.id] = wx.CheckBox(self, -1)
+            self.default[self.id] = wx.StaticText(self, -1, 'Default')
+
+            self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
+            self.layout[self.id].Add(self.pull[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.delete[self.id], -1, wx.EXPAND)
+            self.layout[self.id].Add(self.defaultcheck[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
+            self.layout[self.id].AddGrowableCol(1)
+            self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
+            self.sizers["repolist_layout"].Add(self.container[self.id], -1, wx.EXPAND)
+
+        self.sizers["repolist_layout"].AddGrowableCol(0)
         self.sizers["repolist"].Add(self.sizers["repolist_layout"], -1, wx.EXPAND)
 
-        """
-        grid = wx.GridSizer(3, 2)
-
-        grid.AddMany([(wx.Button(self, wx.ID_CANCEL), 0, wx.TOP | wx.LEFT, 9),
-            (wx.Button(self, wx.ID_DELETE), 0, wx.TOP, 9),
-            (wx.Button(self, wx.ID_SAVE), 0, wx.LEFT, 9),
-            (wx.Button(self, wx.ID_EXIT)),
-            (wx.Button(self, wx.ID_STOP), 0, wx.LEFT, 9),
-            (wx.Button(self, wx.ID_NEW))])
-
-        self.Bind(wx.EVT_BUTTON, self.OnQuit, id=wx.ID_EXIT)
-        self.SetSizer(grid)
-        self.Centre()
-        self.Show(True)
-
-
-    def OnQuit(self, event):
-        self.Close()
-        """
-
         #Build Main Sizer
-        self.sizers["main"].Add(self.sizers["newrepo"], (0,0), flag=wx.EXPAND)
+        self.sizers["main"].Add(self.sizers["newbutton"], (0,0), flag=wx.EXPAND)
         self.sizers["main"].Add(self.sizers["repolist"], (1,0), flag=wx.EXPAND)
+        #self.sizers['main'].Add(self.buttonpanel, (0,0), flag=wx.EXPAND)
+        #self.sizers['main'].Add(self.sizers['repo'], (1,0), flag=wx.EXPAND)
         self.sizers["main"].AddGrowableCol(0)
         self.sizers["main"].AddGrowableCol(1)
-        #self.sizers["main"].AddGrowableRow(1)
+        self.sizers["main"].AddGrowableRow(1)
         self.SetSizer(self.sizers["main"])
+
         self.SetAutoLayout(True)
         self.Fit()
+
+        self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
+
+    def AddRepo(self, event):
+        repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
+        #self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',') #Sets URL
+        repolist = self.manifest.GetList('UpdateManifest', 'repolist', ''); repo = repolist + repo
+        self.manifest.SetList('UpdateManifest', 'repolist', repo)
+
 
 class Manifest(wx.Panel):
     def __init__(self, parent):
@@ -312,27 +322,29 @@ class Manifest(wx.Panel):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-        self.manifest = []
-        self.manifest = self.c.manifest().keys()
-        self.manifest.sort()
+        self.manifestlist = []
+        self.manifestlist = self.c.manifest().keys()
+        self.manifestlist.sort()
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
 
-        self.manifestlog = wx.TextCtrl(self, wx.ID_ANY, size=(400, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        #self.manifestlog = wx.TextCtrl(self, wx.ID_ANY, size=(400, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.manifestlog = wx.ListCtrl( self, -1, size=(400, -1) )
+        self.manifestlog.InsertColumn( 0, "ID" )
+        self.manifestlog.InsertColumn( 1, "Player" )
+        self.manifestlog.SetStringItem(0,1,'dog')
 
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
-
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
-        self.BuildManifest()
-
+        #self.BuildManifest()
 
     def BuildManifest(self):
         self.manifestlog.SetValue('')
         self.manifestlog.AppendText('Currently the Manifest Log shows your files only, later you will be able to select files to ingore on update\n')
-        for i in self.manifest:
+        for i in self.manifestlist:
             self.manifestlog.AppendText(i + '\n')
 
 class Control(wx.Panel):
@@ -342,7 +354,7 @@ class Control(wx.Panel):
 
 
 class updaterFrame(wx.Frame):
-    def __init__(self, parent, title, openrpg):
+    def __init__(self, parent, title, openrpg, manifest):
         wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(640,480), 
             style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP | wx.DEFAULT_FRAME_STYLE)
 
@@ -353,8 +365,8 @@ class updaterFrame(wx.Frame):
         nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
-        page1 = Updater(nb, openrpg)
-        page2 = Repos(nb, openrpg)
+        page1 = Updater(nb, openrpg, manifest)
+        page2 = Repos(nb, openrpg, manifest)
         page3 = Manifest(nb)
         page4 = Control(nb)
 
@@ -370,26 +382,19 @@ class updaterFrame(wx.Frame):
         sizer.Add(nb, 1, wx.EXPAND)
         p.SetSizer(sizer)
 
-
-
 class updateApp(wx.App):
     def OnInit(self):
         self.open_rpg = open_rpg
         self.log = orpg.tools.orpg_log.orpgLog(orpg.dirpath.dir_struct["user"] + "runlogs/")
         self.log.setLogToConsol(False)
         self.log.log("Updater Start", ORPG_NOTE)
-
-        #Add the initial global components of the openrpg class
-        #Every class should be passed openrpg
+        self.manifest = manifest.ManifestChanges()
         self.open_rpg.add_component("log", self.log)
         self.open_rpg.add_component("xml", orpg.orpg_xml)
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        #self.settings = orpg.tools.orpg_settings.orpgSettings(self.open_rpg)
-        #self.open_rpg.add_component("settings", self.settings)
-        #self.settings.updateIni()
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.3", self.open_rpg)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.3", self.open_rpg, self.manifest)
         self.updated = False
         try:
             self.updater.Show()

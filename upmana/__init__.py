@@ -1,1 +1,1 @@
-__all__ = ['upmana']
+__all__ = ['upmana', 'manifest']
