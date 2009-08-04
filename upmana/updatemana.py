@@ -108,7 +108,7 @@ class Updater(wx.Panel):
         rgroup = wx.RadioButton(dlg, wx.ID_ANY, "group_start", style=wx.RB_GROUP)
         rgroup.Hide()
 
-        if self.packages == None: self.get_packages()
+        self.get_packages()
         if self.package_list == None: return
         types = self.package_list
         row=0; col=0
@@ -205,7 +205,7 @@ class Updater(wx.Panel):
 
     def get_package(self):
         #Fixed and ready for test.
-        if self.packages == None: self.get_packages()
+        self.get_packages()
         if self.package_list == None: return None
         return None
 
