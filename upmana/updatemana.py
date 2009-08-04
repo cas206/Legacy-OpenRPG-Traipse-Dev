@@ -168,15 +168,13 @@ class Updater(wx.Panel):
 
             heads = dict.fromkeys(self.repo.heads(), self.repo.branchtags())
             branches = dict.copy(self.repo.branchtags())
-
             self.BranchInfo(self.current)
-
 
     def BranchInfo(self, branch):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "This is Dev Build 0.3 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here."
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.4 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here.\n\nMajor changes in this version are ... Manifest is now in a CheckListBox, very nice, Repos now allow for scrolling, New button works. Checks Box on the Updater tab work.  Settings file is created and data is saved to it."
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Update to " + branch + "\n\n The full release will show the files to be changed here.")
 
@@ -224,25 +222,20 @@ class Repos(wx.Panel):
         ## Section Sizers (with frame edges and text captions)
         self.box_sizers = {}
         self.box_sizers["newbutton"] = wx.StaticBox(self, -1)
-        self.box_sizers["repolist"] = wx.StaticBox(self, -1, "Current Repo List")
 
         ## Layout Sizers
         self.sizers = {}
         self.sizers["main"] = wx.GridBagSizer(hgap=2, vgap=2)
-        self.sizers["repo"] = wx.GridBagSizer(hgap=2, vgap=2)
         self.sizers["button"] = wx.GridBagSizer(hgap=2, vgap=2)
 
-        self.sizers["newbutton"] = wx.StaticBoxSizer(self.box_sizers["newbutton"], wx.VERTICAL)
-
-        self.sizers["repolist"] = wx.StaticBoxSizer(self.box_sizers["repolist"], wx.VERTICAL)
-
         #Button Layout
-        #self.buttonpanel = wx.Panel(upmana.updatemana.Repos, -1)
+        self.sizers["newbutton"] = wx.StaticBoxSizer(self.box_sizers["newbutton"], wx.VERTICAL)
         self.sizers["newrepo_layout"] = wx.FlexGridSizer(rows=1, cols=2, hgap=2, vgap=5)
         empty = wx.StaticText(self, -1, "")
         reponame = wx.StaticText(self, -1, "Name:")
         self.texts["reponame"] = wx.TextCtrl(self, -1, '')
         self.buttons['addrepo'] = wx.Button(self, wx.ID_NEW)
+
         ##Build Button
         self.sizers["newrepo_layout"].Add(self.buttons['addrepo'], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
         self.sizers["newrepo_layout"].Add(empty, -1)
@@ -251,9 +244,14 @@ class Repos(wx.Panel):
         self.sizers["newrepo_layout"].AddGrowableCol(1)
         self.sizers["newbutton"].Add(self.sizers["newrepo_layout"], -1, wx.EXPAND)
 
-        #Repo List Layout
-        ##Needs a new Panel
+        self.repopanel = wx.ScrolledWindow(self)
+        self.repopanel.SetScrollbars(20,20,55,40)
+        self.repopanel.Scroll(50,10)
 
+        self.box_sizers["repolist"] = wx.StaticBox(self.repopanel, -1, "Current Repo List")
+        self.sizers["repolist"] = wx.StaticBoxSizer(self.box_sizers["repolist"], wx.VERTICAL)
+
+        self.sizers["repo"] = wx.GridBagSizer(hgap=2, vgap=2)
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
@@ -262,24 +260,25 @@ class Repos(wx.Panel):
 
         self.id = 1; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
         self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
-        self.defaultcheck = {}; self.default = {}
+        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
 
         #wx.Yeild()  For future refrence.
 
         #Repo Name; Static Text; URL; Button.
         for repo in self.repolist:
-            self.box[self.id] = wx.StaticBox(self, -1, str(repo))
+            #self.repotrac[self.id] = repo
+            self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
             self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
             self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
 
             self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
-            self.name[self.id] = wx.StaticText(self, -1, 'URL')
+            self.name[self.id] = wx.StaticText(self.repopanel, -1, 'URL')
             self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
-            self.url[self.id] = wx.TextCtrl(self, -1, self.uri[self.id])
-            self.pull[self.id] = wx.Button(self, wx.ID_REFRESH)
-            self.delete[self.id] = wx.Button(self, wx.ID_DELETE)
-            self.defaultcheck[self.id] = wx.CheckBox(self, -1)
-            self.default[self.id] = wx.StaticText(self, -1, 'Default')
+            self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
+            self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
+            self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
+            self.defaultcheck[self.id] = wx.CheckBox(self.repopanel, -1)
+            self.default[self.id] = wx.StaticText(self.repopanel, -1, 'Default')
 
             self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
             self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
@@ -294,11 +293,15 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"].AddGrowableCol(0)
         self.sizers["repolist"].Add(self.sizers["repolist_layout"], -1, wx.EXPAND)
 
+        self.sizers["repo"].Add(self.sizers["repolist"], (0,0), flag=wx.EXPAND)
+        self.sizers["repo"].AddGrowableCol(0)
+        self.sizers['repo'].AddGrowableRow(0)
+        self.repopanel.SetSizer(self.sizers['repo'])
+        self.repopanel.SetAutoLayout(True)
+
         #Build Main Sizer
         self.sizers["main"].Add(self.sizers["newbutton"], (0,0), flag=wx.EXPAND)
-        self.sizers["main"].Add(self.sizers["repolist"], (1,0), flag=wx.EXPAND)
-        #self.sizers['main'].Add(self.buttonpanel, (0,0), flag=wx.EXPAND)
-        #self.sizers['main'].Add(self.sizers['repo'], (1,0), flag=wx.EXPAND)
+        self.sizers["main"].Add(self.repopanel, (1,0), flag=wx.EXPAND)
         self.sizers["main"].AddGrowableCol(0)
         self.sizers["main"].AddGrowableCol(1)
         self.sizers["main"].AddGrowableRow(1)
@@ -308,12 +311,16 @@ class Repos(wx.Panel):
         self.Fit()
 
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
+        self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
-        self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',') #Sets URL
+        self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',')
         repolist = self.manifest.GetList('UpdateManifest', 'repolist', ''); repo = repolist + repo
         self.manifest.SetList('UpdateManifest', 'repolist', repo)
+
+    def RefreshRepo(self, event):
+        pass #print str(event) #repo = self.repolist[event]; print repo
 
 
 class Manifest(wx.Panel):
@@ -328,29 +335,18 @@ class Manifest(wx.Panel):
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
 
-        #self.manifestlog = wx.TextCtrl(self, wx.ID_ANY, size=(400, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self.manifestlog = wx.ListCtrl( self, -1, size=(400, -1) )
-        self.manifestlog.InsertColumn( 0, "ID" )
-        self.manifestlog.InsertColumn( 1, "Player" )
-        self.manifestlog.SetStringItem(0,1,'dog')
+        self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, self.manifestlist, 
+            wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
 
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
-        #self.BuildManifest()
-
-    def BuildManifest(self):
-        self.manifestlog.SetValue('')
-        self.manifestlog.AppendText('Currently the Manifest Log shows your files only, later you will be able to select files to ingore on update\n')
-        for i in self.manifestlist:
-            self.manifestlog.AppendText(i + '\n')
 
 class Control(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        t = wx.StaticText(self, -1, "Here you will be able to control your branches, delete branches, \nupdate to a sepcific revision, and that type of control.", (10,60))
 
 
 class updaterFrame(wx.Frame):
@@ -394,7 +390,7 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.3", self.open_rpg, self.manifest)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.4", self.open_rpg, self.manifest)
         self.updated = False
         try:
             self.updater.Show()
