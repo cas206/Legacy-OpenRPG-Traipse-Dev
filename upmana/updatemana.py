@@ -347,7 +347,7 @@ class Repos(wx.Panel):
         self.id = self.pull_list[event.GetEventObject()]
         self.manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
         try:
-            commands.pull(self.ui, self.r, self.url[self.id].GetValue(), force=True)
+            commands.pull(self.ui, self.r, self.url[self.id].GetValue(), rev='', update=False, force=True)
         except:
             pass
 
@@ -357,20 +357,49 @@ class Manifest(wx.Panel):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
+
         self.manifestlist = []
         self.manifestlist = self.c.manifest().keys()
         self.manifestlist.sort()
+
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
 
         self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, self.manifestlist, 
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
 
+        filename = '.hgignore'
+        self.filename = orpg.dirpath.dir_struct["user"] + filename
+        orpg.tools.validate.Validate().config_file('.hgignore',"default.hgignore")
+        self.mana = self.LoadDoc()
+
+        self.manifestlog.Bind(wx.EVT_CHECKLISTBOX, self.GetChecked)
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
+
+    def GetChecked(self, event):
+        self.mana = []
+        for manifest in self.manifestlog.GetChecked():
+            self.mana.append(self.manifestlist[manifest])
+        self.SaveDoc()
+
+    def SaveDoc(self):
+        f = open(self.filename, "w")
+        for mana in self.mana:
+            f.write(mana+'\n')
+        f.close()
+
+    def LoadDoc(self):
+        ignore = open(self.filename)
+        ignorelist = []
+        for i in ignore:
+            ignorelist.append(str(i [:len(i)-1]))
+        self.manifestlog.SetCheckedStrings(ignorelist)
+        manifest = ignore.read()
+        ignore.close()
 
 class Control(wx.Panel):
     def __init__(self, parent):
