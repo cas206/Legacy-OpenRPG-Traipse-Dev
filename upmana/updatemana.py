@@ -255,42 +255,8 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
-        self.repolist = []
-        for v in self.manifest.GetList('UpdateManifest', 'repolist', ''): self.repolist.append(v)
+        self.BuildRepoList(None)
 
-        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
-        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
-        self.defaultcheck = {}; self.default = {}; self.repotrac = {}; self.pull_list = {}
-
-        #wx.Yeild()  For future refrence.
-
-        #Repo Name; Static Text; URL; Button.
-        for repo in self.repolist:
-            self.id += 1
-            self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
-            self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
-            self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
-
-            self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
-            self.name[self.id] = wx.StaticText(self.repopanel, -1, 'URL')
-            self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
-            self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
-            self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
-            self.pull_list[self.pull[self.id]] = self.id
-            self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
-            self.defaultcheck[self.id] = wx.CheckBox(self.repopanel, -1)
-            self.default[self.id] = wx.StaticText(self.repopanel, -1, 'Default')
-
-            self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-            self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
-            self.layout[self.id].Add(self.pull[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-            self.layout[self.id].Add(self.delete[self.id], -1, wx.EXPAND)
-            self.layout[self.id].Add(self.defaultcheck[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-            self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
-            self.layout[self.id].AddGrowableCol(1)
-            self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
-            self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
-            self.sizers["repolist_layout"].Add(self.container[self.id], -1, wx.EXPAND)
 
         self.sizers["repolist_layout"].AddGrowableCol(0)
         self.sizers["repolist"].Add(self.sizers["repolist_layout"], -1, wx.EXPAND)
@@ -314,11 +280,53 @@ class Repos(wx.Panel):
 
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
 
+    def BuildRepoList(self, event):
+        self.repolist = []
+        for v in self.manifest.GetList('UpdateManifest', 'repolist', ''): self.repolist.append(v)
+
+        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
+        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
+        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
+        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
+
+        #wx.Yeild()  For future refrence.
+
+        #Repo Name; Static Text; URL; Button.
+        for repo in self.repolist:
+            self.id += 1
+            self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
+            self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
+            self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
+            self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
+            self.name[self.id] = wx.StaticText(self.repopanel, -1, 'URL')
+            self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
+            self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
+            self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
+            self.pull_list[self.pull[self.id]] = self.id
+            self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
+            self.delete_list[self.delete[self.id]] = self.id
+            self.defaultcheck[self.id] = wx.CheckBox(self.repopanel, -1)
+            self.defchecklist[self.defaultcheck[self.id]] = self.id
+            self.default[self.id] = wx.StaticText(self.repopanel, -1, 'Default')
+            self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
+            self.layout[self.id].Add(self.pull[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.delete[self.id], -1, wx.EXPAND)
+            self.layout[self.id].Add(self.defaultcheck[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
+            self.layout[self.id].AddGrowableCol(1)
+            self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
+            self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
+            self.sizers["repolist_layout"].Insert(0, self.container[self.id], -1, wx.EXPAND)
+            self.sizers['repolist_layout'].Layout()
+
+
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
         self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',')
         repolist = self.manifest.GetList('UpdateManifest', 'repolist', ''); repo = repolist + repo
         self.manifest.SetList('UpdateManifest', 'repolist', repo)
+        self.BuildRepoList(None)
 
     def RefreshRepo(self, event):
         print self.pull_list[event.GetEventObject()]
