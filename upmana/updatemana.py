@@ -254,11 +254,7 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
-        self.id = -1; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
-        self.name = {}; self.url = {}; self.url_list = {}; self.pull = {}; self.uri = {}; self.delete = {}
-        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
-        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
-
+        self.NewRepoList(None)
         self.BuildRepoList(None)
 
         self.sizers["repolist_layout"].AddGrowableCol(0)
@@ -280,6 +276,12 @@ class Repos(wx.Panel):
         self.SetAutoLayout(True)
         self.Fit()
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
+
+    def NewRepoList(self, event):
+        self.id = -1; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
+        self.name = {}; self.url = {}; self.url_list = {}; self.pull = {}; self.uri = {}; self.delete = {}
+        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
+        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
 
     def BuildRepoList(self, event):
         self.repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
@@ -335,9 +337,10 @@ class Repos(wx.Panel):
 
     def DelRepo(self, event):
         self.id = self.delete_list[event.GetEventObject()]
-        repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
-        repolist.pop(self.id); self.manifest.SetList('UpdateManifest', 'repolist', repolist)
-        self.sizers["repolist_layout"].Remove(self.container[self.id])
+        self.sizers["repolist_layout"].Hide(self.container[self.id])
+        try: del self.box_name[self.id]
+        except: pass
+        self.manifest.SetList('UpdateManifest', 'repolist', list(self.box_name.values()))
         self.sizers['repolist_layout'].Layout()
 
     def RefreshRepo(self, event):
