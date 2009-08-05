@@ -135,10 +135,6 @@ class Updater(wx.Panel):
 
         if dlg.ShowModal():
             dlg.Destroy()
-            if self.Updated:
-                self.Updated = False
-                self.filelist.SetValue('')
-                wx.CallAfter(self.check)
 
     def PackageSet(self, event):
         for btn in self.btn:
@@ -258,7 +254,7 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
-        self.id = 0; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
+        self.id = -1; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
         self.name = {}; self.url = {}; self.url_list = {}; self.pull = {}; self.uri = {}; self.delete = {}
         self.defaultcheck = {}; self.default = {}; self.repotrac = {}
         self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
@@ -320,7 +316,9 @@ class Repos(wx.Panel):
             self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
             self.layout[self.id].AddGrowableCol(1)
             self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
+            #Button Events
             self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
+            self.Bind(wx.EVT_BUTTON, self.DelRepo, self.delete[self.id])
             self.sizers["repolist_layout"].Insert(0, self.container[self.id], -1, wx.EXPAND)
             self.sizers['repolist_layout'].Layout()
 
@@ -335,11 +333,18 @@ class Repos(wx.Panel):
         self.manifest.SetList('UpdateManifest', 'repolist', repolist)
         self.BuildRepoList(None)
 
+    def DelRepo(self, event):
+        self.id = self.delete_list[event.GetEventObject()]
+        repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
+        repolist.pop(self.id); self.manifest.SetList('UpdateManifest', 'repolist', repolist)
+        self.sizers["repolist_layout"].Remove(self.container[self.id])
+        self.sizers['repolist_layout'].Layout()
+
     def RefreshRepo(self, event):
         self.id = self.pull_list[event.GetEventObject()]
         self.manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
         try:
-            commands.pull(self.ui, self.r, self.url[self.id].GetValue())
+            commands.pull(self.ui, self.r, self.url[self.id].GetValue(), force=True)
         except:
             pass
 
