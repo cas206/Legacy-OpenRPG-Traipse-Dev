@@ -174,7 +174,7 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.4 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here.\n\nMajor changes in this version are ... Manifest is now in a CheckListBox, very nice, Repos now allow for scrolling, New button works. Checks Box on the Updater tab work.  Settings file is created and data is saved to it."
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.5 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here.\n\nMajor changes in this version are ... Manifest is now in a CheckListBox, very nice, Repos now allow for scrolling, New button works. Checks Box on the Updater tab work.  Settings file is created and data is saved to it."
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Update to " + branch + "\n\n The full release will show the files to be changed here.")
 
@@ -258,15 +258,15 @@ class Repos(wx.Panel):
         self.repolist = []
         for v in self.manifest.GetList('UpdateManifest', 'repolist', ''): self.repolist.append(v)
 
-        self.id = 1; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
+        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
         self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
-        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
+        self.defaultcheck = {}; self.default = {}; self.repotrac = {}; self.pull_list = {}
 
         #wx.Yeild()  For future refrence.
 
         #Repo Name; Static Text; URL; Button.
         for repo in self.repolist:
-            #self.repotrac[self.id] = repo
+            self.id += 1
             self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
             self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
             self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
@@ -276,6 +276,7 @@ class Repos(wx.Panel):
             self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
             self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
             self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
+            self.pull_list[self.pull[self.id]] = self.id
             self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
             self.defaultcheck[self.id] = wx.CheckBox(self.repopanel, -1)
             self.default[self.id] = wx.StaticText(self.repopanel, -1, 'Default')
@@ -288,6 +289,7 @@ class Repos(wx.Panel):
             self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
             self.layout[self.id].AddGrowableCol(1)
             self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
+            self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
             self.sizers["repolist_layout"].Add(self.container[self.id], -1, wx.EXPAND)
 
         self.sizers["repolist_layout"].AddGrowableCol(0)
@@ -311,7 +313,6 @@ class Repos(wx.Panel):
         self.Fit()
 
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
-        self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
@@ -320,8 +321,7 @@ class Repos(wx.Panel):
         self.manifest.SetList('UpdateManifest', 'repolist', repo)
 
     def RefreshRepo(self, event):
-        pass #print str(event) #repo = self.repolist[event]; print repo
-
+        print self.pull_list[event.GetEventObject()]
 
 class Manifest(wx.Panel):
     def __init__(self, parent):
@@ -390,7 +390,7 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.4", self.open_rpg, self.manifest)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.5", self.open_rpg, self.manifest)
         self.updated = False
         try:
             self.updater.Show()
