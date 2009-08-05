@@ -243,27 +243,24 @@ class Repos(wx.Panel):
         self.sizers["newrepo_layout"].Add(self.texts["reponame"], -1, wx.EXPAND)
         self.sizers["newrepo_layout"].AddGrowableCol(1)
         self.sizers["newbutton"].Add(self.sizers["newrepo_layout"], -1, wx.EXPAND)
-
+        #Repo List Panel
         self.repopanel = wx.ScrolledWindow(self)
         self.repopanel.SetScrollbars(20,20,55,40)
         self.repopanel.Scroll(50,10)
-
         self.box_sizers["repolist"] = wx.StaticBox(self.repopanel, -1, "Current Repo List")
         self.sizers["repolist"] = wx.StaticBoxSizer(self.box_sizers["repolist"], wx.VERTICAL)
-
         self.sizers["repo"] = wx.GridBagSizer(hgap=2, vgap=2)
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
         self.BuildRepoList(None)
 
-
         self.sizers["repolist_layout"].AddGrowableCol(0)
         self.sizers["repolist"].Add(self.sizers["repolist_layout"], -1, wx.EXPAND)
-
         self.sizers["repo"].Add(self.sizers["repolist"], (0,0), flag=wx.EXPAND)
         self.sizers["repo"].AddGrowableCol(0)
         self.sizers['repo'].AddGrowableRow(0)
+        self.sizers['repo'].AddGrowableRow(1)
         self.repopanel.SetSizer(self.sizers['repo'])
         self.repopanel.SetAutoLayout(True)
 
@@ -274,15 +271,12 @@ class Repos(wx.Panel):
         self.sizers["main"].AddGrowableCol(1)
         self.sizers["main"].AddGrowableRow(1)
         self.SetSizer(self.sizers["main"])
-
         self.SetAutoLayout(True)
         self.Fit()
-
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
 
     def BuildRepoList(self, event):
-        self.repolist = []
-        for v in self.manifest.GetList('UpdateManifest', 'repolist', ''): self.repolist.append(v)
+        self.repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
 
         self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
         self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
@@ -291,7 +285,6 @@ class Repos(wx.Panel):
 
         #wx.Yeild()  For future refrence.
 
-        #Repo Name; Static Text; URL; Button.
         for repo in self.repolist:
             self.id += 1
             self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
@@ -320,12 +313,15 @@ class Repos(wx.Panel):
             self.sizers["repolist_layout"].Insert(0, self.container[self.id], -1, wx.EXPAND)
             self.sizers['repolist_layout'].Layout()
 
-
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
         self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',')
-        repolist = self.manifest.GetList('UpdateManifest', 'repolist', ''); repo = repolist + repo
-        self.manifest.SetList('UpdateManifest', 'repolist', repo)
+        repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
+        if repolist == '':
+            pass
+        else:
+            repo = repolist + repo
+        self.manifest.SetList('UpdateManifest', 'repolist', repo); print repo
         self.BuildRepoList(None)
 
     def RefreshRepo(self, event):
