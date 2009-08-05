@@ -253,6 +253,11 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
+        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
+        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
+        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
+        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
+
         self.BuildRepoList(None)
 
         self.sizers["repolist_layout"].AddGrowableCol(0)
@@ -277,11 +282,9 @@ class Repos(wx.Panel):
 
     def BuildRepoList(self, event):
         self.repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
+        try: self.repolist = self.repo
+        except: pass
 
-        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
-        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
-        self.defaultcheck = {}; self.default = {}; self.repotrac = {}
-        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
 
         #wx.Yeild()  For future refrence.
 
@@ -315,13 +318,13 @@ class Repos(wx.Panel):
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
-        self.manifest.SetString('updaterepo', repo, ''); repo = repo.split(',')
+        self.manifest.SetString('updaterepo', repo, ''); self.repo = repo.split(',')
         repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
         if repolist == '':
             pass
         else:
-            repo = repolist + repo
-        self.manifest.SetList('UpdateManifest', 'repolist', repo); print repo
+            repolist = repolist + self.repo
+        self.manifest.SetList('UpdateManifest', 'repolist', repolist)
         self.BuildRepoList(None)
 
     def RefreshRepo(self, event):
