@@ -213,6 +213,11 @@ class Repos(wx.Panel):
     def __init__(self, parent, openrpg, manifest):
         wx.Panel.__init__(self, parent)
 
+        ### Update Manager
+        self.ui = ui.ui()
+        self.r = hg.repository(self.ui, ".")
+        self.c = self.r.changectx('tip')
+
         mainpanel = self
         self.openrpg = openrpg
         self.manifest = manifest
@@ -253,8 +258,8 @@ class Repos(wx.Panel):
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
         self.manifest = manifest
 
-        self.id = 0; self.box = {}; self.main = {}; self.container = {}; self.layout = {}
-        self.name = {}; self.url = {}; self.pull = {}; self.uri = {}; self.delete = {}
+        self.id = 0; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
+        self.name = {}; self.url = {}; self.url_list = {}; self.pull = {}; self.uri = {}; self.delete = {}
         self.defaultcheck = {}; self.default = {}; self.repotrac = {}
         self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
 
@@ -285,11 +290,11 @@ class Repos(wx.Panel):
         try: self.repolist = self.repo
         except: pass
 
-
         #wx.Yeild()  For future refrence.
 
         for repo in self.repolist:
             self.id += 1
+            #Build Constructs
             self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
             self.main[self.id] = wx.GridBagSizer(hgap=2, vgap=2)
             self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
@@ -298,12 +303,15 @@ class Repos(wx.Panel):
             self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
             self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
             self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
-            self.pull_list[self.pull[self.id]] = self.id
             self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
             self.delete_list[self.delete[self.id]] = self.id
             self.defaultcheck[self.id] = wx.CheckBox(self.repopanel, -1)
-            self.defchecklist[self.defaultcheck[self.id]] = self.id
             self.default[self.id] = wx.StaticText(self.repopanel, -1, 'Default')
+            #Build Retraceables
+            self.box_name[self.id] = str(repo)
+            self.pull_list[self.pull[self.id]] = self.id
+            self.defchecklist[self.defaultcheck[self.id]] = self.id
+            #Build Layout
             self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
             self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
             self.layout[self.id].Add(self.pull[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
@@ -328,7 +336,12 @@ class Repos(wx.Panel):
         self.BuildRepoList(None)
 
     def RefreshRepo(self, event):
-        print self.pull_list[event.GetEventObject()]
+        self.id = self.pull_list[event.GetEventObject()]
+        self.manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
+        try:
+            commands.pull(self.ui, self.r, self.url[self.id].GetValue())
+        except:
+            pass
 
 class Manifest(wx.Panel):
     def __init__(self, parent):
