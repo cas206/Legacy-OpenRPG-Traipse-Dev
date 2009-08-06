@@ -466,7 +466,7 @@ class updateApp(wx.App):
             self.AutoUpdate(); self.OnExit()
         else: pass
         if self.manifest.GetString('updatemana', 'no_update', '') == 'on' and self.main == False: 
-            print 'no udpate'; self.OnExit()
+            self.OnExit()
         else: pass
         try:
             self.updater.Show()
@@ -479,6 +479,7 @@ class updateApp(wx.App):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
+        self.current = self.repo.dirstate.branch()
         filename = 'ignorelist.txt'
         self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
