@@ -57,7 +57,7 @@ class Updater(wx.Panel):
         self.SetAutoLayout(True)
         self.get_package
 
-        self.current = self.c.branch()
+        self.current = self.repo.dirstate.branch()
         self.BranchInfo(self.current)
 
         ## Event Handlers
@@ -88,13 +88,13 @@ class Updater(wx.Panel):
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
 
-        filename = '.ignorelist.txt'
+        filename = 'ignorelist.txt'
         self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         for ignore in self.ignorelist:
             shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
-        #hg.clean(self.repo, self.current)
+        hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
             shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
             os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
@@ -115,6 +115,10 @@ class Updater(wx.Panel):
         else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
         dlg.SetIcon(icon)
 
+        self.ui = ui.ui()
+        self.repo = hg.repository(self.ui, ".")
+        self.c = self.repo.changectx('tip')
+
         dlgsizer = wx.GridBagSizer(hgap=1, vgap=1)
         Yes = wx.Button( dlg, wx.ID_OK, "Ok" )
         Yes.SetDefault()
@@ -125,7 +129,7 @@ class Updater(wx.Panel):
         if self.package_list == None: return
         types = self.package_list
         row=0; col=0
-        self.current = self.c.branch()
+        self.current = self.repo.dirstate.branch()
         self.package_type = self.current
         self.btnlist = {}; self.btn = {}
         self.id = 1
@@ -217,7 +221,7 @@ class Repos(wx.Panel):
         self.r = hg.repository(self.ui, ".")
         self.c = self.r.changectx('tip')
 
-        mainpanel = self
+        #mainpanel = self
         self.openrpg = openrpg
         self.manifest = manifest
         self.buttons = {}
@@ -356,23 +360,18 @@ class Manifest(wx.Panel):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-
         self.manifestlist = []
         self.manifestlist = self.c.manifest().keys()
         for mana in self.manifestlist: mana = os.sep + 'orpg' + os.sep + mana
         self.manifestlist.sort()
-
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-
         self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, self.manifestlist, 
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
-
         filename = 'ignorelist.txt'
         self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
-
         self.manifestlog.Bind(wx.EVT_CHECKLISTBOX, self.GetChecked)
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
         self.sizer.AddGrowableCol(0)
@@ -458,13 +457,13 @@ class updateApp(wx.App):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-        filename = '.ignorelist.txt'
+        filename = 'ignorelist.txt'
         self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         for ignore in self.ignorelist:
             shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
-        #hg.clean(self.repo, self.current)
+        hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
             shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
             os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])

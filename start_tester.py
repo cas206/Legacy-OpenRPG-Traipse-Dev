@@ -8,23 +8,16 @@ HG = os.environ["HG"]
 import pyver
 pyver.checkPyVersion()
 
-os.system(HG + ' pull "http://hg.assembla.com/traipse"')
-os.system(HG + ' pull "http://hg.assembla.com/traipse_dev"')
-#os.system(HG + ' pull "http://hg.assembla.com/openrpg"')
-#os.system(HG + ' pull "http://hg.assembla.com/openrpg_dev"')
-
+from orpg.orpg_wx import *
+import upmana.updatemana
+app = upmana.updatemana.updateApp(0)
+app.MainLoop()
 for key in sys.modules.keys():
     if 'orpg' in key:
         del sys.modules[key]
 
 from orpg.orpg_wx import *
-
-import upmana.updatemana
-app = upmana.updatemana.updateApp(0)
-app.MainLoop()
-
 import orpg.main
-
 
 if WXLOADED:
     mainapp = orpg.main.orpgApp(0)
