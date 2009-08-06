@@ -9,6 +9,7 @@ import orpg.dirpath
 import orpg.tools.validate
 from mercurial import ui, hg, commands, repo, revlog, cmdutil
 
+
 class Updater(wx.Panel):
     def __init__(self, parent, open_rpg, manifest):
         wx.Panel.__init__(self, parent)
@@ -170,7 +171,7 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.5 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here.\n\nMajor changes in this version are ... Manifest is now in a CheckListBox, very nice, Repos now allow for scrolling, New button works. Checks Box on the Updater tab work.  Settings file is created and data is saved to it."
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.5 of the Update Manager. It has limited functionality.\n\nThe full release will search your Revision log and show the contents here.\n\nMajor changes in this version are ... Manifest is now in a CheckListBox, very nice, Repos now allow for scrolling, New button works. Checks Box on the Updater tab work.  Settings file is created and data is saved to it."
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Update to " + branch + "\n\n The full release will show the files to be changed here.")
 
@@ -179,15 +180,7 @@ class Updater(wx.Panel):
         #    fc = c[f]
         #    self.filelist.AppendText(str(f + '\n'))
 
-
-    def verify_file(self, abs_path):
-        """Returns True if file or directory exists"""
-        try:
-            os.stat(abs_path)
-            return True
-        except OSError:
-            self.log.log("Invalid File or Directory: " + abs_path, ORPG_GENERAL)
-            return False
+    
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
@@ -369,8 +362,8 @@ class Manifest(wx.Panel):
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
 
         filename = '.hgignore'
-        self.filename = orpg.dirpath.dir_struct["user"] + filename
-        orpg.tools.validate.Validate().config_file('.hgignore',"default.hgignore")
+        self.filename = orpg.dirpath.dir_struct["home"] + filename
+        orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"]).config_file(filename, "default.hgignore")
         self.mana = self.LoadDoc()
 
         self.manifestlog.Bind(wx.EVT_CHECKLISTBOX, self.GetChecked)
@@ -390,6 +383,7 @@ class Manifest(wx.Panel):
         f = open(self.filename, "w")
         for mana in self.mana:
             f.write(mana+'\n')
+            #f.write('\n')
         f.close()
 
     def LoadDoc(self):
@@ -447,8 +441,15 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.5", self.open_rpg, self.manifest)
-        self.updated = False
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.6.5", self.open_rpg, self.manifest)
+
+        if self.manifest.GetString("updatemana", "auto_update", "") == 'on':
+            print 'Auto Update not completed'
+            self.OnExit()
+
+        if self.manifest.GetString('updatemana', 'no_update', '') == 'on':
+            self.OnExit()
+
         try:
             self.updater.Show()
             self.SetTopWindow(self.updater)
@@ -458,13 +459,11 @@ class updateApp(wx.App):
         return True
 
     def OnExit(self):
-        #self.settings.save()
-        """
-        imported = ['orpg.orpgCore', 'orpg.orpg_wx', 'orpg.orpg_version', 'orpg.tools.orpg_log', 'orpg.orpg_xml', 'orpg.dirpath', 'orpg.tools.orpg_settings', 'orpg.tools.validate', 'orpg.pulldom', 'orpg.tools.NotebookCtrl', 'orpg.tools.config_update', 'orpg.systempath', 'orpg.minidom', 'orpg.dirpath.dirpath_tools', 'orpg.tools.rgbhex', 'orpg.orpg_windows']
+        imported = ['manifest', 'orpg.dirpath', 'orpg.orpgCore', 'orpg.orpg_version', 'orpg.tools.orpg_log', 'orpg.tools.orpg_log', 'orpg.orpg_xml', 'orpg.dirpath', 'orpg.dirpath', 'orpg.tools.validate', 'mercurial.ui', 'mercurial.hg', 'mercurial.commands', 'mercurial.repo', 'mercurial.revlog', 'mercurial.cmdutil']
 
         for name in imported:
             if name in sys.modules:
-                self.log.log("Unimported " + name, ORPG_DEBUG)
+                #self.log.log("Unimported " + name, ORPG_DEBUG)
                 del sys.modules[name]
-        """
-        self.log.log("Updater Exit\n\n", ORPG_NOTE)
+        self.updater.Destroy()
+        #self.log.log("Updater Exit\n\n", ORPG_NOTE)
