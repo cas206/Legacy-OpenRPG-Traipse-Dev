@@ -195,9 +195,9 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.9(stable) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nThe Updater says it all, choose a branch and update to that branch. Repos is a new feature that I hope users take advantage of. Clone the repo, build your own, and then share it with your friends! The Manifest is the ignore list. Want to make sure a test run doesn't delete important files ... then add them to the Manifest'. Control is not functional yet, but when it is users will be able to update to specific revision dates and delete branches.\n\nThis is a good start. Enjoy the freedom!!"
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.9(stable) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nUpdater: Set your update type on startup; Auto, None. Select a package of changes from a branch and update.\n\nRepos: Collect repositories of different projects. Set a name then assign it a URL. Refresh repositories in your list or delete them from your list.\n\nManifest: A complete list of all the files in your current change set. Check files off that you want to be safe from future updates.\n\nControl: Incomplete. Future revisions will allow users to update to specific revision branchs and delete branches from their computer.\n\nThis is a good start. Enjoy the freedom!!"
         self.changelog.AppendText(changelog + '\n')
-        self.filelist.AppendText("Update to " + branch + "\n\nWhen Update Manager is fully functional this area will show the files that will be affected by the yoru branch selection.")
+        self.filelist.AppendText("Traipse 'OpenRPG'\n\n Currently selected branch: " + branch + "\n\nFile List: When Control is completed this field will display a list of files that will be affected by your selection of branch.  The window to the left will display the description of the branch.\n\nDescription: Stable releases will have a formated Description that displays the Build Number, a summary of the branch, and a summary of the changes in the selected changeset.")
 
         #### Files works but not fully without the change log information, pulled for Dev 0.1
         #for f in files:
@@ -477,7 +477,7 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.6.7", self.open_rpg, self.manifest, self.main)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.6.9 (open beta)", self.open_rpg, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
