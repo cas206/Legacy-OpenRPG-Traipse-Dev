@@ -254,7 +254,7 @@ class orpgFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
 
         self.updateMana.AppendItem(mana)
-        self.mainmenu.Insert(4, self.updateMana, "&Update Manager")
+        self.mainmenu.Insert(5, self.updateMana, "&Update Manager")
         self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)
        
 

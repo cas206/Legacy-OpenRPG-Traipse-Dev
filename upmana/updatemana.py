@@ -195,7 +195,7 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.7 of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. The Updater says it all, choose a branch and update to that branch. Repos is a new feature that I hope users take advantage of. Clone the repo, build your own, and then share it with your friends! The Manifest is the ignore list. Want to make sure a test run doesn't delete important files ... then add them to the Manifest'. Control is not functional yet, but when it is users will be able to update to specific revision dates and delete branches.\n\nThis is a good start. Enjoy the freedom!!"
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.9(stable) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nThe Updater says it all, choose a branch and update to that branch. Repos is a new feature that I hope users take advantage of. Clone the repo, build your own, and then share it with your friends! The Manifest is the ignore list. Want to make sure a test run doesn't delete important files ... then add them to the Manifest'. Control is not functional yet, but when it is users will be able to update to specific revision dates and delete branches.\n\nThis is a good start. Enjoy the freedom!!"
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Update to " + branch + "\n\nWhen Update Manager is fully functional this area will show the files that will be affected by the yoru branch selection.")
 
@@ -342,10 +342,11 @@ class Repos(wx.Panel):
 
         #Set Default Repo Button
         capture = self.manifest.GetString('updaterepo', 'default', '')
-        for caught in self.uri:
-            if capture == self.uri[caught]: self.id = caught; pass
-            else: continue
-        if capture != '': self.defaultcheck[self.id].SetValue(True)
+        if capture != '':
+            for caught in self.uri:
+                if capture == self.uri[caught]: self.id = caught; pass
+                else: continue
+            self.defaultcheck[self.id].SetValue(True)
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
@@ -495,21 +496,24 @@ class updateApp(wx.App):
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
         self.current = self.repo.dirstate.branch()
-        filename = 'ignorelist.txt'
-        self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
-        orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
-        self.mana = self.LoadDoc()
-        for ignore in self.ignorelist: #Checked or not, if it is here, it is ignored.
-            try: shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
-            except: pass
+
         capture = self.manifest.GetString('updaterepo', 'default', '')
-        commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
-        hg.clean(self.repo, self.current)
-        for ignore in self.ignorelist:
-            try: shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-            except: pass
-            try: os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
-            except: pass
+        if capture != '':
+            commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
+            filename = 'ignorelist.txt'
+            self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
+            orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+            self.mana = self.LoadDoc()
+            for ignore in self.ignorelist: #Checked or not, if it is here, it is ignored.
+                try: shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
+                except: pass
+            hg.clean(self.repo, self.current)
+            for ignore in self.ignorelist:
+                try: shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+                except: pass
+                try: os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+                except: pass
+        else: print 'No default repository set, skipping Auto Update!'
 
     def LoadDoc(self):
         ignore = open(self.filename)
