@@ -336,8 +336,16 @@ class Repos(wx.Panel):
             #Button Events
             self.Bind(wx.EVT_BUTTON, self.RefreshRepo, self.pull[self.id])
             self.Bind(wx.EVT_BUTTON, self.DelRepo, self.delete[self.id])
+            self.Bind(wx.EVT_CHECKBOX, self.SetDefault, self.defaultcheck[self.id])
             self.sizers["repolist_layout"].Insert(0, self.container[self.id], -1, wx.EXPAND)
             self.sizers['repolist_layout'].Layout()
+
+        #Set Default Repo Button
+        capture = self.manifest.GetString('updaterepo', 'default', '')
+        for caught in self.uri:
+            if capture == self.uri[caught]: self.id = caught; pass
+            else: continue
+        if capture != '': self.defaultcheck[self.id].SetValue(True)
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
@@ -361,6 +369,13 @@ class Repos(wx.Panel):
         self.manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
         try: commands.pull(self.ui, self.r, self.url[self.id].GetValue(), rev='', update=False, force=True)
         except: pass
+
+    def SetDefault(self, event):
+        self.id = self.defchecklist[event.GetEventObject()]
+        self.manifest.SetString('updaterepo', 'default', self.uri[self.id])
+        for all in self.defaultcheck:
+            self.defaultcheck[all].SetValue(False)
+        self.defaultcheck[self.id].SetValue(True)
 
 class Manifest(wx.Panel):
     def __init__(self, parent):
@@ -401,8 +416,8 @@ class Manifest(wx.Panel):
         ignore = open(self.filename)
         ignorelist = []
         for i in ignore: ignorelist.append(str(i [:len(i)-1]))
-        for i in ignorelist:
-            if self.c.manifest().has_key(i): pass
+        for i in ignorelist: #Adds previously ignored files to manifestlistlog if they are not in changesets.
+            if self.c.manifest().has_key(i): continue
             else: self.manifestlist.append(i); self.manifestlist.sort()
         self.manifestlog.SetCheckedStrings(ignorelist)
         manifest = ignore.readlines()
@@ -484,12 +499,17 @@ class updateApp(wx.App):
         self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
-        for ignore in self.ignorelist:
-            shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
+        for ignore in self.ignorelist: #Checked or not, if it is here, it is ignored.
+            try: shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
+            except: pass
+        capture = self.manifest.GetString('updaterepo', 'default', '')
+        commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
-            shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-            os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+            try: shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+            except: pass
+            try: os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+            except: pass
 
     def LoadDoc(self):
         ignore = open(self.filename)
