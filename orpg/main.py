@@ -53,6 +53,8 @@ import orpg.networking.mplay_client
 import orpg.networking.gsclient
 import orpg.mapper.map
 import orpg.mapper.images
+import upmana.updatemana
+import upmana.manifest as manifest
 import wx.py
 
 ####################################
@@ -122,6 +124,12 @@ class orpgFrame(wx.Frame):
         open_rpg.add_component('pluginmenu', self.pluginMenu)
         self.pluginsFrame.Start()
         self.log.log("plugins reloaded and startup plugins launched", ORPG_DEBUG)
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        self.log.log("Exit orpgFrame", ORPG_DEBUG)
+
+        #Load Update Manager
+        open_rpg.add_component('updatemana', self.updateMana)
+        self.log.log("update manager reloaded", ORPG_DEBUG)
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.log.log("Exit orpgFrame", ORPG_DEBUG)
 
@@ -235,10 +243,20 @@ class orpgFrame(wx.Frame):
         self.pluginMenu = wx.Menu()
         item = wx.MenuItem(self.pluginMenu, wx.ID_ANY, "Control Panel", "Control Panel")
         self.Bind(wx.EVT_MENU, self.OnMB_PluginControlPanel, item)
+
         self.pluginMenu.AppendItem(item)
         self.pluginMenu.AppendSeparator()
         self.mainmenu.Insert(2, self.pluginMenu, "&Plugins")
-        self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)       
+        self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)
+
+        self.updateMana = wx.Menu()
+        mana = wx.MenuItem(self.updateMana, wx.ID_ANY, "Update Manager", "Update Manager")
+        self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
+
+        self.updateMana.AppendItem(mana)
+        self.mainmenu.Insert(4, self.updateMana, "&Update Manager")
+        self.log.log("Exit orpgFrame->build_menu()", ORPG_DEBUG)
+       
 
     #################################
     ## All Menu Events
@@ -449,6 +467,12 @@ class orpgFrame(wx.Frame):
         else: self.pluginsFrame.Show()
         self.log.log("Exit orpgFrame->OnMB_ToolsPlugins(self)", ORPG_DEBUG)
 
+    def OnMB_UpdateManagerPanel(self, evt):
+        self.log.log("Enter orpgFrame->OnMB_ToolsPlugins(self)", ORPG_DEBUG)
+        if self.updateMana.IsShown() == True: self.updateMana.Hide()
+        else: self.updateMana.Show()
+        self.log.log("Exit orpgFrame->OnMB_ToolsPlugins(self)", ORPG_DEBUG)
+
     def OnMB_ToolsLoggingLevelDebug(self):
         self.log.log("Enter orpgFrame->OnMB_ToolsLoggingLevelDebug(self)", ORPG_DEBUG)
         lvl = self.log.getLogLevel()
@@ -535,7 +559,7 @@ class orpgFrame(wx.Frame):
         self._mgr.Update()
         self.log.log("Exit orpgFrame->OnMB_ToolsMapBar(self)", ORPG_DEBUG)
 
-    #Help Menu
+    #Help Menu #Needs a custom Dialog because it is ugly on Windows
     def OnMB_HelpAbout(self):
 
         description = """OpenRPG is a Virtual Game Table that allows users to connect via a network and play table
@@ -603,6 +627,18 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         open_rpg.add_component("startplugs", self.get_startplugins())
         self.windowsmenu = wx.Menu()
         self.mainwindows = {}
+        self.log.log("Menu Created", ORPG_DEBUG)
+        h = int(xml_dom.getAttribute("height"))
+        w = int(xml_dom.getAttribute("width"))
+        posx = int(xml_dom.getAttribute("posx"))
+        posy = int(xml_dom.getAttribute("posy"))
+        maximized = int(xml_dom.getAttribute("maximized"))
+        self.SetDimensions(posx, posy, w, h)
+        self.log.log("Dimensions Set", ORPG_DEBUG)
+
+        #Update Manager
+        self.manifest = manifest.ManifestChanges()
+        self.updateMana = upmana.updatemana.updaterFrame(self, "OpenRPG Update Manager Beta 0.6.7", open_rpg, self.manifest, True)
         self.log.log("Menu Created", ORPG_DEBUG)
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))
@@ -1092,6 +1128,7 @@ class orpgApp(wx.App):
         self.log = orpg.tools.orpg_log.orpgLog(orpg.dirpath.dir_struct["user"] + "runlogs/")
         self.log.setLogToConsol(False)
         self.log.log("Main Application Start", ORPG_DEBUG)
+        self.manifest = manifest.ManifestChanges()
         #Add the initial global components of the openrpg class
         #Every class should be passed openrpg
         open_rpg.add_component("log", self.log)

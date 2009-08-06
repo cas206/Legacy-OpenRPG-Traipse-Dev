@@ -51,6 +51,7 @@ class Updater(wx.Panel):
         self.sizer.Add(self.buttons['advanced'], (2,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['update'], (3,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['finish'], (4,3), flag=wx.EXPAND)
+        self.buttons['finish'].Disable()
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
@@ -60,6 +61,11 @@ class Updater(wx.Panel):
         self.current = self.repo.dirstate.branch()
         self.BranchInfo(self.current)
 
+        if self.manifest.GetString("updatemana", "no_update", "") == 'on': self.buttons['no_check'].SetValue(True)
+        else: self.buttons['no_check'].SetValue(False)
+        if self.manifest.GetString("updatemana", "auto_update", "") == 'on': self.buttons['auto_check'].SetValue(True)
+        else: self.buttons['auto_check'].SetValue(False)
+
         ## Event Handlers
         self.Bind(wx.EVT_BUTTON, self.Update, self.buttons['update'])
         self.Bind(wx.EVT_BUTTON, self.Finish, self.buttons['finish'])
@@ -68,16 +74,16 @@ class Updater(wx.Panel):
         self.Bind(wx.EVT_CHECKBOX, self.ToggleNoUpdate, self.buttons['no_check'])
 
     def ToggleAutoUpdate(self, event):
-        if self.buttons['auto_check'].GetValue():
-            if self.buttons['no_check'].GetValue(): 
+        if self.buttons['auto_check'].GetValue() == True:
+            if self.buttons['no_check'].GetValue() == True: 
                 self.buttons['no_check'].SetValue(False)
                 self.manifest.SetString("updatemana", "no_update", "off")
             self.manifest.SetString("updatemana", "auto_update", "on")
         else: self.manifest.SetString("updatemana", "auto_update", "off")
 
     def ToggleNoUpdate(self, event):
-        if self.buttons['no_check'].GetValue():
-            if self.buttons['auto_check'].GetValue(): 
+        if self.buttons['no_check'].GetValue() == True:
+            if self.buttons['auto_check'].GetValue() == True: 
                 self.buttons['auto_check'].SetValue(False)
                 self.manifest.SetString("updatemana", "auto_update", "off")
             self.manifest.SetString("updatemana", "no_update", "on")
@@ -107,7 +113,9 @@ class Updater(wx.Panel):
         ignore.close()
 
     def Finish(self, evt=None):
-        exit()
+        try: self.parent.Destroy()
+        except:
+            print 'Fail'; exit()
 
     def ChooseBranch(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
@@ -393,6 +401,9 @@ class Manifest(wx.Panel):
         ignore = open(self.filename)
         ignorelist = []
         for i in ignore: ignorelist.append(str(i [:len(i)-1]))
+        for i in ignorelist:
+            if self.c.manifest().has_key(i): pass
+            else: self.manifestlist.append(i); self.manifestlist.sort()
         self.manifestlog.SetCheckedStrings(ignorelist)
         manifest = ignore.readlines()
         ignore.close()
@@ -403,11 +414,12 @@ class Control(wx.Panel):
 
 
 class updaterFrame(wx.Frame):
-    def __init__(self, parent, title, openrpg, manifest):
+    def __init__(self, parent, title, openrpg, manifest, main):
         wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(700,480), 
             style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP | wx.DEFAULT_FRAME_STYLE)
         self.CenterOnScreen()
 
+        self.main = main
         ####### Panel Stuff ######
         p = wx.Panel(self)
         nb = wx.Notebook(p)
@@ -429,10 +441,17 @@ class updaterFrame(wx.Frame):
         sizer = wx.BoxSizer()
         sizer.Add(nb, 1, wx.EXPAND)
         p.SetSizer(sizer)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+    def OnClose(self, event):
+        if self.main == False: self.Destroy()
+        if self.main == True: self.Hide() #self.Hide()
+        #continue
 
 class updateApp(wx.App):
     def OnInit(self):
         self.open_rpg = open_rpg
+        self.main = False
         self.log = orpg.tools.orpg_log.orpgLog(orpg.dirpath.dir_struct["user"] + "runlogs/")
         self.log.setLogToConsol(False)
         self.log.log("Updater Start", ORPG_NOTE)
@@ -442,13 +461,16 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.6.7", self.open_rpg, self.manifest)
-        if self.manifest.GetString("updatemana", "auto_update", "") == 'on':
+        self.updater = updaterFrame(self, "OpenRPG Update Manager Beta 0.6.7", self.open_rpg, self.manifest, self.main)
+        if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
-        if self.manifest.GetString('updatemana', 'no_update', '') == 'on': self.OnExit()
+        else: pass
+        if self.manifest.GetString('updatemana', 'no_update', '') == 'on' and self.main == False: 
+            print 'no udpate'; self.OnExit()
+        else: pass
         try:
             self.updater.Show()
-            self.SetTopWindow(self.updater)
+            #self.SetTopWindow(self.updater)
             self.updater.Fit()
         except: pass
         return True
@@ -479,5 +501,6 @@ class updateApp(wx.App):
         imported = ['manifest', 'orpg.dirpath', 'orpg.orpgCore', 'orpg.orpg_version', 'orpg.tools.orpg_log', 'orpg.tools.orpg_log', 'orpg.orpg_xml', 'orpg.dirpath', 'orpg.dirpath', 'orpg.tools.validate', 'mercurial.ui', 'mercurial.hg', 'mercurial.commands', 'mercurial.repo', 'mercurial.revlog', 'mercurial.cmdutil', 'shutil']
         for name in imported:
             if name in sys.modules: del sys.modules[name]
+
         try: self.updater.Destroy()
         except: pass
