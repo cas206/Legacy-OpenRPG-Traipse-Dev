@@ -2408,17 +2408,15 @@ class mplay_server:
             self.log_msg("Exception: send_to_all(): " + str(e))
 
     def send_to_group(self, from_id, group_id, data):
-        msg = ("<msg to='all' from='0' group_id='"+group_id+"'><font color='#FF0000'>" + data + "</font>")
-        #data = ServerPlugins.postParseIncoming(data)
+        data = ("<msg to='all' from='0' group_id='"+group_id+"'><font color='#FF0000'>" + data + "</font>")
+        data = ServerPlugins.postParseIncoming(data)
         try:
-            print data
             self.p_lock.acquire()
             keys = self.groups[group_id].get_player_ids()
             self.p_lock.release()
-            print keys
             for k in keys:
                 if k != from_id:
-                    self.players[k].outbox.put(msg)
+                    self.players[k].outbox.put(data)
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: send_to_group(): " + str(e))

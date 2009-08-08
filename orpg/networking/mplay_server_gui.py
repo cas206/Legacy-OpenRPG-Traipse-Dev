@@ -262,8 +262,6 @@ class Connections(wx.ListCtrl):
             for r in self.roomList:
                 if room == self.roomList[r]: groupID = r
                 else: groupID = 0
-            print self.roomList[groupID]
-            #groupID = self.roomList.get("'"+room+"'"); print groupID
             if menuItem == MENU_PLAYER_BOOT:
                 print "booting player: ", playerID
                 self.main.server.server.del_player( playerID, groupID )

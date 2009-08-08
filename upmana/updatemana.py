@@ -99,9 +99,10 @@ class Updater(wx.Panel):
         orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         for ignore in self.ignorelist:
-            shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
+            shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
+            print ignore.split('/')[len(ignore.split('/')) - 1]
             shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
             os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
 
@@ -195,7 +196,7 @@ class Updater(wx.Panel):
         self.filelist.SetValue('')
         self.filelist.AppendText("Files that will change\n\n")
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.6.9(stable) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nUpdater: Set your update type on startup; Auto, None. Select a package of changes from a branch and update.\n\nRepos: Collect repositories of different projects. Set a name then assign it a URL. Refresh repositories in your list or delete them from your list.\n\nManifest: A complete list of all the files in your current change set. Check files off that you want to be safe from future updates.\n\nControl: Incomplete. Future revisions will allow users to update to specific revision branchs and delete branches from their computer.\n\nThis is a good start. Enjoy the freedom!!"
+        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.7 (open beta) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nUpdater: Set your update type on startup; Auto, None. Select a package of changes from a branch and update.\n\nRepos: Collect repositories of different projects. Set a name then assign it a URL. Refresh repositories in your list or delete them from your list.\n\nManifest: A complete list of all the files in your current change set. Check files off that you want to be safe from future updates.\n\nControl: Incomplete. Future revisions will allow users to update to specific revision branchs and delete branches from their computer.\n\nThis is a good start. Enjoy the freedom!!"
         self.changelog.AppendText(changelog + '\n')
         self.filelist.AppendText("Traipse 'OpenRPG'\n\n Currently selected branch: " + branch + "\n\nFile List: When Control is completed this field will display a list of files that will be affected by your selection of branch.  The window to the left will display the description of the branch.\n\nDescription: Stable releases will have a formated Description that displays the Build Number, a summary of the branch, and a summary of the changes in the selected changeset.")
 
@@ -477,7 +478,7 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = orpg.tools.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.6.9 (open beta)", self.open_rpg, self.manifest, self.main)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7 (open beta)", self.open_rpg, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
@@ -504,15 +505,13 @@ class updateApp(wx.App):
             self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
             orpg.tools.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
             self.mana = self.LoadDoc()
-            for ignore in self.ignorelist: #Checked or not, if it is here, it is ignored.
-                try: shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep)
-                except: pass
+            for ignore in self.ignorelist:
+                shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
-                try: shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-                except: pass
-                try: os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
-                except: pass
+                print ignore.split('/')[len(ignore.split('/')) - 1]
+                shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+                os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
         else: print 'No default repository set, skipping Auto Update!'
 
     def LoadDoc(self):
