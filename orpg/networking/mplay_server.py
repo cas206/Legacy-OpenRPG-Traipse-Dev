@@ -367,34 +367,29 @@ class mplay_server:
             self.configDom = minidom.parse(self.userPath + 'server_ini.xml')
             self.configDom.normalize()
             self.configDoc = self.configDom.documentElement
-            # Obtain the lobby/server password if it's been specified
-            if self.configDoc.hasAttribute("admin"):
-                self.boot_pwd = self.configDoc.getAttribute("admin")
-            elif self.configDoc.hasAttribute("boot"):
-                self.boot_pwd = self.configDoc.getAttribute("boot")
-            if hasattr(self, 'bootPassword'):
-                self.boot_pwd = self.bootPassword
-            elif len(self.boot_pwd) < 1:
-                self.boot_pwd = raw_input("Enter boot password for the Lobby:  ")
+
+            if hasattr(self, 'bootPassword'): self.boot_pwd = self.bootPassword
+
+            else:
+                if self.configDoc.hasAttribute("admin"): self.boot_pwd = self.configDoc.getAttribute("admin") 
+                elif self.configDoc.hasAttribute("boot"): self.boot_pwd = self.configDoc.getAttribute("boot") 
+
+                if len(self.boot_pwd) < 1: self.boot_pwd = raw_input("Enter admin password:  ")
+
             if not hasattr(self, 'reg') and self.configDoc.hasAttribute("register"):
                 self.reg = self.configDoc.getAttribute("register")
             if not len(self.reg) > 0 or self.reg[0].upper() not in ("Y", "N"):
                 opt = raw_input("Do you want to post your server to the OpenRPG Meta Server list? (y,n) ")
-                if len(opt) and (opt[0].upper() == 'Y'):
-                    self.reg = 'Y'
-                else:
-                    self.reg = 'N'
+                if len(opt) and (opt[0].upper() == 'Y'): self.reg = 'Y'
+                else: self.reg = 'N'
             LobbyName = 'Lobby'
-            if self.configDoc.hasAttribute("lobbyname"):
-                LobbyName = self.configDoc.getAttribute("lobbyname")
+            if self.configDoc.hasAttribute("lobbyname"): LobbyName = self.configDoc.getAttribute("lobbyname")
             map_node = service_node = self.configDoc.getElementsByTagName("map")[0]
             msg_node = service_node = self.configDoc.getElementsByTagName("message")[0]
             mapFile = map_node.getAttribute('file')
             msgFile = msg_node.getAttribute('file')
-            if mapFile == '':
-                mapFile = 'Lobby_map.xml'
-            if msgFile == '':
-                msgFile = 'LobbyMessage.html'
+            if mapFile == '': mapFile = 'Lobby_map.xml'
+            if msgFile == '': msgFile = 'LobbyMessage.html'
             # Update the lobby with the passwords if they've been specified
             if len(self.boot_pwd):
                 self.groups = {'0': game_group( '0', LobbyName, "", 'The game lobby', self.boot_pwd, "",
@@ -406,19 +401,15 @@ class mplay_server:
             service_node = self.configDoc.getElementsByTagName("service")[0]
             address = service_node.getAttribute("address")
             address = address.lower()
-            if address == "" or address == "hostname/address" or address == "localhost":
-                self.server_address = None
-            else:
-                self.server_address = address
+            if address == "" or address == "hostname/address" or address == "localhost": self.server_address = None
+            else: self.server_address = address
             self.server_port = OPENRPG_PORT
-            if service_node.hasAttribute("port"):
-                self.server_port = int(service_node.getAttribute("port"))
+            if service_node.hasAttribute("port"): self.server_port = int(service_node.getAttribute("port"))
             if self.configDoc.hasAttribute("name") and len(self.configDoc.getAttribute("name")) > 0 :
                 self.name = self.configDoc.getAttribute("name")
             else:
                 if self.reg[0].upper() == "Y":
-                    if self.name == None:
-                       self.name = raw_input("Server Name? ")
+                    if self.name == None: self.name = raw_input("Server Name? ")
                     self.register()
 
             # Get the minimum openrpg version from config if available
@@ -429,8 +420,7 @@ class mplay_server:
             try:
                 mver = self.configDoc.getElementsByTagName("version")[0]
                 self.minClientVersion = mver.getAttribute("min")
-            except:
-                self.minClientVersion = SERVER_MIN_CLIENT_VERSION #from orpg/orpg_version.py
+            except: self.minClientVersion = SERVER_MIN_CLIENT_VERSION #from orpg/orpg_version.py
             self.defaultMessageFile = ""
             # This try/except bit is to allow older versions of python to continue without a list error.
 
@@ -446,10 +436,8 @@ class mplay_server:
             try:
                 ak = self.configDoc.getElementsByTagName("autokick")[0]
                 if ak.hasAttribute("silent"):
-                    if ((ak.getAttribute("silent")).lower() == "yes"):
-                        self.silent_auto_kick = 1
-                    else:
-                        self.silent_auto_kick = 0
+                    if ((ak.getAttribute("silent")).lower() == "yes"): self.silent_auto_kick = 1
+                    else: self.silent_auto_kick = 0
                 if ak.hasAttribute("delay"):
                     try:
                         delay = int(ak.getAttribute("delay"))
@@ -497,10 +485,8 @@ class mplay_server:
                     if rpw == "no" or rpw == "0":
                         roomdefault_pass = 0
                         self.log_msg("Room Defaults: Disallowing Passworded Rooms")
-                    else:
-                        self.log_msg("Room Defaults: Allowing Passworded Rooms")
-                except:
-                    self.log_msg("Room Defaults: [Warning] Allowing Passworded Rooms")
+                    else: self.log_msg("Room Defaults: Allowing Passworded Rooms")
+                except: self.log_msg("Room Defaults: [Warning] Allowing Passworded Rooms")
                 try:
                     setting = roomdefaults.getElementsByTagName('map')[0]
                     map = setting.getAttribute('file')
@@ -514,13 +500,10 @@ class mplay_server:
                     setting = roomdefaults.getElementsByTagName('message')[0]
                     msg = setting.getAttribute('file')
                     if msg != "":
-                        if msg[:4].lower() == 'http':
-                            roomdefault_msg = msg
-                        else:
-                            roomdefault_msg = self.userPath + msg.replace("myfiles/", "")
+                        if msg[:4].lower() == 'http': roomdefault_msg = msg
+                        else: roomdefault_msg = self.userPath + msg.replace("myfiles/", "")
                         self.log_msg("Room Defaults: Using " + str(msg) + " for room messages")
-                except:
-                    print ("Room Defaults: [Warning] Using Default Message")
+                except: print ("Room Defaults: [Warning] Using Default Message")
             except:
                 traceback.print_exc()
                 self.log_msg("**WARNING** Error loading default room settings from configuration file. Using internal defaults.")
@@ -529,13 +512,11 @@ class mplay_server:
             #set the defaults
             if roomdefault_msg != "" or roomdefault_msg != None:
                 self.defaultMessageFile = roomdefault_msg  #<room_defaults> tag superceeds older <newrooms> tag
-            else:
-                self.defaultMessageFile = None
+            else: self.defaultMessageFile = None
 
             if roomdefault_map != "" or roomdefault_map != None:
                 self.defaultMapFile = roomdefault_map  #<room_defaults> tag superceeds older <newrooms> tag
-            else:
-                self.defaultMapFile = None
+            else: self.defaultMapFile = None
 
             ##### room default map not handled yet. SETTING IGNORED
             if roomdefault_pass == 0: self.allow_room_passwords = 0
@@ -559,10 +540,8 @@ class mplay_server:
 
             self.validate_protocol = 1
 
-            if(validate_protocol_node):
-                self.validate_protocol = (validate_protocol_node[0].getAttribute("value") == "True")
-            if(self.validate_protocol != 1):
-                self.log_msg("Protocol Validation: OFF")
+            if(validate_protocol_node): self.validate_protocol = (validate_protocol_node[0].getAttribute("value") == "True")
+            if(self.validate_protocol != 1): self.log_msg("Protocol Validation: OFF")
             self.makePersistentRooms()
 
             self.log_msg("Server Configuration File: Processing Completed.")
@@ -581,10 +560,8 @@ class mplay_server:
             bootPassword = element.getAttribute('boot')
 
             # Conditionally check for minVersion attribute
-            if element.hasAttribute('minVersion'):
-                minVersion = element.getAttribute('minVersion')
-            else:
-                minVersion = ""
+            if element.hasAttribute('minVersion'): minVersion = element.getAttribute('minVersion')
+            else: minVersion = ""
 
             # Extract the map filename attribute from the map node
             # we only care about the first map element found -- others are ignored
@@ -594,19 +571,15 @@ class mplay_server:
             messageElement = element.getElementsByTagName('message')[0]
             messageFile = messageElement.getAttribute('file')
 
-            if messageFile[:4] != 'http':
-                messageFile = self.userPath + messageFile.replace("myfiles/", "")
+            if messageFile[:4] != 'http': messageFile = self.userPath + messageFile.replace("myfiles/", "")
 
             # Make sure we have a message to even mess with
-            if(len(messageFile) == 0):
-                messageFile = self.defaultMessageFile
+            if(len(messageFile) == 0): messageFile = self.defaultMessageFile
 
-            if(len(mapFile) == 0):
-                mapFile = self.defaultMapFile
+            if(len(mapFile) == 0): mapFile = self.defaultMapFile
 
             moderated = 0
-            if element.hasAttribute('moderated') and element.getAttribute('moderated').lower() == "true":
-                moderated = 1
+            if element.hasAttribute('moderated') and element.getAttribute('moderated').lower() == "true": moderated = 1
 
             #create the new persistant group
             self.new_group(roomName, roomPassword, bootPassword, minVersion, mapFile, messageFile, persist = 1, moderated=moderated)
@@ -658,10 +631,8 @@ class mplay_server:
         else: return
         #when log mode changes update all connection stubs
         for n in self.players:
-            try:
-                self.players[n].EnableMessageLogging = mode
-            except:
-                self.log_msg("Error changing Message Logging Mode for client #" + str(self.players[n].id))
+            try: self.players[n].EnableMessageLogging = mode
+            except: self.log_msg("Error changing Message Logging Mode for client #" + str(self.players[n].id))
     def NetworkLoggingStatus(self):
         if self.log_network_messages == 0: return "Network Traffic Log: Off"
         elif self.log_network_messages == 1: return "Network Traffic Log: Logging (composite file)"
@@ -683,12 +654,11 @@ class mplay_server:
                     metacache_lock.release()
 
                 if newlist != curlist:          #  If the two lists aren't identical
-                                               #  then something has changed.
+                                                #  then something has changed.
                     instance.register()             #  Call self.register()
                                                 #  which will force a re-read of the meta cache and
                                                 #  redo the registerThreads
-        else:
-            instance.register()
+        else: instance.register()
 
                 # Eventually, reset the MetaServerBaseURL here
 
@@ -699,8 +669,7 @@ class mplay_server:
     def clean_published_servername(self, name):
         #clean name of all apostrophes and quotes
         badchars = "\"\\`><"
-        for c in badchars:
-            name = name.replace(c,"")
+        for c in badchars: name = name.replace(c,"")
         return name
 
     def registerRooms(self, args=None):
@@ -724,25 +693,20 @@ class mplay_server:
 
 
     def register(self,name_given=None):
-        if name_given == None:
-            name = self.name
-        else:
-            self.name = name = name_given
+        if name_given == None: name = self.name
+        else: self.name = name = name_given
 
         name = self.clean_published_servername(name)
 
         #  Set up the value for num_users
-        if self.players:
-            num_players = len(self.players)
-        else:
-            num_players = 0
+        if self.players: num_players = len(self.players)
+        else: num_players = 0
 
         #  request only Meta servers compatible with version 2
         metalist = getMetaServers(versions=["2"])
         if self.show_meta_messages != 0:
             self.log_msg("Found these valid metas:")
-            for meta in metalist:
-                self.log_msg("Meta:" + meta)
+            for meta in metalist: self.log_msg("Meta:" + meta)
 
         #  Go through the list and see if there is already a running register
         #  thread for the meta.
@@ -759,7 +723,7 @@ class mplay_server:
                 if self.show_meta_messages != 0: self.log_msg( "Outdated.  Unregistering and removing")
                 self.metas[meta].unregister()
                 del self.metas[meta]
-            else:
+            else: 
                 if self.show_meta_messages != 0: self.log_msg( "Found in current meta list.  Leaving intact.")
 
         #  Now call register() for alive metas or start one if we need one
@@ -786,26 +750,20 @@ class mplay_server:
         #  Instead, loop through all existing meta threads and unregister them
 
         for meta in self.metas.values():
-            if meta and meta.isAlive():
-                meta.unregister()
-
+            if meta and meta.isAlive(): meta.unregister()
         self.be_registered = 0
 
-
-
-
-    #  This method runs as it's own thread and does the group_member_check every
-    #    sixty seconds.  This should eliminate zombies that linger when no one is
-    #    around to spook them.  GC: Frequency has been reduced as I question how valid
-    #    the implementation is as it will only catch a very small segment of lingering
-    #    connections.
+        #  This method runs as it's own thread and does the group_member_check every
+        #    sixty seconds.  This should eliminate zombies that linger when no one is
+        #    around to spook them.  GC: Frequency has been reduced as I question how valid
+        #    the implementation is as it will only catch a very small segment of lingering
+        #    connections.
     def player_reaper_thread_func(self,arg):
         while self.alive:
             time.sleep(60)
 
             self.p_lock.acquire()
-            for group in self.groups.keys():
-                self.check_group_members(group)
+            for group in self.groups.keys(): self.check_group_members(group)
             self.p_lock.release()
 
     #This thread runs ever 250 miliseconds, and checks various plugin stuff
@@ -815,12 +773,8 @@ class mplay_server:
             players = ServerPlugins.getPlayer()
 
             for player in players:
-                if player is not None:
-                    #Do something here so they can show up in the chat room for non web users'
-                    pass
-
+                if player is not None: pass #Do something here so they can show up in the chat room for non web users'
             data = ServerPlugins.preParseOutgoing()
-
             for msg in data:
                 try:
                     xml_dom = parseXml(msg)
@@ -832,8 +786,7 @@ class mplay_server:
                     xml_dom.setAttribute('to', 'all')
                     self.incoming_msg_handler(xml_dom, msg)
                     xml_dom.unlink()
-                except:
-                    pass
+                except: pass
 
             self.p_lock.release()
             time.sleep(0.250)
@@ -854,25 +807,14 @@ class mplay_server:
                 sent = sock.send(slice)
                 offset += sent
             sentm = offset
-        else:
-            # Calculate our message length
-            length = len( msg )
-
-            # Encode the message length into network byte order
-            lp = pack('!i', length)
-
+        else: 
+            length = len( msg ) # Calculate our message length
+            lp = pack('!i', length) # Encode the message length into network byte order
             try:
-                # Send the encoded length
-                sentl = sock.send( lp )
-
-                # Now, send the message the the length was describing
-                sentm = sock.send( msg )
-
-            except socket.error, e:
-                self.log_msg( e )
-
-            except Exception, e:
-                self.log_msg( e )
+                sentl = sock.send( lp ) # Send the encoded length
+                sentm = sock.send( msg ) # Now, send the message the the length was describing
+            except socket.error, e: self.log_msg( e )
+            except Exception, e: self.log_msg( e )
 
 
     def recvData( self, sock, readSize ):
@@ -885,25 +827,18 @@ class mplay_server:
         try:
             while offset != readSize:
                 frag = sock.recv( readSize - offset )
-
-                # See if we've been disconnected
-                rs = len( frag )
+                rs = len( frag ) # See if we've been disconnected
                 if rs <= 0:
                     # Loudly raise an exception because we've been disconnected!
                     raise IOError, "Remote closed the connection!"
-
-                else:
-                    # Continue to build complete message
+                else: # Continue to build complete message
                     offset += rs
                     data += frag
 
         except socket.error, e:
             self.log_msg("Socket Error: recvData(): " +  e )
             data = ""
-
         return data
-
-
 
     def recvMsg(self, sock, useCompression=False, cmpType=None):
         """This method now expects to receive a message having a 4-byte prefix length.  It will ONLY read
@@ -918,24 +853,16 @@ class mplay_server:
         msgData = ""
         try:
             lenData = self.recvData( sock, MPLAY_LENSIZE )
-
             # Now, convert to a usable form
             (length,) = unpack('!i', lenData)
-
             # Read exactly the remaining amount of data
             msgData = self.recvData( sock, length )
-
             try:
-                if useCompression and cmpType != None:
-                    msgData = cmpType.decompress(msgData)
-            except:
-                traceback.print_exc()
+                if useCompression and cmpType != None: msgData = cmpType.decompress(msgData)
+            except: traceback.print_exc()
 
-        except Exception, e:
-            self.log_msg( "Exception: recvMsg(): " + str(e) )
-
+        except Exception, e: self.log_msg( "Exception: recvMsg(): " + str(e) )
         return msgData
-
 
 
     def kill_server(self):
@@ -1357,6 +1284,8 @@ class mplay_server:
                 self.handle_role("set",props['id'], "GM",self.groups[LOBBY_ID].boot_pwd, LOBBY_ID)
 
                 cmsg = "Client Connect: (" + str(props['id']) + ") " + str(props['name']) + " [" + str(props['ip']) + "]"
+                self.log_msg(cmsg)
+                cmsg = ("connect", props) #################################################
                 self.log_msg(cmsg)
 
                 #  If already registered then re-register, thereby updating the Meta
@@ -1864,7 +1793,7 @@ class mplay_server:
 
             #notify user about others in the room
             self.return_room_roles(from_id,group_id)
-            self.log_msg(("join_group", (from_id, group_id)))
+            self.log_msg(("join_group", (self.groups[group_id].name, group_id, from_id)))
             self.handle_role("set", from_id, self.players[from_id].role, self.groups[group_id].boot_pwd, group_id)
 
         except Exception, e:
@@ -1887,13 +1816,13 @@ class mplay_server:
     def new_group( self, name, pwd, boot, minVersion, mapFile, messageFile, persist = 0, moderated=0 ):
         group_id = str( self.next_group_id )
         self.next_group_id += 1
-
         self.groups[group_id] = game_group( group_id, name, pwd, "", boot, minVersion, mapFile, messageFile, persist )
         self.groups[group_id].moderated = moderated
         ins = ""
         if persist !=0: ins="Persistant "
         lmsg = "Creating " + ins + "Group... (" + str(group_id) + ") " + str(name)
         self.log_msg( lmsg )
+        self.log_msg(("create_group", (str(name), int(group_id), 0) )) ##-99 works, could be better.
 
 
     def change_group_name(self,gid,name,pid):
@@ -2008,6 +1937,7 @@ class mplay_server:
             self.log_msg( lmsg )
             jmsg = "moving to room " + str(group_id) + "."
             self.log_msg( jmsg )
+            self.log_msg(("create_group", (str(name), group_id, from_id)))
             #even creators of the room should see the HTML --akoman
             #edit: jan10/03 - was placed in the except statement. Silly me.
             if self.defaultMessageFile != None:
@@ -2038,7 +1968,7 @@ class mplay_server:
             if not self.isPersistentRoom(group_id)  and self.groups[group_id].get_num_players() == 0:
                 self.send_to_all("0",self.groups[group_id].toxml('del'))
                 del self.groups[group_id]
-                self.log_msg(("delete_group", (from_id, group_id)))
+                self.log_msg(("delete_group", (group_id, from_id)))
 
             else:
                 self.send_to_all("0",self.groups[group_id].toxml('update'))
@@ -2056,6 +1986,7 @@ class mplay_server:
             self.groups[group_id].remove_player(id)
             del self.players[id]
             self.log_msg(dmsg)
+            self.log_msg(("disconnect",id))
 
 
             #  If already registered then re-register, thereby updating the Meta
@@ -2465,6 +2396,7 @@ class mplay_server:
 
     def send_to_all(self,from_id,data):
         try:
+            print data
             self.p_lock.acquire()
             keys = self.players.keys()
             self.p_lock.release()
@@ -2475,15 +2407,18 @@ class mplay_server:
             traceback.print_exc()
             self.log_msg("Exception: send_to_all(): " + str(e))
 
-
-
     def send_to_group(self, from_id, group_id, data):
-        data = ServerPlugins.postParseIncoming(data)
+        msg = ("<msg to='all' from='0' group_id='"+group_id+"'><font color='#FF0000'>" + data + "</font>")
+        #data = ServerPlugins.postParseIncoming(data)
         try:
+            print data
+            self.p_lock.acquire()
             keys = self.groups[group_id].get_player_ids()
+            self.p_lock.release()
+            print keys
             for k in keys:
                 if k != from_id:
-                    self.players[k].outbox.put(data)
+                    self.players[k].outbox.put(msg)
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: send_to_group(): " + str(e))

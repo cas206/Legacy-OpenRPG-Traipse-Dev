@@ -7,9 +7,7 @@
 __appname__=' OpenRPG GUI Server v0.7 '
 __version__='$Revision: 1.26 $'[11:-2]
 __cvsinfo__='$Id: mplay_server_gui.py,v 1.26 2007/11/06 00:32:39 digitalxero Exp $'[5:-2]
-__doc__="""
-OpenRPG Server Graphical Interface
-"""
+__doc__="""OpenRPG Server Graphical Interface"""
 
 import os
 import sys
@@ -22,6 +20,7 @@ import webbrowser
 from threading import Thread
 from meta_server_lib import post_server_data, remove_server
 from mplay_server import mplay_server
+from xml.dom import minidom
 
 # Constants ######################################
 SERVER_RUNNING = 1
@@ -88,10 +87,14 @@ class ServerConfig:
         setting used to control the server.
     """
 
-    def __init__(self, owner ):
-        """ Loads default configuration settings.
-        """
-        OPENRPG_PORT = 9557
+    def __init__(self, owner ): 
+        """ Loads default configuration settings."""
+        userPath = orpg.dirpath.dir_struct["user"] 
+        validate = orpg.tools.validate.Validate(userPath) 
+        validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+        configDom = minidom.parse(userPath + 'server_ini.xml') 
+        port = configDom.childNodes[0].childNodes[1].getAttribute('port')
+        OPENRPG_PORT = 6774 if port == '' else int(port) #Pretty ugly, but I couldn't find the tag any other way.
         self.owner = owner
 
     def load_xml(self, xml):
@@ -145,7 +148,7 @@ class Connections(wx.ListCtrl):
     def __init__( self, parent, main ):
         wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
         self.main = main
-        self.roomList = { "0" : "Lobby" }
+        self.roomList = { 0 : "Lobby" }
         self._imageList = wx.ImageList( 16, 16, False )
         img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
@@ -171,7 +174,8 @@ class Connections(wx.ListCtrl):
         self.menu.SetTitle( "Player Menu" )
         self.menu.Append( MENU_PLAYER_BOOT, "Boot Player" )
         self.menu.AppendSeparator()
-        self.menu.Append( MENU_PLAYER_SEND_MESSAGE, "Send Message" )
+        self.menu.Append( MENU_PLAYER_SEND_MESSAGE, "Send Player Message" )
+        self.menu.Append( MENU_PLAYER_SEND_ROOM_MESSAGE, "Send Room Message" ) 
         self.menu.Append( MENU_PLAYER_SEND_SERVER_MESSAGE, "Broadcast Server Message" )
 
         # Associate our events
@@ -184,8 +188,8 @@ class Connections(wx.ListCtrl):
     def add(self, player):
         i = self.InsertImageStringItem( 0, player["id"], 0 )
         self.SetStringItem( i, 1, self.stripHtml( player["name"] ) )
-        self.SetStringItem( i, 2, self.stripHtml( player["status"] ) )
-        self.SetStringItem( i, 3, "ROOM" )
+        self.SetStringItem( i, 2, "new" )
+        self.SetStringItem( i, 3, self.roomList[0] )
         self.SetStringItem( i, 4, self.stripHtml( player["version"] ) )
         self.SetStringItem( i, 5, self.stripHtml( player["role"] ) )
         self.SetStringItem( i, 6, self.stripHtml( player["ip"] ) )
@@ -212,17 +216,16 @@ class Connections(wx.ListCtrl):
     def update(self, player):
         i = self.FindItemData( -1, int(player["id"]) )
         if i > -1:
-            self.SetStringItem(i, 1, player["name"])
-            self.SetStringItem(i, 2, self.stripHtml( player["status"] ) )
+            self.SetStringItem(i, 1, self.stripHtml(player["name"]))
+            self.SetStringItem(i, 2, self.stripHtml(player["status"]))
             self.AutoAjust()
         else: self.add(player)
 
     def updateRoom( self, data ):
-        (from_id, id) = data
-        i = self.FindItemData( -1, int(from_id) )
-        self.SetStringItem( i, 3, self.roomList[id] )
-        self.SetStringItem( i, 5, "Lurker")
-        self.Refresh()
+        (room, room_id, player) = data
+        i = self.FindItemData( -1, int(player) )
+        self.SetStringItem( i, 3, room )
+        self.AutoAjust()
 
     def setPlayerRole( self, id, role ):
         i = self.FindItemData( -1, int(id) )
@@ -254,8 +257,13 @@ class Connections(wx.ListCtrl):
         if self.main.STATUS == SERVER_RUNNING:
             menuItem = event.GetId()
             playerID = str( self.GetItemData( self.selectedItem ) )
+            room = str(self.GetItem((int(playerID)-1), 3).GetText())
             idList = self.main.server.server.groups
-            groupID = 0
+            for r in self.roomList:
+                if room == self.roomList[r]: groupID = r
+                else: groupID = 0
+            print self.roomList[groupID]
+            #groupID = self.roomList.get("'"+room+"'"); print groupID
             if menuItem == MENU_PLAYER_BOOT:
                 print "booting player: ", playerID
                 self.main.server.server.del_player( playerID, groupID )
@@ -266,11 +274,11 @@ class Connections(wx.ListCtrl):
                 msg = self.GetMessageInput( "Send a message to player" )
                 if len(msg): self.main.server.server.send( msg, playerID, str(groupID) )
             #Leave this in for now.
-            #elif menuItem == MENU_PLAYER_SEND_TO_ROOM:
-            #    print "Send message to room..."
-            #    msg = self.GetMessageInput( "Send message to room of this player")
-            #    if len(msg):
-            #        self.main.server.server.send_to_group( 0, GroupID, msg )
+            elif menuItem == MENU_PLAYER_SEND_ROOM_MESSAGE:
+                print "Send message to room..."
+                msg = self.GetMessageInput( "Send message to room of this player")
+                if len(msg):
+                    self.main.server.server.send_to_group("0", str(groupID), msg )
 
             elif menuItem == MENU_PLAYER_SEND_SERVER_MESSAGE:
                 print "broadcast a message..."
@@ -310,7 +318,7 @@ class ServerGUI(wx.Frame):
         # Server Callbacks
         cb = {}
         cb["log"]        = self.Log
-        cb["connect"]    = self.OnConnect
+        cb["connect"]    = self.OnConnect  ##Fixed!!
         cb["disconnect"] = self.OnDisconnect
         cb["update"]     = self.OnUpdatePlayer
         cb["data_recv"]  = self.OnDataRecv
@@ -432,7 +440,7 @@ class ServerGUI(wx.Frame):
     def Log(self, log):
         wx.LogMessage(str(log))
 
-    def OnConnect(player, self, data):
+    def OnConnect(self, player):
         self.conns.add(player)
 
     def OnDisconnect(self, id):
@@ -452,15 +460,15 @@ class ServerGUI(wx.Frame):
         self.sb.SetStatusText("Recv: %s (%d)" % (format_bytes(self.total_data_received), self.total_messages_received), 2)
 
     def OnCreateGroup( self, data ):
-        print "room list: ", self.conns.roomList
-        self.conns.roomList[id] = name
-        (id, name) = data
-        print "room list: ", self.conns.roomList
+        room_id = data[1]
+        name = data[0]
+        self.conns.roomList[room_id] = name
+        (room, room_id, player) = data
+        self.conns.updateRoom(data)
 
     def OnDeleteGroup( self, data ):
-        (from_id, id) = data
-        #del self.conns.roomList[id]
-        print "OnDeleteGroup room list: ", self.conns.roomList, id
+        (room_id, player) = data
+        del self.conns.roomList[room_id]
 
     def OnJoinGroup( self, data ):
         self.conns.updateRoom( data )
@@ -473,12 +481,35 @@ class ServerGUI(wx.Frame):
     def OnStart(self, event = None):
         """ Start server. """
         if self.STATUS == SERVER_STOPPED:
-            serverNameEntry = wx.TextEntryDialog( self, "Please Enter The Server Name You Wish To Use:",
+            # see if we already have name specified 
+            try:
+                userPath = orpg.dirpath.dir_struct["user"] 
+                validate = orpg.tools.validate.Validate(userPath) 
+                validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+                configDom = minidom.parse(userPath + 'server_ini.xml') 
+                configDom.normalize() 
+                configDoc = configDom.documentElement 
+                if configDoc.hasAttribute("name"): self.serverName = configDoc.getAttribute("name")
+            except: pass 
+            if self.serverName == '': 
+                serverNameEntry = wx.TextEntryDialog( self, "Please Enter The Server Name You Wish To Use:",
                                                  "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
-            if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
-            serverPasswordEntry = wx.TextEntryDialog(self, "Please Enter The Server Admin Password:",
-                                                 "Server's Password", self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
-            if serverPasswordEntry.ShowModal() == wx.ID_OK: self.bootPwd = serverPasswordEntry.GetValue()
+                if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
+            # see if we already have password specified 
+            try: 
+                userPath = orpg.dirpath.dir_struct["user"] 
+                validate = orpg.tools.validate.Validate(userPath) 
+                validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+                configDom = minidom.parse(userPath + 'server_ini.xml') 
+                configDom.normalize() 
+                configDoc = configDom.documentElement 
+                if configDoc.hasAttribute("admin"): self.bootPwd = configDoc.getAttribute("admin") 
+                elif configDoc.hasAttribute("boot"): self.bootPwd = configDoc.getAttribute("boot") 
+            except: pass 
+            if self.bootPwd == '': 
+                serverPasswordEntry = wx.TextEntryDialog(self, "Please Enter The Server Admin Password:", "Server's Password", self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
+                if serverPasswordEntry.ShowModal() == wx.ID_OK: self.bootPwd = serverPasswordEntry.GetValue()
+
             if len(self.serverName):
                 wx.BeginBusyCursor()
                 self.server = ServerMonitor(self.callbacks, self.conf, self.serverName, self.bootPwd)
