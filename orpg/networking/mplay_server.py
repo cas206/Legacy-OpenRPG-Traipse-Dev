@@ -2408,8 +2408,8 @@ class mplay_server:
             self.log_msg("Exception: send_to_all(): " + str(e))
 
     def send_to_group(self, from_id, group_id, data):
-        data = ("<msg to='all' from='0' group_id='"+group_id+"'><font color='#FF0000'>" + data + "</font>")
-        data = ServerPlugins.postParseIncoming(data)
+        #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"'><font color='#FF0000'>" + data + "</font>")
+        data = ServerPlugins.postParseIncoming(data) #Function breaks here.
         try:
             self.p_lock.acquire()
             keys = self.groups[group_id].get_player_ids()

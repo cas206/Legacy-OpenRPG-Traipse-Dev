@@ -224,7 +224,7 @@ class Connections(wx.ListCtrl):
     def updateRoom( self, data ):
         (room, room_id, player) = data
         i = self.FindItemData( -1, int(player) )
-        self.SetStringItem( i, 3, room )
+        if i > 0: self.SetStringItem( i, 3, room )
         self.AutoAjust()
 
     def setPlayerRole( self, id, role ):
@@ -275,8 +275,7 @@ class Connections(wx.ListCtrl):
             elif menuItem == MENU_PLAYER_SEND_ROOM_MESSAGE:
                 print "Send message to room..."
                 msg = self.GetMessageInput( "Send message to room of this player")
-                if len(msg):
-                    self.main.server.server.send_to_group("0", str(groupID), msg )
+                if len(msg): self.main.server.server.send_to_group('0', str(groupID), msg )
 
             elif menuItem == MENU_PLAYER_SEND_SERVER_MESSAGE:
                 print "broadcast a message..."

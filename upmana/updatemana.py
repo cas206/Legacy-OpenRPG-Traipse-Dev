@@ -102,7 +102,6 @@ class Updater(wx.Panel):
             shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
-            print ignore.split('/')[len(ignore.split('/')) - 1]
             shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
             os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
 
