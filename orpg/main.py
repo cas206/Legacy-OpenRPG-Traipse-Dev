@@ -638,7 +638,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
 
         #Update Manager
         self.manifest = manifest.ManifestChanges()
-        self.updateMana = upmana.updatemana.updaterFrame(self, "OpenRPG Update Manager Beta 0.6.7", open_rpg, self.manifest, True)
+        self.updateMana = upmana.updatemana.updaterFrame(self, 
+            "OpenRPG Update Manager Beta 0.7.1", open_rpg, self.manifest, True)
         self.log.log("Menu Created", ORPG_DEBUG)
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))
@@ -660,8 +661,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         wndinfo.Hide()
         self._mgr.AddPane(self.sound_player, wndinfo)
         children = xml_dom._get_childNodes()
-        for c in children:
-            self.build_window(c, self)
+        for c in children: self.build_window(c, self)
 
         # status window
         self.status = status_bar(self)
@@ -724,10 +724,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         self.mainmenu.Insert(3, self.windowsmenu, 'Windows')
         self.log.log("Windows Menu Done", ORPG_DEBUG)
         self._mgr.Update()
-        if wx.VERSION_STRING > "2.8":
-            self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.onPaneClose)
-        else:
-            self.Bind(AUI.EVT_AUI_PANECLOSE, self.onPaneClose)
+        if wx.VERSION_STRING > "2.8": self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.onPaneClose)
+        else: self.Bind(AUI.EVT_AUI_PANECLOSE, self.onPaneClose)
         self.log.log("AUI Bindings Done", ORPG_DEBUG)
 
         #Load the layout if one exists

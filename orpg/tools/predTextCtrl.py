@@ -33,6 +33,7 @@
 
 import string
 from orpg.orpg_windows import *
+from wx.lib.expando import ExpandoTextCtrl
 
 #  This line added to test CVS commit
 
@@ -304,7 +305,7 @@ LetterTree = LetterTreeClass(__key)
 #
 # Defines:
 #    findWord(self,insert,st)
-class predTextCtrl(wx.TextCtrl):
+class predTextCtrl(ExpandoTextCtrl):
 
     # Initialization subroutine.
     #
@@ -332,9 +333,9 @@ class predTextCtrl(wx.TextCtrl):
 
         #  Call super() for default behavior
         if validator:
-            wx.TextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name, validator=validator )
+            ExpandoTextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name, validator=validator )
         else:
-            wx.TextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name)
+            ExpandoTextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name)
 
         self.tree = LetterTree      #  Instantiate a new LetterTree.
         #  TODO:  make name of word file an argument.

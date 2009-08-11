@@ -358,7 +358,7 @@ class miniatures_handler(base_layer_handler):
 	    gametree = open_rpg.get_component('tree')
             node_xml = node_begin + min_xml + '</nodehandler>'
             #print "Sending this XML to insert_xml:" + node_xml
-            gametree.insert_xml(node_xml)
+            gametree.insert_xml(str(node_xml))
         elif id == MIN_SHOW_HIDE:
             if self.sel_rmin.hide:  self.sel_rmin.hide = 0
             else: self.sel_rmin.hide = 1

@@ -70,8 +70,7 @@ NEWCHAT = False
 try:
     import wx.webview
     NEWCHAT = True
-except:
-    pass
+except: pass
 NEWCHAT = False
 
 # Global parser for stripping HTML tags:
@@ -88,8 +87,7 @@ class HTMLStripper(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag in self.special_tags:
             self.accum += '<' + tag
-            for attrib in attrs:
-                self.accum += ' ' + attrib[0] + '="' + attrib[1] + '"'
+            for attrib in attrs: self.accum += ' ' + attrib[0] + '="' + attrib[1] + '"'
             self.accum += '>'
     def handle_charref(self, name):  # charrefs too
         self.accum += "&#" + name + ";"
@@ -111,8 +109,7 @@ def log( settings, text ):
         #filename = time.strftime( filename, time.localtime( time.time() ) )
         timestamp = time.ctime(time.time())
         header = '[%s] : ' % ( timestamp );
-        if settings.get_setting('TimeStampGameLog') != '1':
-            header = ''
+        if settings.get_setting('TimeStampGameLog') != '1': header = ''
         try:
             f = open( orpg.dirpath.dir_struct["user"] + filename, 'a' )
             f.write( '%s%s<br />\n' % ( header, text ) )
@@ -142,9 +139,8 @@ class chat_html_window(wx.html.HtmlWindow):
         self.build_menu()
         self.Bind(wx.EVT_LEFT_UP, self.LeftUp)
         self.Bind(wx.EVT_RIGHT_DOWN, self.onPopup)
-        if "gtk2" in wx.PlatformInfo:
-            self.SetStandardFonts()
-    # def __init__ - end
+        if "gtk2" in wx.PlatformInfo: self.SetStandardFonts()
+        # def __init__ - end
 
     def onPopup(self, evt):
         self.PopupMenu(self.menu)
@@ -216,7 +212,6 @@ if NEWCHAT:
             wx.webview.WebView.__init__(self, parent, id)
 
             self.parent = parent
-
             self.__font = wx.Font(10, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName='Ariel')
 
             self.build_menu()
@@ -239,10 +234,8 @@ if NEWCHAT:
 
         def SetDefaultFontAndSize(self, fontname, fontsize):
             self.__font = wx.Font(int(fontsize), wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=fontname)
-            try:
-                self.SetPageSource(self.Header() + self.StripHeader())
-            except Exception, e:
-                print e
+            try: self.SetPageSource(self.Header() + self.StripHeader())
+            except Exception, e: print e
             return (self.GetFont().GetFaceName(), self.GetFont().GetPointSize())
 
         #Events
@@ -267,9 +260,7 @@ if NEWCHAT:
 
         def StripHeader(self):
             tmp = self.GetPageSource().split('<BODY>')
-            if tmp[-1].find('<body>') > -1:
-                tmp = tmp[-1].split('<body>')
-
+            if tmp[-1].find('<body>') > -1: tmp = tmp[-1].split('<body>')
             return tmp[-1]
 
         def build_menu(self):
@@ -409,10 +400,8 @@ class chat_notebook(orpgTabberWnd):
 
     def onCloseTab(self, evt):
         self.log.log("Enter chat_notebook->onCloseTab(self, evt)", ORPG_DEBUG)
-        try:
-            tabid = evt.GetSelection()
-        except:
-            tabid = self.GetSelection()
+        try: tabid = evt.GetSelection()
+        except: tabid = self.GetSelection()
 
         if self.GetPageText(tabid) == 'Main Room':
             #send no close error to chat
@@ -434,18 +423,14 @@ class chat_notebook(orpgTabberWnd):
             self.GMChatPanel = None
             self.settings.set_setting("GMWhisperTab", "0")
         panel = self.GetPage(tabid)
-        if panel in self.whisper_tabs:
-            self.whisper_tabs.remove(panel)
-        elif panel in self.group_tabs:
-            self.group_tabs.remove(panel)
-        elif panel in self.null_tabs:
-            self.null_tabs.remove(panel)
+        if panel in self.whisper_tabs: self.whisper_tabs.remove(panel)
+        elif panel in self.group_tabs: self.group_tabs.remove(panel)
+        elif panel in self.null_tabs: self.null_tabs.remove(panel)
         self.log.log("Exit chat_notebook->onCloseTab(self, evt)", ORPG_DEBUG)
 
     def newMsg(self, tabid):
         self.log.log("Enter chat_notebook->newMsg(self, tabid)", ORPG_DEBUG)
-        if tabid != self.GetSelection():
-            self.SetPageImage(tabid, 0)
+        if tabid != self.GetSelection(): self.SetPageImage(tabid, 0)
         self.log.log("Exit chat_notebook->newMsg(self, tabid)", ORPG_DEBUG)
 
     def onPageChanging(self, event):
@@ -464,42 +449,47 @@ class chat_notebook(orpgTabberWnd):
         event.Skip()
         self.log.log("Exit chat_notebook->onPageChanged(self, event)", ORPG_DEBUG)
 
-# This class defines and builds the Chat Frame for OpenRPG
-#
-# Inherits: wxPanel
-#
-# Defines:
-#   __init__((self, parent, id, openrpg, sendtarget)
-#   build_ctrls(self)
-#   on_buffer_size(self,evt)
-#   set_colors(self)
-#   set_buffersize(self)
-#   set_chat_text(self,txt)
-#   OnChar(self,event)
-#   on_chat_save(self,evt)
-#   on_text_color(self,event)
-#   colorize(self, color, text)
-#   on_text_format(self,event)
-#   OnSize(self,event)
-#   scroll_down(self)
-#   InfoPost(self,s)
-#   Post(self,s="",send=False,myself=False)
-#   ParsePost(self,s,send=False,myself=False)
-#   ParseDice(self,s)
-#   ParseNodes(self,s)
-#   get_sha_checksum(self)
-#   get_color(self)
-#
+"""
+ This class defines and builds the Chat Frame for OpenRPG
+
+ Inherits: wxPanel
+
+ Defines:
+   __init__((self, parent, id, openrpg, sendtarget)
+   build_ctrls(self)
+   on_buffer_size(self,evt)
+   set_colors(self)
+   set_buffersize(self)
+   set_chat_text(self,txt)
+   OnChar(self,event)
+   on_chat_save(self,evt)
+   on_text_color(self,event)
+   colorize(self, color, text)
+   on_text_format(self,event)
+   OnSize(self,event)
+   scroll_down(self)
+   InfoPost(self,s)
+   Post(self,s="",send=False,myself=False)
+   ParsePost(self,s,send=False,myself=False)
+   ParseDice(self,s)
+   ParseNodes(self,s)
+   get_sha_checksum(self)
+   get_color(self)
+
+"""
 
 class chat_panel(wx.Panel):
 
-    # This is the initialization subroutine
-    #
-    # !self : instance of self
-    # !parent : parent that defines the chatframe
-    # !id :
-    # !openrpg :
-        # !sendtarget:  who gets outbound messages: either 'all' or a playerid
+    """
+    This is the initialization subroutine
+    
+    !self : instance of self
+    !parent : parent that defines the chatframe
+    !id :
+    !openrpg :
+    !sendtarget:  who gets outbound messages: either 'all' or a playerid
+    """
+
     def __init__(self, parent, id, tab_type, sendtarget):
         self.log = open_rpg.get_component("log")
         self.log.log("Enter chat_panel", ORPG_DEBUG)
@@ -543,10 +533,8 @@ class chat_panel(wx.Panel):
         StartupFont = self.settings.get_setting("defaultfont")
         StartupFontSize = self.settings.get_setting("defaultfontsize")
         if(StartupFont != "") and (StartupFontSize != ""):
-            try:
-                self.set_default_font(StartupFont, int(StartupFontSize))
-            except:
-                pass
+            try: self.set_default_font(StartupFont, int(StartupFontSize))
+            except: pass
         self.font = self.chatwnd.GetFont().GetFaceName()
         self.fontsize = self.chatwnd.GetFont().GetPointSize()
         self.scroll_down()
@@ -555,14 +543,10 @@ class chat_panel(wx.Panel):
     def set_default_font(self, fontname=None, fontsize=None):
         """Set all chatpanels to new default fontname/fontsize. Returns current font settings in a (fontname, fontsize) tuple."""
         self.log.log("Enter chat_panel->set_default_font(self, fontname=None, fontsize=None)", ORPG_DEBUG)
-        if (fontname is not None):
-            newfont = fontname
-        else:
-            newfont = self.font
-        if (fontsize is not None):
-            newfontsize = int(fontsize)
-        else:
-            newfontsize = int(self.fontsize)
+        if (fontname is not None): newfont = fontname
+        else: newfont = self.font
+        if (fontsize is not None): newfontsize = int(fontsize)
+        else: newfontsize = int(self.fontsize)
         self.chatwnd.SetDefaultFontAndSize(newfont, newfontsize)
         self.InfoPost("Font is now " + newfont + " point size " + `newfontsize`)
         self.font = newfont
@@ -609,65 +593,53 @@ class chat_panel(wx.Panel):
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Show Images", "Show Images", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_ShowImages, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("Show_Images_In_Chat") == '1':
-            item.Check(True)
+        if self.settings.get_setting("Show_Images_In_Chat") == '1': item.Check(True)
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Strip HTML", "Strip HTML", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_StripHTML, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("striphtml") == '1':
-            item.Check(True)
+        if self.settings.get_setting("striphtml") == '1': item.Check(True)
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Chat Time Index", "Chat Time Index", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_ChatTimeIndex, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("Chat_Time_Indexing") == '1':
-            item.Check(True)
+        if self.settings.get_setting("Chat_Time_Indexing") == '1': item.Check(True)
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Chat Auto Complete", "Chat Auto Complete", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_ChatAutoComplete, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("SuppressChatAutoComplete") == '0':
-            item.Check(True)
+        if self.settings.get_setting("SuppressChatAutoComplete") == '0': item.Check(True)
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Show ID in Chat", "Show ID in Chat", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_ShowIDinChat, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("ShowIDInChat") == '1':
-            item.Check(True)
+        if self.settings.get_setting("ShowIDInChat") == '1': item.Check(True)
         item = wx.MenuItem(wndmenu, wx.ID_ANY, "Log Time Index", "Log Time Index", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_LogTimeIndex, item)
         wndmenu.AppendItem(item)
-        if self.settings.get_setting("TimeStampGameLog") == '1':
-            item.Check(True)
+        if self.settings.get_setting("TimeStampGameLog") == '1': item.Check(True)
         settingmenu.AppendMenu(wx.ID_ANY, 'Chat Window', wndmenu )
         item = wx.MenuItem(tabmenu, wx.ID_ANY, "Tabbed Whispers", "Tabbed Whispers", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_TabbedWhispers, item)
         tabmenu.AppendItem(item)
-        if self.settings.get_setting("tabbedwhispers") == '1':
-            item.Check(True)
+        if self.settings.get_setting("tabbedwhispers") == '1': item.Check(True)
         item = wx.MenuItem(tabmenu, wx.ID_ANY, "GM Tab", "GM Tab", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_GMTab, item)
         tabmenu.AppendItem(item)
-        if self.settings.get_setting("GMWhisperTab") == '1':
-            item.Check(True)
+        if self.settings.get_setting("GMWhisperTab") == '1':item.Check(True)
         item = wx.MenuItem(tabmenu, wx.ID_ANY, "Group Whisper Tabs", "Group Whisper Tabs", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_GroupWhisperTabs, item)
         tabmenu.AppendItem(item)
-        if self.settings.get_setting("GroupWhisperTab") == '1':
-            item.Check(True)
+        if self.settings.get_setting("GroupWhisperTab") == '1': item.Check(True)
         settingmenu.AppendMenu(wx.ID_ANY, 'Chat Tabs', tabmenu)
         item = wx.MenuItem(toolmenu, wx.ID_ANY, "Dice Bar", "Dice Bar", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_DiceBar, item)
         toolmenu.AppendItem(item)
-        if self.settings.get_setting("DiceButtons_On") == '1':
-            item.Check(True)
+        if self.settings.get_setting("DiceButtons_On") == '1': item.Check(True)
         item = wx.MenuItem(toolmenu, wx.ID_ANY, "Format Buttons", "Format Buttons", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_FormatButtons, item)
         toolmenu.AppendItem(item)
-        if self.settings.get_setting("FormattingButtons_On") == '1':
-            item.Check(True)
+        if self.settings.get_setting("FormattingButtons_On") == '1': item.Check(True)
         item = wx.MenuItem(toolmenu, wx.ID_ANY, "Alias Tool", "Alias Tool", wx.ITEM_CHECK)
         top_frame.Bind(wx.EVT_MENU, self.OnMB_AliasTool, item)
         toolmenu.AppendItem(item)
-        if self.settings.get_setting("AliasTool_On") == '1':
-            item.Check(True)
+        if self.settings.get_setting("AliasTool_On") == '1': item.Check(True)
         settingmenu.AppendMenu(wx.ID_ANY, 'Chat Tool Bars', toolmenu)
         menu.AppendMenu(wx.ID_ANY, 'Chat Settings', settingmenu)
         top_frame.mainmenu.Insert(2, menu, '&Chat')
@@ -676,58 +648,44 @@ class chat_panel(wx.Panel):
     ## Settings Menu Events
     def OnMB_ShowImages(self, event):
         self.log.log("Enter chat_panel->OnMB_ShowImages(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("Show_Images_In_Chat", '1')
-        else:
-            self.settings.set_setting("Show_Images_In_Chat", '0')
+        if event.IsChecked(): self.settings.set_setting("Show_Images_In_Chat", '1')
+        else: self.settings.set_setting("Show_Images_In_Chat", '0')
         self.log.log("Exit chat_panel->OnMB_ShowImages(self, event)", ORPG_DEBUG)
 
     def OnMB_StripHTML(self, event):
         self.log.log("Enter chat_panel->OnMB_StripHTML(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("Sstriphtml", '1')
-        else:
-            self.settings.set_setting("striphtml", '0')
+        if event.IsChecked(): self.settings.set_setting("Sstriphtml", '1')
+        else: self.settings.set_setting("striphtml", '0')
         self.log.log("Exit chat_panel->OnMB_StripHTML(self, event)", ORPG_DEBUG)
 
     def OnMB_ChatTimeIndex(self, event):
         self.log.log("Enter chat_panel->OnMB_ChatTimeIndex(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("Chat_Time_Indexing", '1')
-        else:
-            self.settings.set_setting("Chat_Time_Indexing", '0')
+        if event.IsChecked(): self.settings.set_setting("Chat_Time_Indexing", '1')
+        else: self.settings.set_setting("Chat_Time_Indexing", '0')
         self.log.log("Exit chat_panel->OnMB_ChatTimeIndex(self, event)", ORPG_DEBUG)
 
     def OnMB_ChatAutoComplete(self, event):
         self.log.log("Enter chat_panel->OnMB_ChatAutoComplete(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("SuppressChatAutoComplete", '0')
-        else:
-            self.settings.set_setting("SuppressChatAutoComplete", '1')
+        if event.IsChecked(): self.settings.set_setting("SuppressChatAutoComplete", '0')
+        else: self.settings.set_setting("SuppressChatAutoComplete", '1')
         self.log.log("Exit chat_panel->OnMB_ChatAutoComplete(self, event)", ORPG_DEBUG)
 
     def OnMB_ShowIDinChat(self, event):
         self.log.log("Enter chat_panel->OnMB_ShowIDinChat(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("ShowIDInChat", '1')
-        else:
-            self.settings.set_setting("ShowIDInChat", '0')
+        if event.IsChecked(): self.settings.set_setting("ShowIDInChat", '1')
+        else: self.settings.set_setting("ShowIDInChat", '0')
         self.log.log("Exit chat_panel->OnMB_ShowIDinChat(self, event)", ORPG_DEBUG)
 
     def OnMB_LogTimeIndex(self, event):
         self.log.log("Enter chat_panel->OnMB_LogTimeIndex(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("TimeStampGameLog", '1')
-        else:
-            self.settings.set_setting("TimeStampGameLog", '0')
+        if event.IsChecked(): self.settings.set_setting("TimeStampGameLog", '1')
+        else: self.settings.set_setting("TimeStampGameLog", '0')
         self.log.log("Exit chat_panel->OnMB_LogTimeIndex(self, event)", ORPG_DEBUG)
 
     def OnMB_TabbedWhispers(self, event):
         self.log.log("Enter chat_panel->OnMB_TabbedWhispers(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("tabbedwhispers", '1')
-        else:
-            self.settings.set_setting("tabbedwhispers", '0')
+        if event.IsChecked(): self.settings.set_setting("tabbedwhispers", '1')
+        else: self.settings.set_setting("tabbedwhispers", '0')
         self.log.log("Exit chat_panel->OnMB_TabbedWhispers(self, event)", ORPG_DEBUG)
 
     def OnMB_GMTab(self, event):
@@ -735,16 +693,13 @@ class chat_panel(wx.Panel):
         if event.IsChecked():
             self.settings.set_setting("GMWhisperTab", '1')
             self.parent.create_gm_tab()
-        else:
-            self.settings.set_setting("GMWhisperTab", '0')
+        else: self.settings.set_setting("GMWhisperTab", '0')
         self.log.log("Exit chat_panel->OnMB_GMTab(self, event)", ORPG_DEBUG)
 
     def OnMB_GroupWhisperTabs(self, event):
         self.log.log("Enter chat_panel->OnMB_GroupWhisperTabs(self, event)", ORPG_DEBUG)
-        if event.IsChecked():
-            self.settings.set_setting("GroupWhisperTab", '1')
-        else:
-            self.settings.set_setting("GroupWhisperTab", '0')
+        if event.IsChecked(): self.settings.set_setting("GroupWhisperTab", '1')
+        else: self.settings.set_setting("GroupWhisperTab", '0')
         self.log.log("Exit chat_panel->OnMB_GroupWhisperTabs(self, event)", ORPG_DEBUG)
 
 
@@ -754,19 +709,13 @@ class chat_panel(wx.Panel):
         if event.IsChecked():
             self.settings.set_setting("DiceButtons_On", '1')
             act = '1'
-        else:
-            self.settings.set_setting("DiceButtons_On", '0')
+        else: self.settings.set_setting("DiceButtons_On", '0')
         self.toggle_dice(act)
-        try:
-            self.parent.GMChatPanel.toggle_dice(act)
-        except:
-            pass
-        for panel in self.parent.whisper_tabs:
-            panel.toggle_dice(act)
-        for panel in self.parent.group_tabs:
-            panel.toggle_dice(act)
-        for panel in self.parent.null_tabs:
-            panel.toggle_dice(act)
+        try: self.parent.GMChatPanel.toggle_dice(act)
+        except: pass
+        for panel in self.parent.whisper_tabs: panel.toggle_dice(act)
+        for panel in self.parent.group_tabs: panel.toggle_dice(act)
+        for panel in self.parent.null_tabs: panel.toggle_dice(act)
         self.log.log("Exit chat_panel->OnMB_DiceBar(self, event)", ORPG_DEBUG)
 
     def OnMB_FormatButtons(self, event):
@@ -778,16 +727,11 @@ class chat_panel(wx.Panel):
         else:
             self.settings.set_setting("FormattingButtons_On", '0')
         self.toggle_formating(act)
-        try:
-            self.parent.GMChatPanel.toggle_formating(act)
-        except:
-            pass
-        for panel in self.parent.whisper_tabs:
-            panel.toggle_formating(act)
-        for panel in self.parent.group_tabs:
-            panel.toggle_formating(act)
-        for panel in self.parent.null_tabs:
-            panel.toggle_formating(act)
+        try: self.parent.GMChatPanel.toggle_formating(act)
+        except: pass
+        for panel in self.parent.whisper_tabs: panel.toggle_formating(act)
+        for panel in self.parent.group_tabs: panel.toggle_formating(act)
+        for panel in self.parent.null_tabs: panel.toggle_formating(act)
         self.log.log("Exit chat_panel->OnMB_FormatButtons(self, event)", ORPG_DEBUG)
 
     def OnMB_AliasTool(self, event):
@@ -796,19 +740,13 @@ class chat_panel(wx.Panel):
         if event.IsChecked():
             self.settings.set_setting("AliasTool_On", '1')
             act = '1'
-        else:
-            self.settings.set_setting("AliasTool_On", '0')
+        else: self.settings.set_setting("AliasTool_On", '0')
         self.toggle_alias(act)
-        try:
-            self.parent.GMChatPanel.toggle_alias(act)
-        except:
-            pass
-        for panel in self.parent.whisper_tabs:
-            panel.toggle_alias(act)
-        for panel in self.parent.group_tabs:
-            panel.toggle_alias(act)
-        for panel in self.parent.null_tabs:
-            panel.toggle_alias(act)
+        try: self.parent.GMChatPanel.toggle_alias(act)
+        except: pass
+        for panel in self.parent.whisper_tabs: panel.toggle_alias(act)
+        for panel in self.parent.group_tabs: panel.toggle_alias(act)
+        for panel in self.parent.null_tabs:panel.toggle_alias(act)
         self.log.log("Exit chat_panel->OnMB_AliasTool(self, event)", ORPG_DEBUG)
 
     def OnMB_BackgroundColor(self, event):
@@ -889,10 +827,10 @@ class chat_panel(wx.Panel):
         if (self.sendtarget == "all"):
             wx.CallAfter(self.Post, self.colorize(self.syscolor, "<b>Welcome to <a href='http://www.openrpg.com'>OpenRPG</a> version " + self.version + "...  </b>"))
             #self.chat_cmds.on_help()
-        self.chattxt = orpg.tools.predTextCtrl.predTextCtrl(self, -1, "", style=wx.TE_PROCESS_ENTER | wx.TE_PROCESS_TAB,keyHook = self.myKeyHook, validator=None )
+        self.chattxt = orpg.tools.predTextCtrl.predTextCtrl(self, -1, "", style=wx.TE_PROCESS_ENTER |wx.TE_PROCESS_TAB|wx.TE_LINEWRAP, keyHook = self.myKeyHook, validator=None )
         self.build_bar()
         self.basesizer = wx.BoxSizer(wx.VERTICAL)
-        self.basesizer.Add( self.chatwnd,1,wx.EXPAND )
+        self.basesizer.Add( self.chatwnd, 1, wx.EXPAND )
         self.basesizer.Add( self.toolbar_sizer, 0, wx.EXPAND )
         self.basesizer.Add( self.chattxt, 0, wx.EXPAND )
         self.SetSizer(self.basesizer)
@@ -928,10 +866,8 @@ class chat_panel(wx.Panel):
     # def build_ctrls - end
 
     def textCopy(self, event):
-        if self.chattxt.GetStringSelection() == '':
-            self.chatwnd.OnM_EditCopy(None)
-        else:
-            self.chatwnd.Copy()
+        if self.chattxt.GetStringSelection() == '': self.chatwnd.OnM_EditCopy(None)
+        else: self.chatwnd.Copy()
 
     def build_bar(self):
         self.log.log("Enter chat_panel->build_bar(self)", ORPG_DEBUG)
@@ -967,10 +903,8 @@ class chat_panel(wx.Panel):
         self.toolbar_sizer.Add( self.aliasList,0,wx.EXPAND)
         self.toolbar_sizer.Add( self.filterButton, 0, wx.EXPAND )
         self.toolbar_sizer.Add( self.filterList,0,wx.EXPAND)
-        if self.settings.get_setting('AliasTool_On') == '0':
-            self.toggle_alias('0')
-        else:
-            self.toggle_alias('1')
+        if self.settings.get_setting('AliasTool_On') == '0': self.toggle_alias('0')
+        else: self.toggle_alias('1')
         self.log.log("Exit chat_panel->build_alias(self)", ORPG_DEBUG)
 
     def toggle_alias(self, act):
@@ -1014,10 +948,8 @@ class chat_panel(wx.Panel):
         self.toolbar_sizer.Add( self.d20Button, 0 ,wx.EXPAND)
         self.toolbar_sizer.Add( self.d100Button, 0 ,wx.EXPAND)
         self.toolbar_sizer.Add( self.dieModText, 0, wx.ALIGN_CENTER, 5 )
-        if self.settings.get_setting('DiceButtons_On') == '0':
-            self.toggle_dice('0')
-        else:
-            self.toggle_dice('1')
+        if self.settings.get_setting('DiceButtons_On') == '0': self.toggle_dice('0')
+        else: self.toggle_dice('1')
         self.log.log("Exit chat_panel->build_dice(self)", ORPG_DEBUG)
 
     def toggle_dice(self, act):
@@ -1054,10 +986,8 @@ class chat_panel(wx.Panel):
         self.toolbar_sizer.Add( self.boldButton, 0, wx.EXPAND )
         self.toolbar_sizer.Add( self.italicButton, 0, wx.EXPAND )
         self.toolbar_sizer.Add( self.underlineButton, 0, wx.EXPAND )
-        if self.settings.get_setting('FormattingButtons_On') == '0':
-            self.toggle_formating('0')
-        else:
-            self.toggle_formating('1')
+        if self.settings.get_setting('FormattingButtons_On') == '0': self.toggle_formating('0')
+        else: self.toggle_formating('1')
         self.log.log("Exit chat_panel->build_formating(self)", ORPG_DEBUG)
 
     def toggle_formating(self, act):
@@ -1101,10 +1031,8 @@ class chat_panel(wx.Panel):
                 try:
                     link = lnk.GetHref()
                     self.session.set_status_url(link)
-                except:
-                    pass
-        else:
-            self.log.log("Error, self.chatwnd.GetInternalRepresentation() return None", ORPG_GENERAL)
+                except: pass
+        else: self.log.log("Error, self.chatwnd.GetInternalRepresentation() return None", ORPG_GENERAL)
         evt.Skip()
         self.log.log("Exit chat_panel->OnMotion(self, evt)", ORPG_DEBUG)
 
@@ -1139,8 +1067,7 @@ class chat_panel(wx.Panel):
         ##############refresh_counter()##############
         for plugin_fname in self.activeplugins.keys():
             plugin = self.activeplugins[plugin_fname]
-            try:
-                plugin.refresh_counter()
+            try: plugin.refresh_counter()
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'refresh_counter'":
                     self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -1162,15 +1089,13 @@ class chat_panel(wx.Panel):
             self.lastSend = time.time()  #  remember our send time for use in myKeyHook()
             #I think this is cleaner
             status_text = self.settings.get_setting('TypingStatusAlias')
-            if status_text == "" or status_text == None:
-                status_text = "Typing"
+            if status_text == "" or status_text == None: status_text = "Typing"
             self.session.set_text_status(status_text)
         else:
             self.lastSend = 0                            #  set lastSend to zero to indicate we're not typing
             #I think this is cleaner
             status_text = self.settings.get_setting('IdleStatusAlias')
-            if status_text == "" or status_text == None:
-                status_text = "Idle"
+            if status_text == "" or status_text == None: status_text = "Idle"
             self.session.set_text_status(status_text)
         self.log.log("Exit chat_panel->sendTyping(self, typing)", ORPG_DEBUG)
 
@@ -1263,16 +1188,13 @@ class chat_panel(wx.Panel):
             self.histidx = -1
             self.temptext = ""
             self.history = [s] + self.history#prepended instead of appended now, so higher index = greater age
-            if not len(macroText):
-                self.chattxt.SetValue("")
+            if not len(macroText): self.chattxt.SetValue("")
             # play sound
             sound_file = self.settings.get_setting("SendSound")
-            if sound_file != '':
-                self.sound_player.play(sound_file)
+            if sound_file != '': self.sound_player.play(sound_file)
             if s[0] != "/": ## it's not a slash command
                 s = self.ParsePost( s, True, True )
-            else:
-                self.chat_cmds.docmd(s) # emote is in chatutils.py
+            else: self.chat_cmds.docmd(s) # emote is in chatutils.py
 
         ## UP KEY
         elif event.GetKeyCode() == wx.WXK_UP:
@@ -1281,8 +1203,7 @@ class chat_panel(wx.Panel):
                 #text that's not in history but also hasn't been sent to chat gets stored in self.temptext
                 #this way if someone presses the up key, they don't lose their current message permanently
                 #(unless they also press enter at the time)
-                if self.histidx is -1:
-                    self.temptext = self.chattxt.GetValue()
+                if self.histidx is -1: self.temptext = self.chattxt.GetValue()
                 self.histidx += 1
                 self.chattxt.SetValue(self.history[self.histidx])
                 self.chattxt.SetInsertionPointEnd()
@@ -1299,11 +1220,9 @@ class chat_panel(wx.Panel):
                 self.histidx -= 1
                 if self.histidx is -1: #remember, it just decreased
                     self.chattxt.SetValue(self.temptext)
-                else:
-                    self.chattxt.SetValue(self.history[self.histidx])
+                else: self.chattxt.SetValue(self.history[self.histidx])
                 self.chattxt.SetInsertionPointEnd()
-            else:
-                self.histidx = -1 #just in case it somehow got below -1, this should fix it
+            else: self.histidx = -1 #just in case it somehow got below -1, this should fix it
                 #self.InfoPost("**Going down? I don't think so.**")
             #print self.histidx, "in",self.history
 
@@ -1350,14 +1269,12 @@ class chat_panel(wx.Panel):
         elif event.GetKeyCode() in (wx.WXK_PRIOR, wx.WXK_PAGEUP):
             self.log.log("event.GetKeyCode() in (wx.WXK_PRIOR, wx.WXK_PAGEUP)", ORPG_DEBUG)
             self.chatwnd.ScrollPages(-1)
-            if not self.lockscroll:
-                self.lock_scroll(0)
+            if not self.lockscroll: self.lock_scroll(0)
 
         ## PAGE DOWN
         elif event.GetKeyCode() in (wx.WXK_NEXT, wx.WXK_PAGEDOWN):
             self.log.log("event.GetKeyCode() in (wx.WXK_NEXT, wx.WXK_PAGEDOWN)", ORPG_DEBUG)
-            if not self.lockscroll:
-                self.lock_scroll(0)
+            if not self.lockscroll: self.lock_scroll(0)
             if ((self.chatwnd.GetScrollRange(1)-self.chatwnd.GetScrollPos(1)-self.chatwnd.GetScrollThumb(1) < 30) and self.lockscroll):
                 self.lock_scroll(0)
             self.chatwnd.ScrollPages(1)
@@ -1371,8 +1288,7 @@ class chat_panel(wx.Panel):
             event.Skip()
 
         ## NOTHING
-        else:
-            event.Skip()
+        else: event.Skip()
         self.log.log("Exit chat_panel->OnChar(self, event)", ORPG_DEBUG)
     # def OnChar - end
 
@@ -1385,10 +1301,8 @@ class chat_panel(wx.Panel):
         dieText = numDie
         # Now, apply and roll die mods based on the button that was pressed
         id = evt.GetId()
-        if self.dieIDs.has_key(id):
-            dieText += self.dieIDs[id]
-        if len(dieMod) and dieMod[0] not in "*/-+":
-            dieMod = "+" + dieMod
+        if self.dieIDs.has_key(id): dieText += self.dieIDs[id]
+        if len(dieMod) and dieMod[0] not in "*/-+": dieMod = "+" + dieMod
         dieText += dieMod
         dieText = "[" + dieText + "]"
         self.ParsePost(dieText, 1, 1)
@@ -1462,20 +1376,13 @@ class chat_panel(wx.Panel):
         id = event.GetId()
         txt = self.chattxt.GetValue()
         (beg,end) = self.chattxt.GetSelection()
-        if beg != end:
-            sel_txt = txt[beg:end]
-        else:
-            sel_txt = txt
-        if id == self.boldButton.GetId():
-            sel_txt = "<b>" + sel_txt + "</b>"
-        elif id == self.italicButton.GetId():
-            sel_txt = "<i>" + sel_txt + "</i>"
-        elif id == self.underlineButton.GetId():
-            sel_txt = "<u>" + sel_txt + "</u>"
-        if beg != end:
-            txt = txt[:beg] + sel_txt + txt[end:]
-        else:
-            txt = sel_txt
+        if beg != end: sel_txt = txt[beg:end]
+        else: sel_txt = txt
+        if id == self.boldButton.GetId(): sel_txt = "<b>" + sel_txt + "</b>"
+        elif id == self.italicButton.GetId(): sel_txt = "<i>" + sel_txt + "</i>"
+        elif id == self.underlineButton.GetId(): sel_txt = "<u>" + sel_txt + "</u>"
+        if beg != end: txt = txt[:beg] + sel_txt + txt[end:]
+        else: txt = sel_txt
         self.chattxt.SetValue(txt)
         self.chattxt.SetInsertionPointEnd()
         self.chattxt.SetFocus()
@@ -1488,8 +1395,7 @@ class chat_panel(wx.Panel):
             self.lockscroll = False
             self.scroll_lock.SetLabel("Scroll ON")
             if len(self.storedata) != 0:
-                for line in self.storedata:
-                    self.chatwnd.AppendToPage(line)
+                for line in self.storedata: self.chatwnd.AppendToPage(line)
             self.storedata = []
             self.scroll_down()
         else:
@@ -1547,8 +1453,7 @@ class chat_panel(wx.Panel):
         the_gms = []
         for playerid in self.session.players:
             if len(self.session.players[playerid])>7:
-                if self.session.players[playerid][7]=="GM" and self.session.group_id != '0':
-                    the_gms += [playerid]
+                if self.session.players[playerid][7]=="GM" and self.session.group_id != '0': the_gms += [playerid]
         self.log.log("Exit chat_panel->get_gms(self)", ORPG_DEBUG)
         return the_gms
 
@@ -1571,8 +1476,7 @@ class chat_panel(wx.Panel):
         if self.AliasLib != None:
             self.AliasLib.filter = self.filterList.GetSelection()-1;
             for rule in self.AliasLib.filterRegEx:
-                if not self.advancedFilter:
-                    text = re.sub(rule[0], rule[1], text)
+                if not self.advancedFilter: text = re.sub(rule[0], rule[1], text)
                 else:
                     for m in advregex.finditer(text):
                         match = m.group(0)
@@ -1586,20 +1490,16 @@ class chat_panel(wx.Panel):
         text = self.NormalizeParse(text)
         text = self.colorize(self.emotecolor, text)
 
-        if self.type == MAIN_TAB and self.sendtarget == 'all':
-            self.send_chat_message(text,chat_msg.EMOTE_MESSAGE)
+        if self.type == MAIN_TAB and self.sendtarget == 'all': self.send_chat_message(text,chat_msg.EMOTE_MESSAGE)
         elif self.type == MAIN_TAB and self.sendtarget == "gm":
             msg_type = chat_msg.WHISPER_EMOTE_MESSAGE
             the_gms = self.get_gms()
-            for each_gm in the_gms:
-                self.send_chat_message(text,chat_msg.WHISPER_EMOTE_MESSAGE, str(each_gm))
+            for each_gm in the_gms: self.send_chat_message(text,chat_msg.WHISPER_EMOTE_MESSAGE, str(each_gm))
         elif self.type == GROUP_TAB and WG_LIST.has_key(self.sendtarget):
             for pid in WG_LIST[self.sendtarget]:
                 self.send_chat_message(text,chat_msg.WHISPER_EMOTE_MESSAGE, str(pid))
-        elif self.type == WHISPER_TAB:
-            self.send_chat_message(text,chat_msg.WHISPER_EMOTE_MESSAGE, str(self.sendtarget))
-        elif self.type == NULL_TAB:
-            pass
+        elif self.type == WHISPER_TAB: self.send_chat_message(text,chat_msg.WHISPER_EMOTE_MESSAGE, str(self.sendtarget))
+        elif self.type == NULL_TAB: pass
         name = self.GetName()[0]
         text = "** " + name + " " + text + " **"
         self.EmotePost(text)
@@ -1629,10 +1529,8 @@ class chat_panel(wx.Panel):
         text = self.colorize(self.mytextcolor, text)
         for id in player_ids:
             id = id.strip()
-            if self.session.is_valid_id(id):
-                self.send_chat_message(text,chat_msg.WHISPER_MESSAGE,id)
-            else:
-                self.InfoPost(id + " Unknown!")
+            if self.session.is_valid_id(id): self.send_chat_message(text,chat_msg.WHISPER_MESSAGE,id)
+            else: self.InfoPost(id + " Unknown!")
         self.log.log("Exit chat_panel->whisper_to_players(self, text, player_ids)", ORPG_DEBUG)
 
     def send_chat_message(self, text, type=chat_msg.CHAT_MESSAGE, player_id="all"):
@@ -1641,8 +1539,7 @@ class chat_panel(wx.Panel):
         send = 1
         for plugin_fname in self.activeplugins.keys():
             plugin = self.activeplugins[plugin_fname]
-            try:
-                text, send = plugin.send_msg(text, send)
+            try: text, send = plugin.send_msg(text, send)
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'send_msg'":
                     self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -1656,11 +1553,9 @@ class chat_panel(wx.Panel):
             self.settings.set_setting("ShowIDInChat", "0")
         playername = self.GetName()[0]
 
-        if turnedoff:
-            self.settings.set_setting("ShowIDInChat", "1")
+        if turnedoff: self.settings.set_setting("ShowIDInChat", "1")
         msg.set_alias(playername)
-        if send:
-            self.session.send(msg.toxml(),player_id)
+        if send: self.session.send(msg.toxml(),player_id)
         del msg
         self.log.log("Exit chat_panel->send_chat_message(self, text, type, player_id)", ORPG_DEBUG)
 
@@ -1673,18 +1568,14 @@ class chat_panel(wx.Panel):
         text = msg.get_text()
         alias = msg.get_alias()
         # who sent us the message?
-        if alias:
-            display_name = self.chat_display_name([alias, player[1], player[2]])
-        elif player:
-            display_name = self.chat_display_name(player)
-        else:
-            display_name = "Server Administrator"
+        if alias: display_name = self.chat_display_name([alias, player[1], player[2]])
+        elif player: display_name = self.chat_display_name(player)
+        else: display_name = "Server Administrator"
 
         ######### START plugin_incoming_msg() ###########
         for plugin_fname in self.activeplugins.keys():
             plugin = self.activeplugins[plugin_fname]
-            try:
-                text, type, name = plugin.plugin_incoming_msg(text, type, display_name, player)
+            try: text, type, name = plugin.plugin_incoming_msg(text, type, display_name, player)
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'receive_msg'":
                     self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -1692,8 +1583,7 @@ class chat_panel(wx.Panel):
         #end mDuo13 added code
         #image stripping for players' names
         strip_img = self.settings.get_setting("Show_Images_In_Chat")
-        if (strip_img == "0"):
-            display_name = chat_util.strip_img_tags(display_name)
+        if (strip_img == "0"): display_name = chat_util.strip_img_tags(display_name)
         #end image stripping. --mDuo13, July 11th, 2005
         # default sound
         recvSound = "RecvSound"
@@ -1719,10 +1609,8 @@ class chat_panel(wx.Panel):
                     #Check if whisper if from a GM
                     if player[2] in the_gms:
                         msg = name + ' (GM Whisper:) ' + text
-                        if type == chat_msg.WHISPER_MESSAGE:
-                            self.parent.GMChatPanel.Post(msg)
-                        else:
-                            self.parent.GMChatPanel.EmotePost("**" + msg + "**")
+                        if type == chat_msg.WHISPER_MESSAGE: self.parent.GMChatPanel.Post(msg)
+                        else: self.parent.GMChatPanel.EmotePost("**" + msg + "**")
                         idx = self.parent.get_tab_index(self.parent.GMChatPanel)
                         self.parent.newMsg(idx)
                         panelexists = 1
@@ -1731,10 +1619,8 @@ class chat_panel(wx.Panel):
                     for panel in self.parent.group_tabs:
                         if WG_LIST.has_key(panel.sendtarget) and WG_LIST[panel.sendtarget].has_key(int(player[2])):
                             msg = name + text
-                            if type == chat_msg.WHISPER_MESSAGE:
-                                panel.Post(msg)
-                            else:
-                                panel.EmotePost("**" + msg + "**")
+                            if type == chat_msg.WHISPER_MESSAGE: panel.Post(msg)
+                            else: panel.EmotePost("**" + msg + "**")
                             idx = self.parent.get_tab_index(panel)
                             self.parent.newMsg(idx)
                             panelexists = 1
@@ -1744,10 +1630,8 @@ class chat_panel(wx.Panel):
                         #check for whisper tabs as well, to save the number of loops
                         if panel.sendtarget == player[2]:
                             msg = name + whisperingstring + text
-                            if type == chat_msg.WHISPER_MESSAGE:
-                                panel.Post(msg)
-                            else:
-                                panel.EmotePost("**" + msg + "**")
+                            if type == chat_msg.WHISPER_MESSAGE: panel.Post(msg)
+                            else: panel.EmotePost("**" + msg + "**")
                             idx = self.parent.get_tab_index(panel)
                             self.parent.newMsg(idx)
                             panelexists = 1
@@ -1762,28 +1646,22 @@ class chat_panel(wx.Panel):
                                 #Yup, post message. Player may be in more then 1 group so continue as well
                                 panel = self.parent.create_group_tab(group)
                                 msg = name + text
-                                if type == chat_msg.WHISPER_MESSAGE:
-                                    wx.CallAfter(panel.Post, msg)
-                                else:
-                                    wx.CallAfter(panel.EmotePost, "**" + msg + "**")
+                                if type == chat_msg.WHISPER_MESSAGE: wx.CallAfter(panel.Post, msg)
+                                else: wx.CallAfter(panel.EmotePost, "**" + msg + "**")
                                 created = 1
                     #Check to see if we should create a whisper tab
                     if not created and tabbed_whispers_p == "1":
                         panel = self.parent.create_whisper_tab(player[2])
                         msg = name + whisperingstring + text
-                        if type == chat_msg.WHISPER_MESSAGE:
-                            wx.CallAfter(panel.Post, msg)
-                        else:
-                            wx.CallAfter(panel.EmotePost, "**" + msg + "**")
+                        if type == chat_msg.WHISPER_MESSAGE: wx.CallAfter(panel.Post, msg)
+                        else: wx.CallAfter(panel.EmotePost, "**" + msg + "**")
                         created = 1
                     #Final check
                     if not created:
                         #No tabs to create, just send the message to the main chat tab
                         msg = name + whisperingstring + text
-                        if type == chat_msg.WHISPER_MESSAGE:
-                            self.parent.MainChatPanel.Post(msg)
-                        else:
-                            self.parent.MainChatPanel.EmotePost("**" + msg + "**")
+                        if type == chat_msg.WHISPER_MESSAGE: self.parent.MainChatPanel.Post(msg)
+                        else: self.parent.MainChatPanel.EmotePost("**" + msg + "**")
                         self.parent.newMsg(0)
             except Exception, e:
                 self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -1809,33 +1687,31 @@ class chat_panel(wx.Panel):
 
     def InfoPost(self, s):
         self.log.log("Enter chat_panel->InfoPost(self, s)", ORPG_DEBUG)
-        self.Post(self.colorize(self.infocolor, s))
+        self.Post(self.colorize(self.infocolor, s), c='info')
         self.log.log("Exit chat_panel->InfoPost(self, s)", ORPG_DEBUG)
 
     def SystemPost(self, s):
         self.log.log("Enter chat_panel->SystemPost(self, s)", ORPG_DEBUG)
-        self.Post(self.colorize(self.syscolor, s))
+        self.Post(self.colorize(self.syscolor, s), c='system')
         self.log.log("Exit chat_panel->SystemPost(self, s)", ORPG_DEBUG)
 
     def EmotePost(self, s):
         self.log.log("Enter chat_panel->EmotePost(self, s)", ORPG_DEBUG)
-        self.Post(self.colorize(self.emotecolor, s))
+        self.Post(self.colorize(self.emotecolor, s), c='emote')
         self.log.log("Exit chat_panel->EmotePost(self, s)", ORPG_DEBUG)
 
     #### Standard Post method #####
-    def Post(self, s="", send=False, myself=False):
+    def Post(self, s="", send=False, myself=False, c='post'):
         self.log.log("Enter chat_panel->Post(self, s, send, myself)", ORPG_DEBUG)
         strip_p = self.settings.get_setting("striphtml")
         strip_img = self.settings.get_setting("Show_Images_In_Chat")#moved back 7-11-05. --mDuo13
-        if (strip_p == "1"):
-            s = strip_html(s)
-        if (strip_img == "0"):
-            s = chat_util.strip_img_tags(s)
+        if (strip_p == "1"): s = strip_html(s)
+        if (strip_img == "0"): s = chat_util.strip_img_tags(s)
         s = chat_util.simple_html_repair(s)
         s = chat_util.strip_script_tags(s)
         s = chat_util.strip_li_tags(s)
-        s = chat_util.strip_body_tags(s)#7-27-05 mDuo13
-        s = chat_util.strip_misalignment_tags(s)#7-27-05 mDuo13
+        s = chat_util.strip_body_tags(s) #7-27-05 mDuo13
+        s = chat_util.strip_misalignment_tags(s) #7-27-05 mDuo13
         aliasInfo = self.GetName()
         display_name = aliasInfo[0]
         if aliasInfo[1] != 'Default':
@@ -1848,8 +1724,7 @@ class chat_panel(wx.Panel):
         if not myself and not send:
             for plugin_fname in self.activeplugins.keys():
                 plugin = self.activeplugins[plugin_fname]
-                try:
-                    s = plugin.post_msg(s, myself)
+                try: s = plugin.post_msg(s, myself)
                 except Exception, e:
                     if str(e) != "'module' object has no attribute 'post_msg'":
                         self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -1858,8 +1733,7 @@ class chat_panel(wx.Panel):
         if myself:
             name = "<b>" + display_name + "</b>: "
             s = self.colorize(self.mytextcolor, s)
-        else:
-            name = ""
+        else: name = ""
         if aliasInfo[1] != 'Default':
             self.settings.set_setting("mytextcolor", defaultcolor)
             self.set_colors()
@@ -1867,8 +1741,7 @@ class chat_panel(wx.Panel):
         # EDIT: Had to rework blank line check to handle malformed HTML throwing error.
         #       this limits the effectiveness of this check -SD
         lineHasText = 1
-        try:
-            lineHasText = strip_html(s).replace("&nbsp;","").replace(" ","").strip()!=""
+        try: lineHasText = strip_html(s).replace("&nbsp;","").replace(" ","").strip()!=""
         except:
             # HTML parser has errored out (most likely). Being as all we are doing is
             # scanning for empty/blank lines anyway there is no harm in letting a
@@ -1892,42 +1765,32 @@ class chat_panel(wx.Panel):
                     if self.type == WHISPER_TAB or self.type == GROUP_TAB or self.sendtarget == 'gm':
                         s2 = s2 + '</i>'
                         name = '<i>' + name
-                        if self.type == WHISPER_TAB:
-                            name += " (whispering): "
-                        elif self.type == GROUP_TAB:
-                            name += self.settings.get_setting("gwtext") + ' '
-                        elif self.sendtarget == 'gm':
-                            name += " (whispering to GM) "
-                    newline = self.TimeIndexString() + name +  s2 + "<br />"
-                    log( self.settings, name + s2 )
+                        if self.type == WHISPER_TAB: name += " (whispering): "
+                        elif self.type == GROUP_TAB: name += self.settings.get_setting("gwtext") + ' '
+                        elif self.sendtarget == 'gm': name += " (whispering to GM) "
+                    newline = self.TimeIndexString() + "<div class='"+c+"'> " +name + s2 + "</div>"
+                    log( self.settings, c+' '+name + s2 )
             else:
-                newline = self.TimeIndexString() + name +  s + "<br />"
-                log( self.settings, name + s )
-        else:
-            send = False
+                newline = self.TimeIndexString() + "<div class='"+c+"'> " +name + s + "</div>"
+                log( self.settings, c+' '+name + s )
+        else: send = False
         newline = chat_util.strip_unicode(newline)
         if self.lockscroll == 0:
             self.chatwnd.AppendToPage(newline)
             self.scroll_down()
-        else:
-            self.storedata.append(newline)
+        else: self.storedata.append(newline)
         if send:
-            if self.type == MAIN_TAB and self.sendtarget == 'all':
-                self.send_chat_message(s)
+            if self.type == MAIN_TAB and self.sendtarget == 'all': self.send_chat_message(s)
             elif self.type == MAIN_TAB and self.sendtarget == "gm":
                 the_gms = self.get_gms()
                 self.whisper_to_players(s, the_gms)
             elif self.type == GROUP_TAB and WG_LIST.has_key(self.sendtarget):
                 members = []
-                for pid in WG_LIST[self.sendtarget]:
-                    members.append(str(WG_LIST[self.sendtarget][pid]))
+                for pid in WG_LIST[self.sendtarget]: members.append(str(WG_LIST[self.sendtarget][pid]))
                 self.whisper_to_players(self.settings.get_setting("gwtext") + s, members)
-            elif self.type == WHISPER_TAB:
-                self.whisper_to_players(s, [self.sendtarget])
-            elif self.type == NULL_TAB:
-                pass
-            else:
-                self.InfoPost("Failed to send message, unknown send type for this tab")
+            elif self.type == WHISPER_TAB: self.whisper_to_players(s, [self.sendtarget])
+            elif self.type == NULL_TAB: pass
+            else: self.InfoPost("Failed to send message, unknown send type for this tab")
         self.parsed=0
         self.log.log("Exit chat_panel->Post(self, s, send, myself)", ORPG_DEBUG)
 
@@ -1940,8 +1803,7 @@ class chat_panel(wx.Panel):
         self.log.log("Enter chat_panel->TimeIndexString(self)", ORPG_DEBUG)
         try:
             mtime = ""
-            if self.settings.get_setting('Chat_Time_Indexing') == "0":
-                pass
+            if self.settings.get_setting('Chat_Time_Indexing') == "0": pass
             elif self.settings.get_setting('Chat_Time_Indexing') == "1":
                 mtime = time.strftime("[%I:%M:%S] ", time.localtime())
             self.log.log("Exit chat_panel->TimeIndexString(self)", ORPG_DEBUG)
@@ -1963,8 +1825,7 @@ class chat_panel(wx.Panel):
         self.log.log("Enter chat_panel->NormalizeParse(self, s)", ORPG_DEBUG)
         for plugin_fname in self.activeplugins.keys():
             plugin = self.activeplugins[plugin_fname]
-            try:
-                s = plugin.pre_parse(s)
+            try: s = plugin.pre_parse(s)
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'post_msg'":
                     self.log.log(traceback.format_exc(), ORPG_GENERAL)
@@ -2008,14 +1869,11 @@ class chat_panel(wx.Panel):
             if newstr[0].lower() == 'q':
                 newstr = newstr[1:]
                 qmode = 1
-            try:
-                newstr = self.DiceManager.proccessRoll(newstr)
-            except:
-                pass
+            try: newstr = self.DiceManager.proccessRoll(newstr)
+            except: pass
             if qmode == 1:
                 s = s.replace("[" + matches[i] + "]", "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
-            else:
-                s = s.replace("[" + matches[i] + "]", "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
+            else: s = s.replace("[" + matches[i] + "]", "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
         self.log.log("Exit chat_panel->ParseDice(self, s)", ORPG_DEBUG)
         return s
 
@@ -2033,10 +1891,8 @@ class chat_panel(wx.Panel):
             dlg.SetValue('')
             if matches[i][0] != '':
                 dlg.SetTitle("Enter Value for " + matches[i][1])
-            if dlg.ShowModal() == wx.ID_OK:
-                newstr = dlg.GetValue()
-            if newstr == '':
-                newstr = '0'
+            if dlg.ShowModal() == wx.ID_OK: newstr = dlg.GetValue()
+            if newstr == '': newstr = '0'
             s = s.replace(matches[i][0], newstr, 1).replace(matches[i][1], '', 1).replace(matches[i][2], '', 1)
             dlg.Destroy()
         self.log.log("Exit chat_panel->PraseUnknowns(self, s)", ORPG_DEBUG)

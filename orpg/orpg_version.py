@@ -3,8 +3,8 @@ SERVER_MIN_CLIENT_VERSION = "1.7.1"
 
 #BUILD NUMBER FORMAT: "YYMMDD-##" where ## is the incremental daily build index (if needed)
 DISTRO = "Traipse Dev"
-DIS_VER = "Grumpy Goblin"
-BUILD = "090807-02"
+DIS_VER = "Ornery Orc"
+BUILD = "090811-00"
 
 # This version is for network capability.
 PROTOCOL_VERSION = "1.2"
@@ -17,4 +17,4 @@ MENU_TITLE = DISTRO + " " + DIS_VER + ' {' + BUILD + '}'
 # for the micro
 NEEDS_PYTHON_MAJOR = 2
 NEEDS_PYTHON_MINOR = 5
-NEEDS_PYTHON_MICRO = 4
+NEEDS_PYTHON_MICRO = 2
