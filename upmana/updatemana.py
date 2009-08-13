@@ -176,26 +176,25 @@ class Updater(wx.Panel):
 
     def BranchInfo(self, branch):
         cs = self.repo.changectx( self.current ).changeset()
+        rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
         self.changelog.SetValue('')
         changelog = cs[4]
         self.changelog.AppendText(changelog + '\n')
         self.filelist.SetValue('')
-        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\nFiles Modified (in branch): \n")
-        for f in cs[3]:
-            self.filelist.AppendText(f+"\n")
+        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\nFiles Modified (in update): \n")
+        for f in cs[3]: self.filelist.AppendText(f+"\n")
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
         self.package_list = []
         b = self.repo.branchtags()
-        heads = dict.fromkeys(self.repo.heads(), 1)
+        heads = dict.fromkeys(self.repo.heads(), 1) #The code below looks superfluous but there is good info inside
         l = [((n in heads), self.repo.changelog.rev(n), n, t) for t, n in b.items()]
         l.sort()
         l.reverse()
         for ishead, r, n, t in l: self.package_list.append(t)
 
     def get_package(self):
-        #Fixed and ready for test.
         self.get_packages()
         if self.package_list == None: return None
         return None
@@ -239,6 +238,7 @@ class Repos(wx.Panel):
         self.sizers["newrepo_layout"].Add(self.texts["reponame"], -1, wx.EXPAND)
         self.sizers["newrepo_layout"].AddGrowableCol(1)
         self.sizers["newbutton"].Add(self.sizers["newrepo_layout"], -1, wx.EXPAND)
+
         #Repo List Panel
         self.repopanel = wx.ScrolledWindow(self)
         self.repopanel.SetScrollbars(20,20,55,40)
@@ -448,7 +448,6 @@ class updaterFrame(wx.Frame):
     def OnClose(self, event):
         if self.main == False: self.Destroy()
         if self.main == True: self.Hide()
-
 
 class updateApp(wx.App):
     def OnInit(self):

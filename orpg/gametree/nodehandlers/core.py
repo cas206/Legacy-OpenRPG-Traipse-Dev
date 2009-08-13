@@ -273,7 +273,8 @@ class node_handler:
         f = wx.FileDialog(self.tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
             type = f.GetFilterIndex()
-            file = open(f.GetPath(),"w")
+            if f.GetPath()[:len(f.GetPath())-4] != '.xml': file = open(f.GetPath()+'.xml',"w")
+            else: file = open(f.GetPath(),"w")
             file.write(self.toxml(1))
             file.close()
         f.Destroy()
