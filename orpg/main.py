@@ -408,10 +408,10 @@ class orpgFrame(wx.Frame):
         menuid = event.GetId()
         name = self.mainwindows[menuid]
         if name == 'Alias Lib':
-            if self.aliaslib.IsShown() == True: self.aliaslib.Hide()
+            if self.aliaslib.IsShown(): self.aliaslib.Hide()
             else: self.aliaslib.Show()
         else:
-            if self._mgr.GetPane(name).IsShown() == True: self._mgr.GetPane(name).Hide()
+            if self._mgr.GetPane(name).IsShown(): self._mgr.GetPane(name).Hide()
             else: self._mgr.GetPane(name).Show()
             self._mgr.Update()
         self.log.log("Exit orpgFrame->OnMB_WindowsMenu(self, event)", ORPG_DEBUG)
@@ -620,13 +620,13 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         txt = temp_file.read()
         xml_dom = self.xml.parseXml(txt)._get_documentElement()
         temp_file.close()
+        self.windowsmenu = wx.Menu()
+        self.mainwindows = {}
 
         #Plugins Window
         self.pluginsFrame = pluginUI.PluginFrame(self)
         open_rpg.add_component("plugins", self.get_activeplugins())
         open_rpg.add_component("startplugs", self.get_startplugins())
-        self.windowsmenu = wx.Menu()
-        self.mainwindows = {}
         self.log.log("Menu Created", ORPG_DEBUG)
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))
@@ -653,6 +653,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         self.sound_player = orpg.tools.orpg_sound.orpgSound(self)
         open_rpg.add_component("sound", self.sound_player)
         wndinfo = AUI.AuiPaneInfo()
+        menuid = wx.NewId()
+        self.mainwindows[menuid] = "Sound Control Toolbar"
         wndinfo.DestroyOnClose(False)
         wndinfo.Name("Sound Control Toolbar")
         wndinfo.Caption("Sound Control Toolbar")
@@ -666,6 +668,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         # status window
         self.status = status_bar(self)
         wndinfo = AUI.AuiPaneInfo()
+        menuid = wx.NewId()
+        self.mainwindows[menuid] = "Status Window"
         wndinfo.DestroyOnClose(False)
         wndinfo.Name("Status Window")
         wndinfo.Caption("Status Window")
@@ -678,6 +682,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         # Create and show the floating dice toolbar
         self.dieToolBar = orpg.tools.toolBars.DiceToolBar(self, callBack = self.chat.ParsePost)
         wndinfo = AUI.AuiPaneInfo()
+        menuid = wx.NewId()
+        self.mainwindows[menuid] = "Dice Tool Bar"
         wndinfo.DestroyOnClose(False)
         wndinfo.Name("Dice Tool Bar")
         wndinfo.Caption("Dice Tool Bar")
@@ -690,6 +696,8 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         #Create the Map tool bar
         self.mapToolBar = orpg.tools.toolBars.MapToolBar(self, callBack = self.map.MapBar)
         wndinfo = AUI.AuiPaneInfo()
+        menuid = wx.NewId()
+        self.mainwindows[menuid] = "Map Tool Bar"
         wndinfo.DestroyOnClose(False)
         wndinfo.Name("Map Tool Bar")
         wndinfo.Caption("Map Tool Bar")
@@ -834,8 +842,16 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
     def onPaneClose(self, evt):
         self.log.log("Enter orpgFrame->onPaneClose()", ORPG_DEBUG)
         pane = evt.GetPane()
-        for wndid, wname in self.mainwindows.iteritems():
-            if pane.name == wname: self.windowsmenu.Check(wndid, False); break
+        #Arbitrary If ELIF fix. Items had incorrect ID's set. Finding correct ID will fix it for the iteration.
+        #Adding ID also fixed docking. Go figure.
+        if pane.name == 'Sound Control Toolbar': self.mainmenu.SetMenuState('ToolsSoundToolbar', False) 
+        elif pane.name == 'Status Window': self.mainmenu.SetMenuState('ToolsStatusBar', False) 
+        elif pane.name == 'Dice Tool Bar': self.mainmenu.SetMenuState('ToolsDiceBar', False) 
+        elif pane.name == 'Map Tool Bar': self.mainmenu.SetMenuState('ToolsMapBar', False) 
+        else: 
+            for wndid, wname in self.mainwindows.iteritems():
+                #print pane.name, wname, wndid
+                if pane.name == wname: self.windowsmenu.Check(wndid, False); break
         evt.Skip()
         self._mgr.Update()
         self.log.log("Exit orpgFrame->onPaneClose()", ORPG_DEBUG)

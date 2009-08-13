@@ -433,10 +433,14 @@ class Control(wx.Panel):
 
 class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
-        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(700,480), 
-            style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP | wx.DEFAULT_FRAME_STYLE)
-        self.CenterOnScreen()
+        self.dir_struct = open_rpg.get_component("dir_struct")
 
+        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(700,480), style=wx.DEFAULT_FRAME_STYLE)
+        if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
+        else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
+        self.SetIcon(icon)
+
+        self.CenterOnScreen()
         self.main = main
         ####### Panel Stuff ######
         p = wx.Panel(self)
@@ -463,8 +467,8 @@ class updaterFrame(wx.Frame):
 
     def OnClose(self, event):
         if self.main == False: self.Destroy()
-        if self.main == True: self.Hide() #self.Hide()
-        #continue
+        if self.main == True: self.Hide()
+
 
 class updateApp(wx.App):
     def OnInit(self):

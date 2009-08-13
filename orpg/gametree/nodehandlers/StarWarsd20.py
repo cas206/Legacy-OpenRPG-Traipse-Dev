@@ -244,16 +244,15 @@ class tabbed_panel(wx.Notebook):
         self.handler = handler
         self.parent = parent
         tree = self.handler.tree
-        max = tree.GetChildrenCount(handler.mytree_node)
-
+        max = tree.GetChildrenCount(handler.mytree_node, False)
         cookie = 0
-        max = tree.GetChildrenCount(handler.mytree_node)
         try:
             (child,cookie)=tree.GetFirstChild(handler.mytree_node,cookie)
         except: # If this happens we probably have a newer version of wxPython
             (child,cookie)=tree.GetFirstChild(handler.mytree_node)
         obj = tree.GetPyData(child)
         for m in xrange(max):
+    
             if mode == 1:
                 panel = obj.get_design_panel(self)
             else:
@@ -262,7 +261,7 @@ class tabbed_panel(wx.Notebook):
 
             if panel:
                 self.AddPage(panel,name)
-            if m < max-1:
+            if m < max-1: 
                 child = tree.GetNextSibling(child)
                 obj = tree.GetPyData(child)
 
@@ -302,11 +301,11 @@ class SWd20_char_child(node_handler):
     def on_rclick(self,evt):
         pass
 
-    def on_ldclick(self,evt):
-        return
+    def on_ldclick(self,evt): #Function needs help. Needs an OnClose I think.
         if self.myeditor == None or self.myeditor.destroyed:
             title = self.master_dom.getAttribute('name') + " Editor"
-            self.myeditor = orpgPFrame(self.frame,title,orpg.dirpath.dir_struct["icon"]+'grid.ico')
+            # Frame created in correctly.
+            self.myeditor = wx.Frame(self.frame,title,orpg.dirpath.dir_struct["icon"]+'grid.ico')
             wnd = self.get_design_panel(self.myeditor)
             self.myeditor.panel = wnd
             self.wnd = wnd
@@ -1400,14 +1399,16 @@ class feat_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.grid =wx.grid.Grid(self, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(wx.Button(self, 10, "Remove Feat"), 1, wx.EXPAND)
+        remove_btn = wx.Button(self, wx.ID_ANY, "Remove Feat")
+        add_btn = wx.Button(self, wx.ID_ANY, "Add Feat")
+        sizer.Add(remove_btn, 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
-        sizer.Add(wx.Button(self, 20, "Add Feat"), 1, wx.EXPAND)
+        sizer.Add(add_btn, 1, wx.EXPAND)
         self.sizer = sizer
         self.SetSizer(self.sizer)
         self.Bind(wx.EVT_SIZE, self.on_size)
-        EVT_BUTTON(self, 10, self.on_remove)
-        EVT_BUTTON(self, 20, self.on_add)
+        self.Bind(wx.EVT_BUTTON, self.on_remove, remove_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add, add_btn)
 
         n_list = handler.master_dom._get_childNodes()
         self.n_list = n_list
@@ -1541,14 +1542,16 @@ class weapon_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.grid =wx.grid.Grid(self, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(wx.Button(self, 10, "Remove Weapon"), 1, wx.EXPAND)
+        remove_btn = wx.Button(self, 10, "Remove Weapon")
+        add_btn = wx.Button(self, 20, "Add Weapon")
+        sizer.Add(remove_btn, 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
-        sizer.Add(wx.Button(self, 20, "Add Weapon"), 1, wx.EXPAND)
+        sizer.Add(add_btn, 1, wx.EXPAND)
         self.sizer = sizer
         self.SetSizer(self.sizer)
         self.Bind(wx.EVT_SIZE, self.on_size)
-        EVT_BUTTON(self, 10, self.on_remove)
-        EVT_BUTTON(self, 20, self.on_add)
+        self.Bind(wx.EVT_BUTTON, self.on_remove, remove_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add, add_btn)
         self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
         n_list = handler.master_dom.getElementsByTagName('weapon')
         self.n_list = n_list
@@ -1669,14 +1672,16 @@ class ac_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.grid =wx.grid.Grid(self, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(wx.Button(self, 10, "Remove Armor"), 1, wx.EXPAND)
+        remove_btn = wx.Button(self, 10, "Remove Armor")
+        add_btn = wx.Button(self, 20, "Add Armor")
+        sizer.Add(remove_btn, 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
-        sizer.Add(wx.Button(self, 20, "Add Armor"), 1, wx.EXPAND)
+        sizer.Add(add_btn, 1, wx.EXPAND)
         self.sizer = sizer
         self.SetSizer(self.sizer)
         self.Bind(wx.EVT_SIZE, self.on_size)
-        EVT_BUTTON(self, 10, self.on_remove)
-        EVT_BUTTON(self, 20, self.on_add)
+        self.Bind(wx.EVT_BUTTON, self.on_remove, remove_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add, add_btn)
         self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
         self.master_dom = handler.master_dom
         n_list = handler.master_dom._get_childNodes()
@@ -1754,14 +1759,16 @@ class class_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.grid =wx.grid.Grid(self, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(wx.Button(self, 10, "Remove Class"), 1, wx.EXPAND)
+        remove_btn = wx.Button(self, wx.ID_ANY, "Remove Class")
+        add_btn = wx.Button(self, wx.ID_ANY, "Add Class")
+        sizer.Add(remove_btn, 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
-        sizer.Add(wx.Button(self, 20, "Add Class"), 1, wx.EXPAND)
+        sizer.Add(add_btn, 1, wx.EXPAND)
         self.sizer = sizer
         self.SetSizer(self.sizer)
         self.Bind(wx.EVT_SIZE, self.on_size)
-        EVT_BUTTON(self, 10, self.on_remove)
-        EVT_BUTTON(self, 20, self.on_add)
+        self.Bind(wx.EVT_BUTTON, self.on_remove, remove_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add, add_btn)
         self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
 
         n_list = handler.master_dom._get_childNodes()

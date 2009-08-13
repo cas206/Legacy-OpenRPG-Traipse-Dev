@@ -459,7 +459,7 @@ class gen_grid(wx.grid.Grid):
         t_node._set_nodeValue(value)
         if row==0:
             self.handler.on_name_change(value)
-        self.AutoSizeColumn(1)
+        #self.AutoSizeColumn(1)
 
     def refresh_row(self,rowi):
         t_node = safe_get_text_node(self.n_list[rowi])
