@@ -95,7 +95,7 @@ class player_list(wx.ListCtrl):
         self.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
         # Create our column headers
         self.InsertColumn( 0, "ID" )
-        self.InsertColumn( 1, "Player" )
+        self.InsertColumn( 1, "Player")
         self.InsertColumn( 2, "Status" )
 #---------------------------------------------------------
 # [START] Digitalxero Multi Whisper Group 1/1/05
@@ -192,6 +192,13 @@ class player_list(wx.ListCtrl):
 #
 #       Revised 8/03 to add support for password manager
 #---------------------------------------------------------
+
+    def AutoAdjust(self):
+        self.SetColumnWidth(0, -1)
+        if self.GetColumnWidth(1) < 75: self.SetColumnWidth(1, 75)
+        if self.GetColumnWidth(2) < 75: self.SetColumnWidth(2, 75)
+        self.Refresh()
+
     def on_menu_password( self, evt ):
         id = evt.GetId()
         self.session = open_rpg.get_component("session")
@@ -328,6 +335,7 @@ class player_list(wx.ListCtrl):
         roleString = None
         roleBase = "/role %d=%s"
         infoBase = "Attempting to assign the role of %s to (%d) %s..."
+
         # Do type specific processing
 	recycle_bin = {PLAYER_ROLE_LURKER: ROLE_LURKER, PLAYER_ROLE_PLAYER: ROLE_PLAYER, PLAYER_ROLE_GM: ROLE_GM}
 	if recycle_bin.has_key(id):
@@ -449,6 +457,7 @@ class player_list(wx.ListCtrl):
         if sound_file != '':
             sound_player = open_rpg.get_component('sound')
             sound_player.play(sound_file)
+        self.AutoAdjust()
 
     def del_player(self,player):
         i = self.FindItemData(-1,int(player[2]))
@@ -492,7 +501,7 @@ class player_list(wx.ListCtrl):
         self.SetStringItem(i,2,player[3])
         item = self.GetItem(i)
         self.colorize_player_list()
-        self.Refresh()
+        self.AutoAdjust()
 
     def colorize_player_list(self):
         session = open_rpg.get_component("session")

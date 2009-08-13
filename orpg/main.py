@@ -639,7 +639,7 @@ the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  0211
         #Update Manager
         self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager Beta 0.7.1", open_rpg, self.manifest, True)
+            "OpenRPG Update Manager Beta 0.7.2", open_rpg, self.manifest, True)
         self.log.log("Menu Created", ORPG_DEBUG)
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))

@@ -9,7 +9,7 @@ import orpg.dirpath
 import upmana.validate
 import tempfile
 import shutil
-from mercurial import ui, hg, commands, repo, revlog, cmdutil
+from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
 
 class Updater(wx.Panel):
@@ -28,8 +28,8 @@ class Updater(wx.Panel):
         self.log.log("Enter updaterFrame", ORPG_DEBUG)
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(400, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self.filelist = wx.TextCtrl(self, wx.ID_ANY, size=(250, 300), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(325, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.filelist = wx.TextCtrl(self, wx.ID_ANY, size=(275, 300), style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.buttons = {}
         self.buttons['progress_bar'] = wx.Gauge(self, wx.ID_ANY, 100)
         self.buttons['auto_text'] = wx.StaticText(self, wx.ID_ANY, "Auto Update")
@@ -169,40 +169,20 @@ class Updater(wx.Panel):
         heads = dict.fromkeys(self.repo.heads(), 1)
         l = [((n in heads), self.repo.changelog.rev(n), n, t) for t, n in branches.items()]
 
-        #l.sort()
-        #l.reverse()
-        #for ishead, r, n, t in l: self.package_list.append(t)
-
         if self.current != type:
-            #r = hg.islocal()
-            files = self.c.files()
-            #print commands.log(u, r, c)
-            #print r.changelog
-
-            ### Cleaning up for dev build 0.1
-            ### The below material is for the Rev Log.  You can run hg log to see what data it will pull.
-            #cs = r.changectx(c.rev()).changeset()
-            #get = util.cachefunc(lambda r: repo.changectx(r).changeset())
-            #changeiter, matchfn = cmdutil.walkchangerevs(u, r, 1, cs, 1)
-            #for st, rev, fns in changeiter:
-            #    revbranch = get(rev)[5]['branch']; print revbranch
-
             heads = dict.fromkeys(self.repo.heads(), self.repo.branchtags())
             branches = dict.copy(self.repo.branchtags())
             self.BranchInfo(self.current)
 
     def BranchInfo(self, branch):
-        self.filelist.SetValue('')
-        self.filelist.AppendText("Files that will change\n\n")
+        cs = self.repo.changectx( self.current ).changeset()
         self.changelog.SetValue('')
-        changelog = "Traipse 'OpenRPG' Update Manager.\n\nThis is Dev Build 0.7.1 (open beta) of the Update Manager. This version is nearly 100% functional. Users can now add repositories of OpenRPG, choose from different branches available from those repositories, and add files to an ignore list.\n\nThe Update Manager is divided into tabs, Updater, Repos, Manifest, and Control. \n\nUpdater: Set your update type on startup; Auto, None. Select a package of changes from a branch and update.\n\nRepos: Collect repositories of different projects. Set a name then assign it a URL. Refresh repositories in your list or delete them from your list.\n\nManifest: A complete list of all the files in your current change set. Check files off that you want to be safe from future updates.\n\nControl: Incomplete. Future revisions will allow users to update to specific revision branchs and delete branches from their computer.\n\nThis is a good start. Enjoy the freedom!!"
+        changelog = cs[4]
         self.changelog.AppendText(changelog + '\n')
-        self.filelist.AppendText("Traipse 'OpenRPG'\n\n Currently selected branch: " + branch + "\n\nFile List: When Control is completed this field will display a list of files that will be affected by your selection of branch.  The window to the left will display the description of the branch.\n\nDescription: Stable releases will have a formated Description that displays the Build Number, a summary of the branch, and a summary of the changes in the selected changeset.")
-
-        #### Files works but not fully without the change log information, pulled for Dev 0.1
-        #for f in files:
-        #    fc = c[f]
-        #    self.filelist.AppendText(str(f + '\n'))
+        self.filelist.SetValue('')
+        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\nFiles Modified (in branch): \n")
+        for f in cs[3]:
+            self.filelist.AppendText(f+"\n")
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
@@ -435,7 +415,7 @@ class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
         self.dir_struct = open_rpg.get_component("dir_struct")
 
-        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(700,480), style=wx.DEFAULT_FRAME_STYLE)
+        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(600,480), style=wx.DEFAULT_FRAME_STYLE)
         if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
         else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
         self.SetIcon(icon)
@@ -483,7 +463,7 @@ class updateApp(wx.App):
         self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
         self.validate = upmana.validate.Validate()
         self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.1 (open beta)", self.open_rpg, self.manifest, self.main)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", self.open_rpg, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
@@ -492,7 +472,6 @@ class updateApp(wx.App):
         else: pass
         try:
             self.updater.Show()
-            #self.SetTopWindow(self.updater)
             self.updater.Fit()
         except: pass
         return True

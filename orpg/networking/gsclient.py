@@ -159,9 +159,9 @@ class game_server_panel(wx.Panel):
 
         #Build Rooms Sizer
         self.room_list = wx.ListCtrl(self, LIST_ROOM, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
-        self.room_list.InsertColumn(0,"Game", wx.LIST_FORMAT_LEFT,0)
-        self.room_list.InsertColumn(1,"Players", wx.LIST_FORMAT_LEFT,0)
-        self.room_list.InsertColumn(2,"PW", wx.LIST_FORMAT_LEFT,0)
+        self.room_list.InsertColumn(0,"Game", wx.LIST_FORMAT_LEFT,-1)
+        self.room_list.InsertColumn(1,"Players", wx.LIST_FORMAT_LEFT,-1)
+        self.room_list.InsertColumn(2,"PW", wx.LIST_FORMAT_LEFT,-1)
         self.buttons[GS_JOIN] = wx.Button(self, GS_JOIN, "Join Room")
         self.buttons[GS_JOINLOBBY] = wx.Button(self, GS_JOINLOBBY, "Lobby")
         self.sizers["roombtns"] = wx.BoxSizer(wx.HORIZONTAL)
@@ -242,7 +242,6 @@ class game_server_panel(wx.Panel):
 #---------------------------------------------------------
 # [END] Snowdog: Updated Game Server Window 12/02
 #---------------------------------------------------------
-
 
     #-----------------------------------------------------
     # on_server_dbclick()
@@ -464,8 +463,11 @@ class game_server_panel(wx.Panel):
     def autosizeRooms(self):
         self.log.log("Enter game_server_panel->autosizeRooms(self)", ORPG_DEBUG)
         self.room_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-        self.room_list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
-        self.room_list.SetColumnWidth(2, wx.LIST_AUTOSIZE)
+        #self.room_list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+        #self.room_list.SetColumnWidth(2, wx.LIST_AUTOSIZE)
+        if self.room_list.GetColumnWidth(0) < 70: self.room_list.SetColumnWidth(0, 70)
+        if self.room_list.GetColumnWidth(1) < 70: self.room_list.SetColumnWidth(1, 70)
+        if self.room_list.GetColumnWidth(2) < 50: self.room_list.SetColumnWidth(2, 50)
         self.log.log("Exit game_server_panel->autosizeRooms(self)", ORPG_DEBUG)
 
     def refresh_server_list(self):
@@ -527,6 +529,7 @@ class game_server_panel(wx.Panel):
             # No server is currently selected!!!  Versus the broken and random 0!
             self.cur_server_index = -1
             self.server_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            if self.server_list.GetColumnWidth(0) < 70: self.server_list.SetColumnWidth(0, 70)
             self.server_list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
 
             if self.serverNameSet == 0:
