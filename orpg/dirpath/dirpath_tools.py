@@ -8,7 +8,6 @@ if WXLOADED:
         def OnInit(self):
             return True
 
-
 #-------------------------------------------------------
 # void load_paths( dir_struct_reference )
 # moved structure loading from dirpath.py by Snowdog 3-8-05
@@ -27,10 +26,8 @@ def load_paths(dir_struct, root_dir):
     dir_struct["nodes"] = dir_struct["template"] + "nodes" + os.sep
     dir_struct["rollers"] = dir_struct["core"] + "dieroller" + os.sep + "rollers" + os.sep
 
-
-    _userbase_dir = _userbase_dir = os.environ['OPENRPG_BASE']
-    _user_dir = _userbase_dir + os.sep + "myfiles" + os.sep
-
+    _userbase_dir = dir_struct["home"]
+    _user_dir = dir_struct["home"] + "myfiles" + os.sep
 
     try:
         os.makedirs(_user_dir)
@@ -38,14 +35,10 @@ def load_paths(dir_struct, root_dir):
         os.makedirs(_user_dir + "logs" + os.sep);
         os.makedirs(_user_dir + "webfiles" + os.sep);
     except OSError, e:
-        if e.errno != errno.EEXIST:
-            raise
+        if e.errno != errno.EEXIST: raise
 
     dir_struct["user"] = _user_dir
-
     dir_struct["logs"] = dir_struct["user"] + "logs" + os.sep
-
-
 
 #-------------------------------------------------------
 # int verify_home_path( directory_name )
@@ -55,7 +48,6 @@ def load_paths(dir_struct, root_dir):
 def verify_home_path( path ):
     """checks for key ORPG files in the openrpg tree
        and askes for user intervention if their is a problem"""
-
     try:
         #verify that the root dir (as supplied) exists
         if not verify_file(path): return 0
@@ -64,12 +56,10 @@ def verify_home_path( path ):
         #Check and temporarily add one if needed
         if (path[(len(path)-len(os.sep)):] != os.sep):
             path = path + os.sep
-
         # These files should always exist at the root orpg dir
         check_files = ["orpg","data","images"]
         for n in range(len(check_files)):
             if not verify_file(path + check_files[n]): return 0
-
     except:
         # an error occured while verifying the directory structure
         # bail out with error signal
@@ -77,8 +67,6 @@ def verify_home_path( path ):
 
     #all files and directories exist.
     return 1
-
-
 
 #-------------------------------------------------------
 # int verify_file( absolute_path )
@@ -99,6 +87,7 @@ def verify_file(abs_path):
 # added by Snowdog 3-8-05
 # bug fix (SF #1242456) and updated with bailout code. Snowdog 7-25-05
 #-------------------------------------------------------
+## This can be removed in the future. TaS '09
 def get_user_located_root():
     """Notify the user of directory problems
     and show directory selection dialog """
@@ -108,14 +97,13 @@ def get_user_located_root():
         app.MainLoop()
 
         dir = None
-
         try:
             msg = "OpenRPG cannot locate critical files.\nPlease locate the /System/ directory in the following window"
             alert= wx.MessageDialog(None,msg,"Warning",wx.OK|wx.ICON_ERROR)
             alert.Show()
             if alert.ShowModal() == wx.OK:
                 alert.Destroy()
-            dlg = wx.DirDialog(None, "Locate the openrpg1 directory:",style=wx.DD_DEFAULT_STYLE)
+            dlg = wx.DirDialog(None, "Locate the System directory:",style=wx.DD_DEFAULT_STYLE)
             if dlg.ShowModal() == wx.ID_OK:
                 dir = dlg.GetPath()
             dlg.Destroy()

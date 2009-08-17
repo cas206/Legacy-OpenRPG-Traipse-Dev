@@ -78,7 +78,8 @@ class orpgSettings:
     def add_setting(self, tab, setting, value, options, help):
         if len(self.xml_dom.getElementsByTagName(setting)) > 0: return False
         tabs = self.xml_dom.getElementsByTagName("tab")
-        newsetting = self.xml.parseXml('<' + setting + ' value="' + value + '" options="' + options + '" help="' + help + '" />')._get_documentElement()
+        newsetting = self.xml.parseXml('<' + setting + ' value="' + value + '" options="' + 
+                                        options + '" help="' + help + '" />')._get_documentElement()
         for i in xrange(0, len(tabs)):
             if tabs[i].getAttribute("name") == tab and tabs[i].getAttribute("type") == 'grid':
                 tabs[i].appendChild(newsetting)
@@ -125,7 +126,9 @@ class orpgSettings:
             if child._get_tagName() == 'tab' and child.hasChildNodes():
                 self.proccessChildren(child, dom.getAttribute("name"))
             else:
-                self.add_setting(dom.getAttribute("name"), child._get_tagName(), child.getAttribute("value"), child.getAttribute("options"), child.getAttribute("help"))
+                self.add_setting(dom.getAttribute("name"), child._get_tagName(), 
+                                child.getAttribute("value"), child.getAttribute("options"), 
+                                child.getAttribute("help"))
 
     def save(self):
         temp_file = open(self.filename, "w")
@@ -134,7 +137,9 @@ class orpgSettings:
 
 class orpgSettingsWnd(wx.Dialog):
     def __init__(self, parent):
-        wx.Dialog.__init__(self,parent,-1,"OpenRPG Preferences",wx.DefaultPosition,size = wx.Size(-1,-1), style=wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION)
+        wx.Dialog.__init__(self,parent,-1,"OpenRPG Preferences", 
+                            wx.DefaultPosition,size = wx.Size(-1,-1), 
+                            style=wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION)
         self.Freeze()
         self.validate = open_rpg.get_component("validate")
         self.settings = open_rpg.get_component("settings")
@@ -225,6 +230,14 @@ class orpgSettingsWnd(wx.Dialog):
         for i in xrange(0,len(self.changes)):
             self.settings.set_setting(self.changes[i][0], self.changes[i][1])
             top_frame = open_rpg.get_component('frame')
+
+            if self.changes[i][0] == 'defaultfontsize' or self.changes[i][0] == 'defaultfont':
+                self.chat.chatwnd.SetDefaultFontAndSize(self.settings.get_setting('defaultfont'), 
+                                                        self.settings.get_setting('defaultfontsize'))
+                self.chat.InfoPost("Font is now " + 
+                                    self.settings.get_setting('defaultfont') + " point size " + 
+                                    self.settings.get_setting('defaultfontsize'))
+                self.chat.chatwnd.scroll_down()
 
             if self.changes[i][0] == 'bgcolor' or self.changes[i][0] == 'textcolor':
                 self.chat.chatwnd.SetPage(self.chat.ResetPage())
