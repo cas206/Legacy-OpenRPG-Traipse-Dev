@@ -102,7 +102,7 @@ def strip_html(string):
     htmlstripper.close()
     return htmlstripper.accum
 
-def log( settings, text ):
+def log( settings, c, text ):
     filename = settings.get_setting('GameLogPrefix')
     if filename > '' and filename[0] != commands.ANTI_LOG_CHAR:
         filename = filename + time.strftime( '-%Y-%m-%d.html', time.localtime( time.time() ) )
@@ -112,7 +112,7 @@ def log( settings, text ):
         if settings.get_setting('TimeStampGameLog') != '1': header = ''
         try:
             f = open( orpg.dirpath.dir_struct["user"] + filename, 'a' )
-            f.write( '%s%s<br />\n' % ( header, text ) )
+            f.write( '<div class="'+c+'">%s%s</div>\n' % ( header, text ) )
             f.close()
         except:
             print "could not open " + orpg.dirpath.dir_struct["user"] + filename + ", ignoring..."
@@ -932,13 +932,13 @@ class chat_panel(wx.Panel):
         self.log.log("Enter chat_panel->build_dice(self)", ORPG_DEBUG)
         self.numDieText = wx.TextCtrl( self, wx.ID_ANY, "1", size= wx.Size(25, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
         self.dieModText = wx.TextCtrl( self, wx.ID_ANY, "", size= wx.Size(50, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
-        self.d4Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d4.gif', 'Roll d4', wx.ID_ANY, '#bdbdbd')
-        self.d6Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d6.gif', 'Roll d6', wx.ID_ANY, '#bdbdbd')
-        self.d8Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d8.gif', 'Roll d8', wx.ID_ANY, '#bdbdbd')
-        self.d10Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d10.gif', 'Roll d10', wx.ID_ANY, '#bdbdbd')
-        self.d12Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d12.gif', 'Roll d12', wx.ID_ANY, '#bdbdbd')
-        self.d20Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d20.gif', 'Roll d20', wx.ID_ANY, '#bdbdbd')
-        self.d100Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d100.gif', 'Roll d100', wx.ID_ANY, '#bdbdbd')
+        self.d4Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d4.gif', 'Roll d4', wx.ID_ANY)
+        self.d6Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d6.gif', 'Roll d6', wx.ID_ANY)
+        self.d8Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d8.gif', 'Roll d8', wx.ID_ANY)
+        self.d10Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d10.gif', 'Roll d10', wx.ID_ANY)
+        self.d12Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d12.gif', 'Roll d12', wx.ID_ANY)
+        self.d20Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d20.gif', 'Roll d20', wx.ID_ANY)
+        self.d100Button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'b_d100.gif', 'Roll d100', wx.ID_ANY)
         self.toolbar_sizer.Add( self.numDieText, 0, wx.ALIGN_CENTER | wx.EXPAND)
         self.toolbar_sizer.Add( self.d4Button, 0 ,wx.EXPAND)
         self.toolbar_sizer.Add( self.d6Button, 0 ,wx.EXPAND)
@@ -1007,12 +1007,16 @@ class chat_panel(wx.Panel):
     # Heroman - Ideally, we would use static labels...
     def build_colorbutton(self):
         self.log.log("Enter chat_panel->build_colorbutton(self)", ORPG_DEBUG)
-        self.color_button = wx.Button(self, wx.ID_ANY, "C",wx.Point(0,0), wx.Size(22,0))
-        self.saveButton = createMaskedButton( self, orpg.dirpath.dir_struct["icon"]+'save.bmp', 'Save the chatbuffer', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
-        self.color_button.SetBackgroundColour(wx.BLACK)
-        self.color_button.SetForegroundColour(wx.WHITE)
+        self.color_button = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'textcolor.gif', 
+                                                    'Text Color', wx.ID_ANY, '#bdbdbd', 
+                                                    wx.BITMAP_TYPE_GIF)
+
+        self.saveButton = createMaskedButton(self, orpg.dirpath.dir_struct["icon"]+'save.bmp', 
+                                                    'Save the chatbuffer', wx.ID_ANY, 
+                                                    '#c0c0c0', wx.BITMAP_TYPE_BMP )
+        self.color_button.SetBackgroundColour(self.settings.get_setting('mytextcolor'))
         self.toolbar_sizer.Add(self.color_button, 0, wx.EXPAND)
-        self.toolbar_sizer.Add( self.saveButton, 0, wx.EXPAND )
+        self.toolbar_sizer.Add(self.saveButton, 0, wx.EXPAND)
         self.log.log("Exit chat_panel->build_colorbutton(self)", ORPG_DEBUG)
 
     def OnMotion(self, evt):
@@ -1768,11 +1772,11 @@ class chat_panel(wx.Panel):
                         if self.type == WHISPER_TAB: name += " (whispering): "
                         elif self.type == GROUP_TAB: name += self.settings.get_setting("gwtext") + ' '
                         elif self.sendtarget == 'gm': name += " (whispering to GM) "
-                    newline = self.TimeIndexString() + "<div class='"+c+"'> " +name + s2 + "</div>"
-                    log( self.settings, c+' '+name + s2 )
+                    newline = "<div class='"+c+"'> " + self.TimeIndexString() + name + s2 + "</div>"
+                    log( self.settings, c, name+s2 )
             else:
-                newline = self.TimeIndexString() + "<div class='"+c+"'> " +name + s + "</div>"
-                log( self.settings, c+' '+name + s )
+                newline = "<div class='"+c+"'> " + self.TimeIndexString() + name + s + "</div>"
+                log( self.settings, c, name+s )
         else: send = False
         newline = chat_util.strip_unicode(newline)
         if self.lockscroll == 0:

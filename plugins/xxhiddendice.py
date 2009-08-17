@@ -42,7 +42,6 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         return text
 
     def post_msg(self, text, myself):
-        print "post_msg:\n\t" + text
         c = 0
         a = text.find("(hidden roll)")
 
