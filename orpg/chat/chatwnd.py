@@ -66,6 +66,7 @@ import cStringIO # for reading inline imagedata as a stream
 from HTMLParser import HTMLParser
 import chat_util
 import traceback
+from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 NEWCHAT = False
 try:
@@ -1025,7 +1026,7 @@ class chat_panel(wx.Panel):
             logger.debug("Exit chat_panel->myKeyHook(self, event) return 1")
             return 1
         else:
-            loger.debug("Exit chat_panel->myKeyHook(self, event) return 0")
+            logger.debug("Exit chat_panel->myKeyHook(self, event) return 0")
             return 0
 
     #  This subroutine gets called once a second by the typing Timer
