@@ -34,9 +34,8 @@ META_DEBUG = 0
 __version__ = "$Id: meta_server_lib.py,v 1.40 2007/04/04 01:18:42 digitalxero Exp $"
 
 from orpg.orpg_version import PROTOCOL_VERSION
-from orpg.orpg_xml import *
-import orpg.dirpath
-import orpg.tools.validate
+from orpg.orpgCore import *
+from orpg.dirpath import dir_struct
 import urllib
 import orpg.minidom
 from threading import *
@@ -79,7 +78,8 @@ def get_server_dom(data=None,path=None):
         print data
         print
     # build dom
-    xml_dom = parseXml(data)
+    xml = component.get('xml')
+    xml_dom = xml.parseXml(data)
     xml_dom = xml_dom._get_documentElement()
     return xml_dom
 
@@ -198,17 +198,13 @@ def get_server_list(versions = None,sort_by="start"):
 
                 # set them from current node
 
-                if not n.hasAttribute('name'):
-                    n.setAttribute('name','NO_NAME_GIVEN')
+                if not n.hasAttribute('name'): n.setAttribute('name','NO_NAME_GIVEN')
                 name = n.getAttribute('name')
-                if not n.hasAttribute('num_users'):
-                    n.setAttribute('num_users','N/A')
+                if not n.hasAttribute('num_users'): n.setAttribute('num_users','N/A')
                 num_users = n.getAttribute('num_users')
-                if not n.hasAttribute('address'):
-                    n.setAttribute('address','NO_ADDRESS_GIVEN')
+                if not n.hasAttribute('address'): n.setAttribute('address','NO_ADDRESS_GIVEN')
                 address = n.getAttribute('address')
-                if not n.hasAttribute('port'):
-                    n.setAttribute('port','6774')
+                if not n.hasAttribute('port'): n.setAttribute('port','6774')
                 port = n.getAttribute('port')
                 n.setAttribute('meta',meta)
                 end_point = str(address) + ":" + str(port)
@@ -257,7 +253,7 @@ def updateMetaCache(xml_dom):
         if META_DEBUG: print "  Meta List ("+str(len(metas))+" servers)"
         try:
             metacache_lock.acquire()
-            ini = open(orpg.dirpath.dir_struct["user"]+"metaservers.cache","w")
+            ini = open(dir_struct["user"]+"metaservers.cache","w")
             for meta in metas:
                 if META_DEBUG: print "   Writing: "+str(meta.getAttribute('path'))
                 ini.write(str(meta.getAttribute('path')) + " " + str(meta.getAttribute('versions')) + "\n")
@@ -273,8 +269,8 @@ def getRawMetaList():
         try:
             metacache_lock.acquire()
             #  Read in the metas
-            orpg.tools.validate.Validate().config_file("metaservers.cache","metaservers.cache")
-            ini = open(orpg.dirpath.dir_struct["user"]+"metaservers.cache","r")
+            component.get('validate').config_file("metaservers.cache","metaservers.cache")
+            ini = open(dir_struct["user"]+"metaservers.cache","r")
             metas = ini.readlines()
             ini.close()
             return metas
@@ -357,10 +353,11 @@ def getMetaServerBaseURL():
     # get meta server URL
     url = "http://www.openrpg.com/openrpg_servers.php"
     try:
-        orpg.tools.validate.Validate().config_file("settings.xml","default_settings.xml")
-        ini = open(orpg.dirpath.dir_struct["user"]+"settings.xml","r")
+        component.get('validate').config_file("settings.xml","default_settings.xml")
+        ini = open(dir_struct["user"]+"settings.xml","r")
         txt = ini.read()
-        tree = parseXml(txt)._get_documentElement()
+        xml = component.get('xml')
+        tree = xml.parseXml(txt)._get_documentElement()
         ini.close()
         node_list = tree.getElementsByTagName("MetaServerBaseURL")
         if node_list:

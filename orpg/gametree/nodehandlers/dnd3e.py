@@ -233,7 +233,7 @@ class dnd3echar_handler(container_handler):
         #a 1.5002 top of the handler tree, this is used to flag where to stop
         #a 1.5002 on the way up.  Changing this will break getRoot(self)
 
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('howtouse','HowTo use this tool',dnd3ehowto,'note')
         self.new_child_handler('general','GeneralInformation',dnd3egeneral,'gear')
@@ -335,7 +335,7 @@ class dnd3e_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 
@@ -601,7 +601,7 @@ class dnd3eclassnstats(dnd3e_char_child):
         node_handler.__init__(self,xml_dom,tree_node)
         self.hparent = parent #a 1.5002 allow ability to run up tree.
         dnd3e_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('abilities','Abilities Scores',dnd3eability,'gear')
         self.new_child_handler('classes','Classes',dnd3eclasses,'knight')
@@ -633,7 +633,7 @@ class class_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
     def on_drop(self,evt):
@@ -1150,7 +1150,7 @@ class dnd3eskillsnfeats(dnd3e_char_child):
 
         node_handler.__init__(self,xml_dom,tree_node)
         dnd3e_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('skills','Skills',dnd3eskill,'book')
         self.new_child_handler('feats','Feats',dnd3efeats,'book')
@@ -1182,7 +1182,7 @@ class skills_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 
@@ -1594,7 +1594,7 @@ class dnd3ecombat(dnd3e_char_child):
 
         #mark3
         dnd3e_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('hp','Hit Points',dnd3ehp,'gear')
         self.new_child_handler('attacks','Attacks',dnd3eattacks,'spears')
@@ -1628,7 +1628,7 @@ class combat_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 
@@ -2620,7 +2620,7 @@ class dnd3esnp(dnd3e_char_child):
         self.hparent = parent #a 1.5002 allow ability to run up tree.
 
 
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('spells','Spells',dnd3espells,'book')
         self.new_child_handler('divine','Divine Spells',dnd3edivine,'book')
@@ -2658,7 +2658,7 @@ class snp_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 

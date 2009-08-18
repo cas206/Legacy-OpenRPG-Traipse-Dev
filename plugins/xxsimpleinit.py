@@ -10,7 +10,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
     # !openrpg : instance of the the base openrpg control
     def __init__(self, plugindb, parent):
         orpg.pluginhandler.PluginHandler.__init__(self, plugindb, parent)
-        self.orpgframe = open_rpg.get_component('frame')
+        self.orpgframe = component.get('frame')
 
         # The Following code should be edited to contain the proper information
         self.name = 'Simple Init'
@@ -276,16 +276,16 @@ class InitFrame(wx.Frame):
     def __init__(self, plugin):
         self.plugin = plugin
 	self.toggle = plugin.toggle
-        self.log = open_rpg.get_component('log')
+        self.log = component.get('log')
         self.log.log("Enter InitFrame", ORPG_DEBUG)
 
         wx.Frame.__init__(self, None, wx.ID_ANY, title="Simple Init", style=wx.DEFAULT_FRAME_STYLE)
         self.SetOwnBackgroundColour('#EFEFEF')
 
-        self.dir_struct = open_rpg.get_component('dir_struct')
-        self.settings = open_rpg.get_component('settings')
-        self.xml = open_rpg.get_component('xml')
-        self.validate = open_rpg.get_component('validate')
+        self.dir_struct = component.get('dir_struct')
+        self.settings = component.get('settings')
+        self.xml = component.get('xml')
+        self.validate = component.get('validate')
 
         self.Freeze()
         self.buildMenu()
@@ -298,10 +298,10 @@ class InitFrame(wx.Frame):
         self.log.log("Exit InitFrame", ORPG_DEBUG)
 
     def InitSetup(self):
-        self.chat = open_rpg.get_component('chat')
-        self.gametree = open_rpg.get_component('tree')
-        self.map = open_rpg.get_component('map')
-        self.session = open_rpg.get_component('session')
+        self.chat = component.get('chat')
+        self.gametree = component.get('tree')
+        self.map = component.get('map')
+        self.session = component.get('session')
 
         self.initIdx = -1
         self.Thaw()

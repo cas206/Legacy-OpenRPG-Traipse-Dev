@@ -33,7 +33,7 @@ __version__ = "$Id: toolBars.py,v 1.13 2006/11/04 21:24:22 digitalxero Exp $"
 ##
 from inputValidator import *
 import string
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 
 # DICE stuff
 TB_IDC_D4 = wx.NewId()
@@ -56,12 +56,12 @@ class MapToolBar(wx.Panel):
         wx.Panel.__init__(self, parent, id, size=size)
         self.callback = callBack
         self.mapmode = 1
-        self.modeicons = [orpg.dirpath.dir_struct["icon"]+"move.gif",
-            orpg.dirpath.dir_struct["icon"]+"draw.gif",
-            orpg.dirpath.dir_struct["icon"]+"tape.gif"]
+        self.modeicons = [dir_struct["icon"]+"move.gif",
+            dir_struct["icon"]+"draw.gif",
+            dir_struct["icon"]+"tape.gif"]
         # Make a sizer for everything to belong to
         self.sizer = wx.BoxSizer( wx.HORIZONTAL )
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"move.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"move.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self.butt = wx.BitmapButton( self, TB_MAP_MODE, bm )
         self.sizer.Add( self.butt,0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_MAP_MODE)
@@ -98,31 +98,31 @@ class DiceToolBar(wx.Panel):
         self.numDieText = wx.TextCtrl( self, TB_IDC_NUMDICE, "1", size= wx.Size(50, 25),
                                       validator=MathOnlyValidator() )
         self.sizer.Add( self.numDieText, 1, wx.EXPAND | wx.ALIGN_LEFT )
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d4.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d4.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D4, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D4)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d6.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d6.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D6, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D6)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d8.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d8.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D8, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D8)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d10.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d10.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D10, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D10)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d12.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d12.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D12, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D12)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d20.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d20.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D20, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D20)
-        bm = wx.Image(orpg.dirpath.dir_struct["icon"]+"b_d100.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        bm = wx.Image(dir_struct["icon"]+"b_d100.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         butt = wx.BitmapButton( self, TB_IDC_D100, bm, size=(bm.GetWidth(), bm.GetHeight()) )
         self.sizer.Add( butt, 0, wx.ALIGN_CENTER )
         self.Bind(wx.EVT_BUTTON, self.onToolBarClick, id=TB_IDC_D100)

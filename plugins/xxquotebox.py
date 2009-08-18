@@ -1,5 +1,5 @@
 import os
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.plugindb
 import orpg.pluginhandler
 from orpg.tools.rgbhex import RGBHex
@@ -236,7 +236,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     # loads up quotebox.xml as a node in the gametree
     def on_quotebox(self, cmdargs):
-        f = open(orpg.dirpath.dir_struct["plugins"]+ "quotebox.xml","r")
+        f = open(dir_struct["plugins"]+ "quotebox.xml","r")
         self.gametree.insert_xml(f.read())
         f.close()
         return 1

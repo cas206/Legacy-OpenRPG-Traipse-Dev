@@ -31,9 +31,9 @@ __version__ = "$Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $"
 from nodehandler_version import NODEHANDLER_VERSION
 try:
     from orpg.orpg_windows import *
-    import orpg.dirpath
+    from orpg.dirpath import dir_struct
     from orpg.orpg_xml import *
-    from orpg.orpgCore import open_rpg
+    from orpg.orpgCore import component
     import webbrowser
     from orpg.mapper import map
     import os
@@ -53,10 +53,10 @@ class node_handler:
     def __init__(self,xml_dom,tree_node):
         self.master_dom = xml_dom
         self.mytree_node = tree_node
-        self.tree = open_rpg.get_component('tree')
-        self.frame = open_rpg.get_component('frame')
-        self.chat = open_rpg.get_component('chat')
-        self.xml = open_rpg.get_component('xml')
+        self.tree = component.get('tree')
+        self.frame = component.get('frame')
+        self.chat = component.get('chat')
+        self.xml = component.get('xml')
         self.drag = True
         self.myeditor = None # designing
         self.myviewer = None # prett print
@@ -392,7 +392,7 @@ class file_loader(node_handler):
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
         self.file_node = self.master_dom._get_firstChild()
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
 
     def on_ldclick(self,evt):
         file_name = self.file_node.getAttribute("name")
@@ -424,7 +424,7 @@ class url_loader(node_handler):
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
         self.file_node = self.master_dom._get_firstChild()
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
 
     def on_ldclick(self,evt):
         file_name = self.file_node.getAttribute("url")
@@ -455,7 +455,7 @@ class min_map(node_handler):
     """
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
-        self.map = open_rpg.get_component('map')
+        self.map = component.get('map')
         self.mapdata = self.master_dom._get_firstChild()
 
     def on_ldclick(self,evt):

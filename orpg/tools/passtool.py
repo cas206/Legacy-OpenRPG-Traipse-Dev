@@ -27,8 +27,9 @@
 #              doesn't have to type passwords over and over
 
 import orpg.orpg_windows
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 import traceback
+#from orpg.tools.settings import settings
 
 #####################
 ## Password Assistant
@@ -42,19 +43,15 @@ class PassSet:
         #room password
         self.room = None
 
-
-
 class PassTool:
     "Password Management System"
     def __init__(self):
-        self.settings = open_rpg.get_component("settings")
+        self.settings = component.get("settings")
         #server admin password
         self.server = None
         self.groups = {}
-        if self.settings.get_setting('PWMannager') == 'On':
-            self.enabled = 1
-        else:
-            self.enabled = 0
+        if self.settings.get_setting('PWMannager') == 'On': self.enabled = 1
+        else: self.enabled = 0
 
 
     def DumpPasswords(self):
@@ -179,3 +176,6 @@ class PassTool:
         elif type == "server":
             self.ClearPassword( type, groupid  )
             return self.ServerPass()
+
+#PassTool = PassTool()
+component.add('password_manager', PassTool())

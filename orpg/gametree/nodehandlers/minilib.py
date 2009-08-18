@@ -32,7 +32,7 @@ __version__ = "$Id: minilib.py,v 1.28 2007/04/22 22:00:18 digitalxero Exp $"
 miniatures as sending them to the map singly or in batches.
 """
 from core import *
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import string
 import map_miniature_nodehandler
 import orpg.mapper.map_msg
@@ -189,11 +189,11 @@ class minilib_handler( node_handler ):
         if mini.getAttribute( ATTRIBUTE_URL ) == '' or mini.getAttribute( ATTRIBUTE_URL ) == 'http://':
             self.chat.ParsePost( self.chat.colorize(self.chat.syscolor, '"%s" is not a valid URL, the mini "%s" will not be added to the map' % ( mini.getAttribute( ATTRIBUTE_URL ), mini.getAttribute( ATTRIBUTE_NAME ) )) )
             return
-        session = open_rpg.get_component( COMPONENT_SESSION )
+        session = component.get( COMPONENT_SESSION )
         if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER):
-            open_rpg.get_component("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
+            component.get("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
             return
-        map = open_rpg.get_component(COMPONENT_MAP)
+        map = component.get(COMPONENT_MAP)
         for loop in range( count ):
             msg = self.get_miniature_XML( mini, addName)
             msg = str("<map action='update'><miniatures>" + msg + "</miniatures></map>")
@@ -202,8 +202,8 @@ class minilib_handler( node_handler ):
 
     def get_miniature_XML( self, mini, addName = True ):
         msg = orpg.mapper.map_msg.mini_msg()
-        map = open_rpg.get_component( COMPONENT_MAP )
-        session = open_rpg.get_component( COMPONENT_SESSION )
+        map = component.get( COMPONENT_MAP )
+        session = component.get( COMPONENT_SESSION )
         msg.init_prop( ATTRIBUTE_ID, session.get_next_id() )
         for k in mini.getAttributeKeys():
             # translate our attributes to map attributes
@@ -272,7 +272,7 @@ class minilib_use_panel(wx.Panel):
         self.handler = handler
         self.frame = frame
 
-        self.map = open_rpg.get_component('map')
+        self.map = component.get('map')
         names = self.buildList()
         # self.keys = self.list.keys()
         # self.keys.sort()

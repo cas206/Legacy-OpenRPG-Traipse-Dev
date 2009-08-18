@@ -45,7 +45,7 @@ __version__ = "$Id: mplay_server.py,v 1.155 2008/01/24 03:52:03 digitalxero Exp 
 
 from mplay_client import *
 from mplay_client import MPLAY_LENSIZE
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.tools.validate
 import gc
 import cgi
@@ -98,7 +98,7 @@ class game_group(object):
             f.close()
 
         else:
-            f = open(orpg.dirpath.dir_struct["template"] + "default_map.xml")
+            f = open(dir_struct["template"] + "default_map.xml")
             tree = f.read()
             f.close()
 
@@ -249,7 +249,7 @@ class mplay_server:
         self.boot_pwd = ""
         self.server_address = None # IP or Name of server to post to the meta. None means the meta will auto-detect it.
         self.defaultMessageFile = None
-        self.userPath = orpg.dirpath.dir_struct["user"]
+        self.userPath = dir_struct["user"]
         self.lobbyMapFile = "Lobby_map.xml"
         self.lobbyMessageFile = "LobbyMessage.html"
         self.banFile = "ban_list.xml"

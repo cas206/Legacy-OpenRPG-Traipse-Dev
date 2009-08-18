@@ -60,20 +60,16 @@ ORPG_DEBUG          = 16
 class ORPGStorage(object):
     __components = {}
 
-    def add_component(self, key, com):
+    def add(self, key, com):
         self.__components[key] = com
 
-    def get_component(self, key):
-        if self.__components.has_key(key):
-            return self.__components[key]
-        else:
-            return None
+    def get(self, key):
+        if self.__components.has_key(key): return self.__components[key]
+        else: return None
 
-    def del_component(self, key):
-        if self.__components.has_key(key):
-            del self.__components[key]
-        else:
-            return
+    def delete(self, key):
+        if self.__components.has_key(key): del self.__components[key]
+        else: return
 
 def singleton(cls):
     instances = {}
@@ -84,4 +80,4 @@ def singleton(cls):
     return getinstance
 
 ORPGStorage = singleton(ORPGStorage)
-open_rpg = ORPGStorage()
+component = ORPGStorage()

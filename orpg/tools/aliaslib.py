@@ -33,24 +33,24 @@ from orpg.orpgCore import *
 from orpg.orpg_windows import createMaskedButton, orpgMultiCheckBoxDlg
 from orpg.tools.rgbhex import RGBHex
 import orpg.tools.orpg_log
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.orpg_xml
 import orpg.tools.validate
-import orpg.tools.orpg_settings
+#import orpg.tools.orpg_settings
 
 class AliasLib(wx.Frame):
     def __init__(self):
-        self.orpgframe = open_rpg.get_component('frame')
-        self.log = open_rpg.get_component('log')
+        self.orpgframe = component.get('frame')
+        self.log = component.get('log')
         self.log.log("Enter AliasLib", ORPG_DEBUG)
         wx.Frame.__init__(self, None, wx.ID_ANY, title="Alias Lib")
         self.orpgframe.Freeze()
         self.Freeze()
         self.SetOwnBackgroundColour('#EFEFEF')
-        self.dir_struct = open_rpg.get_component('dir_struct')
-        self.settings = open_rpg.get_component('settings')
-        self.xml = open_rpg.get_component('xml')
-        self.validate = open_rpg.get_component('validate')
+        self.dir_struct = dir_struct
+        self.settings = component.get('settings')
+        self.xml = component.get('xml')
+        self.validate = component.get('validate')
         self.filename = self.settings.get_setting('aliasfile') + '.alias'
         self.validate.config_file(self.filename, "default_alias.alias")
         self.buildMenu()
@@ -64,10 +64,10 @@ class AliasLib(wx.Frame):
         self.log.log("Exit AliasLib", ORPG_DEBUG)
 
     def InitSetup(self):
-        self.chat = open_rpg.get_component('chat')
-        self.gametree = open_rpg.get_component('tree')
-        self.map = open_rpg.get_component('map')
-        self.session = open_rpg.get_component('session')
+        self.chat = component.get('chat')
+        self.gametree = component.get('tree')
+        self.map = component.get('map')
+        self.session = component.get('session')
 
     def buildMenu(self):
         self.log.log("Enter AliasLib->buildMenu(self)", ORPG_DEBUG)
@@ -189,7 +189,7 @@ class AliasLib(wx.Frame):
 
     def OnMB_FileExportToTree(self, event):
         self.log.log("Enter AliasLib->OnMB_FileExportToTree(self, event)", ORPG_DEBUG)
-        #tree = open_rpg.get_component("tree")
+        #tree = component.get("tree")
         xml = '<nodehandler class="voxchat_handler" icon="player" module="voxchat" name="' + self.filename[:-6] + '" use.filter="0" version="1.0">' + "\n"
         idx = self.aliasIdx
         for n in xrange(self.selectAliasWnd.GetItemCount()):
@@ -216,7 +216,7 @@ class AliasLib(wx.Frame):
         self.log.log("Enter AliasLib->OnMB_FileExit(self, event)", ORPG_DEBUG)
         self.OnMB_FileSave(0)
         self.Hide()
-        top_frame = open_rpg.get_component('frame')
+        top_frame = component.get('frame')
         top_frame.mainmenu.Check(top_frame.mainmenu.FindMenuItem("Windows", "Alias Lib"), False)
         self.log.log("Exit AliasLib->OnMB_FileExit(self, event)", ORPG_DEBUG)
 

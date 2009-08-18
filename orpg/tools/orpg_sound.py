@@ -7,8 +7,8 @@ class orpgSound(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.parent = parent
 
-        self.log = open_rpg.get_component("log")
-        self.settings = open_rpg.get_component('settings')
+        self.log = component.get("log")
+        self.settings = component.get('settings')
 
         self.log.log("Enter orpgSound", ORPG_DEBUG)
 

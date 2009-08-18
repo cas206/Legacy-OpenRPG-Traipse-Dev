@@ -22,7 +22,7 @@ from string import find, replace
 import wx
 
 import os
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.orpg_version
 import orpg.plugindb
 import orpg.pluginhandler
@@ -300,8 +300,8 @@ class Plugin(orpg.pluginhandler.PluginHandler):
     ###############################################################
 
     def CMD_inittool2(self, cmdargs):
-        f = open(orpg.dirpath.dir_struct["plugins"]+ "inittool2.xml","r")
-        f2 = open(orpg.dirpath.dir_struct["plugins"]+ "inittool2_player.xml","r")
+        f = open(dir_struct["plugins"]+ "inittool2.xml","r")
+        f2 = open(dir_struct["plugins"]+ "inittool2_player.xml","r")
         self.gametree.insert_xml(f.read())
         self.gametree.insert_xml(f2.read())
         f.close()

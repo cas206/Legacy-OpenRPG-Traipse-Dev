@@ -32,7 +32,7 @@ from orpg.orpg_wx import *
 from orpg.orpgCore import *
 import orpg.tools.rgbhex
 import orpg.orpg_xml
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 from orpg.tools.metamenus import MenuEx
 
 class img_helper:
@@ -71,15 +71,15 @@ class orpgTabberWnd(FNB.FlatNotebook):
         nbstyle = FNB.FNB_HIDE_ON_SINGLE_TAB|FNB.FNB_BACKGROUND_GRADIENT
         FNB.FlatNotebook.__init__(self, parent, -1, size=size, style=nbstyle)
         rgbcovert = orpg.tools.rgbhex.RGBHex()
-        self.log = open_rpg.get_component("log")
+        self.log = component.get("log")
         self.log.log("Enter orpgTabberWnd", ORPG_DEBUG)
-        self.settings = open_rpg.get_component("settings")
+        self.settings = component.get("settings")
         tabtheme = self.settings.get_setting('TabTheme')
         tabtext = self.settings.get_setting('TabTextColor')
         (tred, tgreen, tblue) = rgbcovert.rgb_tuple(tabtext)
-        tabbedwindows = open_rpg.get_component("tabbedWindows")
+        tabbedwindows = component.get("tabbedWindows")
         tabbedwindows.append(self)
-        open_rpg.add_component("tabbedWindows", tabbedwindows)
+        component.add("tabbedWindows", tabbedwindows)
 
         theme_dict = {'slanted&aqua': FNB.FNB_VC8, 'slanted&bw': FNB.FNB_VC8, 'flat&aqua': FNB.FNB_FANCY_TABS, 
             'flat&bw': FNB.FNB_FANCY_TABS, 'customflat': FNB.FNB_FANCY_TABS, 'customslant': FNB.FNB_VC8, 
@@ -149,15 +149,16 @@ class AboutHTMLWindow(wx.html.HtmlWindow):
         "Open an external browser to resolve our About box links!!!"
         href = ref.GetHref()
         webbrowser.open( href )
-
-#  This class extends wxSplitterWindow to add an auto expand behavior.  The idea is that the sash
-#       determines the ratio of the two windows, while the mouse position determines which
-#       side will get the larger share of the screen real estate.  It is used instead of regular
-#       wxSplitterWindows if the EnableSplittersAutoExpand setting doesn't evaluate as False.
-#
-#  Note:  To be truly functional, some way of passing EVT_MOTION events to this class, even when the
-#       event takes place over child windows needs to be accomplished.  Once this is accomplished,
-#       however, the class should work as written.
+    """
+      This class extends wxSplitterWindow to add an auto expand behavior.  The idea is that the sash
+           determines the ratio of the two windows, while the mouse position determines which
+           side will get the larger share of the screen real estate.  It is used instead of regular
+           wxSplitterWindows if the EnableSplittersAutoExpand setting doesn't evaluate as False.
+    
+      Note:  To be truly functional, some way of passing EVT_MOTION events to this class, even when the
+           event takes place over child windows needs to be accomplished.  Once this is accomplished,
+           however, the class should work as written.
+    """
 class orpgFocusSplitterWindow(wx.SplitterWindow):
 
     def __init__(self,parent,id = -1,AutoExpand = 1,point = wx.DefaultPosition,size = wx.DefaultSize,style=wx.SP_3D,name="splitterWindow"):
@@ -255,11 +256,11 @@ class html_text_edit(wx.Panel):
         self.DIE2 = wx.NewId()
         self.DIE = wx.NewId()
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        gif = wx.Image(orpg.dirpath.dir_struct["icon"]+"bold.gif", wx.BITMAP_TYPE_GIF)
+        gif = wx.Image(dir_struct["icon"]+"bold.gif", wx.BITMAP_TYPE_GIF)
         self.sizer.Add(wx.BitmapButton(self, self.BOLD, gif.ConvertToBitmap()), 0, wx.EXPAND)
-        gif = wx.Image(orpg.dirpath.dir_struct["icon"]+"italic.gif", wx.BITMAP_TYPE_GIF)
+        gif = wx.Image(dir_struct["icon"]+"italic.gif", wx.BITMAP_TYPE_GIF)
         self.sizer.Add(wx.BitmapButton(self, self.ITALIC, gif.ConvertToBitmap()), 0, wx.EXPAND)
-        gif = wx.Image(orpg.dirpath.dir_struct["icon"]+"underlined.gif", wx.BITMAP_TYPE_GIF)
+        gif = wx.Image(dir_struct["icon"]+"underlined.gif", wx.BITMAP_TYPE_GIF)
         self.sizer.Add(wx.BitmapButton(self, self.UNDER, gif.ConvertToBitmap()), 0, wx.EXPAND)
         self.color_button = wx.Button(self, self.COLOR, "C",wx.Point(0,0),wx.Size(22,0))
         self.color_button.SetBackgroundColour(wx.BLACK)

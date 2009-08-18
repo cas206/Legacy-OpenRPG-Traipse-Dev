@@ -45,7 +45,7 @@ class dnd35char_handler(container_handler):
 
         self.hparent = None #a 1.5002 allow ability to run up tree, this is the
 
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('general','GeneralInformation',dnd35general,'gear')
         self.new_child_handler('inventory','MoneyAndInventory',dnd35inventory,'money')
@@ -120,7 +120,7 @@ class dnd35_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 
@@ -357,7 +357,7 @@ class dnd35classnstats(dnd35_char_child):
         node_handler.__init__(self,xml_dom,tree_node)
         self.hparent = parent #a 1.5002 allow ability to run up tree.
         dnd35_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('abilities','Abilities Scores',dnd35ability,'gear')
         self.new_child_handler('classes','Classes',dnd35classes,'knight')
@@ -389,7 +389,7 @@ class class_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
     def on_drop(self,evt):
@@ -907,7 +907,7 @@ class dnd35skillsnfeats(dnd35_char_child):
 
         node_handler.__init__(self,xml_dom,tree_node)
         dnd35_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('skills','Skills',dnd35skill,'book')
         self.new_child_handler('feats','Feats',dnd35feats,'book')
@@ -938,7 +938,7 @@ class skills_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 
@@ -1358,7 +1358,7 @@ class dnd35combat(dnd35_char_child):
 
         #mark3
         dnd35_char_child.__init__(self,xml_dom,tree_node,parent)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('hp','Hit Points',dnd35hp,'gear')
         self.new_child_handler('attacks','Attacks',dnd35attacks,'spears')
@@ -1392,7 +1392,7 @@ class combat_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 

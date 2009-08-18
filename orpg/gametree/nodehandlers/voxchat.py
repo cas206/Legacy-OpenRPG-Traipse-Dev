@@ -39,10 +39,10 @@ import orpg.tools.predTextCtrl
 import orpg.tools.rgbhex
 import orpg.tools.inputValidator
 
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.minidom
 import orpg.networking.mplay_client
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 
 #
 # Good things to add:
@@ -55,14 +55,14 @@ class voxchat_handler(core.node_handler):
     def __init__(self, xml_dom, tree_node):
         core.node_handler.__init__( self, xml_dom, tree_node)
         self.node = xml_dom
-        self.xml = open_rpg.get_component('xml')
+        self.xml = component.get('xml')
 
     def get_design_panel( self, parent ):
-        aliasLib = open_rpg.get_component('alias')
+        aliasLib = component.get('alias')
         aliasLib.ImportFromTree(self.node)
         return None
 
     def get_use_panel( self, parent ):
-        aliasLib = open_rpg.get_component('alias')
+        aliasLib = component.get('alias')
         aliasLib.ImportFromTree(self.node)
         return None

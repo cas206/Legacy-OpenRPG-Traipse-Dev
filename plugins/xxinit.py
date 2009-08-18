@@ -1,7 +1,7 @@
 import os
 import orpg.pluginhandler
 from string import find, replace
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -52,7 +52,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
                 self.post_my_msg("<font color='#ff0000'>Init recording on</font>")
                 self.toggle = 1
         elif args[0] == 'help':
-            f = open(orpg.dirpath.dir_struct["plugins"]+ "inittool.xml","r")
+            f = open(dir_struct["plugins"]+ "inittool.xml","r")
             self.gametree.insert_xml(f.read())
             f.close()
         elif args[0] == 'type':

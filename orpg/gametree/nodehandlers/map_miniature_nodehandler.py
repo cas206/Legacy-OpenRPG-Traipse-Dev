@@ -45,8 +45,8 @@ class map_miniature_handler(node_handler):
 
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
-        self.mapper = open_rpg.get_component("map")
-        self.session = open_rpg.get_component("session")
+        self.mapper = component.get("map")
+        self.session = component.get("session")
         self.miniature_dom = self.master_dom.getElementsByTagName("miniature")
         if self.miniature_dom:
             self.miniature_dom = self.miniature_dom[0]   # convert to scalar
@@ -120,7 +120,7 @@ class map_miniature_handler(node_handler):
             self.miniature_dom.setAttribute("posy", str(pos.y))
         new_xml = self.get_to_map_XML()
         if (self.session.my_role() != self.session.ROLE_GM) and (self.session.my_role() != self.session.ROLE_PLAYER):
-            open_rpg.get_component("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
+            component.get("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
             return
 
         if new_xml:

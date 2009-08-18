@@ -28,13 +28,13 @@
 
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
 
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 from orpg.orpg_windows import *
-from orpg.orpg_xml import *
+#from orpg.orpg_xml import *
 import meta_server_lib
 import orpg.tools.orpg_settings
 import orpg.tools.rgbhex
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 import traceback
 
 gs_host = 1
@@ -99,13 +99,13 @@ class game_server_panel(wx.Panel):
     def __init__(self,parent):
         wx.Panel.__init__(self, parent, -1)
         self.parent = parent
-        self.log = open_rpg.get_component('log')
+        self.log = component.get('log')
         self.log.log("Enter game_server_panel", ORPG_DEBUG)
-        self.password_manager = open_rpg.get_component('password_manager') # passtool --SD 8/03
-        self.frame = open_rpg.get_component('frame')
-        self.session = open_rpg.get_component('session')
-        self.settings = open_rpg.get_component('settings')
-        self.xml = open_rpg.get_component('xml')
+        self.password_manager = component.get('password_manager') # passtool --SD 8/03
+        self.frame = component.get('frame')
+        self.session = component.get('session')
+        self.settings = component.get('settings')
+        self.xml = component.get('xml')
         self.serverNameSet = 0
         self.last_motd = ""
         self.buttons = {}
@@ -570,7 +570,7 @@ class game_server_panel(wx.Panel):
 
     def do_connect(self, address):
         self.log.log("Enter game_server_panel->do_connect(self, address)", ORPG_DEBUG)
-        chat = open_rpg.get_component('chat')
+        chat = component.get('chat')
         chat.InfoPost("Locating server at " + address + "...")
         if self.session.connect(address):
             self.frame.start_timer()

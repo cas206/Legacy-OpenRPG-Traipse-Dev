@@ -13,7 +13,7 @@ import os
 import sys
 import time
 import types
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import orpg.systempath
 from orpg.orpg_wx import *
 import webbrowser
@@ -89,7 +89,7 @@ class ServerConfig:
 
     def __init__(self, owner ): 
         """ Loads default configuration settings."""
-        userPath = orpg.dirpath.dir_struct["user"] 
+        userPath = dir_struct["user"] 
         validate = orpg.tools.validate.Validate(userPath) 
         validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
         configDom = minidom.parse(userPath + 'server_ini.xml') 
@@ -150,9 +150,9 @@ class Connections(wx.ListCtrl):
         self.main = main
         self.roomList = { 0 : "Lobby" }
         self._imageList = wx.ImageList( 16, 16, False )
-        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
-        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
         self.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
 
@@ -296,8 +296,8 @@ class ServerGUI(wx.Frame):
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size = (760, 560) )
-        if wx.Platform == '__WXMSW__': icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
-        else: icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon( dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
+        else: icon = wx.Icon( dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
         self.SetIcon(icon)
         self.serverName = "Server Name"
         self.bootPwd = ""
@@ -480,7 +480,7 @@ class ServerGUI(wx.Frame):
         if self.STATUS == SERVER_STOPPED:
             # see if we already have name specified 
             try:
-                userPath = orpg.dirpath.dir_struct["user"] 
+                userPath = dir_struct["user"] 
                 validate = orpg.tools.validate.Validate(userPath) 
                 validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
                 configDom = minidom.parse(userPath + 'server_ini.xml') 
@@ -494,7 +494,7 @@ class ServerGUI(wx.Frame):
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             # see if we already have password specified 
             try: 
-                userPath = orpg.dirpath.dir_struct["user"] 
+                userPath = dir_struct["user"] 
                 validate = orpg.tools.validate.Validate(userPath) 
                 validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
                 configDom = minidom.parse(userPath + 'server_ini.xml') 
@@ -586,7 +586,7 @@ class ServerGUIApp(wx.App):
     def OnInit(self):
         # Make sure our image handlers are loaded before we try to display anything
         wx.InitAllImageHandlers()
-        self.splash = wx.SplashScreen(wx.Bitmap(orpg.dirpath.dir_struct["icon"]+'splash.gif'),
+        self.splash = wx.SplashScreen(wx.Bitmap(dir_struct["icon"]+'splash.gif'),
                               wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT,
                               2000,
                               None)

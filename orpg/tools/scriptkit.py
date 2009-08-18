@@ -41,11 +41,11 @@ class scriptkit:
             <li>openrpg - a reference to the application openrpg object.
         </ul>
         """
-        self.chat = open_rpg.get_component( 'chat' )
-        self.map = open_rpg.get_component( 'map' )
-        self.settings = open_rpg.get_component( 'settings' )
-        self.session = open_rpg.get_component('session')
-        self.xml = open_rpg.get_component('xml')
+        self.chat = component.get( 'chat' )
+        self.map = component.get( 'map' )
+        self.settings = component.get( 'settings' )
+        self.session = component.get('session')
+        self.xml = component.get('xml')
 
     def addMiniatureToMap( self, min_label, min_url, unique=0 ):
         """Adds a new miniature icon to the map.  Miniature <em>will</em> be labeled unless autolabel is

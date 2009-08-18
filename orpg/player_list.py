@@ -30,7 +30,7 @@
 __version__ = "$Id: player_list.py,v 1.29 2007/03/30 19:12:06 digitalxero Exp $"
 
 from orpg.orpg_windows import *
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 
 # global definitions
 global ROLE_GM; ROLE_GM = "GM"
@@ -78,19 +78,18 @@ PLAYER_COMMAND_ROOM_RENAME = wx.NewId()
 
 class player_list(wx.ListCtrl):
     def __init__( self, parent):
-        ##wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND )
         wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, 
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
-        self.session = open_rpg.get_component("session")
-        self.settings = open_rpg.get_component('settings')
-        self.chat = open_rpg.get_component('chat')
-        self.password_manager = open_rpg.get_component("password_manager")
+        self.session = component.get("session")
+        self.settings = component.get('settings')
+        self.chat = component.get('chat')
+        self.password_manager = component.get("password_manager")
         # Create in image list -- for whatever reason...guess it will be nice when we can tell which is a bot
         self.whisperCount = 0
         self._imageList = wx.ImageList( 16, 16, False )
-        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
-        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
         self.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
         # Create our column headers
@@ -201,9 +200,9 @@ class player_list(wx.ListCtrl):
 
     def on_menu_password( self, evt ):
         id = evt.GetId()
-        self.session = open_rpg.get_component("session")
-        self.password_manager = open_rpg.get_component("password_manager")
-        self.chat = open_rpg.get_component("chat")
+        self.session = component.get("session")
+        self.password_manager = component.get("password_manager")
+        self.chat = component.get("chat")
         boot_pwd = self.password_manager.GetPassword("admin",int(self.session.group_id))
         if boot_pwd != None:
             alter_pwd_dialog = wx.TextEntryDialog(self,
@@ -215,9 +214,9 @@ class player_list(wx.ListCtrl):
 
     def on_menu_room_rename( self, evt ):
         id = evt.GetId()
-        self.session = open_rpg.get_component("session")
-        self.password_manager = open_rpg.get_component("password_manager")
-        self.chat = open_rpg.get_component("chat")
+        self.session = component.get("session")
+        self.password_manager = component.get("password_manager")
+        self.chat = component.get("chat")
         boot_pwd = self.password_manager.GetPassword("admin",int(self.session.group_id))
         if boot_pwd != None:
             alter_name_dialog = wx.TextEntryDialog(self,"Enter new room name: ","Change Room Name")
@@ -269,9 +268,9 @@ class player_list(wx.ListCtrl):
         return
 
     def on_menu_whispergroup( self, evt ):
-        self.session = open_rpg.get_component("session")
-        self.settings = open_rpg.get_component('settings')
-        self.chat = open_rpg.get_component('chat')
+        self.session = component.get("session")
+        self.settings = component.get('settings')
+        self.chat = component.get('chat')
         "Add/Remove players from Whisper Groups"
         id = evt.GetId()
         item = self.GetItem( self.selected_item )
@@ -298,8 +297,8 @@ class player_list(wx.ListCtrl):
     def on_menu_moderate( self, evt ):
         "Change the moderated status of a room or player."
         id = evt.GetId()
-        self.chat = open_rpg.get_component( "chat" )
-        self.session = open_rpg.get_component("session")
+        self.chat = component.get( "chat" )
+        self.session = component.get("session")
         playerID = self.GetItemData( self.selected_item )
         moderationString = None
         moderateRoomBase = "/moderate %s"
@@ -327,10 +326,10 @@ class player_list(wx.ListCtrl):
             self.chat.InfoPost( infoString )
 
     def on_menu_role_change( self, evt ):
-        self.session = open_rpg.get_component("session")
+        self.session = component.get("session")
         "Change the role of the selected id."
         id = evt.GetId()
-        self.chat = open_rpg.get_component( "chat" )
+        self.chat = component.get( "chat" )
         playerID = self.GetItemData( self.selected_item )
         roleString = None
         roleBase = "/role %d=%s"
@@ -355,13 +354,13 @@ class player_list(wx.ListCtrl):
         pos = wx.Point(evt.GetX(),evt.GetY())
         (item, flag) = self.HitTest(pos)
         id = self.GetItemText(item)
-        self.chat = open_rpg.get_component("chat")
+        self.chat = component.get("chat")
         self.chat.set_chat_text("/w " + id + "=")
 
     def on_menu_item(self,evt):
         id = evt.GetId()
-        self.session = open_rpg.get_component("session")
-        self.password_manager = open_rpg.get_component("password_manager")
+        self.session = component.get("session")
+        self.password_manager = component.get("password_manager")
 
         if id == PLAYER_BOOT:
             id = str(self.GetItemData(self.selected_item))
@@ -369,11 +368,11 @@ class player_list(wx.ListCtrl):
             if boot_pwd != None: self.session.boot_player(id,boot_pwd)
         elif id == PLAYER_WHISPER:
             id = self.GetItemText(self.selected_item)
-            self.chat = open_rpg.get_component("chat")
+            self.chat = component.get("chat")
             self.chat.set_chat_text("/w " + id + "=")
         elif id == PLAYER_IGNORE:
             id = str(self.GetItemData(self.selected_item))
-            self.chat = open_rpg.get_component("chat")
+            self.chat = component.get("chat")
             (result,id,name) = self.session.toggle_ignore(id)
             if result == 0: self.chat.Post(self.chat.colorize(self.chat.syscolor, 
                 "Player " + name + " with ID:" + id +" no longer ignored"))
@@ -392,7 +391,7 @@ class player_list(wx.ListCtrl):
             self.selected_item = item
             #  This if-else block makes the menu item to boot players active or inactive, as appropriate
             # This block is enabled for 1.7.8. Ver. 1.7.9 will boast Admin features.
-            #if open_rpg.get_component("session").group_id == "0":
+            #if component.get("session").group_id == "0":
             #    self.menu.Enable(PLAYER_BOOT,0)
             #    self.menu.SetLabel(PLAYER_BOOT,"Can't boot from Lobby")
             #else:
@@ -452,10 +451,10 @@ class player_list(wx.ListCtrl):
         self.colorize_player_list()
         self.Refresh()
         # play sound
-        setobj = open_rpg.get_component('settings')
+        setobj = component.get('settings')
         sound_file = setobj.get_setting("AddSound")
         if sound_file != '':
-            sound_player = open_rpg.get_component('sound')
+            sound_player = component.get('sound')
             sound_player.play(sound_file)
         self.AutoAdjust()
 
@@ -473,10 +472,10 @@ class player_list(wx.ListCtrl):
 #---------------------------------------------------------
 
         # play sound
-        setobj = open_rpg.get_component('settings')
+        setobj = component.get('settings')
         sound_file = setobj.get_setting("DelSound")
         if sound_file != '':
-            sound_player = open_rpg.get_component('sound')
+            sound_player = component.get('sound')
             sound_player.play(sound_file)
         ic = self.GetItemCount()
         self.whisperCount = 0
@@ -504,8 +503,8 @@ class player_list(wx.ListCtrl):
         self.AutoAdjust()
 
     def colorize_player_list(self):
-        session = open_rpg.get_component("session")
-        settings = open_rpg.get_component('settings')
+        session = component.get("session")
+        settings = component.get('settings')
         mode = settings.get_setting("ColorizeRoles")
         if mode.lower() == "0": return
         players = session.players

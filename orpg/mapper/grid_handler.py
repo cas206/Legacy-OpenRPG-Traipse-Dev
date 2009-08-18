@@ -89,7 +89,7 @@ class grid_handler(base_layer_handler):
     def on_apply(self, evt):
         session=self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM):
-            open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+            component.get("chat").InfoPost("You must be a GM to use this feature")
             return
 
         self.canvas.layers['grid'].set_grid(int(self.grid_size.GetValue()),self.grid_snap.GetValue(),

@@ -30,7 +30,7 @@ __version__ = "$Id: base_handler.py,v 1.20 2007/11/04 17:32:25 digitalxero Exp $
 
 
 from orpg.orpg_windows import *
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 
 class base_layer_handler(wx.Panel):
 
@@ -39,7 +39,7 @@ class base_layer_handler(wx.Panel):
         self.canvas = canvas
         self.map_frame = self.canvas.frame
         self.top_frame = self.canvas.frame.top_frame
-        self.chat = open_rpg.get_component("chat")
+        self.chat = component.get("chat")
         self.build_ctrls()
         self.build_menu()
         #self.Bind(wx.EVT_SIZE, self.on_size)

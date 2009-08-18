@@ -55,7 +55,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         del cherry_start
 
         self.cherryhost = 'http://' + self.host + ':' + str(self.port) + '/webfiles/'
-        open_rpg.add_component("cherrypy", self.cherryhost)
+        component.add("cherrypy", self.cherryhost)
 
     def plugin_disabled(self):
         #Here you need to remove any commands you added, and anything else you want to happen when you disable the plugin
@@ -66,7 +66,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
             self.isServerRunning = 'off'
         else:
             pass
-        open_rpg.del_component("cherrypy")
+        component.delete("cherrypy")
 
     def on_cherrypy(self, cmdargs):
         args = cmdargs.split(None,-1)
@@ -96,7 +96,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
             self.plugindb.SetString("xxcherrypy", "port", str(self.port)) # TAS
             self.chat.InfoPost("CherryPy Web Server is currently: " + self.isServerRunning)
             self.cherryhost = 'http://' + self.host + ':' + str(self.port) + '/webfiles/'
-            open_rpg.del_component("cherrypy"); open_rpg.add_component("cherrypy", self.cherryhost)
+            component.delete("cherrypy"); component.add("cherrypy", self.cherryhost)
             self.chat.InfoPost('CherryPy Web Server address is: ' + self.cherryhost)
 
     def startServer(self, port):

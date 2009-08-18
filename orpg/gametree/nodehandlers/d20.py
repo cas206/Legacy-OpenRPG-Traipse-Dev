@@ -112,7 +112,7 @@ class d20char_handler(node_handler):
     """
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.child_handlers = {}
         self.new_child_handler('howtouse','HowTO use this tool',d20howto,'note')
         self.new_child_handler('general','General Information',d20general,'gear')
@@ -301,7 +301,7 @@ class d20_char_child(node_handler):
         node_handler.__init__(self,xml_dom,tree_node)
         self.char_hander = parent
         self.drag = False
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
         self.myeditor = None
 
 

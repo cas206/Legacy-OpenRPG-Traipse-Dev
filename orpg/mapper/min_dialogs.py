@@ -151,7 +151,7 @@ class min_list_panel(wx.Dialog):
                 else: node_begin += "Unnamed Miniature'"
 
                 node_begin += ">"
-                gametree = open_rpg.get_component('tree')
+                gametree = component.get('tree')
                 node_xml = node_begin + min_xml + '</nodehandler>'
                 print "Sending this XML to insert_xml:" + node_xml
                 gametree.insert_xml(node_xml)

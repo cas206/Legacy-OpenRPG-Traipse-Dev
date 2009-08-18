@@ -71,7 +71,7 @@ class fog_handler(base_layer_handler):
     def on_remove(self,evt):
         session=self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM):
-            open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+            component.get("chat").InfoPost("You must be a GM to use this feature")
             return
         self.canvas.layers['fog'].remove_fog()
         self.canvas.Refresh(False)
@@ -79,7 +79,7 @@ class fog_handler(base_layer_handler):
     def on_showall(self,evt):
         session=self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM):
-            open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+            component.get("chat").InfoPost("You must be a GM to use this feature")
             return
         foglayer = self.canvas.layers['fog']
         foglayer.showall()
@@ -99,7 +99,7 @@ class fog_handler(base_layer_handler):
     def on_hideall(self,evt):
         session=self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM):
-            open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+            component.get("chat").InfoPost("You must be a GM to use this feature")
             return
         foglayer=self.canvas.layers['fog']
         foglayer.clear()
@@ -108,7 +108,7 @@ class fog_handler(base_layer_handler):
     def on_color(self,evt):
         session=self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM):
-            open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+            component.get("chat").InfoPost("You must be a GM to use this feature")
             return
         data = wx.ColourData()
         data.SetChooseFull(True)
@@ -158,7 +158,7 @@ class fog_handler(base_layer_handler):
         if self.drawing == True:
             session=self.canvas.frame.session
             if (session.my_role() != session.ROLE_GM):
-                open_rpg.get_component("chat").InfoPost("You must be a GM to use this feature")
+                component.get("chat").InfoPost("You must be a GM to use this feature")
             else:
                 # This code sets the mode to either new or del 
                 # depending on the action to function with the updated createregen code.

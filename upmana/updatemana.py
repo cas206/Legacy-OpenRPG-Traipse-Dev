@@ -1,11 +1,11 @@
 import wx
 import manifest
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 from orpg.orpgCore import *
 import orpg.orpg_version
 import orpg.tools.orpg_log
 import orpg.orpg_xml
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import upmana.validate
 import tempfile
 import shutil
@@ -13,7 +13,7 @@ from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
 
 class Updater(wx.Panel):
-    def __init__(self, parent, open_rpg, manifest):
+    def __init__(self, parent, component, manifest):
         wx.Panel.__init__(self, parent)
 
         ### Update Manager
@@ -21,10 +21,9 @@ class Updater(wx.Panel):
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
         self.manifest = manifest
-        self.xml = open_rpg.get_component('xml')
-        self.dir_struct = open_rpg.get_component("dir_struct")
+        self.xml = component.get('xml')
         self.parent = parent
-        self.log = open_rpg.get_component("log")
+        self.log = component.get("log")
         self.log.log("Enter updaterFrame", ORPG_DEBUG)
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
@@ -95,15 +94,15 @@ class Updater(wx.Panel):
         self.c = self.repo.changectx('tip')
 
         filename = 'ignorelist.txt'
-        self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
-        upmana.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+        self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
+        upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         for ignore in self.ignorelist:
-            shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
+            shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
-            shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-            os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+            shutil.copyfile(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+            os.remove(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
 
     def LoadDoc(self):
         ignore = open(self.filename)
@@ -119,8 +118,8 @@ class Updater(wx.Panel):
 
     def ChooseBranch(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
-        if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
-        else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
+        else: icon = wx.Icon(dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
         dlg.SetIcon(icon)
 
         self.ui = ui.ui()
@@ -373,8 +372,8 @@ class Manifest(wx.Panel):
         self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, self.manifestlist, 
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
         filename = 'ignorelist.txt'
-        self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
-        upmana.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+        self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
+        upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         self.manifestlog.Bind(wx.EVT_CHECKLISTBOX, self.GetChecked)
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
@@ -413,11 +412,11 @@ class Control(wx.Panel):
 
 class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
-        self.dir_struct = open_rpg.get_component("dir_struct")
+        dir_struct = component.get("dir_struct")
 
         wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(600,480), style=wx.DEFAULT_FRAME_STYLE)
-        if wx.Platform == '__WXMSW__': icon = wx.Icon(self.dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
-        else: icon = wx.Icon(self.dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
+        else: icon = wx.Icon(dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
         self.SetIcon(icon)
 
         self.CenterOnScreen()
@@ -451,18 +450,18 @@ class updaterFrame(wx.Frame):
 
 class updateApp(wx.App):
     def OnInit(self):
-        self.open_rpg = open_rpg
+        self.component = component
         self.main = False
-        self.log = orpg.tools.orpg_log.orpgLog(orpg.dirpath.dir_struct["user"] + "runlogs/")
+        self.log = orpg.tools.orpg_log.orpgLog(dir_struct["user"] + "runlogs/")
         self.log.setLogToConsol(False)
         self.log.log("Updater Start", ORPG_NOTE)
         self.manifest = manifest.ManifestChanges()
-        self.open_rpg.add_component("log", self.log)
-        self.open_rpg.add_component("xml", orpg.orpg_xml)
-        self.open_rpg.add_component("dir_struct", orpg.dirpath.dir_struct)
+        self.component.add("log", self.log)
+        self.component.add("xml", orpg.orpg_xml)
+        self.component.add("dir_struct", dir_struct)
         self.validate = upmana.validate.Validate()
-        self.open_rpg.add_component("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", self.open_rpg, self.manifest, self.main)
+        self.component.add("validate", self.validate)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", self.component, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
@@ -485,16 +484,16 @@ class updateApp(wx.App):
         if capture != '':
             commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
             filename = 'ignorelist.txt'
-            self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + filename
-            upmana.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+            self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
+            upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
             self.mana = self.LoadDoc()
             for ignore in self.ignorelist:
-                shutil.copy(ignore, orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
+                shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
                 print ignore.split('/')[len(ignore.split('/')) - 1]
-                shutil.copyfile(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-                os.remove(orpg.dirpath.dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+                shutil.copyfile(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+                os.remove(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
         else: print 'No default repository set, skipping Auto Update!'
 
     def LoadDoc(self):

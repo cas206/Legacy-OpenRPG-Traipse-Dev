@@ -1,9 +1,9 @@
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
 import orpg.plugindb as plugindb
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 
-sys.path.append(orpg.dirpath.dir_struct["plugins"])
+sys.path.append(dir_struct["plugins"])
 
 class PluginFrame(wx.Frame):
     def __init__(self, parent):
@@ -278,7 +278,7 @@ class PluginFrame(wx.Frame):
         self.pluginList.DeleteAllItems()
         self.pluginNames = []
 
-        list_of_plugin_dir = os.listdir(orpg.dirpath.dir_struct["plugins"])
+        list_of_plugin_dir = os.listdir(dir_struct["plugins"])
         for p in list_of_plugin_dir:
             #print p[:2]; print p[-4:]
             if p[:2].lower()=="xx" and p[-3:]==".py":

@@ -164,10 +164,10 @@ class miniatures_handler(base_layer_handler):
             y = dc.DeviceToLogicalY(0)
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, dlg.GetPath()), {'pos':cmpPoint(x,y)})
         else:
-            try: min_url = open_rpg.get_component("cherrypy") + filename
+            try: min_url = component.get("cherrypy") + filename
             except: return
             min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, 
-                open_rpg.get_component("cherrypy")) + '/' + filename
+                component.get("cherrypy")) + '/' + filename
             # build url
             if min_url == "" or min_url == "http://": return
             if min_url[:7] != "http://": min_url = "http://" + min_url
@@ -355,7 +355,7 @@ class miniatures_handler(base_layer_handler):
             if self.sel_rmin.label: node_begin += self.sel_rmin.label + "'"
             else:  node_begin += "Unnamed Miniature'"
             node_begin += ">"
-	    gametree = open_rpg.get_component('tree')
+	    gametree = component.get('tree')
             node_xml = node_begin + min_xml + '</nodehandler>'
             #print "Sending this XML to insert_xml:" + node_xml
             gametree.insert_xml(str(node_xml))
@@ -746,7 +746,7 @@ class miniatures_handler(base_layer_handler):
     ## helper functions
 
     def infoPost(self, message):
-        open_rpg.get_component("chat").InfoPost(message)
+        component.get("chat").InfoPost(message)
 
     def role_is_gm_or_player(self):
         session = self.canvas.frame.session

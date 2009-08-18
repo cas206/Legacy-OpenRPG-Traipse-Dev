@@ -1,12 +1,13 @@
 import xmltramp
-import orpg.dirpath
-import orpg.tools.validate
+from orpg.dirpath import dir_struct
+#import orpg.tools.validate
 from types import *
+from orpg.orpgCore import component
 
 class PluginDB:
     def __init__(self, filename="plugindb.xml"):
-        self.filename = orpg.dirpath.dir_struct["user"] + filename
-        orpg.tools.validate.Validate().config_file(filename,"default_plugindb.xml")
+        self.filename = dir_struct["user"] + filename
+        component.get('validate').config_file(filename,"default_plugindb.xml")
         self.xml_dom = self.LoadDoc()
 
     def GetString(self, plugname, strname, defaultval, verbose=0):

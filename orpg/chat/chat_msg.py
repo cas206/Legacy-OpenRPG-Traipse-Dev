@@ -29,7 +29,8 @@
 
 __version__ = "$Id: chat_msg.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
 
-import orpg.orpg_xml
+#import orpg.orpg_xml
+from orpg.orpgCore import *
 from chat_version import CHAT_VERSION
 
 CHAT_MESSAGE = 1
@@ -41,6 +42,7 @@ WHISPER_EMOTE_MESSAGE = 6
 
 class chat_msg:
     def __init__(self,xml_text="<chat type=\"1\" version=\""+CHAT_VERSION+"\" alias=\"\" ></chat>"):
+        self.xml = component.get('xml')
         self.chat_dom = None
         self.takexml(xml_text)
 
@@ -49,10 +51,11 @@ class chat_msg:
             self.chat_dom.unlink()
 
     def toxml(self):
-        return orpg.orpg_xml.toxml(self.chat_dom)
+        return self.xml.toxml(self.chat_dom)
 
     def takexml(self,xml_text):
-        xml_dom = orpg.orpg_xml.parseXml(xml_text)
+        #self.xml = component.get('xml')
+        xml_dom = self.xml.parseXml(xml_text)
         node_list = xml_dom.getElementsByTagName("chat")
         if len(node_list) < 1:
             print "Warning: no <chat/> elements found in DOM."
@@ -66,10 +69,10 @@ class chat_msg:
             self.text_node = None
             self.chat_dom.unlink()
         self.chat_dom = xml_dom
-        self.text_node = orpg.orpg_xml.safe_get_text_node(self.chat_dom)
+        self.text_node = self.xml.safe_get_text_node(self.chat_dom)
 
     def set_text(self,text):
-        text = orpg.orpg_xml.strip_text(text)
+        text = self.xml.strip_text(text)
         self.text_node._set_nodeValue(text)
 
     def set_type(self,type):

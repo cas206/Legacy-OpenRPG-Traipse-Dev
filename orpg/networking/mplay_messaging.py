@@ -47,11 +47,11 @@ def myescape(data):
 
 class messenger:
     def __init__(self, *args, **kwargs):
-        self.log = open_rpg.get_component("log")
-        self.xml = open_rpg.get_component("xml")
-        self.dir_struct = open_rpg.get_component("dir_struct")
-        self.validate = open_rpg.get_component("validate")
-        self.settings = open_rpg.get_component("settings")
+        self.log = component.get("log")
+        self.xml = component.get("xml")
+        self.dir_struct = component.get("dir_struct")
+        self.validate = component.get("validate")
+        self.settings = component.get("settings")
         if kwargs.has_key('isServer'):
             self.isServer = kwargs['isServer']
         else:

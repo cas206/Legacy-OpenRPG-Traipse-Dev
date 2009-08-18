@@ -1,13 +1,13 @@
 import xmltramp
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import upmana.validate
 from os import sep
 from types import *
 
 class ManifestChanges:
     def __init__(self, filename="updatemana.xml"):
-        self.filename = orpg.dirpath.dir_struct["home"] + 'upmana' + sep + filename
-        upmana.validate.Validate(orpg.dirpath.dir_struct["home"] + 'upmana' + sep).config_file(filename,"default_manifest.xml")
+        self.filename = dir_struct["home"] + 'upmana' + sep + filename
+        upmana.validate.Validate(dir_struct["home"] + 'upmana' + sep).config_file(filename,"default_manifest.xml")
         self.xml_dom = self.LoadDoc()
 
     def GetString(self, plugname, strname, defaultval, verbose=0):

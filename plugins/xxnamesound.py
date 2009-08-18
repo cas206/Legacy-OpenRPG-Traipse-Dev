@@ -1,9 +1,9 @@
 import os
 import orpg.pluginhandler
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import re
 import string
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -39,13 +39,13 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
         self.names = self.plugindb.GetList("xxnamesound", "names", [])
 
-        self.soundplayer = self.sound_player = open_rpg.get_component('sound')
+        self.soundplayer = self.sound_player = component.get('sound')
 
         tmp = self.plugindb.GetString('xxnamesound', 'wnotify', str(self.notify))
         if tmp == 'True':
             self.on_wnotify(None)
 
-        self.soundfile = self.plugindb.GetString('xxnamesound', 'soundfile', orpg.dirpath.dir_struct['plugins'] + 'heya.wav')
+        self.soundfile = self.plugindb.GetString('xxnamesound', 'soundfile', dir_struct['plugins'] + 'heya.wav')
 
 
         reg = []

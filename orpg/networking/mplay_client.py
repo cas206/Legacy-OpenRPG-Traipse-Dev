@@ -29,7 +29,7 @@
 
 __version__ = "$Id: mplay_client.py,v 1.71 2007/05/12 20:41:54 digitalxero Exp $"
 
-import orpg.minidom
+#import orpg.minidom
 import socket
 import Queue
 import thread
@@ -38,22 +38,21 @@ from threading import Event, Lock
 from xml.sax.saxutils import escape
 from struct import pack, unpack, calcsize
 from string import *
-from orpg.orpg_version import *
+from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
 import errno
 import os
 import time
+from orpg.orpgCore import *
 
 try:
     import bz2
     cmpBZ2 = True
-except:
-    cmpBZ2 = False
+except: cmpBZ2 = False
 
 try:
     import zlib
     cmpZLIB = True
-except:
-    cmpZLIB = False
+except: cmpZLIB = False
 
 
 # This should be configurable
@@ -83,7 +82,7 @@ STATUS_SET_URL = 1
 def parseXml(data):
     "parse and return doc"
     #print data
-    doc = orpg.minidom.parseString(data)
+    doc = component.get('xml').parseXml(data)
     doc.normalize()
     return doc
 
@@ -133,9 +132,6 @@ class client_base:
         self.text_status = "Idle"
         self.statLock = Lock()
         self.useroles = 0
-        self.ROLE_GM = "GM"
-        self.ROLE_PLAYER = "Player"
-        self.ROLE_LURKER = "Lurker"
         self.lastmessagetime = time.time()
         self.connecttime = time.time()
 
@@ -176,15 +172,13 @@ class client_base:
             try:
                 if self.useCompression and self.compressionType != None:
                     readMsg = self.compressionType.decompress(readMsg)
-            except:
-                pass
+            except: pass
 
             # Check the length of the message
             bytes = len( readMsg )
 
             # Make sure we are still connected
-            if bytes == 0:
-                break
+            if bytes == 0: break
             else:
                 # Pass along the message so it can be processed
                 self.inbox.put( readMsg )
@@ -322,9 +316,10 @@ class client_base:
             (self.name, self.ip, self.id, self.text_status, self.version, self.protocol_version, self.client_string,role) = player
         except Exception, e:
             print e
-
-# The IP field should really be deprecated as too many systems are NAT'd and/or behind firewalls for a
-# client provided IP address to have much value.  As such, we now label it as deprecated.
+    """
+     The IP field should really be deprecated as too many systems are NAT'd and/or behind firewalls for a
+     client provided IP address to have much value.  As such, we now label it as deprecated.
+    """
     def toxml(self,action):
         xml_data = '<player name="' + myescape(self.name) + '"'
         xml_data += ' action="' + action + '" id="' + self.id + '"'
@@ -338,8 +333,7 @@ class client_base:
             xml_data += ' cmpType="bz2"'
         elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
             xml_data += ' cmpType="zlib"'
-        else:
-            xml_data += ' cmpType="None"'
+        else: xml_data += ' cmpType="None"'
         xml_data += ' />'
         return xml_data
 
@@ -356,7 +350,9 @@ class client_base:
         return status
 
     def my_role(self):
-#Why create the three different objects?  Why not just assign a value to self.role and use that? Prof_Ebral ponders.
+        #Leaving this for testing.
+        return self.role
+        """
         if self.role == "GM":
             return self.ROLE_GM
         elif self.role == "Player":
@@ -364,6 +360,7 @@ class client_base:
         elif self.role == "Lurker":
             return self.ROLE_LURKER
         return -1
+        """
 
     def set_status(self,status):
         self.statLock.acquire()
@@ -391,12 +388,9 @@ class client_base:
         idletime = self.idle_time()
         idlemins = idletime / 60
         status = "Unknown"
-        if idlemins < 3:
-            status = "Active"
-        elif idlemins < 10:
-            status = "Idle ("+str(int(idlemins))+" mins)"
-        else:
-            status = "Inactive ("+str(int(idlemins))+" mins)"
+        if idlemins < 3: status = "Active"
+        elif idlemins < 10:  status = "Idle ("+str(int(idlemins))+" mins)"
+        else: status = "Inactive ("+str(int(idlemins))+" mins)"
         return status
 
     def connected_time(self):
@@ -425,6 +419,8 @@ class mplay_client(client_base):
     "mplay client"
     def __init__(self,name,callbacks):
         client_base.__init__(self)
+        component.add('mp_client', self)
+        self.xml = component.get('xml')
         self.set_name(name)
         self.on_receive = callbacks['on_receive']
         self.on_mplay_event = callbacks['on_mplay_event']
@@ -437,9 +433,6 @@ class mplay_client(client_base):
         # Should really find a better solution. -- SD 8/03
         self.orpgFrame_callback = callbacks['orpgFrame']
         self.settings = self.orpgFrame_callback.settings
-        #self.version = VERSION
-        #self.protocol_version = PROTOCOL_VERSION
-        #self.client_string = CLIENT_STRING
         self.ignore_id = []
         self.ignore_name = []
         self.players = {}
@@ -679,7 +672,7 @@ class mplay_client(client_base):
         end = data.find(">")
         head = data[:end+1]
         msg = data[end+1:]
-        xml_dom = parseXml(head)
+        xml_dom = self.xml.parseXml(head)
         xml_dom = xml_dom._get_documentElement()
         tag_name = xml_dom._get_tagName()
         id = xml_dom.getAttribute("from")
@@ -858,7 +851,7 @@ class mplay_client(client_base):
             self.sendMsg( self.sock, self.toxml("new") )
             data = self.recvMsg( self.sock )
             # get new id and group_id
-            xml_dom = parseXml(data)
+            xml_dom = self.xml.parseXml(data)
             xml_dom = xml_dom._get_documentElement()
             self.id = xml_dom.getAttribute("id")
             self.group_id = xml_dom.getAttribute("group_id")
@@ -913,3 +906,4 @@ class mplay_client(client_base):
         self.unique_cookie += 1
         return_str = self.id + "-" + str(self.unique_cookie)
         return return_str
+

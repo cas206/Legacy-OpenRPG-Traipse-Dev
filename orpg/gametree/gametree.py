@@ -30,8 +30,8 @@ __version__ = "$Id: gametree.py,v 1.68 2007/12/07 20:39:48 digitalxero Exp $"
 
 from orpg.orpg_wx import *
 from orpg.orpg_windows import *
-from orpg.orpgCore import open_rpg
-import orpg.dirpath
+from orpg.orpgCore import component
+from orpg.dirpath import dir_struct
 from nodehandlers import core
 import orpg.gametree.nodehandlers.containers
 import orpg.gametree.nodehandlers.forms
@@ -80,15 +80,16 @@ TOP_FEATURES = wx.NewId()
 
 class game_tree(wx.TreeCtrl):
     def __init__(self, parent, id):
-        wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
-        self.log = open_rpg.get_component('log')
-        self.log.log("Enter game_tree", ORPG_DEBUG)
-        self.validate = open_rpg.get_component('validate')
-        self.xml = open_rpg.get_component('xml')
-        self.settings = open_rpg.get_component('settings')
-        self.session = open_rpg.get_component('session')
-        self.chat = open_rpg.get_component('chat')
-        self.mainframe = open_rpg.get_component('frame')
+        wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, 
+                wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
+        self.orpgLog = component.get('log')
+        self.orpgLog.log("Enter game_tree", ORPG_DEBUG)
+        self.validate = component.get('validate')
+        self.xml = component.get('xml')
+        self.settings = component.get('settings')
+        self.session = component.get('session')
+        self.chat = component.get('chat')
+        self.mainframe = component.get('frame')
         self.build_img_list()
         self.build_std_menu()
         self.nodehandlers = {}
@@ -105,37 +106,37 @@ class game_tree(wx.TreeCtrl):
         self.Bind(wx.EVT_KEY_UP, self.on_key_up)
         self.id = 1
         self.dragging = False
-        self.root_dir = orpg.dirpath.dir_struct["home"]
-        self.last_save_dir = orpg.dirpath.dir_struct["user"]
+        self.root_dir = dir_struct["home"]
+        self.last_save_dir = dir_struct["user"]
 
         #Create tree from default if it does not exist
         self.validate.config_file("tree.xml","default_tree.xml")
-        open_rpg.add_component("tree", self)
+        component.add("tree", self)
         #build tree
         self.root = self.AddRoot("Game Tree",self.icons['gear'])
         self.was_labeling = 0
         self.rename_flag = 0
         self.image_cache = {}
-        self.log.log("Exit game_tree", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree", ORPG_DEBUG)
 
     def add_nodehandler(self, nodehandler, nodeclass):
-        self.log.log("Enter game_tree->add_nodehandler(self, nodehandler, nodeclass)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->add_nodehandler(self, nodehandler, nodeclass)", ORPG_DEBUG)
         if not self.nodehandlers.has_key(nodehandler):
             self.nodehandlers[nodehandler] = nodeclass
         else:
-            self.log.log("Nodehandler for " + nodehandler + " already exists!", ORPG_DEBUG, True)
-        self.log.log("Exit game_tree->add_nodehandler(self, nodehandler, nodeclass)", ORPG_DEBUG)
+            self.orpgLog.log("Nodehandler for " + nodehandler + " already exists!", ORPG_DEBUG, True)
+        self.orpgLog.log("Exit game_tree->add_nodehandler(self, nodehandler, nodeclass)", ORPG_DEBUG)
 
     def remove_nodehandler(self, nodehandler):
-        self.log.log("Enter game_tree->remove_nodehandler(self, nodehandler)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->remove_nodehandler(self, nodehandler)", ORPG_DEBUG)
         if self.nodehandlers.has_key(nodehandler):
             del self.nodehandlers[nodehandler]
         else:
-            self.log.log("No nodehandler for " + nodehandler + " exists!", ORPG_DEBUG, True)
-        self.log.log("Exit game_tree->remove_nodehandler(self, nodehandler)", ORPG_DEBUG)
+            self.orpgLog.log("No nodehandler for " + nodehandler + " exists!", ORPG_DEBUG, True)
+        self.orpgLog.log("Exit game_tree->remove_nodehandler(self, nodehandler)", ORPG_DEBUG)
 
     def init_nodehandlers(self):
-        self.log.log("Enter game_tree->init_nodehandlers(self)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->init_nodehandlers(self)", ORPG_DEBUG)
         self.add_nodehandler('group_handler', orpg.gametree.nodehandlers.containers.group_handler)
         self.add_nodehandler('tabber_handler', orpg.gametree.nodehandlers.containers.tabber_handler)
         self.add_nodehandler('splitter_handler', orpg.gametree.nodehandlers.containers.splitter_handler)
@@ -158,12 +159,12 @@ class game_tree(wx.TreeCtrl):
         self.add_nodehandler('node_loader', core.node_loader)
         self.add_nodehandler('url_loader', core.url_loader)
         self.add_nodehandler('min_map', core.min_map)
-        self.log.log("Exit game_tree->init_nodehandlers(self)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->init_nodehandlers(self)", ORPG_DEBUG)
 
     #   event = wxKeyEvent
     #   set to be called by wxWindows by EVT_CHAR macro in __init__
     def on_key_up(self, evt):
-        self.log.log("Enter game_tree->on_key_up(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_key_up(self, evt)", ORPG_DEBUG)
         key_code = evt.GetKeyCode()
         if self.dragging and (key_code == wx.WXK_SHIFT):
             curSelection = self.GetSelection()
@@ -176,10 +177,10 @@ class game_tree(wx.TreeCtrl):
                 obj.on_drop(evt)
                 self.drag_obj = None
         evt.Skip()
-        self.log.log("Exit game_tree->on_key_up(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_key_up(self, evt)", ORPG_DEBUG)
 
     def on_char(self, evt):
-        self.log.log("Enter game_tree->on_char(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_char(self, evt)", ORPG_DEBUG)
         key_code = evt.GetKeyCode()
         curSelection = self.GetSelection()                            #  Get the current selection
         if evt.ShiftDown() and ((key_code == wx.WXK_UP) or (key_code == wx.WXK_DOWN)) and not self.dragging:
@@ -207,13 +208,13 @@ class game_tree(wx.TreeCtrl):
             self.rename_flag = 1
             self.EditLabel(curSelection)
         evt.Skip()
-        self.log.log("Exit game_tree->on_char(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_char(self, evt)", ORPG_DEBUG)
 
     ## locate_valid_tree
     ## GUI based dialogs to locate/fix missing treefile issues --Snowdog 3/05
     def locate_valid_tree(self, error, msg, dir, filename):
         """prompts the user to locate a new tree file or create a new one"""
-        self.log.log("Enter game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
         response = wx.MessageDialog(self, msg, error, wx.YES|wx.NO|wx.ICON_ERROR)
         if response == wx.YES:
             file = None
@@ -223,22 +224,22 @@ class game_tree(wx.TreeCtrl):
             dlg.Destroy()
             if not file: self.load_tree(error=1)
             else: self.load_tree(file)
-            self.log.log("Exit game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
             return
         else:
             self.validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
-            self.log.log("Exit game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->locate_valid_tree(self, error, msg, dir, filename)", ORPG_DEBUG)
             return
 
-    def load_tree(self, filename=orpg.dirpath.dir_struct["user"]+'tree.xml', error=0):
-        self.log.log("Enter game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
+    def load_tree(self, filename=dir_struct["user"]+'tree.xml', error=0):
+        self.orpgLog.log("Enter game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
         self.settings.set_setting("gametree", filename)
         tmp = None
         xml_dom = None
         xml_doc = None
         try:
-            self.log.log("Reading Gametree file: " + filename + "...", ORPG_INFO, True)
+            self.orpgLog.log("Reading Gametree file: " + filename + "...", ORPG_INFO, True)
             tmp = open(filename,"r")
             xml_doc = self.xml.parseXml(tmp.read())
             tmp.close()
@@ -246,16 +247,16 @@ class game_tree(wx.TreeCtrl):
                 pass
             else:
                 xml_dom = xml_doc._get_documentElement()
-            self.log.log("done.", ORPG_INFO, True)
+            self.orpgLog.log("done.", ORPG_INFO, True)
 
         except IOError:
             emsg = "Gametree Missing!\n"+filename+" cannot be found.\n\n"\
                    "Would you like to locate it?\n"\
                    "(Selecting 'No' will cause a new default gametree to be generated)"
             fn = filename[ ((filename.rfind(os.sep))+len(os.sep)):]
-            self.locate_valid_tree("Gametree Error", emsg, orpg.dirpath.dir_struct["user"], fn)
-            self.log.log(emsg, ORPG_GENERAL)
-            self.log.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
+            self.locate_valid_tree("Gametree Error", emsg, dir_struct["user"], fn)
+            self.orpgLog.log(emsg, ORPG_GENERAL)
+            self.orpgLog.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
             return
 
         if not xml_dom:
@@ -269,9 +270,9 @@ class game_tree(wx.TreeCtrl):
                    "lastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.\n\n"\
                    "Would you like to select a different gametree file to use?\n"\
                    "(Selecting 'No' will cause a new default gametree to be generated)"
-            self.locate_valid_tree("Corrupt Gametree!", emsg, orpg.dirpath.dir_struct["user"], fn)
-            self.log.log(emsg, ORPG_GENERAL)
-            self.log.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
+            self.locate_valid_tree("Corrupt Gametree!", emsg, dir_struct["user"], fn)
+            self.orpgLog.log(emsg, ORPG_GENERAL)
+            self.orpgLog.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
             return
 
         if xml_dom._get_tagName() != "gametree":
@@ -279,53 +280,53 @@ class game_tree(wx.TreeCtrl):
             emsg = fn+" does not appear to be a valid gametree file.\n\n"\
                    "Would you like to select a different gametree file to use?\n"\
                    "(Selecting 'No' will cause a new default gametree to be generated)"
-            self.locate_valid_tree("Invalid Gametree!", emsg, orpg.dirpath.dir_struct["user"], fn)
-            self.log.log(emsg, ORPG_DEBUG)
-            self.log.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
+            self.locate_valid_tree("Invalid Gametree!", emsg, dir_struct["user"], fn)
+            self.orpgLog.log(emsg, ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
             return
 
         # get gametree version - we could write conversion code here!
         self.master_dom = xml_dom
-        self.log.log("Master Dom Set", ORPG_DEBUG)
+        self.orpgLog.log("Master Dom Set", ORPG_DEBUG)
 
         try:
             version = self.master_dom.getAttribute("version")
             # see if we should load the gametree
             loadfeatures = int(self.settings.get_setting("LoadGameTreeFeatures"))
             if loadfeatures:
-                xml_dom = self.xml.parseXml(open(orpg.dirpath.dir_struct["template"]+"feature.xml","r").read())
+                xml_dom = self.xml.parseXml(open(dir_struct["template"]+"feature.xml","r").read())
                 xml_dom = xml_dom._get_documentElement()
                 xml_dom = self.master_dom.appendChild(xml_dom)
                 self.settings.set_setting("LoadGameTreeFeatures","0")
 
             ## load tree
-            self.log.log("Features loaded (if required)", ORPG_DEBUG)
+            self.orpgLog.log("Features loaded (if required)", ORPG_DEBUG)
             self.CollapseAndReset(self.root)
             children = self.master_dom._get_childNodes()
-            self.log.log("Parsing Gametree Nodes ", ORPG_INFO, True)
+            self.orpgLog.log("Parsing Gametree Nodes ", ORPG_INFO, True)
             for c in children:
                 print '.',
                 self.load_xml(c,self.root)
-            self.log.log("done", ORPG_INFO, True)
+            self.orpgLog.log("done", ORPG_INFO, True)
             self.Expand(self.root)
             self.SetPyData(self.root,self.master_dom)
             if error != 1:
                 infile = open(filename, "rb")
-                outfile = open(orpg.dirpath.dir_struct["user"]+"lastgood.xml", "wb")
+                outfile = open(dir_struct["user"]+"lastgood.xml", "wb")
                 outfile.write(infile.read())
             else:
-                self.log.log("Not overwriting lastgood.xml file.", ORPG_INFO, True)
+                self.orpgLog.log("Not overwriting lastgood.xml file.", ORPG_INFO, True)
 
         except Exception, e:
-            self.log.log(traceback.format_exc(), ORPG_GENERAL)
+            self.orpgLog.log(traceback.format_exc(), ORPG_GENERAL)
             wx.MessageBox("Corrupt Tree!\nYour game tree is being regenerated. To\nsalvage a recent version of your gametree\nexit OpenRPG and copy the lastgood.xml\nfile in your myfiles directory\nto "+filename+ "\nin your myfiles directory.\nlastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.")
             os.rename(filename,filename+".corrupt")
             self.validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
-        self.log.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->load_tree(self, filename, error)", ORPG_DEBUG)
 
     def build_std_menu(self, obj=None):
-        self.log.log("Enter game_tree->build_std_menu(self, obj)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->build_std_menu(self, obj)", ORPG_DEBUG)
 
         # build useful menu
         useful_menu = wx.Menu()
@@ -385,20 +386,20 @@ class game_tree(wx.TreeCtrl):
         self.Bind(wx.EVT_MENU, self.on_load_new_tree, id=TOP_NEW_TREE)
         self.Bind(wx.EVT_MENU, self.on_tree_prop, id=TOP_TREE_PROP)
         self.Bind(wx.EVT_MENU, self.on_insert_features, id=TOP_FEATURES)
-        self.log.log("Exit game_tree->build_std_menu(self, obj)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->build_std_menu(self, obj)", ORPG_DEBUG)
 
     def do_std_menu(self, evt, obj):
-        self.log.log("Enter game_tree->do_std_menu(self, evt, obj)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->do_std_menu(self, evt, obj)", ORPG_DEBUG)
         try:
             self.std_menu.Enable(STD_MENU_MAP, obj.checkToMapMenu())
         except:
             self.std_menu.Enable(STD_MENU_MAP, obj.map_aware())
         self.std_menu.Enable(STD_MENU_CLONE, obj.can_clone())
         self.PopupMenu(self.std_menu)
-        self.log.log("Exit game_tree->do_std_menu(self, evt, obj)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->do_std_menu(self, evt, obj)", ORPG_DEBUG)
 
     def strip_html(self, player):
-        self.log.log("Enter game_tree->strip_html(self, player)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->strip_html(self, player)", ORPG_DEBUG)
         ret_string = ""
         x = 0
         in_tag = 0
@@ -412,27 +413,27 @@ class game_tree(wx.TreeCtrl):
                     pass
             else :
                 ret_string = ret_string + player[0][x]
-        self.log.log(ret_string, ORPG_DEBUG)
-        self.log.log("Exit game_tree->strip_html(self, player)", ORPG_DEBUG)
+        self.orpgLog.log(ret_string, ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->strip_html(self, player)", ORPG_DEBUG)
         return ret_string
 
     def on_receive_data(self, data, player):
-        self.log.log("Enter game_tree->on_receive_data(self, data, player)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_receive_data(self, data, player)", ORPG_DEBUG)
         beg = string.find(data,"<tree>")
         end = string.rfind(data,"</tree>")
         data = data[6:end]
         self.insert_xml(data)
-        self.log.log("Exit game_tree->on_receive_data(self, data, player)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_receive_data(self, data, player)", ORPG_DEBUG)
 
     def on_send_to_chat(self, evt):
-        self.log.log("Enter game_tree->on_send_to_chat(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_send_to_chat(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_send_to_chat(evt)
-        self.log.log("Exit game_tree->on_send_to_chat(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_send_to_chat(self, evt)", ORPG_DEBUG)
 
     def on_whisper_to(self, evt):
-        self.log.log("Enter game_tree->on_whisper_to(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_whisper_to(self, evt)", ORPG_DEBUG)
         players = self.session.get_players()
         opts = []
         myid = self.session.get_id()
@@ -457,10 +458,10 @@ class game_tree(wx.TreeCtrl):
                     for s in selections:
                         player_ids.append(players[s][2])
                     self.chat.whisper_to_players(obj.tohtml(),player_ids)
-        self.log.log("Exit game_tree->on_whisper_to(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_whisper_to(self, evt)", ORPG_DEBUG)
 
     def on_export_html(self, evt):
-        self.log.log("Enter game_tree->on_export_html(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_export_html(self, evt)", ORPG_DEBUG)
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","HTML (*.html)|*.html",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
             item = self.GetSelection()
@@ -476,34 +477,34 @@ class game_tree(wx.TreeCtrl):
             self.last_save_dir, throwaway = os.path.split( f.GetPath() )
         f.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit game_tree->on_export_html(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_export_html(self, evt)", ORPG_DEBUG)
 
     def indifferent(self, evt):
-        self.log.log("Enter game_tree->indifferent(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->indifferent(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("indifferent")
-        self.log.log("Exit game_tree->indifferent(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->indifferent(self, evt)", ORPG_DEBUG)
 
     def useful(self, evt):
-        self.log.log("Enter game_tree->useful(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->useful(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useful")
-        self.log.log("Exit game_tree->useful(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->useful(self, evt)", ORPG_DEBUG)
 
     def useless(self, evt):
-        self.log.log("Enter game_tree->useless(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->useless(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useless")
-        self.log.log("Exit game_tree->useless(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->useless(self, evt)", ORPG_DEBUG)
 
     def on_email(self,evt):
         pass
 
     def on_send_to(self, evt):
-        self.log.log("Enter game_tree->on_send_to(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_send_to(self, evt)", ORPG_DEBUG)
         players = self.session.get_players()
         opts = []
         myid = self.session.get_id()
@@ -527,10 +528,10 @@ class game_tree(wx.TreeCtrl):
                     for s in selections:
                         self.session.send(xmldata,players[s][2])
             dlg.Destroy()
-        self.log.log("Exit game_tree->on_send_to(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_send_to(self, evt)", ORPG_DEBUG)
 
     def on_icon(self, evt):
-        self.log.log("Enter game_tree->on_icon(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_icon(self, evt)", ORPG_DEBUG)
         icons = self.icons.keys()
         icons.sort()
         dlg = wx.SingleChoiceDialog(self,"Choose Icon?","Change Icon",icons)
@@ -540,10 +541,10 @@ class game_tree(wx.TreeCtrl):
             obj = self.GetPyData(item)
             obj.change_icon(key)
         dlg.Destroy()
-        self.log.log("Exit game_tree->on_icon(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_icon(self, evt)", ORPG_DEBUG)
 
     def on_wizard(self, evt):
-        self.log.log("Enter game_tree->on_wizard(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_wizard(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         name = "New " + obj.master_dom.getAttribute("name")
@@ -552,11 +553,11 @@ class game_tree(wx.TreeCtrl):
         xml_data += self.xml.toxml(obj)
         xml_data += "</nodehandler>"
         self.insert_xml(xml_data)
-        self.log.log(xml_data, ORPG_DEBUG)
-        self.log.log("Exit game_tree->on_wizard(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log(xml_data, ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_wizard(self, evt)", ORPG_DEBUG)
 
     def on_clone(self, evt):
-        self.log.log("Enter game_tree->on_clone(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_clone(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         if obj.can_clone():
@@ -569,118 +570,118 @@ class game_tree(wx.TreeCtrl):
             parent = obj.master_dom._get_parentNode()
             xml_dom = parent.insertBefore(xml_dom, obj.master_dom)
             self.load_xml(xml_dom, parent_node, prev_sib)
-        self.log.log("Exit game_tree->on_clone(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_clone(self, evt)", ORPG_DEBUG)
 
     def on_save(self, evt):
         """save node to a xml file"""
-        self.log.log("Enter game_tree->on_save(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_save(self, evt)", ORPG_DEBUG)
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_save(evt)
         os.chdir(self.root_dir)
-        self.log.log("Exit game_tree->on_save(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_save(self, evt)", ORPG_DEBUG)
 
     def on_save_tree_as(self, evt):
-        self.log.log("Enter game_tree->on_save_tree_as(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_save_tree_as(self, evt)", ORPG_DEBUG)
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
             self.save_tree(f.GetPath())
             self.last_save_dir, throwaway = os.path.split( f.GetPath() )
         f.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit game_tree->on_save_tree_as(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_save_tree_as(self, evt)", ORPG_DEBUG)
 
     def on_save_tree(self, evt=None):
-        self.log.log("Enter game_tree->on_save_tree(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_save_tree(self, evt)", ORPG_DEBUG)
         filename = self.settings.get_setting("gametree")
         self.save_tree(filename)
-        self.log.log("Exit game_tree->on_save_tree(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_save_tree(self, evt)", ORPG_DEBUG)
 
-    def save_tree(self, filename=orpg.dirpath.dir_struct["user"]+'tree.xml'):
-        self.log.log("Enter game_tree->save_tree(self, filename)", ORPG_DEBUG)
+    def save_tree(self, filename=dir_struct["user"]+'tree.xml'):
+        self.orpgLog.log("Enter game_tree->save_tree(self, filename)", ORPG_DEBUG)
         self.master_dom.setAttribute("version",GAMETREE_VERSION)
         self.settings.set_setting("gametree",filename)
         file = open(filename,"w")
         file.write(self.xml.toxml(self.master_dom,1))
         file.close()
-        self.log.log("Exit game_tree->save_tree(self, filename)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->save_tree(self, filename)", ORPG_DEBUG)
 
     def on_load_new_tree(self, evt):
-        self.log.log("Enter game_tree->on_load_new_tree(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_load_new_tree(self, evt)", ORPG_DEBUG)
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.OPEN)
         if f.ShowModal() == wx.ID_OK:
             self.load_tree(f.GetPath())
             self.last_save_dir, throwaway = os.path.split( f.GetPath() )
         f.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit game_tree->on_load_new_tree(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_load_new_tree(self, evt)", ORPG_DEBUG)
 
     def on_insert_file(self, evt):
         """loads xml file into the tree"""
-        self.log.log("Enter game_tree->on_insert_file(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_insert_file(self, evt)", ORPG_DEBUG)
         if self.last_save_dir == ".":
-            self.last_save_dir = orpg.dirpath.dir_struct["user"]
+            self.last_save_dir = dir_struct["user"]
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.OPEN)
         if f.ShowModal() == wx.ID_OK:
             self.insert_xml(open(f.GetPath(),"r").read())
             self.last_save_dir, throwaway = os.path.split( f.GetPath() )
         f.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit game_tree->on_insert_file(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_insert_file(self, evt)", ORPG_DEBUG)
 
     def on_insert_url(self, evt):
         """loads xml url into the tree"""
-        self.log.log("Enter game_tree->on_insert_url(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_insert_url(self, evt)", ORPG_DEBUG)
         dlg = wx.TextEntryDialog(self,"URL?","Insert URL", "http://")
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetValue()
             file = urllib.urlopen(path)
             self.insert_xml(file.read())
         dlg.Destroy()
-        self.log.log("Exit game_tree->on_insert_url(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_insert_url(self, evt)", ORPG_DEBUG)
 
     def on_insert_features(self, evt):
-        self.log.log("Enter game_tree->on_insert_features(self, evt)", ORPG_DEBUG)
-        self.insert_xml(open(orpg.dirpath.dir_struct["template"]+"feature.xml","r").read())
-        self.log.log("Exit game_tree->on_insert_features(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_insert_features(self, evt)", ORPG_DEBUG)
+        self.insert_xml(open(dir_struct["template"]+"feature.xml","r").read())
+        self.orpgLog.log("Exit game_tree->on_insert_features(self, evt)", ORPG_DEBUG)
 
     def on_tree_prop(self, evt):
-        self.log.log("Enter game_tree->on_tree_prop(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_tree_prop(self, evt)", ORPG_DEBUG)
         dlg = gametree_prop_dlg(self, self.settings)
         if dlg.ShowModal() == wx.ID_OK:
             pass
         dlg.Destroy()
-        self.log.log("Exit game_tree->on_tree_prop(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_tree_prop(self, evt)", ORPG_DEBUG)
 
     def on_node_design(self, evt):
-        self.log.log("Enter game_tree->on_node_design(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_node_design(self, evt)", ORPG_DEBUG)
 
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_design(evt)
 
-        self.log.log("Exit game_tree->on_node_design(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_node_design(self, evt)", ORPG_DEBUG)
 
     def on_node_use(self, evt):
-        self.log.log("Enter game_tree->on_node_use(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_node_use(self, evt)", ORPG_DEBUG)
 
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_use(evt)
 
-        self.log.log("Exit game_tree->on_node_use(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_node_use(self, evt)", ORPG_DEBUG)
 
     def on_node_pp(self, evt):
-        self.log.log("Enter game_tree->on_node_pp(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_node_pp(self, evt)", ORPG_DEBUG)
 
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_html_view(evt)
 
-        self.log.log("Exit game_tree->on_node_pp(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_node_pp(self, evt)", ORPG_DEBUG)
 
     def on_del(self, evt):
-        self.log.log("Enter game_tree->on_del(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_del(self, evt)", ORPG_DEBUG)
         status_value = "none"
         try:
             item = self.GetSelection()
@@ -721,10 +722,10 @@ class game_tree(wx.TreeCtrl):
             msg.ShowModal()
             msg.Destroy()
 
-        self.log.log("Exit game_tree->on_del(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_del(self, evt)", ORPG_DEBUG)
 
     def on_about(self, evt):
-        self.log.log("Enter game_tree->on_about(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_about(self, evt)", ORPG_DEBUG)
 
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -732,77 +733,77 @@ class game_tree(wx.TreeCtrl):
         about.ShowModal()
         about.Destroy()
 
-        self.log.log("Exit game_tree->on_about(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_about(self, evt)", ORPG_DEBUG)
 
     def on_send_to_map(self, evt):
-        self.log.log("Enter game_tree->on_send_to_map(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_send_to_map(self, evt)", ORPG_DEBUG)
 
         item = self.GetSelection()
         obj = self.GetPyData(item)
         if hasattr(obj,"on_send_to_map"):
             obj.on_send_to_map(evt)
 
-        self.log.log("Exit game_tree->on_send_to_map(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_send_to_map(self, evt)", ORPG_DEBUG)
 
     def insert_xml(self, txt):
-        self.log.log("Enter game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->insert_xml(self, txt)", ORPG_DEBUG)
         #Updated to allow safe merging of gametree files
         #without leaving an unusable and undeletable node.
         #                               -- Snowdog 8/03
         xml_dom = self.xml.parseXml(txt)
         if xml_dom == None:
             wx.MessageBox("Import Failed: Invalid or missing node data")
-            self.log.log("Import Failed: Invalid or missing node data", ORPG_DEBUG)
-            self.log.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+            self.orpgLog.log("Import Failed: Invalid or missing node data", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
             return
         xml_temp = xml_dom._get_documentElement()
 
         if not xml_temp:
             wx.MessageBox("Error Importing Node or Tree")
-            self.log.log("Error Importing Node or Tree", ORPG_DEBUG)
-            self.log.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+            self.orpgLog.log("Error Importing Node or Tree", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
             return
 
         if xml_temp._get_tagName() == "gametree":
             children = xml_temp._get_childNodes()
             for c in children:
                 self.load_xml(c, self.root)
-            self.log.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
             return
 
         if not xml_dom:
             wx.MessageBox("XML Error")
-            self.log.log("XML Error", ORPG_DEBUG)
-            self.log.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+            self.orpgLog.log("XML Error", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
             return
 
         xml_dom = xml_dom._get_firstChild()
         child = self.master_dom._get_firstChild()
         xml_dom = self.master_dom.insertBefore(xml_dom,child)
         self.load_xml(xml_dom,self.root,self.root)
-        self.log.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->insert_xml(self, txt)", ORPG_DEBUG)
 
     def build_img_list(self):
         """make image list"""
-        self.log.log("Enter game_tree->build_img_list(self)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->build_img_list(self)", ORPG_DEBUG)
         helper = img_helper()
         self.icons = { }
         self._imageList= wx.ImageList(16,16,False)
-        man = open(orpg.dirpath.dir_struct["icon"]+"icons.xml","r")
+        man = open(dir_struct["icon"]+"icons.xml","r")
         xml_dom = self.xml.parseXml(man.read())
         man.close()
         xml_dom = xml_dom._get_documentElement()
         node_list = xml_dom._get_childNodes()
         for n in node_list:
             key = n.getAttribute("name")
-            path = orpg.dirpath.dir_struct["icon"] + n.getAttribute("file")
+            path = dir_struct["icon"] + n.getAttribute("file")
             img = helper.load_file(path)
             self.icons[key] = self._imageList.Add(img)
         self.SetImageList(self._imageList)
-        self.log.log("Exit game_tree->build_img_list(self)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->build_img_list(self)", ORPG_DEBUG)
 
     def load_xml(self, xml_dom, parent_node, prev_node=None):
-        self.log.log("Enter game_tree->load_xml(self, xml_dom, parent_node, prev_node)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->load_xml(self, xml_dom, parent_node, prev_node)", ORPG_DEBUG)
         #add the first tree node
         i = 0
         text = xml_dom.getAttribute("name")
@@ -810,7 +811,7 @@ class game_tree(wx.TreeCtrl):
         if self.icons.has_key(icon):
             i = self.icons[icon]
         name = xml_dom._get_nodeName()
-        self.log.log("Text, icon and name set\n" + text + "\n" + icon + "\n" + name, ORPG_DEBUG)
+        self.orpgLog.log("Text, icon and name set\n" + text + "\n" + icon + "\n" + name, ORPG_DEBUG)
         if prev_node:
             if prev_node == parent_node:
                 new_tree_node = self.PrependItem(parent_node, text, i, i)
@@ -819,37 +820,37 @@ class game_tree(wx.TreeCtrl):
         else:
             new_tree_node = self.AppendItem(parent_node, text, i, i)
 
-        self.log.log("Node Added to tree", ORPG_DEBUG)
+        self.orpgLog.log("Node Added to tree", ORPG_DEBUG)
         #create a nodehandler or continue loading xml into tree
         if name == "nodehandler":
             #wx.BeginBusyCursor()
-            self.log.log("We have a Nodehandler", ORPG_DEBUG)
+            self.orpgLog.log("We have a Nodehandler", ORPG_DEBUG)
             try:
                 py_class = xml_dom.getAttribute("class")
-                self.log.log("nodehandler class: " + py_class, ORPG_DEBUG)
+                self.orpgLog.log("nodehandler class: " + py_class, ORPG_DEBUG)
                 if not self.nodehandlers.has_key(py_class):
                     raise Exception, "Unknown Nodehandler for " + py_class
                 self.nodes[self.id] = self.nodehandlers[py_class](xml_dom, new_tree_node)
                 self.SetPyData(new_tree_node, self.nodes[self.id])
-                self.log.log("Node Data set", ORPG_DEBUG)
+                self.orpgLog.log("Node Data set", ORPG_DEBUG)
                 bmp = self.nodes[self.id].get_scaled_bitmap(16,16)
                 if bmp:
                     self.cached_load_of_image(bmp,new_tree_node,)
-                self.log.log("Node Icon loaded", ORPG_DEBUG)
+                self.orpgLog.log("Node Icon loaded", ORPG_DEBUG)
                 self.id = self.id + 1
             except Exception, er:
-                self.log.log(traceback.format_exc(), ORPG_GENERAL)
-                #self.log.log("Error Info: " + xml_dom.getAttribute("class") + "\n" + str(er), "Tree Node Load Error", ORPG_GENERAL, True) # Arbitrary fix! TaS. (gametree should thread in the future.)
-		self.log.log("Error Info: " + xml_dom.getAttribute("class") + "\n" + str(er), ORPG_GENERAL, True)
+                self.orpgLog.log(traceback.format_exc(), ORPG_GENERAL)
+                #self.orpgLog.log("Error Info: " + xml_dom.getAttribute("class") + "\n" + str(er), "Tree Node Load Error", ORPG_GENERAL, True) # Arbitrary fix! TaS. (gametree should thread in the future.)
+		self.orpgLog.log("Error Info: " + xml_dom.getAttribute("class") + "\n" + str(er), ORPG_GENERAL, True)
                 self.Delete(new_tree_node)
                 parent = xml_dom._get_parentNode()
                 parent.removeChild(xml_dom)
             #wx.EndBusyCursor()
-        self.log.log("Exit game_tree->load_xml(self, xml_dom, parent_node, prev_node)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->load_xml(self, xml_dom, parent_node, prev_node)", ORPG_DEBUG)
         return new_tree_node
 
     def cached_load_of_image(self, bmp_in, new_tree_node):
-        self.log.log("Enter game_tree->cached_load_of_image(self, bmp_in, new_tree_node)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->cached_load_of_image(self, bmp_in, new_tree_node)", ORPG_DEBUG)
         image_list = self.GetImageList()
         img = wx.ImageFromBitmap(bmp_in)
         img_data = img.GetData()
@@ -864,12 +865,12 @@ class game_tree(wx.TreeCtrl):
             self.image_cache[image_index] = img_data
         self.SetItemImage(new_tree_node,image_index)
         self.SetItemImage(new_tree_node,image_index, wx.TreeItemIcon_Selected)
-        self.log.log("Exit game_tree->cached_load_of_image(self, bmp_in, new_tree_node)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->cached_load_of_image(self, bmp_in, new_tree_node)", ORPG_DEBUG)
         return image_index
 
 
     def on_rclick(self, evt):
-        self.log.log("Enter game_tree->on_rclick(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_rclick(self, evt)", ORPG_DEBUG)
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)
         if item.IsOk():
@@ -881,10 +882,10 @@ class game_tree(wx.TreeCtrl):
                 self.PopupMenu(self.top_menu)
         else:
             self.PopupMenu(self.top_menu,pt)
-        self.log.log("Exit game_tree->on_rclick(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_rclick(self, evt)", ORPG_DEBUG)
 
     def on_ldclick(self, evt):
-        self.log.log("Enter game_tree->on_ldclick(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_ldclick(self, evt)", ORPG_DEBUG)
         self.rename_flag = 0
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)
@@ -902,10 +903,10 @@ class game_tree(wx.TreeCtrl):
                         obj.on_html_view(evt)
                     elif action == "chat":
                         self.on_send_to_chat(evt)
-        self.log.log("Exit game_tree->on_ldclick(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_ldclick(self, evt)", ORPG_DEBUG)
 
     def on_left_down(self, evt):
-        self.log.log("Enter game_tree->on_left_down(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_left_down(self, evt)", ORPG_DEBUG)
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)
         if item.IsOk() and self.was_labeling:
@@ -918,10 +919,10 @@ class game_tree(wx.TreeCtrl):
         else:
             self.SelectItem(item)
         evt.Skip()
-        self.log.log("Exit game_tree->on_left_down(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_left_down(self, evt)", ORPG_DEBUG)
 
     def on_left_up(self, evt):
-        self.log.log("Enter game_tree->on_left_up(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_left_up(self, evt)", ORPG_DEBUG)
         if self.dragging:
             cur = wx.StockCursor(wx.CURSOR_ARROW)
             self.SetCursor(cur)
@@ -934,10 +935,10 @@ class game_tree(wx.TreeCtrl):
                 if(isinstance(obj,core.node_handler)):
                     obj.on_drop(evt)
                     self.drag_obj = None
-        self.log.log("Exit game_tree->on_left_up(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_left_up(self, evt)", ORPG_DEBUG)
 
     def on_label_change(self, evt):
-        self.log.log("Enter game_tree->on_label_change(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_label_change(self, evt)", ORPG_DEBUG)
         item = evt.GetItem()
         txt = evt.GetLabel()
         self.was_labeling = 0
@@ -947,10 +948,10 @@ class game_tree(wx.TreeCtrl):
             obj.master_dom.setAttribute('name',txt)
         else:
             evt.Veto()
-        self.log.log("Exit game_tree->on_label_change(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_label_change(self, evt)", ORPG_DEBUG)
 
     def on_label_begin(self, evt):
-        self.log.log("Enter game_tree->on_label_begin(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_label_begin(self, evt)", ORPG_DEBUG)
         if not self.rename_flag:
             evt.Veto()
         else:
@@ -958,10 +959,10 @@ class game_tree(wx.TreeCtrl):
             item = evt.GetItem()
             if item == self.GetRootItem():
                 evt.Veto()
-        self.log.log("Exit game_tree->on_label_begin(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_label_begin(self, evt)", ORPG_DEBUG)
 
     def on_drag(self, evt):
-        self.log.log("Enter game_tree->on_drag(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->on_drag(self, evt)", ORPG_DEBUG)
         self.rename_flag = 0
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -971,25 +972,25 @@ class game_tree(wx.TreeCtrl):
             cur = wx.StockCursor(wx.CURSOR_HAND)
             self.SetCursor(cur)
             self.drag_obj = obj
-        self.log.log("Exit game_tree->on_drag(self, evt)", ORPG_DEBUG)
+        self.orpgLog.log("Exit game_tree->on_drag(self, evt)", ORPG_DEBUG)
 
     def is_parent_node(self, node, compare_node):
-        self.log.log("Enter game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
+        self.orpgLog.log("Enter game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
 
         parent_node = self.GetItemParent(node)
         if compare_node == parent_node:
 
-            self.log.log("parent node", ORPG_DEBUG)
-            self.log.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
+            self.orpgLog.log("parent node", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
             return 1
         elif parent_node == self.root:
 
-            self.log.log("not parent", ORPG_DEBUG)
-            self.log.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
+            self.orpgLog.log("not parent", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
             return 0
         else:
 
-            self.log.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
+            self.orpgLog.log("Exit game_tree->is_parent_node(self, node, compare_node)", ORPG_DEBUG)
             return self.is_parent_node(parent_node, compare_node)
 
 CTRL_TREE_FILE = wx.NewId()

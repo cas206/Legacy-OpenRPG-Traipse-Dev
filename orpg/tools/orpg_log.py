@@ -25,39 +25,134 @@
 #
 # Description: classes for orpg log messages
 #
+from __future__ import with_statement
+import sys
+import os, os.path
+import time
 
-from orpg.orpgCore import *
+from orpg.external.terminalwriter import TerminalWriter
+from orpg.tools.decorators import pending_deprecation
+from orpg.dirpath import dir_struct
 
-class orpgLog:
+#########################
+## Error Types
+#########################
+ORPG_CRITICAL       = 1
+ORPG_GENERAL        = 2
+ORPG_INFO           = 4
+ORPG_NOTE           = 8
+ORPG_DEBUG          = 16
+
+class orpgLog(object):
+    _log_level = 7
+    _log_name = None
+    _log_to_console = False
+    _io = TerminalWriter(sys.stderr)
+    _lvl_args = None
+
+    def __new__(cls, *args, **kwargs):
+        it = cls.__dict__.get("__it__")
+        if it is not None:
+            return it
+        cls.__it__ = it = object.__new__(cls)
+        return it
+
     def __init__(self, home_dir, filename='orpgRunLog '):
-        self.logToConsol = True
-        self.logLevel = 7
-        self.logName = home_dir + filename + time.strftime( '%m-%d-%Y.txt', time.localtime( time.time() ) )
+        self._lvl_args = {16: {'colorizer': {'green': True},
+                               'log_string': 'DEBUG'},
+                          8: {'colorizer': {'bold': True, 'green':True},
+                              'log_string':'NOTE'},
+                          4: {'colorizer': {'blue': True},
+                              'log_string': 'INFO'},
+                          2: {'colorizer': {'red': True},
+                             'log_string': 'ERROR'},
+                          1: {'colorizer': {'bold': True, 'red': True},
+                             'log_string': 'EXCEPTION'}}
+        if not self.log_name:
+            self.log_name = home_dir + filename + time.strftime('%m-%d-%Y.txt',
+                                                    time.localtime(time.time()))
 
-    def log(self, msg, type, to_consol=False):
-        if self.logToConsol or to_consol or type == ORPG_CRITICAL:
-            print msg
+    def debug(self, msg, to_console=False):
+        self.log(msg, ORPG_DEBUG, to_console)
 
-        if type & self.logLevel or to_consol:
-            logMsg = time.strftime( '[%x %X] ', time.localtime( time.time() ) ) + msg + "\n"
-            logFile = open(self.logName, "a")
-            logFile.write(logMsg)
-            logFile.close()
+    def note(self, msg, to_console=False):
+        self.log(msg, ORPG_NOTE, to_console)
 
+    def info(self, msg, to_console=False):
+        self.log(msg, ORPG_INFO, to_console)
+
+    def general(self, msg, to_console=False):
+        self.log(msg, ORPG_GENERAL, to_console)
+
+    def exception(self, msg, to_console=True):
+        self.log(msg, ORPG_CRITICAL, to_console)
+
+    def log(self, msg, log_type, to_console=False):
+        if self.log_to_console or to_console or log_type == ORPG_CRITICAL:
+            self._io.line(str(msg), **self._lvl_args[log_type]['colorizer'])
+
+
+        if log_type & self.log_level or to_console:
+            atr = {'msg': msg, 'level': self._lvl_args[log_type]['log_string']}
+            atr['time'] = time.strftime('[%x %X]', time.localtime(time.time()))
+            logMsg = '%(time)s (%(level)s) - %(msg)s\n' % (atr)
+
+            with open(self.log_name, 'a') as f:
+                f.write(logMsg)
+
+    @pending_deprecation("use logger.log_level = #")
     def setLogLevel(self, log_level):
-        self.logLevel = log_level
+        self.log_level = log_level
 
+    @pending_deprecation("use logger.log_level")
     def getLogLevel(self):
-        return self.logLevel
+        return self.log_level
 
+    @pending_deprecation("use logger.log_name = bla")
     def setLogName(self, log_name):
-        self.logName = log_name
+        self.log_name = log_name
 
+    @pending_deprecation("use logger.log_name")
     def getLogName(self):
-        return self.logName
+        return self.log_name
 
-    def setLogToConsol(self, bool):
-        self.logToConsol = bool
+    @pending_deprecation("use logger.log_to_console = True/False")
+    def setLogToConsol(self, true_or_false):
+        self.log_to_consol = true_or_false
 
+    @pending_deprecation("use logger.log_to_console")
     def getLogToConsol(self):
-        return self.logToConsol
+        return self.log_to_consol
+
+    """
+    Property Methods
+    """
+    def _get_log_level(self):
+        return self._log_level
+    def _set_log_level(self, log_level):
+        if not isinstance(log_level, int) or log_level < 1 or log_level > 31:
+            raise TypeError("The loggers level must be an int between 1 and 31")
+
+        self._log_level = log_level
+
+    def _get_log_name(self):
+        return self._log_name
+    def _set_log_name(self, name):
+        if not os.access(os.path.abspath(os.path.dirname(name)), os.W_OK):
+            raise IOError("Could not write to the specified location")
+
+        self._log_name = name
+
+    def _get_log_to_console(self):
+        return self._log_to_console
+    def _set_log_to_console(self, true_or_false):
+        if not isinstance(true_or_false, bool):
+            raise TypeError("log_to_console must be a boolean value")
+
+        self._log_to_console = true_or_false
+
+    log_level = property(_get_log_level, _set_log_level)
+    log_name = property(_get_log_name, _set_log_name)
+    log_to_console = property(_get_log_to_console, _set_log_to_console)
+
+logger = orpgLog(dir_struct.get("user") + "runlogs/")

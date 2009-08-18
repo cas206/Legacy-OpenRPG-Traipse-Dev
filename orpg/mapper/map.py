@@ -31,7 +31,7 @@ from map_version import MAP_VERSION
 from map_msg import *
 from min_dialogs import *
 from map_prop_dialog import *
-import orpg.dirpath
+from orpg.dirpath import dir_struct
 import random
 import os
 import thread
@@ -44,7 +44,7 @@ from fog_handler import *
 from images import ImageHandler
 from grid_handler import *
 from map_handler import *
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 
 # Various marker modes for player tools on the map
 MARKER_MODE_NONE = 0
@@ -55,10 +55,10 @@ MARKER_MODE_AREA_TARGET = 3
 class MapCanvas(wx.ScrolledWindow):
     def __init__(self, parent, ID, isEditor=0):
         self.parent = parent
-        self.log = open_rpg.get_component("log")
+        self.log = component.get("log")
         self.log.log("Enter MapCanvas", ORPG_DEBUG)
-        self.settings = open_rpg.get_component("settings")
-        self.session = open_rpg.get_component("session")
+        self.settings = component.get("settings")
+        self.session = component.get("session")
         wx.ScrolledWindow.__init__(self, parent, ID, 
             style=wx.HSCROLL | wx.VSCROLL | wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER )
         self.frame = parent
@@ -120,7 +120,7 @@ class MapCanvas(wx.ScrolledWindow):
 
     def processImages(self, evt=None):
         self.log.log("Enter MapCanvas->processImages(self)", ORPG_DEBUG)
-        self.session = open_rpg.get_component("session")
+        self.session = component.get("session")
         if self.session.my_role() == self.session.ROLE_LURKER or (str(self.session.group_id) == '0' and str(self.session.status) == '1'):
             cidx = self.parent.get_tab_index("Background")
             self.parent.layer_tabs.EnableTab(cidx, False)
@@ -545,8 +545,8 @@ class MapCanvas(wx.ScrolledWindow):
     def on_left_up(self, evt):
         self.log.log("Enter MapCanvas->on_left_up(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): self.on_tape_up(evt)
-        elif open_rpg.get_component("tree").dragging:
-            tree = open_rpg.get_component("tree")
+        elif component.get("tree").dragging:
+            tree = component.get("tree")
             if tree.drag_obj.map_aware():
                 tree.drag_obj.on_send_to_map(evt)
                 tree.dragging = False
@@ -557,7 +557,7 @@ class MapCanvas(wx.ScrolledWindow):
     def on_motion(self, evt):
         self.log.log("Enter MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): self.on_tape_motion(evt)
-        elif evt.LeftIsDown() and open_rpg.get_component("tree").dragging: pass
+        elif evt.LeftIsDown() and component.get("tree").dragging: pass
         else: self.frame.on_motion(evt)
         self.log.log("Exit MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
 
@@ -628,8 +628,8 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_prop(self, evt):
         self.log.log("Enter MapCanvas->on_prop(self, evt)", ORPG_DEBUG)
-        self.session = open_rpg.get_component("session")
-        self.chat = open_rpg.get_component("chat")
+        self.session = component.get("session")
+        self.chat = component.get("chat")
         if (self.session.my_role() != self.session.ROLE_GM):
             self.chat.InfoPost("You must be a GM to use this feature")
             self.log.log("Exit MapCanvas->on_prop(self, evt)", ORPG_DEBUG)
@@ -806,14 +806,14 @@ class MapCanvas(wx.ScrolledWindow):
 
 class map_wnd(wx.Panel):
     def __init__(self, parent, id):
-        self.log = open_rpg.get_component('log')
+        self.log = component.get('log')
         self.log.log("Enter map_wnd", ORPG_DEBUG)
         wx.Panel.__init__(self, parent, id)
         self.canvas = MapCanvas(self, -1)
-        self.session = open_rpg.get_component('session')
-        self.settings = open_rpg.get_component('settings')
-        self.chat = open_rpg.get_component('chat')
-        self.top_frame = open_rpg.get_component('frame')
+        self.session = component.get('session')
+        self.settings = component.get('settings')
+        self.chat = component.get('chat')
+        self.top_frame = component.get('frame')
         self.root_dir = os.getcwd()
         self.current_layer = 2
         self.layer_tabs = orpgTabberWnd(self, style=FNB.FNB_NO_X_BUTTON|FNB.FNB_BOTTOM|FNB.FNB_NO_NAV_BUTTONS)
@@ -850,7 +850,7 @@ class map_wnd(wx.Panel):
             self.chat.InfoPost("You must be a GM to use this feature")
             self.log.log("Exit map_wnd->load_default(self)", ORPG_DEBUG)
             return
-        f = open(orpg.dirpath.dir_struct["template"] + "default_map.xml")
+        f = open(dir_struct["template"] + "default_map.xml")
         self.new_data(f.read())
         f.close()
         self.canvas.send_map_data("new")
@@ -870,7 +870,7 @@ class map_wnd(wx.Panel):
             self.chat.InfoPost("You must be a GM to use this feature")
             self.log.log("Exit map_wnd->new_data(self, data)", ORPG_DEBUG)
             return
-        d = wx.FileDialog(self.GetParent(), "Save map data", orpg.dirpath.dir_struct["user"], "", "*.xml", wx.SAVE)
+        d = wx.FileDialog(self.GetParent(), "Save map data", dir_struct["user"], "", "*.xml", wx.SAVE)
         if d.ShowModal() == wx.ID_OK:
             f = open(d.GetPath(), "w")
             data = '<nodehandler class="min_map" icon="compass" module="core" name="miniature Map">'
@@ -889,7 +889,7 @@ class map_wnd(wx.Panel):
             self.chat.InfoPost("You must be a GM to use this feature")
             self.log.log("Exit map_wnd->on_open(self, evt)", ORPG_DEBUG)
             return
-        d = wx.FileDialog(self.GetParent(), "Select a file", orpg.dirpath.dir_struct["user"], "", "*.xml", wx.OPEN)
+        d = wx.FileDialog(self.GetParent(), "Select a file", dir_struct["user"], "", "*.xml", wx.OPEN)
         if d.ShowModal() == wx.ID_OK:
             f = open(d.GetPath())
             map_string = f.read()

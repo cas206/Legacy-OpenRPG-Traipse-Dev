@@ -1,5 +1,5 @@
 from orpg.orpg_wx import *
-from orpg.orpgCore import open_rpg
+from orpg.orpgCore import component
 
 class PluginHandler:
     # Initialization subroutine.
@@ -7,14 +7,14 @@ class PluginHandler:
     # !self : instance of self
     # !chat : instance of the chat window to write to
     def __init__(self, plugindb, parent):
-        self.session = open_rpg.get_component("session")
-        self.chat = open_rpg.get_component("chat")
-        self.settings = open_rpg.get_component("settings")
-        self.gametree = open_rpg.get_component("tree")
-        self.startplugs = open_rpg.get_component("startplugs")
-        self.xml = open_rpg.get_component("xml")
-        self.validate = open_rpg.get_component("validate")
-        self.topframe = open_rpg.get_component("frame")
+        self.session = component.get("session")
+        self.chat = component.get("chat")
+        self.settings = component.get("settings")
+        self.gametree = component.get("tree")
+        self.startplugs = component.get("startplugs")
+        self.xml = component.get("xml")
+        self.validate = component.get("validate")
+        self.topframe = component.get("frame")
         self.plugindb = plugindb
         self.parent = parent
         self.shortcmdlist = self.chat.chat_cmds.shortcmdlist
@@ -27,7 +27,7 @@ class PluginHandler:
         pass
 
     def menu_start(self):
-        rootMenu = open_rpg.get_component("pluginmenu")
+        rootMenu = component.get("pluginmenu")
         try:
             self.plugin_menu()
             rootMenu.AppendMenu(wx.ID_ANY, self.name, self.menu)
@@ -39,7 +39,7 @@ class PluginHandler:
 
     def menu_cleanup(self):
         self.settings.save()
-        rootMenu = open_rpg.get_component("pluginmenu")
+        rootMenu = component.get("pluginmenu")
         menus = rootMenu.MenuItems
         for mi in menus:
             if mi.GetText() == self.name:

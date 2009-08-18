@@ -211,7 +211,7 @@ class textctrl_handler(node_handler):
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
         self.text_elem = self.master_dom.getElementsByTagName('text')[0]
-        self.text = safe_get_text_node(self.text_elem)
+        self.text = component.get('xml').safe_get_text_node(self.text_elem)
         if self.text_elem.getAttribute("send_button") == "":
             self.text_elem.setAttribute("send_button","0")
         if self.text_elem.getAttribute("raw_mode") == "":
@@ -448,7 +448,7 @@ class listbox_handler(node_handler):
     def get_selected_text(self):
         node = self.get_selected_node()
         if node:
-            return safe_get_text_node(node)._get_nodeValue()
+            return component.get('xml').safe_get_text_node(node)._get_nodeValue()
         else:
             return ""
 
@@ -466,7 +466,7 @@ class listbox_handler(node_handler):
         opts = []
         for opt in self.options:
             if opt.getAttribute("selected") == "1":
-                opts.append(safe_get_text_node(opt)._get_nodeValue())
+                opts.append(component.get('xml').safe_get_text_node(opt)._get_nodeValue())
         return opts
 
     def get_selections_index(self):
@@ -494,11 +494,11 @@ class listbox_handler(node_handler):
     def get_options(self):
         opts = []
         for opt in self.options:
-            opts.append(safe_get_text_node(opt)._get_nodeValue())
+            opts.append(component.get('xml').safe_get_text_node(opt)._get_nodeValue())
         return opts
 
     def get_option(self,index):
-        return safe_get_text_node(self.options[index])._get_nodeValue()
+        return component.get('xml').safe_get_text_node(self.options[index])._get_nodeValue()
 
     def add_option(self,opt):
         elem = minidom.Element('option')
@@ -514,7 +514,7 @@ class listbox_handler(node_handler):
         self.options = self.list.getElementsByTagName('option')
 
     def edit_option(self,index,value):
-        safe_get_text_node(self.options[index])._set_nodeValue(value)
+        component.get('xml').safe_get_text_node(self.options[index])._set_nodeValue(value)
 
     def has_send_button(self):
         if self.list.getAttribute("send_button") == '0':
