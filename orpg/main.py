@@ -59,7 +59,7 @@ import wx.py
 
 from orpg.dieroller.utils import roller_manager as DiceManager
 from orpg.tools.orpg_log import logger
-from orpg.tools.oprg_settings import settings #imported, not used yet
+from orpg.tools.orpg_settings import settings #imported, not used yet
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
 from orpg.tools.decorators import debugging
