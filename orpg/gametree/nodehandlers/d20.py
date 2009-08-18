@@ -573,7 +573,7 @@ class d20general(d20_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + ", "
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -584,7 +584,7 @@ class d20general(d20_char_child):
 
     def get_char_name( self ):
         node = self.master_dom.getElementsByTagName( 'name' )[0]
-        t_node = safe_get_text_node( node )
+        t_node = component.get('xml').safe_get_text_node( node )
         return t_node._get_nodeValue()
 
 
@@ -714,7 +714,7 @@ class d20divine(d20_char_child):
         created by d20char_handler.
     """
     def __init__(self,xml_dom,tree_node,parent):
-        d20_char_child.__init__(self,xml_dom,tree_node,openrpg,parent)
+        d20_char_child.__init__(self,xml_dom,tree_node,component,parent)
         node_list = self.master_dom.getElementsByTagName( 'gift' )
         self.spells = {}
         tree = self.tree
@@ -903,7 +903,7 @@ class d20inventory(d20_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + "<br />"
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -914,7 +914,7 @@ class d20inventory(d20_char_child):
 
     def get_char_name( self ):
         node = self.master_dom.getElementsByTagName( 'name' )[0]
-        t_node = safe_get_text_node( node )
+        t_node = component.get('xml').safe_get_text_node( node )
         return t_node._get_nodeValue()
 
 class d20hp(d20_char_child):
@@ -1302,7 +1302,7 @@ class howto_panel(wx.Panel):
         self.master_dom = handler.master_dom
         n_list = self.master_dom._get_childNodes()
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
         self.sizer.AddMany([ (wx.StaticText(self, -1, t_node._get_nodeValue()),   0, wx.ALIGN_CENTER_VERTICAL),
                  ])
         self.sizer.AddGrowableCol(1)
@@ -1411,7 +1411,7 @@ class gen_grid(wx.grid.Grid):
         if row==0: self.handler.on_name_change(value)
 
     def refresh_row(self,rowi):
-        t_node = safe_get_text_node(self.n_list[rowi])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[rowi])
         self.SetCellValue(rowi,0,self.n_list[rowi]._get_tagName())
         self.SetReadOnly(rowi,0)
         self.SetCellValue(rowi,1,t_node._get_nodeValue())
@@ -1451,7 +1451,7 @@ class inventory_grid(wx.grid.Grid):
         if row==0: self.handler.on_name_change(value)
 
     def refresh_row(self,rowi):
-        t_node = safe_get_text_node(self.n_list[rowi])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[rowi])
         self.SetCellValue(rowi,0,self.n_list[rowi]._get_tagName())
         self.SetReadOnly(rowi,0)
         self.SetCellValue(rowi,1,t_node._get_nodeValue())

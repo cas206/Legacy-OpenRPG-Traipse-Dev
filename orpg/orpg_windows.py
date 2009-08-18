@@ -31,7 +31,6 @@ __version__ = "$Id: orpg_windows.py,v 1.42 2007/12/07 20:59:16 digitalxero Exp $
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
 import orpg.tools.rgbhex
-import orpg.orpg_xml
 from orpg.dirpath import dir_struct
 from orpg.tools.metamenus import MenuEx
 
@@ -620,7 +619,7 @@ def parseXml_with_dlg(parent,s,ownerDocument=None):
     "Parse xml with progress dialog"
     dlg = do_progress_dlg(parent,"XML Parser","Reading Configuration Files...",2)
     #dlg.Update(1)
-    doc = orpg.orpg_xml.parseXml(s)
+    doc = component.get('xml').parseXml(s)
     dlg.Update(1,"Done.")
     dlg.Destroy()
     return doc

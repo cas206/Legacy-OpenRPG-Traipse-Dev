@@ -169,7 +169,7 @@ class dnd35general(dnd35_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + ", "
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -183,7 +183,7 @@ class dnd35general(dnd35_char_child):
 
     def get_char_name( self ):
         node = self.master_dom.getElementsByTagName( 'name' )[0]
-        t_node = safe_get_text_node( node )
+        t_node = component.get('xml').safe_get_text_node( node )
         return t_node._get_nodeValue()
 
 class gen_grid(wx.grid.Grid):
@@ -218,7 +218,7 @@ class gen_grid(wx.grid.Grid):
         #self.AutoSizeColumn(1)
 
     def refresh_row(self,rowi):
-        t_node = safe_get_text_node(self.n_list[rowi])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[rowi])
 
         self.SetCellValue(rowi,0,self.n_list[rowi]._get_tagName())
         self.SetReadOnly(rowi,0)
@@ -244,7 +244,7 @@ class dnd35inventory(dnd35_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>Inventory</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + "<br />"
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -316,12 +316,12 @@ class inventory_pane(wx.Panel):
 
         for node in self.n_list:
             if node._get_tagName() == nodeName:
-                t_node = safe_get_text_node(node)
+                t_node = component.get('xml').safe_get_text_node(node)
                 t_node._set_nodeValue(value)
 
     def saveMoney(self, row, col):
         value = self.grid.GetCellValue(row, col)
-        t_node = safe_get_text_node(self.n_list[row])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[row])
         t_node._set_nodeValue(value)
 
     def on_cell_change(self, evt):
@@ -333,7 +333,7 @@ class inventory_pane(wx.Panel):
 
 
     def refresh_row(self, row):
-        t_node = safe_get_text_node(self.n_list[row])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[row])
         tagname = self.n_list[row]._get_tagName()
         value = t_node._get_nodeValue()
         if tagname == 'Gear':

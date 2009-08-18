@@ -127,7 +127,7 @@ class SWd20char_handler(node_handler):
     def on_version(self,old_version):
         node_handler.on_version(self,old_version)
         if old_version == "":
-            tmp = open(orpg.dirpath.dir_struct["nodes"]+"StarWars_d20character.xml","r")
+            tmp = open(dir_struct["nodes"]+"StarWars_d20character.xml","r")
             xml_dom = parseXml_with_dlg(self.tree,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -212,7 +212,7 @@ class SWd20char_handler(node_handler):
         return html_str
 
     def about(self):
-        html_str = "<img src='" + orpg.dirpath.dir_struct["icon"]+'d20_logo.gif' "><br /><b>d20 Character Tool v0.7 beta</b>"
+        html_str = "<img src='" + dir_struct["icon"]+'d20_logo.gif' "><br /><b>d20 Character Tool v0.7 beta</b>"
         html_str += "<br />by Chris Davis<br />chris@rpgarchive.com"
         return html_str
 
@@ -267,7 +267,7 @@ class tabbed_panel(wx.Notebook):
 
 
     def about(self):
-        html_str = "<img src='" + orpg.dirpath.dir_struct["icon"]+'d20_logo.gif' "><br /><b>d20 Character Tool v0.7 beta</b>"
+        html_str = "<img src='" + dir_struct["icon"]+'d20_logo.gif' "><br /><b>d20 Character Tool v0.7 beta</b>"
         html_str += "<br />by Chris Davis<br />chris@rpgarchive.com"
         return html_str
 
@@ -305,7 +305,7 @@ class SWd20_char_child(node_handler):
         if self.myeditor == None or self.myeditor.destroyed:
             title = self.master_dom.getAttribute('name') + " Editor"
             # Frame created in correctly.
-            self.myeditor = wx.Frame(self.frame,title,orpg.dirpath.dir_struct["icon"]+'grid.ico')
+            self.myeditor = wx.Frame(self.frame,title,dir_struct["icon"]+'grid.ico')
             wnd = self.get_design_panel(self.myeditor)
             self.myeditor.panel = wnd
             self.wnd = wnd
@@ -558,7 +558,7 @@ class SWd20general(SWd20_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + ", "
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -569,7 +569,7 @@ class SWd20general(SWd20_char_child):
 
     def get_char_name( self ):
         node = self.master_dom.getElementsByTagName( 'name' )[0]
-        t_node = safe_get_text_node( node )
+        t_node = component.get('xml').safe_get_text_node( node )
         return t_node._get_nodeValue()
 
 
@@ -652,7 +652,7 @@ class SWd20inventory(SWd20_char_child):
         n_list = self.master_dom._get_childNodes()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
             html_str += "<B>"+n._get_tagName().capitalize() +":</B> "
             html_str += t_node._get_nodeValue() + "<br />"
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -663,7 +663,7 @@ class SWd20inventory(SWd20_char_child):
 
     def get_char_name( self ):
         node = self.master_dom.getElementsByTagName( 'name' )[0]
-        t_node = safe_get_text_node( node )
+        t_node = component.get('xml').safe_get_text_node( node )
         return t_node._get_nodeValue()
 
 class SWd20hp(SWd20_char_child):
@@ -1004,7 +1004,7 @@ class howto_panel(wx.Panel):
         self.master_dom = handler.master_dom
         n_list = self.master_dom._get_childNodes()
         for n in n_list:
-            t_node = safe_get_text_node(n)
+            t_node = component.get('xml').safe_get_text_node(n)
         self.sizer.AddMany([ (wx.StaticText(self, -1, t_node._get_nodeValue()),   0, wx.ALIGN_CENTER_VERTICAL),
                  ])
         self.sizer.AddGrowableCol(1)
@@ -1143,7 +1143,7 @@ class gen_grid(wx.grid.Grid):
         if row==0: self.handler.on_name_change(value)
 
     def refresh_row(self,rowi):
-        t_node = safe_get_text_node(self.n_list[rowi])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[rowi])
         self.SetCellValue(rowi,0,self.n_list[rowi]._get_tagName())
         self.SetReadOnly(rowi,0)
         self.SetCellValue(rowi,1,t_node._get_nodeValue())
@@ -1183,7 +1183,7 @@ class inventory_grid(wx.grid.Grid):
         if row==0: self.handler.on_name_change(value)
 
     def refresh_row(self,rowi):
-        t_node = safe_get_text_node(self.n_list[rowi])
+        t_node = component.get('xml').safe_get_text_node(self.n_list[rowi])
         self.SetCellValue(rowi,0,self.n_list[rowi]._get_tagName())
         self.SetReadOnly(rowi,0)
         self.SetCellValue(rowi,1,t_node._get_nodeValue())
@@ -1439,7 +1439,7 @@ class feat_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["SWd20"]+"d20feats.xml","r")
+            tmp = open(dir_struct["SWd20"]+"d20feats.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1609,7 +1609,7 @@ class weapon_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["SWd20"]+"d20weapons.xml","r")
+            tmp = open(dir_struct["SWd20"]+"d20weapons.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1724,7 +1724,7 @@ class ac_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["SWd20"]+"d20armor.xml","r")
+            tmp = open(dir_struct["SWd20"]+"d20armor.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1811,7 +1811,7 @@ class class_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["SWd20"]+"SWd20classes.xml","r")
+            tmp = open(dir_struct["SWd20"]+"SWd20classes.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()

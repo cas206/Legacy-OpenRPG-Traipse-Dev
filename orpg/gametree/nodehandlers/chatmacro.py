@@ -42,7 +42,7 @@ class macro_handler(node_handler):
     def __init__(self,xml_dom,tree_node):
         node_handler.__init__(self,xml_dom,tree_node)
         self.text_elem = self.master_dom.getElementsByTagName('text')[0]
-        self.text = safe_get_text_node(self.text_elem)
+        self.text = component.get('xml').safe_get_text_node(self.text_elem)
 
     def set_text(self,txt):
         self.text._set_nodeValue(txt)
