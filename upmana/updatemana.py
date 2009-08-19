@@ -1,18 +1,18 @@
 import wx
 import manifest
-from orpg.dirpath import dir_struct
 from orpg.orpgCore import *
-import orpg.orpg_version
-import orpg.tools.orpg_log
-import orpg.orpg_xml
-from orpg.dirpath import dir_struct
-import upmana.validate
-import tempfile
+#import tempfile
 import shutil
+from orpg.dirpath import dir_struct
+from orpg.tools.orpg_log import logger
+from orpg.tools.decorators import debugging
+from upmana.validate import validate
+from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
 
 class Updater(wx.Panel):
+    @debugging
     def __init__(self, parent, component, manifest):
         wx.Panel.__init__(self, parent)
 
@@ -21,10 +21,8 @@ class Updater(wx.Panel):
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
         self.manifest = manifest
-        self.xml = component.get('xml')
         self.parent = parent
-        self.log = component.get("log")
-        self.log.log("Enter updaterFrame", ORPG_DEBUG)
+        #logger.debug("Enter updaterFrame") #Need to set logging level
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
         self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(325, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
@@ -92,10 +90,9 @@ class Updater(wx.Panel):
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-
         filename = 'ignorelist.txt'
         self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
-        upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+        component.get('validate').config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         for ignore in self.ignorelist:
             shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
@@ -176,11 +173,15 @@ class Updater(wx.Panel):
     def BranchInfo(self, branch):
         cs = self.repo.changectx( self.current ).changeset()
         rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
+        #print self.repo.changelog.reachable(self.repo.branchtags()[self.current])
+        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]):
+        #    print self.repo.changelog.rev(heads)
         self.changelog.SetValue('')
         changelog = cs[4]
         self.changelog.AppendText(changelog + '\n')
         self.filelist.SetValue('')
-        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\nFiles Modified (in update): \n")
+        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\n")
+        self.filelist.AppendText("Files Modified (in update): \n")
         for f in cs[3]: self.filelist.AppendText(f+"\n")
 
     def get_packages(self, type=None):
@@ -373,7 +374,7 @@ class Manifest(wx.Panel):
             wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
         filename = 'ignorelist.txt'
         self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
-        upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+        component.get('validate').config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
         self.manifestlog.Bind(wx.EVT_CHECKLISTBOX, self.GetChecked)
         self.sizer.Add(self.manifestlog, (0,0), flag=wx.EXPAND)
@@ -409,16 +410,123 @@ class Control(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
+        ### Control Panel
+        self.ui = ui.ui()
+        self.repo = hg.repository(self.ui, ".")
+        self.c = self.repo.changectx('tip')
+        self.manifest = manifest
+        self.parent = parent
+        #logger.debug("Enter updaterFrame") #Need to set logging level
+
+        self.get_packages()
+        self.SetBackgroundColour(wx.WHITE)
+        self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
+
+        self.buttons = {}
+
+        ## Changelog / File List
+        changelogcp = wx.Panel(self)
+        self.changelogcp = wx.GridBagSizer(hgap=1, vgap=1)
+        self.changelog = wx.TextCtrl(changelogcp, wx.ID_ANY, size=(300, 240), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.filelist = wx.TextCtrl(changelogcp, wx.ID_ANY, size=(300, 240), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.changelogcp.Add(self.changelog, (0,0), flag=wx.EXPAND)
+        self.changelogcp.Add(self.filelist, (1,0), flag=wx.EXPAND)
+        changelogcp.SetSizer(self.changelogcp)
+        self.changelogcp.AddGrowableCol(0)
+        self.changelogcp.AddGrowableRow(0)
+        self.changelogcp.AddGrowableRow(1)
+        changelogcp.SetAutoLayout(True)
+
+        ## Branches / Revisions
+        branchcp = wx.Panel(self)
+        self.branchcp = wx.GridBagSizer(hgap=1, vgap=1)
+        self.branches = wx.Choice(branchcp, wx.ID_ANY, size=(125, 25), choices=self.package_list)
+        self.branch_txt = wx.StaticText(branchcp, wx.ID_ANY, "Branches")
+
+        revlistcp = wx.Panel(self)
+        self.revlistcp = wx.GridBagSizer(hgap=1, vgap=1)
+        self.revlist1 = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=(290, 240), style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_HRULES)
+        self.revlist1.InsertColumn(0, 'Revs', 145)
+        self.revlist1.InsertColumn(1, 'Revs', 145)
+        self.revlistcp.Add(self.revlist1, (0,0), span=(1,2), flag=wx.EXPAND)
+        revlistcp.SetSizer(self.revlistcp)
+        self.revlistcp.AddGrowableCol(0)
+        self.revlistcp.AddGrowableRow(0)
+        self.revlistcp.AddGrowableRow(1)
+        revlistcp.SetAutoLayout(True)
+
+        self.branchcp.Add(self.branches, (0,0), flag=wx.ALIGN_LEFT)
+        self.branchcp.Add(self.branch_txt, (0,1), flag=wx.ALIGN_CENTER_VERTICAL)
+        self.branchcp.Add(revlistcp, (1,13), flag=wx.EXPAND|wx.ALIGN_RIGHT)
+        branchcp.SetSizer(self.branchcp)
+        self.branchcp.AddGrowableCol(1)
+        self.branchcp.AddGrowableRow(0)
+        branchcp.SetAutoLayout(True)
+
+        ## Control Panel
+        cp = wx.Panel(self)
+        self.cp = wx.GridBagSizer(hgap=1, vgap=1)
+        self.buttons['update'] = wx.Button(cp, wx.ID_ANY, "Revision Update")
+        self.buttons['delete'] = wx.Button(cp, wx.ID_ANY, "Delete Branch")
+        self.cp.Add(self.buttons['update'], (0,0))
+        self.cp.Add(self.buttons['delete'], (0,1))
+        cp.SetSizer(self.cp)
+        self.cp.AddGrowableCol(0)
+        self.cp.AddGrowableRow(0)
+        cp.SetAutoLayout(True)
+
+        self.sizer.Add(changelogcp, (0,0), span=(2,1),flag=wx.EXPAND)
+        self.sizer.Add(branchcp, (0,1))
+        self.sizer.Add(cp, (1,1), span=(2,1))
+
+        self.buttons['delete'].Disable()
+        self.sizer.AddGrowableCol(0)
+        self.sizer.AddGrowableRow(0)
+        self.sizer.AddGrowableCol(1)
+        self.sizer.AddGrowableRow(1)
+        self.SetSizer(self.sizer)
+        self.SetAutoLayout(True)
+
+        self.current = self.repo.dirstate.branch()
+        self.BranchInfo(self.current)
+
+    def BranchInfo(self, branch):
+        cs = self.repo.changectx( self.current ).changeset()
+        rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
+        #print self.repo.changelog.reachable(self.repo.branchtags()[self.current])
+        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]): #grabs revision list depending on branch.
+        #    print self.repo.changelog.rev(heads)
+        #self.changelog.SetValue('')
+        changelog = cs[4]
+        #self.changelog.AppendText(changelog + '\n')
+        #self.filelist.SetValue('')
+        #self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\n")
+        #self.filelist.AppendText("Files Modified (in update): \n")
+        #for f in cs[3]: self.filelist.AppendText(f+"\n")
+
+    def get_packages(self, type=None):
+        #Fixed and ready for Test. Can be cleaner
+        self.package_list = []
+        b = self.repo.branchtags()
+        heads = dict.fromkeys(self.repo.heads(), 1) #The code below looks superfluous but there is good info inside
+        l = [((n in heads), self.repo.changelog.rev(n), n, t) for t, n in b.items()]
+        l.sort()
+        l.reverse()
+        for ishead, r, n, t in l: self.package_list.append(t)
+
+    def get_package(self):
+        self.get_packages()
+        if self.package_list == None: return None
+        return None
 
 class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
-        dir_struct = component.get("dir_struct")
 
         wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(600,480), style=wx.DEFAULT_FRAME_STYLE)
         if wx.Platform == '__WXMSW__': icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
         else: icon = wx.Icon(dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
-        self.SetIcon(icon)
 
+        self.SetIcon(icon)
         self.CenterOnScreen()
         self.main = main
         ####### Panel Stuff ######
@@ -450,18 +558,13 @@ class updaterFrame(wx.Frame):
 
 class updateApp(wx.App):
     def OnInit(self):
-        self.component = component
         self.main = False
-        self.log = orpg.tools.orpg_log.orpgLog(dir_struct["user"] + "runlogs/")
-        self.log.setLogToConsol(False)
-        self.log.log("Updater Start", ORPG_NOTE)
+        #logger.setLogToConsol(False)
+        #logger. ??? ("Updater Start", ORPG_NOTE)
         self.manifest = manifest.ManifestChanges()
-        self.component.add("log", self.log)
-        self.component.add("xml", orpg.orpg_xml)
-        self.component.add("dir_struct", dir_struct)
-        self.validate = upmana.validate.Validate()
-        self.component.add("validate", self.validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", self.component, self.manifest, self.main)
+        component.add('validate', validate)
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", 
+                                component, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
@@ -485,7 +588,8 @@ class updateApp(wx.App):
             commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
             filename = 'ignorelist.txt'
             self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
-            upmana.validate.Validate(dir_struct["home"] + 'upmana' + os.sep).config_file(filename, "default_ignorelist.txt")
+            component.get('validate').config_file(filename, "default_ignorelist.txt")
+
             self.mana = self.LoadDoc()
             for ignore in self.ignorelist:
                 shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
@@ -494,7 +598,7 @@ class updateApp(wx.App):
                 print ignore.split('/')[len(ignore.split('/')) - 1]
                 shutil.copyfile(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
                 os.remove(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
-        else: print 'No default repository set, skipping Auto Update!'
+        else: print 'No default repository set, skipping Auto Update!' #Add better warning!
 
     def LoadDoc(self):
         ignore = open(self.filename)
@@ -504,7 +608,10 @@ class updateApp(wx.App):
         ignore.close()
 
     def OnExit(self):
-        imported = ['manifest', 'orpg.dirpath', 'orpg.orpgCore', 'orpg.orpg_version', 'orpg.tools.orpg_log', 'orpg.tools.orpg_log', 'orpg.orpg_xml', 'orpg.dirpath', 'orpg.dirpath', 'upmana.validate', 'mercurial.ui', 'mercurial.hg', 'mercurial.commands', 'mercurial.repo', 'mercurial.revlog', 'mercurial.cmdutil', 'shutil']
+        imported = ['manifest', 'orpg.dirpath', 'orpg.orpgCore', 'orpg.orpg_version', 
+                    'orpg.tools.orpg_log', 'orpg.tools.orpg_log', 'orpg.orpg_xml', 'orpg.dirpath', 
+                    'orpg.dirpath', 'upmana.validate', 'mercurial.ui', 'mercurial.hg', 
+                    'mercurial.commands', 'mercurial.repo', 'mercurial.revlog', 'mercurial.cmdutil', 'shutil']
         for name in imported:
             if name in sys.modules: del sys.modules[name]
 
