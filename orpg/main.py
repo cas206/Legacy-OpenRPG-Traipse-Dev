@@ -36,6 +36,8 @@ from orpg.orpg_windows import *
 
 from orpg.dirpath import dir_struct
 
+from orpg import minidom
+
 import orpg.player_list
 
 import orpg.tools.pluginui as pluginUI
@@ -613,7 +615,7 @@ class orpgFrame(wx.Frame):
         filename = dir_struct["user"] + "layout.xml"
         temp_file = open(filename)
         txt = temp_file.read()
-        xml_dom = self.xml.parseXml(txt)._get_documentElement()
+        xml_dom = xml.parseXml(txt)._get_documentElement()
         temp_file.close()
 
         """ Would a component work better? 
@@ -743,7 +745,7 @@ class orpgFrame(wx.Frame):
         #Load the layout if one exists
         layout = xml_dom.getElementsByTagName("DockLayout")
         try:
-            textnode = self.xml.safe_get_text_node(layout[0])
+            textnode = xml.safe_get_text_node(layout[0])
             self._mgr.LoadPerspective(textnode._get_nodeValue())
         except: pass
         xml_dom.unlink()
@@ -872,7 +874,7 @@ class orpgFrame(wx.Frame):
         filename = dir_struct["user"] + "layout.xml"
         temp_file = open(filename)
         txt = temp_file.read()
-        xml_dom = self.xml.parseXml(txt)._get_documentElement()
+        xml_dom = xml.parseXml(txt)._get_documentElement()
         temp_file.close()
         (x_size,y_size) = self.GetClientSize()
         (x_pos,y_pos) = self.GetPositionTuple()
@@ -885,12 +887,12 @@ class orpgFrame(wx.Frame):
         xml_dom.setAttribute("maximized", str(max))
         layout = xml_dom.getElementsByTagName("DockLayout")
         try:
-            textnode = self.xml.safe_get_text_node(layout[0])
+            textnode = xml.safe_get_text_node(layout[0])
             textnode._set_nodeValue(str(self._mgr.SavePerspective()))
         except:
-            elem = self.xml.minidom.Element('DockLayout')
+            elem = minidom.Element('DockLayout')
             elem.setAttribute("DO_NO_EDIT","True")
-            textnode = self.xml.safe_get_text_node(elem)
+            textnode = xml.safe_get_text_node(elem)
             textnode._set_nodeValue(str(self._mgr.SavePerspective()))
             xml_dom.appendChild(elem)
         temp_file = open(filename, "w")

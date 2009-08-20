@@ -3,11 +3,11 @@ import manifest
 from orpg.orpgCore import *
 #import tempfile
 import shutil
+
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 from upmana.validate import validate
-from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
 

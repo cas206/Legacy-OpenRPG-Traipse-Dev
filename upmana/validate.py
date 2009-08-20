@@ -35,3 +35,5 @@ class Validate:
 
     def ini_entry(self, entry_name, ini_file):
         pass
+
+validate = Validate()
