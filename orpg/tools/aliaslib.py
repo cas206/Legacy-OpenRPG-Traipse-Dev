@@ -29,30 +29,23 @@
 __version__ = "$Id: aliaslib.py,v 1.20 2007/08/09 05:23:21 digitalxero Exp $"
 
 from orpg.orpg_wx import *
-from orpg.orpgCore import *
+from orpg.orpgCore import component
 from orpg.orpg_windows import createMaskedButton, orpgMultiCheckBoxDlg
 from orpg.tools.rgbhex import RGBHex
-import orpg.tools.orpg_log
 from orpg.dirpath import dir_struct
-import orpg.orpg_xml
-import orpg.tools.validate
-#import orpg.tools.orpg_settings
+from orpg.tools.validate import validate
+from orpg.tools.orpg_settings import settings
+import re
 
 class AliasLib(wx.Frame):
     def __init__(self):
         self.orpgframe = component.get('frame')
-        self.log = component.get('log')
-        self.log.log("Enter AliasLib", ORPG_DEBUG)
         wx.Frame.__init__(self, None, wx.ID_ANY, title="Alias Lib")
         self.orpgframe.Freeze()
         self.Freeze()
         self.SetOwnBackgroundColour('#EFEFEF')
-        self.dir_struct = dir_struct
-        self.settings = component.get('settings')
-        self.xml = component.get('xml')
-        self.validate = component.get('validate')
-        self.filename = self.settings.get_setting('aliasfile') + '.alias'
-        self.validate.config_file(self.filename, "default_alias.alias")
+        self.filename = settings.get_setting('aliasfile') + '.alias'
+        validate.config_file(self.filename, "default_alias.alias")
         self.buildMenu()
         self.buildButtons()
         self.buildGUI()
@@ -61,7 +54,6 @@ class AliasLib(wx.Frame):
         self.Thaw()
         self.orpgframe.Thaw()
         self.Bind(wx.EVT_CLOSE, self.OnMB_FileExit)
-        self.log.log("Exit AliasLib", ORPG_DEBUG)
 
     def InitSetup(self):
         self.chat = component.get('chat')
@@ -70,7 +62,6 @@ class AliasLib(wx.Frame):
         self.session = component.get('session')
 
     def buildMenu(self):
-        self.log.log("Enter AliasLib->buildMenu(self)", ORPG_DEBUG)
         filemenu = wx.Menu()
         item = wx.MenuItem(filemenu, wx.ID_ANY, "&New\tCtrl+N", "New ALias Lib")
         self.Bind(wx.EVT_MENU, self.OnMB_FileNew, item)
@@ -129,10 +120,8 @@ class AliasLib(wx.Frame):
         menu.Append(filtermenu, "&Filter")
         menu.Append(transmitmenu, "&Transmit")
         self.SetMenuBar(menu)
-        self.log.log("Exit AliasLib->buildMenu(self)", ORPG_DEBUG)
 
     def OnMB_FileNew(self, event):
-        self.log.log("Enter AliasLib->OnMB_FileNew(self, event)", ORPG_DEBUG)
         oldfilename = self.filename
         dlg = wx.TextEntryDialog(self, "Please Name This Alias Lib", "New Alias Lib")
         if dlg.ShowModal() == wx.ID_OK:
@@ -143,24 +132,22 @@ class AliasLib(wx.Frame):
             self.aliasList = []
             self.filterList = []
             self.OnMB_FileSave(None)
-        self.settings.set_setting('aliasfile', self.filename[:-6])
-        self.log.log("Exit AliasLib->OnMB_FileNew(self, event)", ORPG_DEBUG)
+        settings.set_setting('aliasfile', self.filename[:-6])
 
     def OnMB_FileOpen(self, event):
-        self.log.log("Enter AliasLib->OnMB_FileOpen(self, event)", ORPG_DEBUG)
         oldfilename = self.filename
-        dlg = wx.FileDialog(self, "Select an Alias Lib to Open", self.dir_struct["user"], wildcard="*.alias", style=wx.HIDE_READONLY|wx.OPEN)
+        dlg = wx.FileDialog(self, "Select an Alias Lib to Open", 
+                            dir_struct["user"], wildcard="*.alias", 
+                            style=wx.HIDE_READONLY|wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.filename = dlg.GetFilename()
         dlg.Destroy()
         if oldfilename != self.filename:
             self.OnMB_FileSave(None, oldfilename)
             self.loadFile()
-        self.settings.set_setting('aliasfile', self.filename[:-6])
-        self.log.log("Exit AliasLib->OnMB_FileOpen(self, event)", ORPG_DEBUG)
+        settings.set_setting('aliasfile', self.filename[:-6])
 
     def OnMB_FileSave(self, event, file=None):
-        self.log.log("Enter AliasLib->OnMB_FileSave(self, event)", ORPG_DEBUG)
         idx = self.aliasIdx
         if file == None:
             file = self.filename
@@ -182,15 +169,18 @@ class AliasLib(wx.Frame):
             xml += "\t</filter>\n"
         xml += "</aliaslib>"
         self.alias = idx
-        f = open(self.dir_struct["user"] + file, "w")
+        f = open(dir_struct["user"] + file, "w")
         f.write(xml)
         f.close()
-        self.log.log("Exit AliasLib->OnMB_FileSave(self, event)", ORPG_DEBUG)
 
     def OnMB_FileExportToTree(self, event):
-        self.log.log("Enter AliasLib->OnMB_FileExportToTree(self, event)", ORPG_DEBUG)
         #tree = component.get("tree")
-        xml = '<nodehandler class="voxchat_handler" icon="player" module="voxchat" name="' + self.filename[:-6] + '" use.filter="0" version="1.0">' + "\n"
+        xml = '<nodehandler class="voxchat_handler" '
+        xml += 'icon="player" '
+        xml += 'module="voxchat" '
+        xml += 'name="' + self.filename[:-6] + '" '
+        xml += 'use.filter="0" '
+        xml += 'version="1.0">' + '\n'
         idx = self.aliasIdx
         for n in xrange(self.selectAliasWnd.GetItemCount()):
             self.alias = n
@@ -210,23 +200,16 @@ class AliasLib(wx.Frame):
             xml += "\t</voxchat.filter>\n"
         xml += "</nodehandler>"
         self.gametree.insert_xml(xml)
-        self.log.log("Exit AliasLib->OnMB_FileExportToTree(self, event)", ORPG_DEBUG)
 
     def OnMB_FileExit(self, event):
-        self.log.log("Enter AliasLib->OnMB_FileExit(self, event)", ORPG_DEBUG)
         self.OnMB_FileSave(0)
         self.Hide()
-        top_frame = component.get('frame')
-        top_frame.mainmenu.Check(top_frame.mainmenu.FindMenuItem("Windows", "Alias Lib"), False)
-        self.log.log("Exit AliasLib->OnMB_FileExit(self, event)", ORPG_DEBUG)
+        self.orpgframe.mainmenu.Check(self.orpgframe.mainmenu.FindMenuItem("Windows", "Alias Lib"), False)
 
     def OnMB_AliasNew(self, event):
-        self.log.log("Enter AliasLib->OnMB_AliasNew(self, event)", ORPG_DEBUG)
         self.NewEditAliasDialog("New")
-        self.log.log("Exit AliasLib->OnMB_AliasNew(self, event)", ORPG_DEBUG)
 
     def OnMB_AliasAddTemporary(self, event):
-        self.log.log("Enter AliasLib->OnMB_AliasAddTemporary(self, event)", ORPG_DEBUG)
         minis = self.map.canvas.layers['miniatures'].miniatures
         for min in minis:
             name = min.label
@@ -235,16 +218,12 @@ class AliasLib(wx.Frame):
                 self.selectAliasWnd.SetStringItem(i, 1, "Default")
                 self.selectAliasWnd.RefreshItem(i)
         self.RefreshAliases()
-        self.log.log("Exit AliasLib->OnMB_AliasAddTemporary(self, event)", ORPG_DEBUG)
 
     def OnMB_AliasEdit(self, event):
-        self.log.log("Enter AliasLib->OnMB_AliasEdit(self, event)", ORPG_DEBUG)
         if self.aliasIdx != -1:
             self.NewEditAliasDialog("Edit")
-        self.log.log("Exit AliasLib->OnMB_AliasEdit(self, event)", ORPG_DEBUG)
 
     def NewEditAliasDialog(self, type):
-        self.log.log("Enter AliasLib->NewEditAliasDialog(self, type)", ORPG_DEBUG)
         dlg = wx.Dialog(self, wx.ID_ANY, type + " Alias", style=wx.DEFAULT_DIALOG_STYLE|wx.STAY_ON_TOP)
         txt = wx.TextCtrl(dlg, wx.ID_ANY)
         if type == 'Edit':
@@ -279,24 +258,18 @@ class AliasLib(wx.Frame):
                     self.selectAliasWnd.SetItemTextColour(i, RGBHex().hexstring(r, g, b))
                 self.selectAliasWnd.RefreshItem(i)
             self.RefreshAliases()
-        self.log.log("Exit AliasLib->NewEditAliasDialog(self, type)", ORPG_DEBUG)
 
     def ChangeAliasColor(self, event):
-        self.log.log("Enter AliasLib->ChangeAliasColor(self, event)", ORPG_DEBUG)
         color = RGBHex().do_hex_color_dlg(self)
         self.colorbtn.SetLabel("Chat Color")
         self.colorbtn.SetForegroundColour(color)
-        self.log.log("Exit AliasLib->ChangeAliasColor(self, event)", ORPG_DEBUG)
 
     def OnMB_AliasDelete(self, event):
-        self.log.log("Enter AliasLib->OnMB_AliasDelete(self, event)", ORPG_DEBUG)
         if self.aliasIdx != -1:
             self.selectAliasWnd.DeleteItem(self.aliasIdx)
         self.RefreshAliases()
-        self.log.log("Exit AliasLib->OnMB_AliasDelete(self, event)", ORPG_DEBUG)
 
     def OnMB_FilterNew(self, event):
-        self.log.log("Enter AliasLib->OnMB_FilterNew(self, event)", ORPG_DEBUG)
         dlg = wx.TextEntryDialog(self, 'Filter Name: ', 'Please name this filter')
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
@@ -306,141 +279,121 @@ class AliasLib(wx.Frame):
         self.filter = i
         self.regExList.append([])
         self.OnMB_FilterEdit(None)
-        self.log.log("Exit AliasLib->OnMB_FilterNew(self, event)", ORPG_DEBUG)
 
     def OnMB_FilterEdit(self, event):
-        self.log.log("Enter AliasLib->OnMB_FilterEdit(self, event)", ORPG_DEBUG)
         wnd = FilterEditWnd(self, self.filter, self.filterRegEx)
         wnd.MakeModal(True)
         wnd.Show()
-        self.log.log("Exit AliasLib->OnMB_FilterEdit(self, event)", ORPG_DEBUG)
 
     def OnMB_FilterDelete(self, event):
-        self.log.log("Enter AliasLib->OnMB_FilterDelete(self, event)", ORPG_DEBUG)
         if self.filterIdx != -1:
             self.selectFilterWnd.DeleteItem(self.filterIdx)
-        self.log.log("Exit AliasLib->OnMB_FilterDelete(self, event)", ORPG_DEBUG)
 
     def OnMB_TransmitSend(self, event):
-        self.log.log("Enter AliasLib->OnMB_TransmitSend(self, event)", ORPG_DEBUG)
         self.orpgframe.Freeze()
         if self.alias[1] != 'Default':
-            defaultcolor = self.settings.get_setting("mytextcolor")
-            self.settings.set_setting("mytextcolor", self.alias[1])
+            defaultcolor = settings.get_setting("mytextcolor")
+            settings.set_setting("mytextcolor", self.alias[1])
             self.chat.set_colors()
         line = self.textWnd.GetValue().replace("\n", "<br />")
         if self.checkFilterText.IsChecked() and self.filter != self.chat.defaultFilterName:
-            for rule in self.filterRegEx:
-                line = re.sub(rule[0], rule[1], line)
+            for rule in self.filterRegEx: line = re.sub(rule[0], rule[1], line)
         if len(line) > 1:
-            if len(line) > 1 and line[0] != "/":
-                self.chat.ParsePost(line, True, True)
-            else:
-                self.chat.chat_cmds.docmd(line)
+            if len(line) > 1 and line[0] != "/": self.chat.ParsePost(line, True, True)
+            else: self.chat.chat_cmds.docmd(line)
         if self.alias[1] != 'Default':
-            self.settings.set_setting("mytextcolor", defaultcolor)
+            settings.set_setting("mytextcolor", defaultcolor)
             self.chat.set_colors()
         if self.checkClearText.IsChecked():
             self.textWnd.SetValue("")
-        top_frame.Thaw()
-        self.log.log("Exit AliasLib->OnMB_TransmitSend(self, event)", ORPG_DEBUG)
+        self.orpgframe.Thaw()
 
     def OnMB_TransmitEmote(self, event):
-        self.log.log("Enter AliasLib->OnMB_TransmitEmote(self, event)", ORPG_DEBUG)
         self.orpgframe.Freeze()
         line = self.textWnd.GetValue().replace("\n", "<br />")
         if self.checkFilterText.IsChecked() and self.filter != self.chat.defaultFilterName:
-            for rule in self.filterRegEx:
-                line = re.sub(rule[0], rule[1], line)
+            for rule in self.filterRegEx: line = re.sub(rule[0], rule[1], line)
         self.chat.emote_message(line)
         if self.checkClearText.IsChecked():
             self.textWnd.SetValue("")
-        top_frame.Thaw()
-        self.log.log("Exit AliasLib->OnMB_TransmitEmote(self, event)", ORPG_DEBUG)
+        self.orpgframe.Thaw()
 
     def OnMB_TransmitWhisper(self, event):
-        self.log.log("Enter AliasLib->OnMB_TransmitWhisper(self, event)", ORPG_DEBUG)
         self.orpgframe.Freeze()
         players = self.session.get_players()
         if self.alias[1] != 'Default':
-            defaultcolor = self.settings.get_setting("mytextcolor")
-            self.settings.set_setting("mytextcolor", self.alias[1])
+            defaultcolor = settings.get_setting("mytextcolor")
+            settings.set_setting("mytextcolor", self.alias[1])
             self.chat.set_colors()
         opts = []
-        myid = session.get_id()
+        myid = self.session.get_id()
         for p in players:
-            if p[2] != myid:
-                opts.append("(" + p[2] + ") " + self.chat.html_strip(p[0]))
+            if p[2] != myid: opts.append("(" + p[2] + ") " + self.chat.html_strip(p[0]))
         dlg = orpgMultiCheckBoxDlg(self, opts, "Select Players:", "Whisper To", [])
         sendto = []
         if dlg.ShowModal() == wx.ID_OK:
             selections = dlg.get_selections()
-            for s in selections:
-                sendto.append(players[s][2])
+            for s in selections: sendto.append(players[s][2])
         line = self.textWnd.GetValue().replace("\n", "<br />")
         if self.checkFilterText.IsChecked() and self.filter != self.chat.defaultFilterName:
-            for rule in self.filterRegEx:
-                line = re.sub(rule[0], rule[1], line)
-        if len(sendto):
-            self.chat.whisper_to_players(line, sendto)
+            for rule in self.filterRegEx: line = re.sub(rule[0], rule[1], line)
+        if len(sendto): self.chat.whisper_to_players(line, sendto)
         if self.alias[1] != 'Default':
-            self.settings.set_setting("mytextcolor", defaultcolor)
+            settings.set_setting("mytextcolor", defaultcolor)
             self.chat.set_colors()
-        if self.checkClearText.IsChecked():
-            self.textWnd.SetValue("")
-        top_frame.Thaw()
-        self.log.log("Exit AliasLib->OnMB_TransmitWhisper(self, event)", ORPG_DEBUG)
+        if self.checkClearText.IsChecked(): self.textWnd.SetValue("")
+        self.orpgframe.Thaw()
 
     def OnMB_TransmitMacro(self, event):
-        self.log.log("Enter AliasLib->OnMB_TransmitMacro(self, event)", ORPG_DEBUG)
         self.orpgframe.Freeze()
         if self.alias[1] != 'Default':
-            defaultcolor = self.settings.get_setting("mytextcolor")
-            self.settings.set_setting("mytextcolor", self.alias[1])
+            defaultcolor = settings.get_setting("mytextcolor")
+            settings.set_setting("mytextcolor", self.alias[1])
             self.chat.set_colors()
         lines = self.textWnd.GetValue().split("\n")
         if self.checkFilterText.IsChecked() and self.filter != self.chat.defaultFilterName:
+            line = self.textWnd.GetValue().replace("\n", "<br />")
             for rule in self.filterRegEx:
                 line = re.sub(rule[0], rule[1], line)
         for line in lines:
             if len(line) > 1:
-                if line[0] != "/":
-                    self.chat.ParsePost(line, True, True)
-                else:
-                    self.chat.chat_cmds.docmd(line)
+                if line[0] != "/": self.chat.ParsePost(line, True, True)
+                else: self.chat.chat_cmds.docmd(line)
         if self.alias[1] != 'Default':
-            self.settings.set_setting("mytextcolor", defaultcolor)
+            settings.set_setting("mytextcolor", defaultcolor)
             self.chat.set_colors()
-        if self.checkClearText.IsChecked():
-            self.textWnd.SetValue("")
-        top_frame.Thaw()
-        self.log.log("Exit AliasLib->OnMB_TransmitMacro(self, event)", ORPG_DEBUG)
+        if self.checkClearText.IsChecked(): self.textWnd.SetValue("")
+        self.orpgframe.Thaw()
 
     def buildButtons(self):
-        self.log.log("Enter AliasLib->buildButtons(self)", ORPG_DEBUG)
         self.topBtnSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.middleBtnSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.bottomBtnSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.addFromMapBtn = createMaskedButton(self, self.dir_struct["icon"] + 'install.gif', 'Add temporary aliases from map', wx.ID_ANY, "#C0C0C0")
-        self.newAliasBtn = createMaskedButton(self, self.dir_struct["icon"] + 'player.gif', 'Add a new Alias', wx.ID_ANY)
-        self.delAliasBtn = createMaskedButton(self, self.dir_struct["icon"] + 'noplayer.gif', 'Delete selected Alias', wx.ID_ANY)
-        self.editAliasBtn = createMaskedButton(self, self.dir_struct["icon"] + 'note.gif', 'Edit selected Alias', wx.ID_ANY)
+        self.addFromMapBtn = createMaskedButton(self, dir_struct["icon"] + 'install.gif', 
+                    'Add temporary aliases from map', wx.ID_ANY, "#C0C0C0")
+        self.newAliasBtn = createMaskedButton(self, dir_struct["icon"] + 'player.gif', 'Add a new Alias', wx.ID_ANY)
+        self.delAliasBtn = createMaskedButton(self, dir_struct["icon"] + 'noplayer.gif', 'Delete selected Alias', wx.ID_ANY)
+        self.editAliasBtn = createMaskedButton(self, dir_struct["icon"] + 'note.gif', 'Edit selected Alias', wx.ID_ANY)
         self.Bind(wx.EVT_BUTTON, self.OnMB_AliasNew, self.newAliasBtn)
         self.Bind(wx.EVT_BUTTON, self.OnMB_AliasAddTemporary, self.addFromMapBtn)
         self.Bind(wx.EVT_BUTTON, self.OnMB_AliasEdit, self.editAliasBtn)
         self.Bind(wx.EVT_BUTTON, self.OnMB_AliasDelete, self.delAliasBtn)
-        self.newFilterBtn = createMaskedButton(self, self.dir_struct["icon"] + 'add_filter.gif', 'Add a new Filter', wx.ID_ANY, "#0000FF")
-        self.editFilterBtn = createMaskedButton(self, self.dir_struct["icon"] + 'edit_filter.gif', 'Edit selected Filter', wx.ID_ANY, "#FF0000")
-        self.delFilterBtn = createMaskedButton(self, self.dir_struct["icon"] + 'delete_filter.gif', 'Delete selected Filter', wx.ID_ANY, "#0000FF")
+        self.newFilterBtn = createMaskedButton(self, dir_struct["icon"] + 'add_filter.gif', 
+                    'Add a new Filter', wx.ID_ANY, "#0000FF")
+        self.editFilterBtn = createMaskedButton(self, dir_struct["icon"] + 'edit_filter.gif', 
+                    'Edit selected Filter', wx.ID_ANY, "#FF0000")
+        self.delFilterBtn = createMaskedButton(self, dir_struct["icon"] + 'delete_filter.gif', 
+                    'Delete selected Filter', wx.ID_ANY, "#0000FF")
         self.Bind(wx.EVT_BUTTON, self.OnMB_FilterNew, self.newFilterBtn)
         self.Bind(wx.EVT_BUTTON, self.OnMB_FilterEdit, self.editFilterBtn)
         self.Bind(wx.EVT_BUTTON, self.OnMB_FilterDelete, self.delFilterBtn)
-        self.textBoldBtn = createMaskedButton(self, self.dir_struct["icon"] + 'bold.gif', 'Bold', wx.ID_ANY, "#BDBDBD")
-        self.textItalicBtn = createMaskedButton(self, self.dir_struct["icon"] + 'italic.gif', 'Italic', wx.ID_ANY, "#BDBDBD")
-        self.textUnderlineBtn = createMaskedButton(self, self.dir_struct["icon"] + 'underlined.gif', 'Underline', wx.ID_ANY, "#BDBDBD")
+        self.textBoldBtn = createMaskedButton(self, dir_struct["icon"] + 'bold.gif', 'Bold', wx.ID_ANY, "#BDBDBD")
+        self.textItalicBtn = createMaskedButton(self, dir_struct["icon"] + 'italic.gif', 'Italic', wx.ID_ANY, "#BDBDBD")
+        self.textUnderlineBtn = createMaskedButton(self, dir_struct["icon"] + 'underlined.gif', 
+                    'Underline', wx.ID_ANY, "#BDBDBD")
         self.textColorBtn = wx.Button(self, wx.ID_ANY, "Color")
         self.textColorBtn.SetForegroundColour(wx.BLACK)
-        self.exportBtn = createMaskedButton(self, self.dir_struct["icon"] + 'grid.gif', 'Export to Tree', wx.ID_ANY)
+        self.exportBtn = createMaskedButton(self, dir_struct["icon"] + 'grid.gif', 'Export to Tree', wx.ID_ANY)
         self.Bind(wx.EVT_BUTTON, self.FormatText, self.textBoldBtn)
         self.Bind(wx.EVT_BUTTON, self.FormatText, self.textItalicBtn)
         self.Bind(wx.EVT_BUTTON, self.FormatText, self.textUnderlineBtn)
@@ -478,10 +431,8 @@ class AliasLib(wx.Frame):
         self.bottomBtnSizer.Add(self.whisperBtn, 0, wx.EXPAND)
         self.bottomBtnSizer.Add(self.macroBtn, 0, wx.EXPAND)
         self.bottomBtnSizer.Add(self.doneBtn, 0, wx.EXPAND|wx.ALIGN_RIGHT)
-        self.log.log("Exit AliasLib->buildButtons(self)", ORPG_DEBUG)
 
     def buildGUI(self):
-        self.log.log("Enter AliasLib->buildGUI(self)", ORPG_DEBUG)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         rightwnd = wx.SplitterWindow(self, wx.ID_ANY, style=wx.SP_LIVE_UPDATE|wx.SP_NO_XP_THEME|wx.SP_3DSASH)
         leftwnd = wx.SplitterWindow(rightwnd, wx.ID_ANY, style=wx.SP_LIVE_UPDATE|wx.SP_NO_XP_THEME|wx.SP_3DSASH)
@@ -505,24 +456,20 @@ class AliasLib(wx.Frame):
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.Fit()
-        self.log.log("Exit AliasLib->buildGUI(self)", ORPG_DEBUG)
 
     def loadFile(self):
-        self.log.log("Enter AliasLib->loadFile(self)", ORPG_DEBUG)
-        f = open(self.dir_struct["user"] + self.filename, "r")
+        f = open(dir_struct["user"] + self.filename, "r")
         data = f.read()
         f.close()
         self.alias = -1
         self.filter = -1
-        xml_dom = self.xml.parseXml(data)
+        xml_dom = component.get('xml').parseXml(data)
         del data
         aliases = xml_dom.getElementsByTagName("alias")
         alist = []
         for alias in aliases:
-            if alias.hasAttribute("color"):
-                color = alias.getAttribute("color")
-            else:
-                color = 'Default'
+            if alias.hasAttribute("color"): color = alias.getAttribute("color")
+            else: color = 'Default'
             aname = self.MakeSafeHTML(alias.getAttribute("name"))
             alist.append([aname, color])
         alist.sort()
@@ -534,21 +481,19 @@ class AliasLib(wx.Frame):
             flist.append(filter.getAttribute("name"))
             rules = filter.getElementsByTagName("rule")
             sub = []
-            for rule in rules:
-                sub.append([self.MakeSafeHTML(rule.getAttribute("match")), self.MakeSafeHTML(rule.getAttribute("sub"))])
+            for rule in rules: sub.append([self.MakeSafeHTML(rule.getAttribute("match")), 
+                                        self.MakeSafeHTML(rule.getAttribute("sub"))])
             self.regExList.append(sub)
         self.filterList = flist
         xml_dom.unlink()
         self.alias = -1
         self.filter = -1
-        self.log.log("Exit AliasLib->loadFile(self)", ORPG_DEBUG)
 
     def MakeSafeHTML(self, str):
         return str.replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">").replace("&#39;", "'")
     def MakeHTMLSafe(self, str):
         return str.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;").replace("'", "&#39;")
     def ImportFromTree(self, xml_dom):
-        self.log.log("Enter AliasLib->ImportFromTree(self, xml_dom)", ORPG_DEBUG)
         oldfilename = self.filename
         if xml_dom.getAttribute('name') == 'Alias Library':
             dlg = wx.TextEntryDialog(self, "Please Name This Alias Lib", "New Alias Lib")
@@ -558,40 +503,30 @@ class AliasLib(wx.Frame):
             else:
                 dlg.Destroy()
                 return
-        else:
-            self.filename = xml_dom.getAttribute('name') + '.alias'
-        self.settings.set_setting('aliasfile', self.filename[:-6])
-        if oldfilename != self.filename:
-            self.OnMB_FileSave(None, oldfilename)
-        f = open(self.dir_struct["user"] + self.filename, "w")
+        else: self.filename = xml_dom.getAttribute('name') + '.alias'
+        settings.set_setting('aliasfile', self.filename[:-6])
+        if oldfilename != self.filename: self.OnMB_FileSave(None, oldfilename)
+        f = open(dir_struct["user"] + self.filename, "w")
         f.write(xml_dom.toxml().replace('nodehandler', 'aliaslib').replace('voxchat.', ''))
         f.close()
         wx.CallAfter(self.loadFile)
-        self.log.log("Exit AliasLib->ImportFromTree(self, xml_dom)", ORPG_DEBUG)
 
     def NewAliasSelection(self, event):
-        self.log.log("Enter AliasLib->NewAliasSelection(self, event)", ORPG_DEBUG)
         self.alias = event.GetIndex()
         wx.CallAfter(self.chat.aliasList.SetStringSelection, self.alias[0])
-        self.log.log("Exit AliasLib->NewAliasSelection(self, event)", ORPG_DEBUG)
 
     def NoAliasSelection(self, event):
-        self.log.log("Enter AliasLib->NoAliasSelection(self, event)", ORPG_DEBUG)
         self.aliasIdx = -1
         wx.CallAfter(self.chat.aliasList.SetStringSelection, self.alias[0])
-        self.log.log("Exit AliasLib->NoAliasSelection(self, event)", ORPG_DEBUG)
 
     def GetSelectedAlias(self):
-        self.log.log("Enter AliasLib->GetSelectedAlias(self)", ORPG_DEBUG)
         self.InitSetup()
         if self.aliasIdx != -1:
-            self.log.log("Exit AliasLib->GetSelectedAlias(self) return " + str(self.aliasIdx), ORPG_DEBUG)
-            return [self.selectAliasWnd.GetItem(self.aliasIdx, 0).GetText(), self.selectAliasWnd.GetItem(self.aliasIdx, 1).GetText()]
-        self.log.log("Exit AliasLib->GetSelectedAlias(self) return " + str(self.aliasIdx), ORPG_DEBUG)
+            return [self.selectAliasWnd.GetItem(self.aliasIdx, 0).GetText(), 
+                    self.selectAliasWnd.GetItem(self.aliasIdx, 1).GetText()]
         return [self.chat.defaultAliasName, "Default"]
 
     def SetSelectedAlias(self, alias):
-        self.log.log("Enter AliasLib->SetSelectedAlias(self, aliasIdx)", ORPG_DEBUG)
         found = False
         if isinstance(alias, (int, long)):
             self.aliasIdx = alias
@@ -603,36 +538,29 @@ class AliasLib(wx.Frame):
                     found = True
         if not found:
             self.aliasIdx = -1
-        self.log.log("Exit AliasLib->SetSelectedAlias(self, aliasIdx)", ORPG_DEBUG)
 
     def GetAliasList(self):
-        self.log.log("Enter AliasLib->GetAliasList(self)", ORPG_DEBUG)
         alist = []
         for n in xrange(0, self.selectAliasWnd.GetItemCount()):
             self.alias = n
             alist.append(self.alias[0])
-        self.log.log("Exit AliasLib->GetAliasList(self)", ORPG_DEBUG)
         alist.sort()
         alist.insert(0, self.chat.defaultAliasName)
         return alist
 
     def SetAliasList(self, alist):
-        self.log.log("Enter AliasLib->SetAliasList(self, list)", ORPG_DEBUG)
         self.selectAliasWnd.ClearAll()
         self.selectAliasWnd.InsertColumn(0, "Alias")
         self.selectAliasWnd.InsertColumn(1, "Chat Color")
         for item in alist:
             i = self.selectAliasWnd.InsertStringItem(self.selectAliasWnd.GetItemCount(), item[0])
             self.selectAliasWnd.SetStringItem(i, 1, item[1])
-            if item[1] != 'Default':
-                self.selectAliasWnd.SetItemTextColour(i, item[1])
+            if item[1] != 'Default': self.selectAliasWnd.SetItemTextColour(i, item[1])
             self.selectAliasWnd.RefreshItem(i)
         self.aliasIdx = -1
         self.RefreshAliases()
-        self.log.log("Exit AliasLib->SetAliasList(self, list)", ORPG_DEBUG)
 
     def GetAliasColor(self):
-        self.log.log("Enter/Exit AliasLib->GetAliasColor(self) return " + self.alias[1], ORPG_DEBUG)
         return self.alias[1]
 
     def RefreshAliases(self):
@@ -645,23 +573,19 @@ class AliasLib(wx.Frame):
             tmp = self.chat.aliasList.GetStringSelection()
             self.alias = tmp
             aidx = self.aliasIdx+1
-            if len(self.aliasList) <= aidx:
-                aidx = 0
+            if len(self.aliasList) <= aidx: aidx = 0
             self.chat.aliasList.Clear()
-            for n in xrange(l1):
-                self.chat.aliasList.Insert(self.aliasList[n], n)
+            for n in xrange(l1): self.chat.aliasList.Insert(self.aliasList[n], n)
             self.chat.aliasList.SetStringSelection(self.aliasList[aidx])
             fidx = self.chat.filterList.GetSelection()
-            if len(self.filterList) <= fidx:
-                fidx = 0
+            if len(self.filterList) <= fidx: fidx = 0
             self.chat.filterList.Clear()
             for n in xrange(l2):
                 self.chat.filterList.Insert(self.filterList[n], n)
             self.chat.filterList.SetStringSelection(self.filterList[fidx])
             if self.chat.parent.GMChatPanel != None:
                 aidx = self.chat.parent.GMChatPanel.aliasList.GetSelection()
-                if len(self.aliasList) <- aidx:
-                    aidx = 0
+                if len(self.aliasList) <- aidx: aidx = 0
                 self.chat.parent.GMChatPanel.aliasList.Clear()
                 for n in xrange(l1):
                     self.chat.parent.GMChatPanel.aliasList.Insert(self.aliasList[n], n)
@@ -701,8 +625,7 @@ class AliasLib(wx.Frame):
 
             for tab in self.chat.parent.null_tabs:
                 aidx = tab.aliasList.GetSelection()
-                if len(self.aliasList) <= aidx:
-                    aidx = 0
+                if len(self.aliasList) <= aidx: aidx = 0
                 tab.aliasList.Clear()
                 for n in xrange(l1):
                     tab.aliasList.Insert(self.aliasList[n], n)
@@ -716,55 +639,38 @@ class AliasLib(wx.Frame):
         wx.CallAfter(self.orpgframe.Thaw)
 
     def SetAliasColor(self, color):
-        self.log.log("Enter AliasLib->SetAliasColor(self, color)", ORPG_DEBUG)
         if self.aliasIdx != -1:
             self.selectAliasWnd.SetStringItem(self.aliasIdx, 1, color)
             self.selectAliasWnd.SetItemTextColour(self.aliasIdx, color)
-        self.log.log("Exit AliasLib->SetAliasColor(self, color)", ORPG_DEBUG)
 
     def FilterTextChecked(self, event):
         if self.checkFilterText.IsChecked():
             self.chat.filterList.SetStringSelection(self.filter)
-        else:
-            self.chat.filterList.SetStringSelection(self.chat.defaultFilterName)
+        else: self.chat.filterList.SetStringSelection(self.chat.defaultFilterName)
 
     def NewFilterSelection(self, event):
-        self.log.log("Enter AliasLib->NewFilterSelection(self, event)", ORPG_DEBUG)
         self.filter = event.GetIndex()
-        if self.checkFilterText.IsChecked():
-            wx.CallAfter(self.chat.filterList.SetStringSelection, self.filter)
-        self.log.log("Exit AliasLib->NewFilterSelection(self, event)", ORPG_DEBUG)
+        if self.checkFilterText.IsChecked(): wx.CallAfter(self.chat.filterList.SetStringSelection, self.filter)
 
     def NoFilterSelection(self, event):
-        self.log.log("Enter AliasLib->NoFilterSelection(self, event)", ORPG_DEBUG)
         self.filter = -1
         wx.CallAfter(self.chat.filterList.SetStringSelection, self.filter)
-        self.log.log("Exit AliasLib->NoFilterSelection(self, event)", ORPG_DEBUG)
 
     def GetSelectedFilter(self):
-        self.log.log("Enter AliasLib->GetSelectedFilter(self)", ORPG_DEBUG)
-        if self.filterIdx != -1:
-            self.log.log("Exit AliasLib->GetSelectedFilter(self) return " + str(self.filterIdx), ORPG_DEBUG)
-            return self.selectFilterWnd.GetItem(self.filterIdx, 0).GetText()
-        self.log.log("Exit AliasLib->GetSelectedFilter(self) return " + str(self.filterIdx), ORPG_DEBUG)
+        if self.filterIdx != -1: return self.selectFilterWnd.GetItem(self.filterIdx, 0).GetText()
         return self.chat.defaultFilterName
 
     def SetSelectedFilter(self, idx):
-        self.log.log("Enter AliasLib->SetSelectedFilter(self, filter)", ORPG_DEBUG)
         self.filterIdx = idx
-        self.log.log("Exit AliasLib->SetSelectedFilter(self, filter)", ORPG_DEBUG)
 
     def GetFilterList(self):
-        self.log.log("Enter AliasLib->GetFilterList(self)", ORPG_DEBUG)
         list = []
         for n in xrange(-1, self.selectFilterWnd.GetItemCount()):
             self.filter = n
             list.append(self.filter)
-        self.log.log("Exit AliasLib->GetFilterList(self)", ORPG_DEBUG)
         return list
 
     def SetFilterList(self, list):
-        self.log.log("Enter AliasLib->SetFilterList(self, list)", ORPG_DEBUG)
         self.selectFilterWnd.ClearAll()
         self.selectFilterWnd.InsertColumn(0, "Filter Name")
         for item in list:
@@ -773,11 +679,9 @@ class AliasLib(wx.Frame):
         self.selectFilterWnd.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.filter = -1
         self.RefreshAliases()
-        self.log.log("Exit AliasLib->SetFilterList(self, list)", ORPG_DEBUG)
 
     def GetFilterRegEx(self):
-        if self.filterIdx == -1:
-            return []
+        if self.filterIdx == -1: return []
         return self.regExList[self.filterIdx]
 
     def SetFilterRegEx(self, list):
@@ -789,16 +693,11 @@ class AliasLib(wx.Frame):
         id = event.GetId()
         txt = self.textWnd.GetValue()
         (beg, end) = self.textWnd.GetSelection()
-        if beg != end:
-            sel_txt = txt[beg:end]
-        else:
-            sel_txt = txt
-        if id == self.textBoldBtn.GetId():
-            sel_txt = "<b>" + sel_txt + "</b>"
-        elif id == self.textItalicBtn.GetId():
-            sel_txt = "<i>" + sel_txt + "</i>"
-        elif id == self.textUnderlineBtn.GetId():
-            sel_txt = "<u>" + sel_txt + "</u>"
+        if beg != end: sel_txt = txt[beg:end]
+        else: sel_txt = txt
+        if id == self.textBoldBtn.GetId(): sel_txt = "<b>" + sel_txt + "</b>"
+        elif id == self.textItalicBtn.GetId(): sel_txt = "<i>" + sel_txt + "</i>"
+        elif id == self.textUnderlineBtn.GetId(): sel_txt = "<u>" + sel_txt + "</u>"
         elif id == self.textColorBtn.GetId():
             dlg = wx.ColourDialog(self)
             if not dlg.ShowModal() == wx.ID_OK:
@@ -808,10 +707,8 @@ class AliasLib(wx.Frame):
             color = RGBHex().hexstring(color[0], color[1], color[2])
             dlg.Destroy()
             sel_txt = '<font color="' + color + '">' + sel_txt + '</font>'
-        if beg != end:
-            txt = txt[:beg] + sel_txt + txt[end:]
-        else:
-            txt = sel_txt
+        if beg != end: txt = txt[:beg] + sel_txt + txt[end:]
+        else: txt = sel_txt
         self.textWnd.SetValue(txt)
         self.textWnd.SetInsertionPointEnd()
         self.textWnd.SetFocus()
@@ -820,27 +717,22 @@ class AliasLib(wx.Frame):
     alias = property(GetSelectedAlias, SetSelectedAlias)
     aliasList = property(GetAliasList, SetAliasList)
     aliasColor = property(GetAliasColor, SetAliasColor)
-
     filter = property(GetSelectedFilter, SetSelectedFilter)
     filterList = property(GetFilterList, SetFilterList)
     filterRegEx = property(GetFilterRegEx, SetFilterRegEx)
 
 
-
 class FilterEditWnd(wx.Frame):
     def __init__(self, parent, filterName, filterList):
         wx.Frame.__init__(self, parent, wx.ID_ANY, "Edit Filter: " + filterName)
-
         self.filterList = filterList
         self.parent = parent
-
         self.Freeze()
         self.buildGUI()
         self.fillList()
         self.Layout()
         self.grid.Select(0)
         self.Thaw()
-
         self.Bind(wx.EVT_CLOSE, self.OnExit)
 
     def buildGUI(self):
@@ -849,38 +741,30 @@ class FilterEditWnd(wx.Frame):
         bsizer.Add(self.panel, 1, wx.EXPAND)
         self.SetSizer(bsizer)
         self.SetAutoLayout(True)
-
         self.grid = wx.ListCtrl(self.panel, wx.ID_ANY, style=wx.LC_SINGLE_SEL|wx.LC_REPORT|wx.LC_HRULES)
         self.grid.InsertColumn(0, "Replace")
         self.grid.InsertColumn(1, "With")
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.selectRule, self.grid)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.RuleEdit, self.grid)
-
         self.addBtn = wx.Button(self.panel, wx.ID_ANY, 'Add')
         self.editBtn = wx.Button(self.panel, wx.ID_ANY, 'Edit')
         self.deleteBtn = wx.Button(self.panel, wx.ID_ANY, 'Delete')
         self.okBtn = wx.Button(self.panel, wx.ID_OK, 'Done')
-
         self.Bind(wx.EVT_BUTTON, self.RuleAdd, self.addBtn)
         self.Bind(wx.EVT_BUTTON, self.RuleEdit, self.editBtn)
         self.Bind(wx.EVT_BUTTON, self.RuleDelete, self.deleteBtn)
         self.Bind(wx.EVT_BUTTON, self.OnDone, self.okBtn)
-
         btsizer = wx.BoxSizer(wx.VERTICAL)
         btsizer.Add(self.addBtn, 0, wx.EXPAND)
         btsizer.Add(self.editBtn, 0, wx.EXPAND)
         btsizer.Add(self.deleteBtn, 0, wx.EXPAND)
         btsizer.Add(self.okBtn, 0, wx.EXPAND)
-
         sizer = wx.GridBagSizer(5,5)
-
         sizer.Add(self.grid, (0,0), flag=wx.EXPAND)
         sizer.Add(btsizer, (0,1), flag=wx.EXPAND)
-
         sizer.AddGrowableCol(0)
         sizer.AddGrowableRow(0)
         sizer.SetEmptyCellSize((0,0))
-
         self.panel.SetSizer(sizer)
         self.panel.SetAutoLayout(True)
 
@@ -888,7 +772,6 @@ class FilterEditWnd(wx.Frame):
         for rule in self.filterList:
             i = self.grid.InsertStringItem(self.grid.GetItemCount(), rule[0])
             self.grid.SetStringItem(i, 1, rule[1])
-
         self.grid.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.grid.SetColumnWidth(1, wx.LIST_AUTOSIZE)
 
@@ -897,7 +780,6 @@ class FilterEditWnd(wx.Frame):
         self.Freeze()
         for i in xrange(0, self.grid.GetItemCount()):
             self.grid.SetItemBackgroundColour(i, (255,255,255))
-
         self.grid.SetItemBackgroundColour(self.currentIdx, (0,255,0))
         self.grid.SetItemState(self.currentIdx, 0, wx.LIST_STATE_SELECTED)
         self.grid.EnsureVisible(self.currentIdx)
@@ -914,24 +796,19 @@ class FilterEditWnd(wx.Frame):
         sizer.Add(withtxt, 0, wx.EXPAND)
         sizer.Add(wx.Button(dlg, wx.ID_OK, 'Ok'), 0, wx.EXPAND)
         sizer.Add(wx.Button(dlg, wx.ID_CANCEL, 'Cancel'), 0, wx.EXPAND)
-
         dlg.SetSizer(sizer)
         dlg.SetAutoLayout(True)
         dlg.Fit()
-
         rpltxt.SetValue(self.grid.GetItem(self.currentIdx, 0).GetText())
         withtxt.SetValue(self.grid.GetItem(self.currentIdx, 1).GetText())
-
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-
         self.grid.SetStringItem(self.currentIdx, 0, rpltxt.GetValue())
         self.grid.SetStringItem(self.currentIdx, 1, withtxt.GetValue())
         self.grid.RefreshItem(self.currentIdx)
         self.grid.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.grid.SetColumnWidth(1, wx.LIST_AUTOSIZE)
-
         dlg.Destroy()
 
     def RuleAdd(self, event):
@@ -946,11 +823,9 @@ class FilterEditWnd(wx.Frame):
 
     def OnExit(self, event):
         self.MakeModal(False)
-
         list = []
         for i in xrange(0, self.grid.GetItemCount()):
             list.append([self.grid.GetItem(i, 0).GetText(), self.grid.GetItem(i, 1).GetText()])
-
         self.parent.filterRegEx = list
         event.Skip()
 

@@ -34,10 +34,10 @@ class Plugin(orpg.pluginhandler.PluginHandler): #Attempting to pass the orpgFram
         self.topframe.Bind(wx.EVT_MENU, self.on_settings, self.notifyAll)
         self.topframe.Bind(wx.EVT_MENU, self.on_settings, self.notifyWhisper)
 
-
     def on_settings(self, evt):
         if self.notifyToggle.IsChecked() == False:
             self.notify = 'Off'
+            self.plugindb.SetString('xxchatnotify', 'notify', self.notify)
             return
         if self.notifyBeep.IsChecked() == True:
             self.notify ='beep'
@@ -49,12 +49,14 @@ class Plugin(orpg.pluginhandler.PluginHandler): #Attempting to pass the orpgFram
             self.type = 'all'
         elif self.notifyWhisper.IsChecked() == True:
             self.type = 'whisper'
+        self.plugindb.SetString('xxchatnotify', 'notify', self.notify)
+        self.plugindb.SetString('xxchatnotify', 'type', self.type)
 
 
     def plugin_enabled(self):
         self.plugin_addcommand('/notify', self.on_notify, 'beep | flash | both | off | type all|whisper | clearsound | lsound soundfile [Local Sound Files only] | rsound http://to.sound.file [Remote Sound Files only] - This command turns on the chat notification. You can use sound files and flash by issuing /notify both')
-        self.notify = self.plugindb.GetString('xxchatnotify', 'notify', 'off')
-        self.type = self.plugindb.GetString('xxchatnotify', 'type', 'all')
+        self.notify = self.plugindb.GetString('xxchatnotify', 'notify', string) or 'off'
+        self.type = self.plugindb.GetString('xxchatnotify', 'type', string) or 'beep'
         self.mainframe = component.get('frame')
         self.sound_player = component.get('sound')
         self.soundloc = self.plugindb.GetString('xxchatnotify', 'soundloc', 'local')
