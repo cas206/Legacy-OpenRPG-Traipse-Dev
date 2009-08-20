@@ -143,7 +143,7 @@
 # r- resolved
 # o- open
 #
-import orpg.tools.orpg_settings
+import orpg.tools.orpg_settings #Not used??
 import orpg.minidom
 from core import *
 from containers import *

@@ -31,19 +31,22 @@ from map_version import MAP_VERSION
 from map_msg import *
 from min_dialogs import *
 from map_prop_dialog import *
-from orpg.dirpath import dir_struct
+
 import random
 import os
 import thread
 import gc
 import traceback
+
 from miniatures_handler import *
 from whiteboard_handler import *
 from background_handler import *
-from fog_handler import *
-from images import ImageHandler
 from grid_handler import *
 from map_handler import *
+from fog_handler import *
+
+from orpg.dirpath import dir_struct
+from images import ImageHandler
 from orpg.orpgCore import component
 
 # Various marker modes for player tools on the map
@@ -55,8 +58,7 @@ MARKER_MODE_AREA_TARGET = 3
 class MapCanvas(wx.ScrolledWindow):
     def __init__(self, parent, ID, isEditor=0):
         self.parent = parent
-        self.log = component.get("log")
-        self.log.log("Enter MapCanvas", ORPG_DEBUG)
+        self.log = component.get('log')
         self.settings = component.get("settings")
         self.session = component.get("session")
         wx.ScrolledWindow.__init__(self, parent, ID, 
@@ -106,20 +108,14 @@ class MapCanvas(wx.ScrolledWindow):
         self.inside = 0
         # miniatures drag
         self.drag = None
-        self.log.log("Exit MapCanvas", ORPG_DEBUG)
 
     def better_refresh(self, event=None):
-        self.log.log("Enter MapCanvas->better_refresh(self)", ORPG_DEBUG)
         self.Refresh(True)
-        self.log.log("Eexit MapCanvas->better_refresh(self)", ORPG_DEBUG)
 
     def pre_destory_cleanup(self):
-        self.log.log("Enter MapCanvas->pre_destory_cleanup(self)", ORPG_DEBUG)
         self.layers["miniatures"].del_all_miniatures()
-        self.log.log("Exit MapCanvas->pre_destory_cleanup(self)", ORPG_DEBUG)
 
     def processImages(self, evt=None):
-        self.log.log("Enter MapCanvas->processImages(self)", ORPG_DEBUG)
         self.session = component.get("session")
         if self.session.my_role() == self.session.ROLE_LURKER or (str(self.session.group_id) == '0' and str(self.session.status) == '1'):
             cidx = self.parent.get_tab_index("Background")
@@ -162,9 +158,7 @@ class MapCanvas(wx.ScrolledWindow):
             self.cacheSizeSet = True
             cacheSize = self.settings.get_setting("ImageCacheSize")
             if len(cacheSize): self.cacheSize = int(cacheSize)
-            else: self.log.log("Default cache size being used.", ORPG_GENERAL)
-            self.log.log("Current image cache size is set at " + str(self.cacheSize) + " images, using random purge.", 
-                ORPG_GENERAL)
+            else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
             img = wx.ImageFromMime(path[1], path[2]).ConvertToBitmap()
@@ -180,15 +174,15 @@ class MapCanvas(wx.ScrolledWindow):
             # Flag that we now need to refresh!
             self.requireRefresh += 1
 
-            # Randomly purge an item from the cache, while this is lamo, it does
-            # keep the cache from growing without bounds, which is pretty important!
+            """ Randomly purge an item from the cache, while this is lamo, it does
+                keep the cache from growing without bounds, which is pretty important!"""
             if len(ImageHandler.Cache) >= self.cacheSize:
                 ImageHandler.cleanCache()
         else:
-            # Now, make sure not only that we require a refresh, but that enough time has
-            # gone by since our last refresh.  This keeps back to back refreshing occuring during
-            # large map loads.  Of course, we are now trying to pack as many image refreshes as
-            # we can into a single cycle.
+            """ Now, make sure not only that we require a refresh, but that enough time has
+                gone by since our last refresh.  This keeps back to back refreshing occuring during
+                large map loads.  Of course, we are now trying to pack as many image refreshes as
+                we can into a single cycle."""
             if self.requireRefresh and (self.requireRefresh == self.lastRefreshValue):
                 if (self.lastRefreshTime) < time.time():
                     self.requireRefresh = 0
@@ -196,86 +190,64 @@ class MapCanvas(wx.ScrolledWindow):
                     self.lastRefreshTime = time.time()
                     self.Refresh(True)
             else: self.lastRefreshValue = self.requireRefresh
-        self.log.log("Exit MapCanvas->processImages(self)", ORPG_DEBUG)
 
     def on_scroll(self, evt):
-        self.log.log("Enter MapCanvas->on_scroll(self, evt)", ORPG_DEBUG)
         if self.drag: self.drag.Hide()
         if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
-        self.log.log("Exit MapCanvas->on_scroll(self, evt)", ORPG_DEBUG)
 
     def on_char(self, evt):
-        self.log.log("Enter MapCanvas->on_char(self, evt)", ORPG_DEBUG)
         if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
-        self.log.log("Exit MapCanvas->on_char(self, evt)", ORPG_DEBUG)
 
     def printscale(self):
-        self.log.log("Enter MapCanvas->printscale(self)", ORPG_DEBUG)
         wx.BeginBusyCursor()
         dc = wx.ClientDC(self)
         self.PrepareDC(dc)
         self.showmapscale(dc)
         self.Refresh(True)
         wx.EndBusyCursor()
-        self.log.log("Exit MapCanvas->printscale(self)", ORPG_DEBUG)
 
     def send_map_data(self, action="update"):
-        self.log.log("Enter MapCanvas->send_map_data(self, " + action +")", ORPG_DEBUG)
         wx.BeginBusyCursor()
         send_text = self.toxml(action)
         if send_text:
             if not self.isEditor: self.frame.session.send(send_text)
         wx.EndBusyCursor()
-        self.log.log("Exit MapCanvas->send_map_data(self, " + action +")", ORPG_DEBUG)
 
     def get_size(self):
-        self.log.log("Enter MapCanvas->get_size(self)", ORPG_DEBUG)
-        self.log.log("Exit MapCanvas->get_size(self) return " + str(self.size), ORPG_DEBUG)
         return self.size
 
     def set_size(self, size):
-        self.log.log("Enter MapCanvas->set_size(self, size)", ORPG_DEBUG)
         if size[0] < 300: size = (300, size[1])
         if size[1] < 300: size = (size[0], 300)
         self.size_changed = 1
         self.size = size
         self.fix_scroll()
         self.layers['fog'].resize(size)
-        self.log.log("Exit MapCanvas->set_size(self, size)", ORPG_DEBUG)
 
     def fix_scroll(self):
-        self.log.log("Enter MapCanvas->fix_scroll(self)", ORPG_DEBUG)
         scale = self.layers['grid'].mapscale
         pos = self.GetViewStart()
         unit = self.GetScrollPixelsPerUnit()
         pos = [pos[0]*unit[0],pos[1]*unit[1]]
         size = self.GetClientSize()
         unit = [10*scale,10*scale]
-        if (unit[0] == 0 or unit[1] == 0):
-            self.log.log("Exit MapCanvas->fix_scroll(self)", ORPG_DEBUG)
-            return
+        if (unit[0] == 0 or unit[1] == 0): return
         pos[0] /= unit[0]
         pos[1] /= unit[1]
         mx = [int(self.size[0]*scale/unit[0])+1, int(self.size[1]*scale/unit[1]+1)]
         self.SetScrollbars(unit[0], unit[1], mx[0], mx[1], pos[0], pos[1])
-        self.log.log("Exit MapCanvas->fix_scroll(self)", ORPG_DEBUG)
 
     def on_resize(self, evt):
-        self.log.log("Enter MapCanvas->on_resize(self, evt)", ORPG_DEBUG)
         self.fix_scroll()
         wx.CallAfter(self.Refresh, True)
         evt.Skip()
-        self.log.log("Exit MapCanvas->on_resize(self, evt)", ORPG_DEBUG)
 
     def on_erase_background(self, evt):
-        self.log.log("Enter MapCanvas->on_erase_background(self, evt)", ORPG_DEBUG)
         evt.Skip()
-        self.log.log("Exit MapCanvas->on_erase_background(self, evt)", ORPG_DEBUG)
 
     def on_paint(self, evt):
-        self.log.log("Enter MapCanvas->on_paint(self, evt)", ORPG_DEBUG)
         scale = self.layers['grid'].mapscale
         scrollsize = self.GetScrollPixelsPerUnit()
         clientsize = self.GetClientSize()
@@ -307,17 +279,13 @@ class MapCanvas(wx.ScrolledWindow):
                 self.showmapscale(wdc)
         try: evt.Skip()
         except: pass
-        self.log.log("Exit MapCanvas->on_paint(self, evt)", ORPG_DEBUG)
 
     def preppaint(self):
-        self.log.log("Enter MapCanvas->preppaint(self)", ORPG_DEBUG)
         dc = wx.PaintDC(self)
         self.PrepareDC(dc)
-        self.log.log("Exit MapCanvas->preppaint(self)", ORPG_DEBUG)
         return (dc)
 
     def showmapscale(self, dc):
-        self.log.log("Enter MapCanvas->showmapscale(self, dc)", ORPG_DEBUG)
         scalestring = "Scale x" + `self.layers['grid'].mapscale`[:3]
         (textWidth, textHeight) = dc.GetTextExtent(scalestring)
         dc.SetUserScale(1, 1)
@@ -330,13 +298,11 @@ class MapCanvas(wx.ScrolledWindow):
         dc.DrawText(scalestring, x+1, y+1)
         dc.SetPen(wx.NullPen)
         dc.SetBrush(wx.NullBrush)
-        self.log.log("Exit MapCanvas->showmapscale(self, dc)", ORPG_DEBUG)
 
     def snapMarker(self, snapPoint):
         """Based on the position and unit size, figure out where we need to snap to.  As is, on
         a square grid, there are four possible places to snap.  On a hex gid, there are 6 or 12 snap
         points."""
-        self.log.log("Enter MapCanvas->snapMarker(self, snapPoint)", ORPG_DEBUG)
 
         # If snap to grid is disabled, simply return snapPoint unmodified
         if self.layers['grid'].snap:
@@ -362,48 +328,38 @@ class MapCanvas(wx.ScrolledWindow):
                 else: quadYPos = offsetY + size
                 # Create our snap snapPoint and return it
                 snapPoint = wx.Point( quadXPos, quadYPos )
-        self.log.log("Exit MapCanvas->snapMarker(self, snapPoint)", ORPG_DEBUG)
         return snapPoint
 
     # Bunch of math stuff for marking and measuring
     def calcSlope(self, start, stop):
         """Calculates the slop of a line and returns it."""
-        self.log.log("Enter MapCanvas->calcSlope(self, start, stop)", ORPG_DEBUG)
         if start.x == stop.x: s = 0.0001
         else: s = float((stop.y - start.y)) / float((stop.x - start.x))
-        self.log.log("Exit MapCanvas->calcSlope(self, start, stop)", ORPG_DEBUG)
         return s
 
     def calcSlopeToAngle(self, slope):
         """Based on the input slope, the angle (in degrees) will be returned."""
-        self.log.log("Enter MapCanvas->calcSlopeToAngle(self, slope)", ORPG_DEBUG)
         # See if the slope is neg or positive
         if slope == abs(slope):
             # Slope is positive, so make sure it's not zero
             if slope == 0: a = 0
             else: a = 360 - atan(slope) * (180.0/pi)
         else: a = atan(abs(slope)) * (180.0/pi)
-        self.log.log("Exit MapCanvas->calcSlopeToAngle(self, slope)", ORPG_DEBUG)
         return a
 
     def calcLineAngle(self, start, stop):
         """Based on two points that are on a line, return the angle of that line."""
-        self.log.log("Enter MapCanvas->calcLineAngle(self, start, stop)", ORPG_DEBUG)
         a = self.calcSlopeToAngle( self.calcSlope( start, stop ) )
-        self.log.log("Exit MapCanvas->calcLineAngle(self, start, stop)", ORPG_DEBUG)
         return a
 
     def calcPixelDistance(self, start, stop):
         """Calculate the distance between two pixels and returns it.  The calculated
         distance is the Euclidean Distance, which is:
         d = sqrt( (x2 - x1)**2 + (y2 - y1)**2 )"""
-        self.log.log("Enter MapCanvas->calcPixelDistance(self, start, stop)", ORPG_DEBUG)
         d = sqrt( abs((stop.x - start.x)**2 - (stop.y - start.y)**2) )
-        self.log.log("Exit MapCanvas->calcPixelDistance(self, start, stop)", ORPG_DEBUG)
         return d
 
     def calcUnitDistance(self, start, stop, lineAngle):
-        self.log.log("Enter MapCanvas->calcUnitDistance(self, start, stop, lineAngle)", ORPG_DEBUG)
         distance = self.calcPixelDistance( start, stop )
         ln = "%0.2f" % lineAngle
         if self.layers['grid'].mode == GRID_HEXAGON:
@@ -413,12 +369,10 @@ class MapCanvas(wx.ScrolledWindow):
             if ln == "0.00" or ln == "359.99": ud = distance / self.layers['grid'].unit_size
             else: ud = (sqrt(abs((stop.x - start.x)**2 + (stop.y - start.y)**2))) / self.layers['grid'].unit_size
             #ud = sqrt( abs((stop.x - start.x)**2 - (stop.y - start.y)**2) )
-        self.log.log("Exit MapCanvas->calcUnitDistance(self, start, stop, lineAngle)", ORPG_DEBUG)
         return ud
 
     def on_tape_motion(self, evt):
         """Track mouse motion so we can update the marker visual every time it's moved"""
-        self.log.log("Enter MapCanvas->on_tape_motion(self, evt)", ORPG_DEBUG)
         # Make sure we have a mode to do anything, otherwise, we ignore this
         if self.markerMode:
             # Grap the current DC for all of the marker modes
@@ -428,7 +382,7 @@ class MapCanvas(wx.ScrolledWindow):
             # Grab the current map position
             pos = self.snapMarker( evt.GetLogicalPosition( dc ) )
             # Enable brush optimizations
-            #dc.SetOptimization( True )
+            # dc.SetOptimization( True )
             # Set up the pen used for drawing our marker
             dc.SetPen( wx.Pen(wx.RED, 1, wx.LONG_DASH) )
             # Now, based on the marker mode, draw the right thing
@@ -449,12 +403,10 @@ class MapCanvas(wx.ScrolledWindow):
             # Disable brush optimizations
             #dc.SetOptimization( False )
             del dc
-        self.log.log("Exit MapCanvas->on_tape_motion(self, evt)", ORPG_DEBUG)
 
     def on_tape_down(self, evt):
         """Greg's experimental tape measure code.  Hopefully, when this is done, it will all be
         modal based on a toolbar."""
-        self.log.log("Enter MapCanvas->on_tape_down(self, evt)", ORPG_DEBUG)
         dc = wx.ClientDC( self )
         self.PrepareDC( dc )
         dc.SetUserScale(self.layers['grid'].mapscale,self.layers['grid'].mapscale)
@@ -484,11 +436,9 @@ class MapCanvas(wx.ScrolledWindow):
         self.markerStart = pos
         self.markerStop = pos
         del dc
-        self.log.log("Exit MapCanvas->on_tape_down(self, evt)", ORPG_DEBUG)
 
     def on_tape_up(self, evt):
         """When we release the middle button, disable any marking updates that we have been doing."""
-        self.log.log("Enter MapCanvas->on_tape_up(self, evt)", ORPG_DEBUG)
         # If we are in measure mode, draw the actual UNIT distance
         if self.markerMode == MARKER_MODE_MEASURE:
             dc = wx.ClientDC( self )
@@ -521,29 +471,21 @@ class MapCanvas(wx.ScrolledWindow):
             del font
             del dc
         self.markerMode = MARKER_MODE_NONE
-        self.log.log("Exit MapCanvas->on_tape_up(self, evt)", ORPG_DEBUG)
 
     # MODE 1 = MOVE, MODE 2 = whiteboard, MODE 3 = Tape measure
     def on_left_down(self, evt):
-        self.log.log("Enter MapCanvas->on_left_down(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): self.on_tape_down (evt)
         else: self.frame.on_left_down(evt)
-        self.log.log("Exit MapCanvas->on_left_down(self, evt)", ORPG_DEBUG)
 
     def on_right_down(self, evt):
-        self.log.log("Enter MapCanvas->on_right_down(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): pass
         else: self.frame.on_right_down(evt)
-        self.log.log("Exit MapCanvas->on_right_down(self, evt)", ORPG_DEBUG)
 
     def on_left_dclick(self, evt):
-        self.log.log("Enter MapCanvas->on_left_dclick(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): pass
         else: self.frame.on_left_dclick(evt)
-        self.log.log("Exit MapCanvas->on_left_dclick(self, evt)", ORPG_DEBUG)
 
     def on_left_up(self, evt):
-        self.log.log("Enter MapCanvas->on_left_up(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): self.on_tape_up(evt)
         elif component.get("tree").dragging:
             tree = component.get("tree")
@@ -552,17 +494,13 @@ class MapCanvas(wx.ScrolledWindow):
                 tree.dragging = False
                 tree.drag_obj = None
         else: self.frame.on_left_up(evt)
-        self.log.log("Exit MapCanvas->on_left_up(self, evt)", ORPG_DEBUG)
 
     def on_motion(self, evt):
-        self.log.log("Enter MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
         if evt.ShiftDown(): self.on_tape_motion(evt)
         elif evt.LeftIsDown() and component.get("tree").dragging: pass
         else: self.frame.on_motion(evt)
-        self.log.log("Exit MapCanvas->on_motion(self, evt)", ORPG_DEBUG)
 
     def on_zoom_out(self, evt):
-        self.log.log("Enter MapCanvas->on_zoom_out(self, evt)", ORPG_DEBUG)
         if self.layers['grid'].mapscale > 0.2:
             # attempt to keep same logical point at center of screen
             scale = self.layers['grid'].mapscale
@@ -592,10 +530,8 @@ class MapCanvas(wx.ScrolledWindow):
             dc.EndDrawing()
             del dc
             self.zoom_display_timer.Start(500,1)
-        self.log.log("Exit MapCanvas->on_zoom_out(self, evt)", ORPG_DEBUG)
 
     def on_zoom_in(self, evt):
-        self.log.log("Enter MapCanvas->on_zoom_in(self, evt)", ORPG_DEBUG)
         # attempt to keep same logical point at center of screen
         scale = self.layers['grid'].mapscale
         scrollsize = self.GetScrollPixelsPerUnit()
@@ -624,15 +560,12 @@ class MapCanvas(wx.ScrolledWindow):
         dc.EndDrawing()
         del dc
         self.zoom_display_timer.Start(500, 1)
-        self.log.log("Exit MapCanvas->on_zoom_in(self, evt)", ORPG_DEBUG)
 
     def on_prop(self, evt):
-        self.log.log("Enter MapCanvas->on_prop(self, evt)", ORPG_DEBUG)
         self.session = component.get("session")
         self.chat = component.get("chat")
         if (self.session.my_role() != self.session.ROLE_GM):
             self.chat.InfoPost("You must be a GM to use this feature")
-            self.log.log("Exit MapCanvas->on_prop(self, evt)", ORPG_DEBUG)
             return
         dlg = general_map_prop_dialog(self.frame.GetParent(),self.size,self.layers['bg'],self.layers['grid'])
         if dlg.ShowModal() == wx.ID_OK:
@@ -641,10 +574,8 @@ class MapCanvas(wx.ScrolledWindow):
             self.Refresh(False)
         dlg.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit MapCanvas->on_prop(self, evt)", ORPG_DEBUG)
 
     def add_miniature(self, min_url, min_label='', min_unique=-1):
-        self.log.log("Enter MapCanvas->add_miniature(self, min_url, min_label, min_unique)", ORPG_DEBUG)
         if min_unique == -1: min_unique = not self.use_serial
         if min_url == "" or min_url == "http://": return
         if min_url[:7] != "http://" : min_url = "http://" + min_url
@@ -659,27 +590,19 @@ class MapCanvas(wx.ScrolledWindow):
         try:
             id = 'mini-' + self.frame.session.get_next_id()
             self.layers['miniatures'].add_miniature(id, min_url, label=min_label)
-        except Exception, e:
-            self.log.log(traceback.format_exc(), ORPG_GENERAL)
-            self.log.log("Unable to load/resolve URL: " + min_url + " on resource ' + min_label + ' !!!", ORPG_GENERAL)
+        except:
             self.layers['miniatures'].rollback_serial()
         wx.EndBusyCursor()
         self.send_map_data()
         self.Refresh(False)
-        self.log.log("Exit MapCanvas->add_miniature(self, min_url, min_label, min_unique)", ORPG_DEBUG)
 
     def get_label_from_url(self, url=''):
-        self.log.log("Enter MapCanvas->get_label_from_url(self, url)", ORPG_DEBUG)
-        if url == '':
-            self.log.log("Exit MapCanvas->get_label_from_url(self, url)", ORPG_DEBUG)
-            return ''
+        if url == '': return ''
         start = url.rfind("/")+1
         label = url[start:len(url)-4]
-        self.log.log("Exit MapCanvas->get_label_from_url(self, url)", ORPG_DEBUG)
         return label
 
     def toxml(self, action="update"):
-        self.log.log("Enter MapCanvas->toxml(self, " + action + ")", ORPG_DEBUG)
         if action == "new":
             self.size_changed = 1
         xml_str = "<map version='" + self.map_version + "'"
@@ -692,36 +615,27 @@ class MapCanvas(wx.ScrolledWindow):
         for k in keys:
             if (k != "fog" or action != "update"): s += self.layers[k].layerToXML(action)
         self.size_changed = 0
-        if s:
-            self.log.log("Exit MapCanvas->toxml(self, " + action + ")", ORPG_DEBUG)
-            return xml_str + " action='" + action + "'>" + s + "</map>"
+        if s: return xml_str + " action='" + action + "'>" + s + "</map>"
         else:
-            if changed:
-                self.log.log("Exit MapCanvas->toxml(self, " + action + ")", ORPG_DEBUG)
-                return xml_str + " action='" + action + "'/>"
-            else:
-                self.log.log("Exit MapCanvas->toxml(self, " + action + ")", ORPG_DEBUG)
-                return ""
+            if changed: return xml_str + " action='" + action + "'/>"
+            else: return ""
 
     def takexml(self, xml):
-        #
-        # Added Process Dialog to display during long map parsings
-        # as well as a try block with an exception traceback to try
-        # and isolate some of the map related problems users have been
-        # experiencing --Snowdog 5/15/03
-        #
-        # Apparently Process Dialog causes problems with linux.. commenting it out. sheez.
-        #  --Snowdog 5/27/03
-        self.log.log("Enter MapCanvas->takexml(self, xml)", ORPG_DEBUG)
+        """
+          Added Process Dialog to display during long map parsings
+          as well as a try block with an exception traceback to try
+          and isolate some of the map related problems users have been
+          experiencing --Snowdog 5/15/03
+         
+          Apparently Process Dialog causes problems with linux.. commenting it out. sheez.
+           --Snowdog 5/27/03
+        """
         try:
             #parse the map DOM
             xml_dom = parseXml(xml)
-            if xml_dom == None:
-                self.log.log("xml_dom == None\n" + xml, ORPG_INFO)
-                self.log.log("Exit MapCanvas->takexml(self, xml)", ORPG_DEBUG)
-                return
+            if xml_dom == None: return
             node_list = xml_dom.getElementsByTagName("map")
-            if len(node_list) < 1: self.log.log("Invalid XML format for mapper", ORPG_INFO)
+            if len(node_list) < 1: pass
             else:
                 # set map version to incoming data so layers can convert
                 self.map_version = node_list[0].getAttribute("version")
@@ -762,18 +676,14 @@ class MapCanvas(wx.ScrolledWindow):
                 self.map_version = MAP_VERSION
                 self.Refresh(False)
             xml_dom.unlink()  # eliminate circular refs
-        except:
-            self.log.log(traceback.format_exc(), ORPG_GENERAL)
-            self.log.log("EXCEPTION: Critical Error Loading Map!!!", ORPG_GENERAL)
-        self.log.log("Exit MapCanvas->takexml(self, xml)", ORPG_DEBUG)
+        except: pass
 
     def re_ids_in_xml(self, xml):
-        self.log.log("Enter MapCanvas->re_ids_in_xml(self, xml)", ORPG_DEBUG)
         new_xml = ""
         tmp_map = map_msg()
         xml_dom = parseXml(str(xml))
         node_list = xml_dom.getElementsByTagName("map")
-        if len(node_list) < 1: self.log.log("Invalid XML format for mapper", ORPG_INFO)
+        if len(node_list) < 1: pass
         else:
             tmp_map.init_from_dom(node_list[0])
             if tmp_map.children.has_key("miniatures"):
@@ -801,13 +711,11 @@ class MapCanvas(wx.ScrolledWindow):
                             l.init_prop("id", id)
             new_xml = tmp_map.get_all_xml()
         if xml_dom: xml_dom.unlink()
-        self.log.log("Exit MapCanvas->re_ids_in_xml(self, xml)", ORPG_DEBUG)
         return str(new_xml)
 
 class map_wnd(wx.Panel):
     def __init__(self, parent, id):
         self.log = component.get('log')
-        self.log.log("Enter map_wnd", ORPG_DEBUG)
         wx.Panel.__init__(self, parent, id)
         self.canvas = MapCanvas(self, -1)
         self.session = component.get('session')
@@ -839,16 +747,13 @@ class map_wnd(wx.Panel):
         #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeave)
         self.load_default()
-        self.log.log("Exit map_wnd", ORPG_DEBUG)
 
     def OnLeave(self, evt):
         if "__WXGTK__" in wx.PlatformInfo: wx.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 
     def load_default(self):
-        self.log.log("Enter map_wnd->load_default(self)", ORPG_DEBUG)
         if self.session.is_connected() and (self.session.my_role() != self.session.ROLE_GM) and (self.session.use_roles()):
             self.chat.InfoPost("You must be a GM to use this feature")
-            self.log.log("Exit map_wnd->load_default(self)", ORPG_DEBUG)
             return
         f = open(dir_struct["template"] + "default_map.xml")
         self.new_data(f.read())
@@ -856,19 +761,14 @@ class map_wnd(wx.Panel):
         self.canvas.send_map_data("new")
         if not self.session.is_connected() and (self.session.my_role() != self.session.ROLE_GM):
             self.session.update_role("GM")
-        self.log.log("Exit map_wnd->load_default(self)", ORPG_DEBUG)
 
     def new_data(self, data):
-        self.log.log("Enter map_wnd->new_data(self, data)", ORPG_DEBUG)
         self.canvas.takexml(data)
         self.update_tools()
-        self.log.log("Exit map_wnd->new_data(self, data)", ORPG_DEBUG)
 
     def on_save(self,evt):
-        self.log.log("Enter map_wnd->new_data(self, data)", ORPG_DEBUG)
         if (self.session.my_role() != self.session.ROLE_GM):
             self.chat.InfoPost("You must be a GM to use this feature")
-            self.log.log("Exit map_wnd->new_data(self, data)", ORPG_DEBUG)
             return
         d = wx.FileDialog(self.GetParent(), "Save map data", dir_struct["user"], "", "*.xml", wx.SAVE)
         if d.ShowModal() == wx.ID_OK:
@@ -881,13 +781,10 @@ class map_wnd(wx.Panel):
             f.close()
         d.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit map_wnd->new_data(self, data)", ORPG_DEBUG)
 
     def on_open(self, evt):
-        self.log.log("Enter map_wnd->on_open(self, evt)", ORPG_DEBUG)
         if self.session.is_connected() and (self.session.my_role() != self.session.ROLE_GM) and (self.session.use_roles()):
             self.chat.InfoPost("You must be a GM to use this feature")
-            self.log.log("Exit map_wnd->on_open(self, evt)", ORPG_DEBUG)
             return
         d = wx.FileDialog(self.GetParent(), "Select a file", dir_struct["user"], "", "*.xml", wx.OPEN)
         if d.ShowModal() == wx.ID_OK:
@@ -902,25 +799,18 @@ class map_wnd(wx.Panel):
                     self.session.update_role("GM")
         d.Destroy()
         os.chdir(self.root_dir)
-        self.log.log("Exit map_wnd->on_open(self, evt)", ORPG_DEBUG)
 
     def get_current_layer_handler(self):
-        self.log.log("Enter map_wnd->get_current_layer_handler(self)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->get_current_layer_handler(self)", ORPG_DEBUG)
         return self.layer_handlers[self.current_layer]
 
     def get_tab_index(self, layer):
         """Return the index of a chatpanel in the wxNotebook."""
-        self.log.log("Enter map_wnd->get_tab_index(self, layer)", ORPG_DEBUG)
         for i in xrange(self.layer_tabs.GetPageCount()):
             if (self.layer_tabs.GetPageText(i) == layer):
-                self.log.log("Exit map_wnd->get_tab_index(self, layer) return " + str(i), ORPG_DEBUG)
                 return i
-        self.log.log("Exit map_wnd->get_tab_index(self, layer) return 0", ORPG_DEBUG)
         return 0
 
     def on_layer_change(self, evt):
-        self.log.log("Enter map_wnd->on_layer_change(self, evt)", ORPG_DEBUG)
         layer = self.layer_tabs.GetPage(evt.GetSelection())
         for i in xrange(0, len(self.layer_handlers)):
             if layer == self.layer_handlers[i]: self.current_layer = i
@@ -930,67 +820,43 @@ class map_wnd(wx.Panel):
             else: bg.url_path.Show(True)
         self.canvas.Refresh(False)
         evt.Skip()
-        self.log.log("Exit map_wnd->on_layer_change(self, evt)", ORPG_DEBUG)
 
     def on_left_down(self, evt):
-        self.log.log("Enter map_wnd->on_left_down(self, evt)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->on_left_down(self, evt)", ORPG_DEBUG)
         self.layer_handlers[self.current_layer].on_left_down(evt)
 
     #double click handler added by Snowdog 5/03
     def on_left_dclick(self, evt):
-        self.log.log("Enter map_wnd->on_left_dclick(self, evt)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->on_left_dclick(self, evt)", ORPG_DEBUG)
         self.layer_handlers[self.current_layer].on_left_dclick(evt)
 
     def on_right_down(self, evt):
-        self.log.log("Enter map_wnd->on_right_down(self, evt)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->on_right_down(self, evt)", ORPG_DEBUG)
         self.layer_handlers[self.current_layer].on_right_down(evt)
 
     def on_left_up(self, evt):
-        self.log.log("Enter map_wnd->on_left_up(self, evt)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->on_left_up(self, evt)", ORPG_DEBUG)
         self.layer_handlers[self.current_layer].on_left_up(evt)
 
     def on_motion(self, evt):
-        self.log.log("Enter map_wnd->on_motion(self, evt)", ORPG_DEBUG)
-        self.log.log("Exit map_wnd->on_motion(self, evt)", ORPG_DEBUG)
         self.layer_handlers[self.current_layer].on_motion(evt)
 
     def MapBar(self, id, data):
-        self.log.log("Enter map_wnd->MapBar(self, id, data)", ORPG_DEBUG)
         self.canvas.MAP_MODE = data
-        if id == 1:
-            self.canvas.MAP_MODE = data
-        self.log.log("Exit map_wnd->MapBar(self, id, data)", ORPG_DEBUG)
+        if id == 1: self.canvas.MAP_MODE = data
 
     def set_map_focus(self, evt):
-        self.log.log("Enter map_wnd->set_map_focus(self, evt)", ORPG_DEBUG)
         self.canvas.SetFocus()
-        self.log.log("Exit map_wnd->set_map_focus(self, evt)", ORPG_DEBUG)
 
     def pre_exit_cleanup(self):
-        self.log.log("Enter map_wnd->pre_exit_cleanup(self)", ORPG_DEBUG)
         # do some pre exit clean up for bitmaps or other objects
         try:
             ImageHandler.flushCache()
             self.canvas.pre_destory_cleanup()
-        except Exception, e:
-            self.log.log(traceback.format_exc(), ORPG_CRITICAL)
-            self.log.log("EXCEPTION: " + str(e), ORPG_CRITICAL)
-        self.log.log("Exit map_wnd->pre_exit_cleanup(self)", ORPG_DEBUG)
+        except: pass
 
     def update_tools(self):
-        self.log.log("Enter map_wnd->update_tools(self)", ORPG_DEBUG)
         for h in self.layer_handlers:
             h.update_info()
-        self.log.log("Exit map_wnd->update_tools(self)", ORPG_DEBUG)
 
     def on_hk_map_layer(self, evt):
-        self.log.log("Enter map_wnd->on_hk_map_layer(self, evt)", ORPG_DEBUG)
         id = self.top_frame.mainmenu.GetHelpString(evt.GetId())
-        #print evt.GetMenu().GetTitle()
         if id == "Background Layer": self.current_layer = self.get_tab_index("Background")
         if id == "Grid Layer": self.current_layer = self.get_tab_index("Grid")
         if id == "Miniature Layer": self.current_layer = self.get_tab_index("Miniatures")
@@ -998,15 +864,11 @@ class map_wnd(wx.Panel):
         elif id == "Fog Layer": self.current_layer = self.get_tab_index("Fog")
         elif id == "General Properties": self.current_layer = self.get_tab_index("General")
         self.layer_tabs.SetSelection(self.current_layer)
-        self.log.log("Exit map_wnd->on_hk_map_layer(self, evt)", ORPG_DEBUG)
 
     def on_flush_cache(self, evt):
-        self.log.log("Enter map_wnd->on_flush_cache(self, evt)", ORPG_DEBUG)
         ImageHandler.flushCache()
-        self.log.log("Exit map_wnd->on_flush_cache(self, evt)", ORPG_DEBUG)
 
     def build_menu(self):
-        self.log.log("Enter map_wnd->build_menu(self)", ORPG_DEBUG)
         # temp menu
         menu = wx.Menu()
         item = wx.MenuItem(menu, wx.ID_ANY, "&Load Map", "Load Map")
@@ -1043,10 +905,7 @@ class map_wnd(wx.Panel):
         self.top_frame.Bind(wx.EVT_MENU, self.canvas.on_prop, item)
         menu.AppendItem(item)
         self.top_frame.mainmenu.Insert(2, menu, '&Map')
-        self.log.log("Exit map_wnd->build_menu(self)", ORPG_DEBUG)
 
     def get_hot_keys(self):
-        self.log.log("Enter map_wnd->get_hot_keys(self)", ORPG_DEBUG)
         self.build_menu()
-        self.log.log("Exit map_wnd->get_hot_keys(self)", ORPG_DEBUG)
         return []

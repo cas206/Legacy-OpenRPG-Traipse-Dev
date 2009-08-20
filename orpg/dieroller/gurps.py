@@ -53,7 +53,6 @@ from die import *
 from time import time, clock
 import random
 
-
 __version__ = "$Id: gurps.py,v 1.5 2007/05/06 16:42:55 digitalxero Exp $"
 
 # gurps
@@ -65,45 +64,58 @@ class gurps(std):
 # these methods return new die objects for specific options
 
 # Original msk roll renamed to be easier to understand/remember
+    
     def skill(self,skill,mod):
         return gurpsskill(self,skill,mod)
 
+    
     def defaultskill(self,stat,defaultlevel,mod):
         return gurpsdefaultskill(self,stat,defaultlevel,mod)
 
+    
     def supernatural(self,skill,resistance,mod):
         return gurpssupernatural(self,skill,resistance,mod)
 
+    
     def crit_hit(self):
         return gurpscrit_hit(self)
 
+    
     def crit_headblow(self):
         return gurpscrit_headblow(self)
 
+    
     def crit_miss(self):
         return gurpscrit_miss(self)
 
+    
     def crit_unarm(self):
         return gurpscrit_unarm(self)
 
+    
     def spellfail(self):
         return gurpsspellfail(self)
 
+    
     def frightcheck(self,level,mod):
         return gurpsfrightcheck(self,level,mod)
 
+    
     def frightcheckfail(self,mod):
         return gurpsfrightcheckfail(self,mod)
 
 class gurpsskill(std):
+    
     def __init__(self,source=[],skill=0,mod=0):
         std.__init__(self,source)
         self.skill = skill
         self.mod = mod
 
+    
     def is_success(self):
         return (((self.sum()) <= self.skill+self.mod) and (self.sum() < 17))
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -142,12 +154,14 @@ class gurpsskill(std):
         return myStr
 
 class gurpsdefaultskill(std):
+    
     def __init__(self,source=[],stat=0,defaultlevel=0,mod=0):
         std.__init__(self,source)
         self.stat = stat
         self.defaultlevel = defaultlevel
         self.mod = mod
 
+    
     def is_success(self):
         if self.stat < 21:
             intSkillVal = self.stat + self.defaultlevel + self.mod
@@ -155,6 +169,7 @@ class gurpsdefaultskill(std):
             intSkillVal = 20 + self.defaultlevel + self.mod
         return (((self.sum()) <= intSkillVal) and (self.sum() < 17))
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -199,12 +214,14 @@ class gurpsdefaultskill(std):
         return myStr
 
 class gurpssupernatural(std):
+    
     def __init__(self,source=[],skill=0,resistance=0,mod=0):
         std.__init__(self,source)
         self.skill = skill
         self.resistance = resistance
         self.mod = mod
 
+    
     def is_success(self):
         if self.skill+self.mod > 16:
             if self.resistance > 16:
@@ -218,6 +235,7 @@ class gurpssupernatural(std):
             newSkill = self.skill+self.mod
         return (((self.sum()) <= newSkill) and (self.sum() < 17))
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -269,9 +287,11 @@ class gurpssupernatural(std):
         return myStr
 
 class gurpscrit_hit(std):
+    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
         for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
@@ -300,10 +320,11 @@ class gurpscrit_hit(std):
         return myStr
 
 class gurpscrit_headblow(std):
-      def __init__(self,source=[],mod=0):
-            std.__init__(self,source)
+        def __init__(self,source=[],mod=0):
+        std.__init__(self,source)
 
-      def __str__(self):
+    
+    def __str__(self):
         myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
         for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
             myStr += ","                  #Adds a comma after each die
@@ -337,9 +358,11 @@ class gurpscrit_headblow(std):
         return myStr
 
 class gurpscrit_miss(std):
+    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
         for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
@@ -376,9 +399,11 @@ class gurpscrit_miss(std):
         return myStr
 
 class gurpscrit_unarm(std):
+    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
         for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
@@ -414,9 +439,11 @@ class gurpscrit_unarm(std):
         return myStr
 
 class gurpsspellfail(std):
+    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -455,14 +482,17 @@ class gurpsspellfail(std):
         return myStr
 
 class gurpsfrightcheck(std):
+    
     def __init__(self,source=[],skill=0,mod=0):
         std.__init__(self,source)
         self.skill = skill
         self.mod = mod
 
+    
     def is_success(self):
         return (((self.sum()) <= self.skill+self.mod) and (self.sum() < 14))
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -586,10 +616,12 @@ class gurpsfrightcheck(std):
         return myStr
 
 class gurpsfrightcheckfail(std):
+    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
         self.mod = mod
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:

@@ -59,19 +59,24 @@ from die import *
 __version__ = "1.1"
 
 class srex(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
 
+    
     def vs(self,actualtarget=4,tnrange=3):        #reports all tns around specified, max distance of range
         return srVs(self,actualtarget,(actualtarget-tnrange),(actualtarget+tnrange))
 
+    
     def vswide(self,actualtarget=4,maxtarget=12):    #wide simply means it reports TNs from 2 to a specified max.
         return srVs(self,actualtarget,2,maxtarget)
 
+    
     def open(self):         #unchanged from standard shadowrun open.
         return srOpen(self)
 
 class srVs(std):
+    
     def __init__(self,source=[],actualtarget=4,mintn=2,maxtn=12):
         std.__init__(self, source)
         if actualtarget > 30:
@@ -100,6 +105,7 @@ class srVs(std):
         # made the dieroller generic enough to use any die type
         self.openended(self[0].sides)
 
+    
     def openended(self,num):
         if num <= 1:
             self
@@ -116,6 +122,7 @@ class srVs(std):
             return self.openended(num)
 
     #count successes, by looping through each die, and checking it against the currently set TN
+    
     def __sum__(self):
         s = 0
         for r in self.data:
@@ -126,6 +133,7 @@ class srVs(std):
     #a modified sum, but this one takes a target argument, and is there because otherwise it is difficult to loop through
     #tns counting successes against each one without changing target, which is rather dangerous as the original TN could
     #easily be lost.
+    
     def xsum(self,curtarget):
         s = 0
         for r in self.data:
@@ -134,6 +142,7 @@ class srVs(std):
         return s
 
 
+    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -154,10 +163,12 @@ class srVs(std):
         return myStr
 
 class srOpen(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
         self.openended(self[0].sides)
 
+    
     def openended(self,num):
         if num <= 1:
             self
@@ -171,6 +182,7 @@ class srOpen(std):
         else:
             return self.openended(num)
 
+    
     def __sum__(self):
         s = 0
         for r in self.data:
@@ -178,6 +190,7 @@ class srOpen(std):
                 s = r
         return s
 
+    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])

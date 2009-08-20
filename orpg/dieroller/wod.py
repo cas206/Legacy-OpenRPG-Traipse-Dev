@@ -36,19 +36,23 @@ __version__ = "$Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $"
 
 
 class wod(std):
+    
     def __init__(self,source=[],target=0,targetthr=0):
         std.__init__(self,source)
         self.target = target
         self.targetthr = targetthr
 
+    
     def vs(self,target):
         self.target = target
         return self
 
+    
     def thr(self,targetthr):
         self.targetthr = targetthr
         return self
 
+    
     def sum(self):
         rolls = []
         s = 0
@@ -70,6 +74,7 @@ class wod(std):
                 s = 0
         return s
 
+    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])

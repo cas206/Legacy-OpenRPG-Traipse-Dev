@@ -1,4 +1,4 @@
-import orpg.tools.orpg_settings
+import orpg.tools.orpg_settings #Settings
 import orpg.minidom
 from core import *
 from containers import *

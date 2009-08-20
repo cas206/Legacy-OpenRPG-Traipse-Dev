@@ -49,7 +49,7 @@ from orpg.dirpath import dir_struct
 import orpg.tools.rgbhex
 import orpg.tools.inputValidator
 #from orpg.tools.metamenus import MenuEx #Needed?
-from orpg.orpgCore import component
+
 import webbrowser
 from string import *
 from orpg.orpg_version import VERSION
@@ -66,6 +66,10 @@ import cStringIO # for reading inline imagedata as a stream
 from HTMLParser import HTMLParser
 import chat_util
 import traceback
+
+from orpg.tools.validate import validate
+from orpg.tools.orpg_settings import settings
+from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 NEWCHAT = False
@@ -79,23 +83,29 @@ NEWCHAT = False
 # The 'tag stripping' is implicit, because this parser echoes every
 # type of html data *except* the tags.
 class HTMLStripper(HTMLParser):
+    @debugging
     def __init__(self):
         self.accum = ""
         self.special_tags = ['hr', 'br', 'img']
+    @debugging
     def handle_data(self, data):  # quote cdata literally
         self.accum += data
+    @debugging
     def handle_entityref(self, name): # entities must be preserved exactly
         self.accum += "&" + name + ";"
+    @debugging
     def handle_starttag(self, tag, attrs):
         if tag in self.special_tags:
             self.accum += '<' + tag
             for attrib in attrs: self.accum += ' ' + attrib[0] + '="' + attrib[1] + '"'
             self.accum += '>'
+    @debugging
     def handle_charref(self, name):  # charrefs too
         self.accum += "&#" + name + ";"
 htmlstripper = HTMLStripper()
 
 # utility function;  see Post().
+@debugging
 def strip_html(string):
     "Return string tripped of html tags."
     htmlstripper.reset()
@@ -104,6 +114,7 @@ def strip_html(string):
     htmlstripper.close()
     return htmlstripper.accum
 
+@debugging
 def log( settings, c, text ):
     filename = settings.get_setting('GameLogPrefix')
     if filename > '' and filename[0] != commands.ANTI_LOG_CHAR:
@@ -135,6 +146,7 @@ class chat_html_window(wx.html.HtmlWindow):
     # !self : instance of self
     # !parent :
     # !id :
+    @debugging
     def __init__(self, parent, id):
         wx.html.HtmlWindow.__init__(self, parent, id, style=wx.SUNKEN_BORDER | wx.html.HW_SCROLLBAR_AUTO|wx.NO_FULL_REPAINT_ON_RESIZE)
         self.parent = parent
@@ -144,41 +156,50 @@ class chat_html_window(wx.html.HtmlWindow):
         if "gtk2" in wx.PlatformInfo: self.SetStandardFonts()
         # def __init__ - end
 
+    @debugging
     def onPopup(self, evt):
         self.PopupMenu(self.menu)
 
+    @debugging
     def LeftUp(self, event):
         event.Skip()
         wx.CallAfter(self.parent.set_chat_text_focus, None)
 
+    @debugging
     def build_menu(self):
         self.menu = wx.Menu()
         item = wx.MenuItem(self.menu, wx.ID_ANY, "Copy", "Copy")
         self.Bind(wx.EVT_MENU, self.OnM_EditCopy, item)
         self.menu.AppendItem(item)
 
+    @debugging
     def OnM_EditCopy(self, evt):
         wx.TheClipboard.Open()
         wx.TheClipboard.Clear()
         wx.TheClipboard.SetData(wx.TextDataObject(self.SelectionToText()))
         wx.TheClipboard.Close()
 
+    @debugging
     def scroll_down(self):
         maxrange = self.GetScrollRange(wx.VERTICAL)
         pagesize = self.GetScrollPageSize(wx.VERTICAL)
         self.Scroll(-1, maxrange-pagesize)
 
+    @debugging
     def mouse_wheel(self, event):
         amt = event.GetWheelRotation()
         units = amt/(-(event.GetWheelDelta()))
         self.ScrollLines(units*3)
 
+    @debugging
     def Header(self):
         return '<html><body bgcolor="' + self.parent.bgcolor + '" text="' + self.parent.textcolor + '">'
 
+    @debugging
     def StripHeader(self):
         return self.GetPageSource().replace(self.Header(), '')
 
+    @debugging
     def GetPageSource(self):
         return self.GetParser().GetSource()
 
@@ -186,12 +207,14 @@ class chat_html_window(wx.html.HtmlWindow):
     #
     # !self : instance of self
     # !linkinfo : instance of a class that contains the link information
+    @debugging
     def OnLinkClicked(self, linkinfo):
         href = linkinfo.GetHref()
         wb = webbrowser.get()
         wb.open(href)
     # def OnLinkClicked - end
 
+    @debugging
     def CalculateAllFonts(self, defaultsize):
         return [int(defaultsize * 0.4),
                 int(defaultsize * 0.7),
@@ -201,6 +224,7 @@ class chat_html_window(wx.html.HtmlWindow):
                 int(defaultsize * 2),
                 int(defaultsize * 2.5)]
 
+    @debugging
     def SetDefaultFontAndSize(self, fontname, fontsize):
         """Set 'fontname' to the default chat font.
            Returns current font settings in a (fontname, fontsize) tuple."""
@@ -210,6 +234,7 @@ class chat_html_window(wx.html.HtmlWindow):
 # class chat_html_window - end
 if NEWCHAT:
     class ChatHtmlWindow(wx.webview.WebView):
+        @debugging
         def __init__(self, parent, id):
             wx.webview.WebView.__init__(self, parent, id)
 
@@ -222,18 +247,23 @@ if NEWCHAT:
             self.Bind(wx.webview.EVT_WEBVIEW_BEFORE_LOAD, self.OnLinkClicked)
 
         #Wrapers so I dont have to add special Code
+        @debugging
         def SetPage(self, htmlstring):
             self.SetPageSource(htmlstring)
 
+        @debugging
         def AppendToPage(self, htmlstring):
             self.SetPageSource(self.GetPageSource() + htmlstring)
 
+        @debugging
         def GetFont(self):
             return self.__font
 
+        @debugging
         def CalculateAllFonts(self, defaultsize):
             return
 
+        @debugging
         def SetDefaultFontAndSize(self, fontname, fontsize):
             self.__font = wx.Font(int(fontsize), wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=fontname)
             try: self.SetPageSource(self.Header() + self.StripHeader())
@@ -241,41 +271,50 @@ if NEWCHAT:
             return (self.GetFont().GetFaceName(), self.GetFont().GetPointSize())
 
         #Events
+        @debugging
         def OnLinkClicked(self, linkinfo):
             href = linkinfo.GetHref()
             wb = webbrowser.get()
             wb.open(href)
 
+        @debugging
         def onPopup(self, evt):
             self.PopupMenu(self.menu)
 
+        @debugging
         def LeftUp(self, event):
             event.Skip()
             wx.CallAfter(self.parent.set_chat_text_focus, None)
 
+        @debugging
         def OnM_EditCopy(self, evt):
             self.Copy()
 
         #Cutom Methods
+        @debugging
         def Header(self):
             return "<html><head><style>body {font-size: " + str(self.GetFont().GetPointSize()) + "px;font-family: " + self.GetFont().GetFaceName() + ";color: " + self.parent.textcolor + ";background-color: " + self.parent.bgcolor + ";margin: 0;padding: 0 0;height: 100%;}</style></head><body>"
 
+        @debugging
         def StripHeader(self):
             tmp = self.GetPageSource().split('<BODY>')
             if tmp[-1].find('<body>') > -1: tmp = tmp[-1].split('<body>')
             return tmp[-1]
 
+        @debugging
         def build_menu(self):
             self.menu = wx.Menu()
             item = wx.MenuItem(self.menu, wx.ID_ANY, "Copy", "Copy")
             self.Bind(wx.EVT_MENU, self.OnM_EditCopy, item)
             self.menu.AppendItem(item)
 
+        @debugging
         def scroll_down(self):
             maxrange = self.GetScrollRange(wx.VERTICAL)
             pagesize = self.GetScrollPageSize(wx.VERTICAL)
             self.Scroll(-1, maxrange-pagesize)
 
+        @debugging
         def mouse_wheel(self, event):
             amt = event.GetWheelRotation()
             units = amt/(-(event.GetWheelDelta()))
@@ -493,9 +532,9 @@ class chat_panel(wx.Panel):
         # who receives outbound messages, either "all" or "playerid" string
         self.sendtarget = sendtarget
         self.type = tab_type
-        self.sound_player = component.get('sound')
+        #self.sound_player = component.get('sound') #Removing!
         # create die roller manager
-        self.DiceManager = component.get('DiceManager')
+        #self.DiceManager = component.get('DiceManager') #Removing!
         # create rpghex tool
         self.r_h = orpg.tools.rgbhex.RGBHex()
         self.h = 0
@@ -520,7 +559,7 @@ class chat_panel(wx.Panel):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.build_ctrls()
         #openrpg dir
-        self.root_dir = dir_struct["home"]
+        #self.root_dir = dir_struct["home"] #Removing!
         # html font/fontsize is global to all the notebook tabs.
         StartupFont = self.settings.get_setting("defaultfont")
         StartupFontSize = self.settings.get_setting("defaultfontsize")
@@ -1162,7 +1201,7 @@ class chat_panel(wx.Panel):
             if not len(macroText): self.chattxt.SetValue("")
             # play sound
             sound_file = self.settings.get_setting("SendSound")
-            if sound_file != '': self.sound_player.play(sound_file)
+            if sound_file != '': component.get('sound').play(sound_file)
             if s[0] != "/": ## it's not a slash command
                 s = self.ParsePost( s, True, True )
             else: self.chat_cmds.docmd(s) # emote is in chatutils.py
@@ -1292,7 +1331,7 @@ class chat_panel(wx.Panel):
             file.write(self.ResetPage() + "</body></html>")
             file.close()
         f.Destroy()
-        os.chdir(self.root_dir)
+        os.chdir(dir_struct["home"])
     # def on_chat_save - end
 
     @debugging
@@ -1642,7 +1681,7 @@ class chat_panel(wx.Panel):
         # playe sound
         sound_file = self.settings.get_setting(recvSound)
         if sound_file != '':
-            self.sound_player.play(sound_file)
+            component.get('sound').play(sound_file)
     #### Posting helpers #####
 
     @debugging
@@ -1731,7 +1770,7 @@ class chat_panel(wx.Panel):
                 newline = "<div class='"+c+"'> " + self.TimeIndexString() + name + s + "</div>"
                 log( self.settings, c, name+s )
         else: send = False
-        newline = chat_util.strip_unicode(newline)
+        newline = component.get('xml').strip_unicode(newline)
         if self.lockscroll == 0:
             self.chatwnd.AppendToPage(newline)
             self.scroll_down()
@@ -1820,7 +1859,7 @@ class chat_panel(wx.Panel):
             if newstr[0].lower() == 'q':
                 newstr = newstr[1:]
                 qmode = 1
-            try: newstr = self.DiceManager.proccessRoll(newstr)
+            try: newstr = component.get('DiceManager').proccessRoll(newstr)
             except: pass
             if qmode == 1:
                 s = s.replace("[" + matches[i] + "]", "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)

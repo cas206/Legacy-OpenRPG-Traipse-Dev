@@ -107,7 +107,7 @@ class grid_layer(layer_base):
             else:
                 x = topLeft.x
                 y = topLeft.y
-            return cmpPoint(int(x),int(y))                                           #  Set the pos attribute
+            return cmpPoint(int(x),int(y)) #  Set the pos attribute
         else: return cmpPoint(int(pos.x),int(pos.y))
 
     def set_rect_mode(self):
@@ -209,7 +209,6 @@ class grid_layer(layer_base):
             # and therefore (per transformation above) is at iso co-ord (iso_unit_size, 0)
             # the bottom corner of the first diamond is grid co-ord (width/2, height)
             # and therefore (per transformation above) is at iso co-ord (0, iso_unit_size)
-
             # the calculation is now as simple as the rectangle case, but using iso co-ords
             return cmpPoint(floor(iso_x/iso_unit_size), floor(iso_y/iso_unit_size))
         else: return None

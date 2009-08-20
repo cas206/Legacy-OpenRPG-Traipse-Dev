@@ -201,6 +201,7 @@ class general_map_prop_dialog(wx.Dialog):
                 data = dlg.GetColourData()
                 self.ctrls[CTRL_GRID_COLOR].SetBackgroundColour(data.GetColour())
             dlg.Destroy()
+
     def on_ok(self,evt):
         try: self.size = (int(self.ctrls[CTRL_WIDTH].GetValue()),int(self.ctrls[CTRL_HEIGHT].GetValue()))
         except: pass

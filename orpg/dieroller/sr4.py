@@ -68,25 +68,32 @@ MIN_TARGET_NUMBER = 5
 GLITCH_NUMBER = 1
 
 class sr4(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
         self.threshold = None
         self.init_attrib = None
 
+    
     def vs(self,threshold=0):
         return sr4vs(self, threshold)
 
+    
     def edge(self,threshold=0):
         return sr4vs(self, threshold, 1)
 
+    
     def init(self,init_attrib=0):
         return sr4init(self, init_attrib)
 
+    
     def initedge(self,init_attrib=0):
         return sr4init(self, init_attrib, 1)
+    
     def edgeinit(self,init_attrib=0):
         return sr4init(self, init_attrib, 1)
 
+    
     def countEdge(self,num):
         if num <= 1:
             self
@@ -106,6 +113,7 @@ class sr4(std):
         else:
             return self.countEdge(num)
 
+    
     def countHits(self,num):
         for i in range(len(self.data)):
             if (self.data[i].lastroll() >= MIN_TARGET_NUMBER):
@@ -115,6 +123,7 @@ class sr4(std):
                 self.ones += 1
             self.total += 1
 
+    
     def __str__(self):
         if len(self.data) > 0:
             self.hits = 0
@@ -145,6 +154,7 @@ class sr4(std):
         return myStr
 
 class sr4init(sr4):
+    
     def __init__(self,source=[],init_attrib=1,edge=0):
         std.__init__(self,source)
         if init_attrib < 2:
@@ -159,6 +169,7 @@ class sr4init(sr4):
             self.countEdge(self.dicesides)
         self.countHits(self.dicesides)
 
+    
     def __str__(self):
         if len(self.data) > 0:
             firstpass = 0
@@ -182,6 +193,7 @@ class sr4init(sr4):
         return myStr
 
 class sr4vs(sr4):
+    
     def __init__(self,source=[], threshold=1, edge=0):
         std.__init__(self, source)
         if threshold < 0:
@@ -196,6 +208,7 @@ class sr4vs(sr4):
             self.countEdge(self.dicesides)
         self.countHits(self.dicesides)
 
+    
     def __str__(self):
         if len(self.data) > 0:
             firstpass = 0
@@ -221,6 +234,7 @@ class sr4vs(sr4):
         else:
             myStr = "[] = (0)"
         return myStr
+
 
 def CheckIfGlitch(ones, hits, total_dice):
     if (ones * 2) >= total_dice:

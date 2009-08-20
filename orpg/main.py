@@ -47,8 +47,8 @@ import orpg.tools.rgbhex
 import orpg.gametree.gametree
 import orpg.chat.chatwnd
 
-import orpg.networking.mplay_client
 import orpg.networking.gsclient
+import orpg.networking.mplay_client
 
 import orpg.mapper.map
 import orpg.mapper.images
@@ -57,11 +57,11 @@ import upmana.updatemana
 import upmana.manifest as manifest
 import wx.py
 
-from orpg.dieroller.utils import roller_manager as DiceManager
-from orpg.tools.orpg_log import logger
+from orpg.dieroller.utils import DiceManager
 from orpg.tools.orpg_settings import settings #imported, not used yet
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
+from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 from orpg.tools.metamenus import MenuBarEx
 
@@ -83,7 +83,6 @@ class orpgFrame(wx.Frame):
         self.orpgLog = component.get('log')
         self.xml = component.get("xml")
         self.validate = component.get("validate")
-        self.settings = component.get("settings")
         self.orpgLog.log("Enter orpgFrame", ORPG_DEBUG)
         self.rgbcovert = orpg.tools.rgbhex.RGBHex()
         self._mgr = AUI.AuiManager(self)
@@ -102,7 +101,7 @@ class orpgFrame(wx.Frame):
                 "on_status_event":self.on_status_event,
                 "on_password_signal":self.on_password_signal,
                 "orpgFrame":self}
-
+        self.settings = component.get('settings') #Arbitrary until settings updated with Core.
         self.session = orpg.networking.mplay_client.mplay_client(self.settings.get_setting("player"), call_backs)
         self.poll_timer = wx.Timer(self, wx.NewId())
         self.Bind(wx.EVT_TIMER, self.session.poll, self.poll_timer)
@@ -111,7 +110,7 @@ class orpgFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.session.update, self.ping_timer)
 
         # create roller manager
-        self.DiceManager = DiceManager(self.settings.get_setting("dieroller"))
+        self.DiceManager = DiceManager(settings.get_setting("dieroller"))
         component.add('DiceManager', self.DiceManager)
 
         #create password manager --SD 8/03
@@ -130,7 +129,7 @@ class orpgFrame(wx.Frame):
         component.add("alias", self.aliaslib)
 
         self.orpgLog.log("openrpg components all added", ORPG_DEBUG)
-        self.tree.load_tree(self.settings.get_setting("gametree"))
+        self.tree.load_tree(settings.get_setting("gametree"))
         logger.debug("Tree Loaded")
         self.players.size_cols()
 
@@ -237,10 +236,10 @@ class orpgFrame(wx.Frame):
                 ]]
 
         self.mainmenu = MenuBarEx(self, menu)
-        if self.settings.get_setting('Heartbeat') == '1':
+        if settings.get_setting('Heartbeat') == '1':
             self.mainmenu.SetMenuState("GameServerServerHeartbeat", True)
 
-        tabtheme = self.settings.get_setting('TabTheme')  #This change is stable. TaS.
+        tabtheme = settings.get_setting('TabTheme')  #This change is stable. TaS.
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", tabtheme == 'slanted&aqua')
@@ -249,7 +248,7 @@ class orpgFrame(wx.Frame):
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedCustom", tabtheme == 'customslant')
         self.mainmenu.SetMenuState("OpenRPGTabStylesFlatCustom", tabtheme == 'customflat')
 
-        lvl = int(self.settings.get_setting('LoggingLevel'))
+        lvl = int(settings.get_setting('LoggingLevel'))
         if lvl & ORPG_DEBUG: self.mainmenu.SetMenuState("ToolsLoggingLevelDebug", True)
         if lvl & ORPG_DEBUG: self.mainmenu.SetMenuState("ToolsLoggingLevelNote", True)
         if lvl & ORPG_INFO: self.mainmenu.SetMenuState("ToolsLoggingLevelInfo", True)
@@ -278,7 +277,7 @@ class orpgFrame(wx.Frame):
     @debugging
     def SetTabStyles(self, *args, **kwargs):
 
-        tabtheme = self.settings.get_setting('TabTheme')  #This change is stable. TaS.
+        tabtheme = settings.get_setting('TabTheme')  #This change is stable. TaS.
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", tabtheme == 'slanted&aqua')
@@ -314,7 +313,7 @@ class orpgFrame(wx.Frame):
         component.add("tabbedWindows", tabbedwindows)
 
         #Run though the new list and set the proper styles
-        tabbg = self.settings.get_setting('TabBackgroundGradient')
+        tabbg = settings.get_setting('TabBackgroundGradient')
         rgbc = orpg.tools.rgbhex.RGBHex()
         (red, green, blue) = rgbc.rgb_tuple(tabbg)
 
@@ -338,14 +337,14 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesSlantedColorful(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedColorful"):
-            self.settings.set_setting('TabTheme', 'slanted&colorful')
+            settings.set_setting('TabTheme', 'slanted&colorful')
             self.SetTabStyles("OpenRPGTabStylesSlantedColorful", FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", True)
 
     @debugging
     def OnMB_OpenRPGTabStylesSlantedBlackandWhite(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedBlackandWhite"):
-            self.settings.set_setting('TabTheme', 'slanted&bw')
+            settings.set_setting('TabTheme', 'slanted&bw')
             self.SetTabStyles("OpenRPGTabStylesSlantedBlackandWhite", 
                 FNB.FNB_VC8, graidentTo=wx.WHITE, graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", True)
@@ -353,7 +352,7 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesSlantedAqua(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedAqua"):
-            self.settings.set_setting('TabTheme', 'slanted&aqua')
+            settings.set_setting('TabTheme', 'slanted&aqua')
             self.SetTabStyles("OpenRPGTabStylesSlantedAqua", FNB.FNB_VC8, 
                 graidentTo=wx.Color(0, 128, 255), graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", True)
@@ -361,15 +360,15 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesSlantedCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedCustom"):
-            self.settings.set_setting('TabTheme', 'customslant')
+            settings.set_setting('TabTheme', 'customslant')
             rgbc = orpg.tools.rgbhex.RGBHex()
-            gfrom = self.settings.get_setting('TabGradientFrom')
+            gfrom = settings.get_setting('TabGradientFrom')
             (fred, fgreen, fblue) = rgbc.rgb_tuple(gfrom)
-            gto = self.settings.get_setting('TabGradientTo')
+            gto = settings.get_setting('TabGradientTo')
             (tored, togreen, toblue) = rgbc.rgb_tuple(gto)
-            tabtext = self.settings.get_setting('TabTextColor')
+            tabtext = settings.get_setting('TabTextColor')
             (tred, tgreen, tblue) = rgbc.rgb_tuple(tabtext)
-            tabbg = self.settings.get_setting('TabBackgroundGradient')
+            tabbg = settings.get_setting('TabBackgroundGradient')
             (red, green, blue) = rgbc.rgb_tuple(tabbg)
             self.SetTabStyles("OpenRPGTabStylesSlantedCustom", FNB.FNB_VC8, 
                 graidentTo=wx.Color(tored, togreen, toblue), graidentFrom=wx.Color(fred, fgreen, fblue), 
@@ -379,7 +378,7 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesFlatBlackandWhite(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatBlackandWhite"):
-            self.settings.set_setting('TabTheme', 'flat&bw')
+            settings.set_setting('TabTheme', 'flat&bw')
             self.SetTabStyles("OpenRPGTabStylesFlatBlackandWhite", FNB.FNB_FANCY_TABS, 
                 graidentTo=wx.WHITE, graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesFlatBlackandWhite", True)
@@ -387,7 +386,7 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesFlatAqua(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatAqua"):
-            self.settings.set_setting('TabTheme', 'flat&aqua')
+            settings.set_setting('TabTheme', 'flat&aqua')
             self.SetTabStyles("OpenRPGTabStylesFlatAqua", FNB.FNB_FANCY_TABS, 
                 graidentTo=wx.Color(0, 128, 255), graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesFlatAqua", True)
@@ -395,15 +394,15 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_OpenRPGTabStylesFlatCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatCustom"):
-            self.settings.set_setting('TabTheme', 'customflat')
+            settings.set_setting('TabTheme', 'customflat')
             rgbc = orpg.tools.rgbhex.RGBHex()
-            gfrom = self.settings.get_setting('TabGradientFrom')
+            gfrom = settings.get_setting('TabGradientFrom')
             (fred, fgreen, fblue) = rgbc.rgb_tuple(gfrom)
-            gto = self.settings.get_setting('TabGradientTo')
+            gto = settings.get_setting('TabGradientTo')
             (tored, togreen, toblue) = rgbc.rgb_tuple(gto)
-            tabtext = self.settings.get_setting('TabTextColor')
+            tabtext = settings.get_setting('TabTextColor')
             (tred, tgreen, tblue) = rgbc.rgb_tuple(tabtext)
-            tabbg = self.settings.get_setting('TabBackgroundGradient')
+            tabbg = settings.get_setting('TabBackgroundGradient')
             (red, green, blue) = rgbc.rgb_tuple(tabbg)
             self.SetTabStyles("OpenRPGTabStylesFlatCustom", FNB.FNB_FANCY_TABS, 
                 graidentTo=wx.Color(tored, togreen, toblue), graidentFrom=wx.Color(fred, fgreen, fblue), 
@@ -442,8 +441,8 @@ class orpgFrame(wx.Frame):
 
     @debugging
     def OnMB_GameServerServerHeartbeat(self):
-        if self.mainmenu.GetMenuState("GameServerServerHeartbeat"): self.settings.set_setting('Heartbeat', '1')
-        else: self.settings.set_setting('Heartbeat', '0')
+        if self.mainmenu.GetMenuState("GameServerServerHeartbeat"): settings.set_setting('Heartbeat', '1')
+        else: settings.set_setting('Heartbeat', '0')
 
     @debugging
     def OnMB_GameServerStartServer(self):
@@ -796,9 +795,9 @@ class orpgFrame(wx.Frame):
         elif name == "tree":
             temp_wnd = orpg.gametree.gametree.game_tree(parent_wnd, -1)
             self.tree = temp_wnd
-            if self.settings.get_setting('ColorTree') == '1':
-                self.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                self.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
+            if settings.get_setting('ColorTree') == '1':
+                self.tree.SetBackgroundColour(settings.get_setting('bgcolor'))
+                self.tree.SetForegroundColour(settings.get_setting('textcolor'))
             else:
                 self.tree.SetBackgroundColour('white')
                 self.tree.SetForegroundColour('black')
@@ -811,9 +810,9 @@ class orpgFrame(wx.Frame):
         elif name == "player":
             temp_wnd = orpg.player_list.player_list(parent_wnd)
             self.players = temp_wnd
-            if self.settings.get_setting('ColorTree') == '1':
-                self.players.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                self.players.SetForegroundColour(self.settings.get_setting('textcolor'))
+            if settings.get_setting('ColorTree') == '1':
+                self.players.SetBackgroundColour(settings.get_setting('bgcolor'))
+                self.players.SetForegroundColour(settings.get_setting('textcolor'))
             else:
                 self.players.SetBackgroundColour('white')
                 self.players.SetForegroundColour('black')
@@ -1100,7 +1099,7 @@ class orpgFrame(wx.Frame):
                     traceback.print_exc()
         #end mDuo13 added code
         self.saveLayout()
-        try: self.settings.save()
+        try: settings.save()
         except Exception:
             logger.general("[WARNING] Error saving 'settings' component", True)
 
@@ -1109,9 +1108,9 @@ class orpgFrame(wx.Frame):
             logger.general("[WARNING] Map error pre_exit_cleanup()", True)
 
         try:
-            save_tree = string.upper(self.settings.get_setting("SaveGameTreeOnExit"))
+            save_tree = string.upper(settings.get_setting("SaveGameTreeOnExit"))
             if  (save_tree != "0") and (save_tree != "False") and (save_tree != "NO"):
-                self.tree.save_tree(self.settings.get_setting("gametree"))
+                self.tree.save_tree(settings.get_setting("gametree"))
         except Exception:
             logger.general("[WARNING] Error saving gametree", True)
 
@@ -1177,7 +1176,7 @@ class orpgApp(wx.App):
 
         component.add('log', logger)
         component.add('xml', xml)
-        #component.add('settings', settings)
+        component.add('settings', settings)
         component.add('validate', validate)
         component.add("tabbedWindows", [])
 
@@ -1185,8 +1184,7 @@ class orpgApp(wx.App):
 
         self.orpgLog = component.get('log')
         self.validate = component.get('validate')
-        self.settings = component.get('settings')
-        logger.log_level = int(self.settings.get_setting('LoggingLevel'))
+        logger.log_level = int(settings.get_setting('LoggingLevel'))
         self.called = False
         wx.InitAllImageHandlers()
         self.splash = orpgSplashScreen(None, dir_struct["icon"] + 'splash13.jpg', 3000, self.AfterSplash)

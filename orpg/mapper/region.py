@@ -156,10 +156,14 @@ class IRect:
         return IRect().make(self.left+pt.X,self.top+pt.Y,self.right+pt.X,self.bottom+pt.Y)
 
     def intersect(self,rect):
-        return IRect().make(max(self.left,rect.left),max(self.top,rect.top),min(self.right,rect.right),min(self.bottom,rect.bottom))
+        return IRect().make(max(self.left,rect.left),
+                            max(self.top,rect.top),min(self.right,rect.right),
+                            min(self.bottom,rect.bottom))
 
     def union(self,rect):
-        return IRect().make(min(self.left,rect.left),min(self.top,rect.top),max(self.right,rect.right),max(self.bottom,rect.bottom))
+        return IRect().make(min(self.left,rect.left),
+                            min(self.top,rect.top),max(self.right,rect.right),
+                            max(self.bottom,rect.bottom))
 
     def equals(self,rect):
         if (self.top==rect.top and self.bottom==rect.bottom and self.left==rect.left and self.right==rect.right): return 1
@@ -206,7 +210,7 @@ class ClipRectList:
         x+="]"
         return x
 
-#remove all rectangles from list
+    #remove all rectangles from list
     def Clear(self):
         while(self.first):
             rect=self.first
@@ -215,7 +219,7 @@ class ClipRectList:
         self.last=None
         self.count=0
 
-#add a new clipping rectangle to list
+    #add a new clipping rectangle to list
     def AddRect(self,rect):
         rect.prev=None
         rect.next=self.first
@@ -224,7 +228,7 @@ class ClipRectList:
         if self.last is None: self.last=rect
         self.count += 1
 
-#removes the passed clipping rectangle from the list
+    #removes the passed clipping rectangle from the list
     def RemoveRect(self,rect):
         if not (rect.prev is None): rect.prev.next=rect.next
         else: self.first=rect.next
@@ -232,8 +236,8 @@ class ClipRectList:
         else: self.last=rect.prev
         self.count -= 1
 
-# find the clipping rectangle at the the beginning of the list, remove it,
-# and return it
+    # find the clipping rectangle at the the beginning of the list, remove it,
+    # and return it
     def RemoveHead(self):
         if self.count==0: return None
         rect=self.first
@@ -242,8 +246,8 @@ class ClipRectList:
         self.count -= 1
         return rect
 
-# stealrects -- appends the list of clipping rectangles in pclist to the current
-# list.  removes the entries from pclist
+    # stealrects -- appends the list of clipping rectangles in pclist to the current
+    # list.  removes the entries from pclist
     def StealRects(self,pclist):
         if pclist.first is None: return
         if self.first is None:
@@ -258,7 +262,7 @@ class ClipRectList:
         pclist.last = None
         pclist.count = 0
 
-# utilitarian procedure to return all clipping rectangles as a Python list
+    # utilitarian procedure to return all clipping rectangles as a Python list
     def GetList(self):
         result=[]
         f = self.first

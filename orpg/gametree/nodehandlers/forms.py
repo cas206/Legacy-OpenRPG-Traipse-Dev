@@ -29,7 +29,7 @@
 __version__ = "$Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $"
 
 from containers import *
-import wx.lib.scrolledpanel
+from wx.lib.scrolledpanel import ScrolledPanel
 
 def bool2int(b):
     #in wxPython 2.5+, evt.Checked() returns True or False instead of 1.0 or 0.
@@ -81,9 +81,9 @@ class form_handler(container_handler):
         container_handler.on_drop(self,evt)
 
 
-class form_panel(wx.lib.scrolledpanel.ScrolledPanel):
+class form_panel(ScrolledPanel):
     def __init__(self, parent, handler):
-        wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
+        ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
         self.height = int(handler.atts.getAttribute("height"))
         self.width = int(handler.atts.getAttribute("width"))
 
@@ -112,7 +112,7 @@ class form_panel(wx.lib.scrolledpanel.ScrolledPanel):
         if x < nx:
             x = nx+10
         y += ny+11
-        wx.lib.scrolledpanel.ScrolledPanel.SetSize(self, (x, y))
+        ScrolledPanel.SetSize(self, (x, y))
 
 
     def create_child_wnd(self, obj, evt):

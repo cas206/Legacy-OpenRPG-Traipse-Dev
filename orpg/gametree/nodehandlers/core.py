@@ -32,15 +32,12 @@ from nodehandler_version import NODEHANDLER_VERSION
 try:
     from orpg.orpg_windows import *
     from orpg.dirpath import dir_struct
-    from orpg.orpg_xml import *
     from orpg.orpgCore import component
     import webbrowser
     from orpg.mapper import map
     import os
 except:
     import wx
-
-
 
 
 #html defaults
@@ -56,10 +53,10 @@ class node_handler:
         self.tree = component.get('tree')
         self.frame = component.get('frame')
         self.chat = component.get('chat')
-        self.xml = component.get('xml')
+        self.xml = component.get('xml') #Not used?
         self.drag = True
         self.myeditor = None # designing
-        self.myviewer = None # prett print
+        self.myviewer = None # pretty print
         self.mywindow = None # using
         # call version hook
         self.on_version(self.master_dom.getAttribute("version"))
@@ -114,8 +111,7 @@ class node_handler:
             if self.create_designframe():
                 self.myeditor.Show()
                 self.myeditor.Raise()
-            else:
-                return
+            else: return
         wx.CallAfter(self.myeditor.Layout)
 
 
@@ -124,7 +120,7 @@ class node_handler:
         self.myeditor = wx.Frame(None, -1, title)
         self.myeditor.Freeze()
         if wx.Platform == '__WXMSW__':
-            icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
+            icon = wx.Icon(dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
             self.myeditor.SetIcon(icon)
             del icon
 
@@ -163,14 +159,13 @@ class node_handler:
                 return
         wx.CallAfter(self.mywindow.Layout)
 
-
     def create_useframe(self):
         caption = self.master_dom.getAttribute('name')
         self.mywindow = wx.Frame(None, -1, caption)
         self.mywindow.Freeze()
 
         if wx.Platform == '__WXMSW__':
-            icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'note.ico', wx.BITMAP_TYPE_ICO)
+            icon = wx.Icon(dir_struct["icon"] + 'note.ico', wx.BITMAP_TYPE_ICO)
             self.mywindow.SetIcon(icon)
             del icon
         self.mywindow.panel = self.get_use_panel(self.mywindow)
@@ -203,7 +198,7 @@ class node_handler:
             caption = self.master_dom.getAttribute('name')
             self.myviewer = wx.Frame(None, -1, caption)
             if wx.Platform == '__WXMSW__':
-                icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
+                icon = wx.Icon(dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
                 self.myviewer.SetIcon(icon)
                 del icon
             self.myviewer.panel = self.get_html_panel(self.myviewer)
@@ -246,7 +241,7 @@ class node_handler:
         self.tree.load_xml(xml_dom, parent_node, prev_sib)
 
     def toxml(self,pretty=0):
-        return toxml(self.master_dom,pretty)
+        return component.get('xml').toxml(self.master_dom,pretty)
 
     def tohtml(self):
         return self.master_dom.getAttribute("name")
@@ -270,7 +265,7 @@ class node_handler:
         self.tree.Refresh()
 
     def on_save(self,evt):
-        f = wx.FileDialog(self.tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
+        f = wx.FileDialog(self.tree,"Select a file", dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
             type = f.GetFilterIndex()
             if f.GetPath()[:len(f.GetPath())-4] != '.xml': file = open(f.GetPath()+'.xml',"w")
@@ -396,7 +391,7 @@ class file_loader(node_handler):
 
     def on_ldclick(self,evt):
         file_name = self.file_node.getAttribute("name")
-        self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        self.tree.insert_xml(open(dir_struct["nodes"] + file_name,"r").read())
         return 1
 
     def on_design(self,evt):

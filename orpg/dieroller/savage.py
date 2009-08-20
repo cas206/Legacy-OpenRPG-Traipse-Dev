@@ -20,8 +20,6 @@
 #
 
 from die import *
-#from whrandom import randint
-#import random
 import string
 from random import *
 __version__ = "$Id: savage.py,v 1.2 2007/05/06 16:42:55 digitalxero Exp $"
@@ -29,32 +27,41 @@ __version__ = "$Id: savage.py,v 1.2 2007/05/06 16:42:55 digitalxero Exp $"
 # Savage, as in Savage Worlds
 class sw(std):
     #def __init__(self,source=[], wnd=1, loc="rnd", chmod=0):
+    
     def __init__(self,source=[],fmod=0):
         std.__init__(self,source)
 
 # these methods return new die objects for specific options
 
+    
     def fright(self,fearmod=0):
         return fright(self,fearmod=0)
 
+    
     def kob(self,wnd,loc):
         return kob(self,wnd=1,loc="rnd")
 
+    
     def ooc(self):
         return ooc(self)
 
+    
     def ract(self,chmod=0):
         return ract(self,chmod=0)
 
+    
     def vcrit(self):
         return vcrit(self)
 
+    
     def fortune(self):
         return fortune(self)
 
+    
     def freak(self):
         return freak(self)
 
+    
     def swdhelps(self):
         return swdhelps(self)
 
@@ -67,6 +74,7 @@ class fright(std):
     #  Usage:  [fright()]
     #          [fright(6)] - if the fear modifier of the monster was 6
     #-----------------
+    
     def __init__(self,fmod=0):
         global fear
         std.__init__(self)
@@ -74,6 +82,7 @@ class fright(std):
 
     #def sum(self):
 
+    
     def __str__(self):
         global fear
         iroll = randint(1,20)
@@ -118,6 +127,7 @@ class kob(std):
     #          [kob(3,"h") - If 3 wounds were received that sent the player to the Knockout Blow Table with a called shot to the head
     #---------------------
     global wound, loca
+    
     def __init__(self, wnd, loc="rnd"):
         global wound, loca
         std.__init__(self, wnd)
@@ -129,6 +139,7 @@ class kob(std):
             mystr = "You need to supply a number for the wound."
             return mystr
 
+    
     def __str__(self):
         global wound, loca
         itbl = "no"
@@ -235,11 +246,13 @@ class ract(std):
     #          [ract(-2)] - A -2 Charisma modifier
     #----------------------
     global charisma
+    
     def __init__(self,chmod=0):
         global charisma
         std.__init__(self)
         charisma = chmod
 
+    
     def __str__(self):
         global charisma
         r1roll = randint(2,12)
@@ -269,9 +282,11 @@ class ooc(std):
     #  roll and displays the results of the roll.  This will also display altitude information for flying vehicles.
     #  Usage:  [ooc()]
     #--------------------
+    
     def __init__(self):
         std.__init__(self)
 
+    
     def __str__(self):
         ooroll = randint(2,12)
         oodescripton = "Something"
@@ -331,9 +346,11 @@ class vcrit(std):
     #  modifiers to this roll
     #  Usage [vcrit()]
     #----------------
+    
     def __init__(self):
         std.__init__(self)
 
+    
     def __str__(self):
         chitroll = randint(2,12)
         if chitroll == 2:
@@ -373,9 +390,11 @@ class vcrit(std):
 
 class swdhelps(std):
     #Display help information for this die roller - it will list all the available commands, and how to use them
+    
     def __init__(self):
         std.__init__(self)
 
+    
     def __str__(self):
         myStr = "<table border='1' valign='top'>\
         <tr>\
@@ -421,9 +440,11 @@ class swdhelps(std):
         return myStr
 
 class fortune(std):
+    
     def __init___(self):
         std.__init__(self)
 
+    
     def __str__(self):
         forroll = randint(2,12)
         if forroll == 2 or forroll == 12: #Need to roll on Freak Event Table
@@ -453,13 +474,16 @@ class fortune(std):
         myStr = "["+fortune+" ("+str(forroll)+")] ==>"+fdescription
         return myStr
 
+    
     def freak(self):
         return fortunefreak(self)
 
 class freak(std):
+    
     def __init__(self):
         std.__init__(self)
 
+    
     def __str__(self):
         feroll = randint(1,10)
         if feroll == 1:
@@ -500,8 +524,10 @@ class freak(std):
         return myStr
 
 class rdm(std):  #If I get the time and the inspiration - I may try to incorporate a Random Table roller...  I need to think about this one.
+    
     def __init__(self):
         std.__init__(self)
 
+    
     def __str__(self):
         return myStr

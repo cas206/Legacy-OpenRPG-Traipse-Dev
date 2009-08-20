@@ -37,47 +37,52 @@ __version__ = "$Id: trinity.py,v 1.2 2007/05/05 05:30:10 digitalxero Exp $"
 
 
 class trinity(std):
-   def __init__(self,source=[],target=7,targetthr=0):
-       std.__init__(self,source)
-       self.target = target
-       self.targetthr = targetthr
+    
+    def __init__(self,source=[],target=7,targetthr=0):
+        std.__init__(self,source)
+        self.target = target
+        self.targetthr = targetthr
 
-   def vs(self,target):
-       self.target = target
-       return self
+    
+    def vs(self,target):
+        self.target = target
+        return self
 
-   def thr(self,targetthr):
-       self.targetthr = targetthr
-       return self
+    
+    def thr(self,targetthr):
+        self.targetthr = targetthr
+        return self
 
-   def sum(self):
-       rolls = []
-       s = 0
-       b = 0
-       for a in self.data:
-           rolls.extend(a.gethistory())
-       for r in rolls:
-           if r >= self.target:
-               s += 1
-           elif r == 1:
-               b -= 1
-       if s == 0:
-           return b
-       else:
-           return s
+    
+    def sum(self):
+        rolls = []
+        s = 0
+        b = 0
+        for a in self.data:
+            rolls.extend(a.gethistory())
+        for r in rolls:
+            if r >= self.target:
+                s += 1
+            elif r == 1:
+                b -= 1
+        if s == 0:
+            return b
+        else:
+            return s
 
-   def __str__(self):
-       if len(self.data) > 0:
-           myStr = "[" + str(self.data[0])
-           for a in self.data[1:]:
-               myStr += ","
-               myStr += str(a)
-           if self.sum() < 0:
-               myStr += "] result of a (" + str(self.sum()) + ") botch"
-           elif self.sum() == 0:
-               myStr += "] result of a failure"
-           else:
-               myStr += "] result of (" + str(self.sum()) + ") success"
+    
+    def __str__(self):
+        if len(self.data) > 0:
+            myStr = "[" + str(self.data[0])
+            for a in self.data[1:]:
+                myStr += ","
+                myStr += str(a)
+            if self.sum() < 0:
+                myStr += "] result of a (" + str(self.sum()) + ") botch"
+            elif self.sum() == 0:
+                myStr += "] result of a failure"
+            else:
+                myStr += "] result of (" + str(self.sum()) + ") success"
 
 
-       return myStr
+        return myStr

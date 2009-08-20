@@ -42,29 +42,32 @@ from gurps import *
 from runequest import *
 from savage import *
 from trinity import *
-from orpg.orpgCore import component
-
 import re
 
 rollers = ['std','wod','d20','hero','shadowrun', 'sr4','hackmaster','srex','wodex', 'gurps', 'runequest', 'sw', 'trinity']
 
 class roller_manager:
+    
     def __init__(self,roller_class="d20"):
         try: self.setRoller(roller_class)
         except: self.roller_class = "std"
 
+    
     def setRoller(self,roller_class):
         try:
             rollers.index(roller_class)
             self.roller_class = roller_class
         except: raise Exception, "Invalid die roller!"
 
+    
     def getRoller(self):
         return self.roller_class
 
+    
     def listRollers(self):
         return rollers
 
+    
     def stdDieToDClass(self,match):
         s = match.group(0)
         (num,sides) = s.split('d')
@@ -77,6 +80,7 @@ class roller_manager:
         return "(" + num.strip() + "**" + self.roller_class + "(" + sides.strip() + "))"
 
     #  Use this to convert ndm-style (3d6) dice to d_base format
+    
     def convertTheDieString(self,s):
         reg = re.compile("\d+\s*[a-zA-Z]+\s*[\dFf]+")
         (result, num_matches) = reg.subn(self.stdDieToDClass, s)
@@ -88,6 +92,8 @@ class roller_manager:
             except: pass
         return result
 
+    
     def proccessRoll(self,s):
         return str(eval(self.convertTheDieString(s)))
-#component.add('dieroller', roller_manager())
+
+DiceManager = roller_manager

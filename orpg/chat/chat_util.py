@@ -2,6 +2,9 @@
 
 import re
 import string
+from orpg.orpgCore import *
+from orpg.tools.orpg_log import logger
+from orpg.tools.decorators import debugging
 
 #============================================
 # simple_html_repair(string)
@@ -16,6 +19,7 @@ import string
 #
 # Created 04-25-2005 by Snowdog
 #=============================================
+@debugging
 def simple_html_repair(string):
     "Returns string with extra > symbols to isolate badly formated HTML"
     #walk though string checking positions of < and > tags.
@@ -67,9 +71,9 @@ def simple_html_repair(string):
     if diff > 0:
         for d in range(1,diff):
             string = string+">"
-
     return string
 
+""" Depricated! Might as well use the already made component.get('xml')
 def strip_unicode(txt):
     for i in xrange(len(txt)):
         if txt[i] not in string.printable:
@@ -78,6 +82,7 @@ def strip_unicode(txt):
             except:
                 txt = txt.replace(txt[i], '{?}')
     return txt
+"""
 
 #================================================
 # strip_script_tags(string)
@@ -85,6 +90,7 @@ def strip_unicode(txt):
 # removes all script tags (start and end)
 # 04-26-2005 Snowdog
 #================================================
+@debugging
 def strip_script_tags(string):
     #kill the <script> issue
     p = re.compile( '<(\s*)(/*)[Ss][Cc][Rr][Ii][Pp][Tt](.*?)>')
@@ -97,6 +103,7 @@ def strip_script_tags(string):
 # removes all li tags (start and end)
 # 05-13-2005
 #================================================
+@debugging
 def strip_li_tags(string):
     #kill the <li> issue
     string = re.sub( r'<(\s*)[Ll][Ii](.*?)>', r'<b><font color="#000000" size=+1>*</font></b>    ', string)
@@ -111,6 +118,7 @@ def strip_li_tags(string):
 #   through legitimate means such as the OpenRPG settings.
 # 07-27-2005 by mDuo13
 #================================================
+@debugging
 def strip_body_tags(string):
     bodytag_regex = re.compile(r"""<\/?body.*?>""", re.I)
     string = re.sub(bodytag_regex, "", string)
@@ -129,6 +137,7 @@ def strip_body_tags(string):
 # used legitimately without causing much annoyance.
 # 07-27-2005 mDuo13
 #================================================
+@debugging
 def strip_misalignment_tags(string):
     alignment_regex = re.compile(r"""<p([^>]*?)align\s*=\s*('.*?'|".*?"|[^\s>]*)(.*?)>""", re.I)
     string = re.sub(alignment_regex, "<p\\1\\3>", string)
@@ -149,6 +158,7 @@ def strip_misalignment_tags(string):
 # 05-13-2005
 # redone 07-11-2005 by mDuo13
 #================================================
+@debugging
 def strip_img_tags(string):
     #This is a Settings definable feature, Allowing users to enable or disable image display to fix the client crash due to large img posted to chat.
     #p = re.sub( r'<(\s*)(/*)[Ii][Mm][Gg][ ][Ss][Rr][Cc][=](.*?)>', r'<!-- img tag removed //--> <a href=\3>\3</a>', string)

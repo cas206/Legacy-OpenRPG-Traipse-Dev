@@ -1,36 +1,35 @@
-#------------------------------------------------
-# file: map_utils.py
-#
-# This file contains generic utility functions
-# for use in the openrpg mapping system
-# -----------------------------------------------
+"""
+ file: map_utils.py
+
+ This file contains generic utility functions
+ for use in the openrpg mapping system
+"""
 
 import math
-
-#-----------------------------------------------------------------------
-# distance_between()
-# Returns the distance between two points
-#-----------------------------------------------------------------------
+"""
+ distance_between()
+ Returns the distance between two points
+"""
 def distance_between( x1, y1, x2, y2 ):
    "Returns the distance between two points"
    dx = x2 - x1
    dy = y2 - y1
    return math.sqrt( dx*dx + dy*dy )
 
-#-----------------------------------------------------------------------
-# proximity_test()
-# Tests if 'test_point' (T) is close (within 'threshold' units) to the
-# line segment 'start_point' to 'end_point' (PQ).
-#
-# The closest point (R) to T on the line PQ is given by:
-#    R = P + u (Q - P)
-# TR is perpendicular to PQ so:
-#    (T - R) dot (Q - P) = 0
-# Solving these two equations gives the equation for u (see below).
-#
-# If u < 0 or u > 1 then R is not within the line segment and we simply
-# test against point P or Q.
-#-----------------------------------------------------------------------
+"""
+ proximity_test()
+ Tests if 'test_point' (T) is close (within 'threshold' units) to the
+ line segment 'start_point' to 'end_point' (PQ).
+
+ The closest point (R) to T on the line PQ is given by:
+    R = P + u (Q - P)
+ TR is perpendicular to PQ so:
+    (T - R) dot (Q - P) = 0
+ Solving these two equations gives the equation for u (see below).
+
+ If u < 0 or u > 1 then R is not within the line segment and we simply
+ test against point P or Q.
+"""
 def proximity_test( start_point, end_point, test_point, threshold ):
    "Test if a point is close to a line segment"
    x1,y1 = start_point

@@ -27,7 +27,8 @@
 #
 __version__ = "$Id: grid_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $"
 
-from base_msg import *
+from base_msg import map_element_msg_base
+#from base_msg import * ## ?? import all? Deprecated!?
 
 class grid_msg(map_element_msg_base):
 

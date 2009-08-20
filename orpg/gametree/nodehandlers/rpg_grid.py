@@ -201,7 +201,7 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         Show or hide the edit control.  You can use the attr (if not None)
         to set colours or fonts for the control.
         """
-        self.base_Show(show, attr)
+        self.base_Show(show, attr) #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
 
 
     def BeginEdit(self, row, col, grid):

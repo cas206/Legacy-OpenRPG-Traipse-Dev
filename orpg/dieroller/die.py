@@ -37,6 +37,7 @@ import copy
 
 class die_base(UserList.UserList):
 
+    
     def __init__(self,source = []):
         if isinstance(source, (int, float, basestring)):
             s = []
@@ -46,12 +47,14 @@ class die_base(UserList.UserList):
         UserList.UserList.__init__(self,s)
 
 
+    
     def sum(self):
         s = 0
         for a in self.data:
             s += int(a)
         return s
 
+    
     def __lshift__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             o = other
@@ -66,6 +69,7 @@ class die_base(UserList.UserList):
                 result.append(die)
         return self.__class__(result)
 
+    
     def __rshift__(self,other):
 
         if type(other) == type(3) or type(other) == type(3.0):
@@ -81,13 +85,16 @@ class die_base(UserList.UserList):
                 result.append(die)
         return self.__class__(result)
 
+    
     def __rlshift__(self,other):
         return self.__rshift__(other)
 
+    
     def __rrshift__(self,other):
         return self.__lshift__(other)
 
 
+    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -99,6 +106,7 @@ class die_base(UserList.UserList):
             myStr = "[] = (0)"
         return myStr
 
+    
     def __lt__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() < other)
@@ -107,6 +115,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__lt__(self,other)
 
+    
     def __le__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() <= other)
@@ -115,6 +124,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__le__(self,other)
 
+    
     def __eq__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() == other)
@@ -123,6 +133,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__eq__(self,other)
 
+    
     def __ne__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() != other)
@@ -131,6 +142,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__ne__(self,other)
 
+    
     def __gt__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() > other)
@@ -139,6 +151,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__gt__(self,other)
 
+    
     def __ge__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return (self.sum() >= other)
@@ -147,6 +160,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__ge__(self,other)
 
+    
     def __cmp__(self,other):
         #  this function included for backwards compatibility
         #  As of 2.1, lists implement the "rich comparison"
@@ -159,9 +173,11 @@ class die_base(UserList.UserList):
             return UserList.UserList.__cmp__(self,other)
 
 
+    
     def __rcmp__(self,other):
         return self.__cmp__(other)
 
+    
     def __add__(self,other):
         mycopy = copy.deepcopy(self)
         if type(other) == type(3) or type(other) == type(3.0):
@@ -177,9 +193,11 @@ class die_base(UserList.UserList):
         #result = UserList.UserList.__add__(mycopy,other)
         return mycopy
 
+    
     def __iadd__(self,other):
         return self.__add__(other)
 
+    
     def __radd__(self,other):
         mycopy = copy.deepcopy(self)
         if type(other) == type(3) or type(other) == type(3.0):
@@ -189,9 +207,11 @@ class die_base(UserList.UserList):
         mycopy.insert(0,other)
         return mycopy
 
+    
     def __int__(self):
         return self.sum()
 
+    
     def __sub__(self,other):
         mycopy = copy.deepcopy(self)
         if type(other) == type(3) or type(other) == type(3.0):
@@ -204,6 +224,7 @@ class die_base(UserList.UserList):
         mycopy.extend(other)
         return mycopy
 
+    
     def __rsub__(self,other):
         mycopy = -copy.deepcopy(self)
         #print type(other)
@@ -214,9 +235,11 @@ class die_base(UserList.UserList):
         mycopy.insert(0,other)
         return mycopy
 
+    
     def __isub__(self,other):
         return self.__sub__(other)
 
+    
     def __mul__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.sum() * other
@@ -225,9 +248,11 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__mul__(self,other)
 
+    
     def __rmul__(self,other):
         return self.__mul__(other)
 
+    
     def __div__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return float(self.sum()) / other
@@ -236,6 +261,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__div__(self,other)
 
+    
     def __rdiv__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return other / float(self.sum())
@@ -244,6 +270,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__rdiv__(self,other)
 
+    
     def __mod__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.sum()%other
@@ -252,6 +279,7 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__mod__(self,other)
 
+    
     def __rmod__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return other % self.sum()
@@ -260,22 +288,26 @@ class die_base(UserList.UserList):
         else:
             return UserList.UserList.__rmod__(self,other)
 
+    
     def __neg__(self):
         for i in range(len(self.data)):
             self.data[i] = -self.data[i]
         return self
 
+    
     def __pos__(self):
         for i in range(len(self.data)):
             self.data[i] = +self.data[i]
         return self
 
+    
     def __abs__(self):
         for i in range(len(self.data)):
             self.data[i] = abs(self.data[i])
         return self
         #return abs(self.sum())
 
+    
     def __pow__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.sum() ** other
@@ -285,6 +317,7 @@ class die_base(UserList.UserList):
             return UserList.UserList.__pow__(self,other)
 
 
+    
     def __rpow__(self,other):
         #  We're overloading exponentiation of ints to create "other" number of dice
 
@@ -300,6 +333,7 @@ class die_base(UserList.UserList):
 ### di class to handle actual dice
 
 class di:
+    
     def __init__(self,sides,min=1):
         self.sides = sides
         self.history = None
@@ -307,40 +341,47 @@ class di:
         self.target = None
         self.roll(min)
 
+    
     def __str__(self):
         if len(self.history) > 1:
             return str(self.history)
         else:
             return str(self.value)
 
+    
     def __neg__(self):
         self.value = -self.value
         for i in range(len(self.history)):
             self.history[i] = -self.history[i]
         return self
 
+    
     def __pos__(self):
         self.value = +self.value
         for i in range(len(self.history)):
             self.history[i] = +self.history[i]
         return self
 
+    
     def __abs__(self):
         self.value = abs(self.value)
         for i in range(len(self.history)):
             self.history[i] = abs(self.history[i])
         return self
 
+    
     def __repr__(self):
         if len(self.history) > 1:
             return str(self.history)
         else:
             return str(self.value)
 
+    
     def __int__(self):
         return self.value
 
 
+    
     def __lt__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value < other
@@ -349,6 +390,7 @@ class di:
         else:
             return self < other
 
+    
     def __le__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value <= other
@@ -357,6 +399,7 @@ class di:
         else:
             return self <= other
 
+    
     def __eq__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value == other
@@ -365,6 +408,7 @@ class di:
         else:
             return self == other
 
+    
     def __ne__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value != other
@@ -373,6 +417,7 @@ class di:
         else:
             return self != other
 
+    
     def __gt__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value > other
@@ -381,6 +426,7 @@ class di:
         else:
             return self > other
 
+    
     def __ge__(self,other):
         if type(other) == type(3) or type(other) == type(3.0):
             return self.value >= other
@@ -389,10 +435,11 @@ class di:
         else:
             return self >= other
 
+    
     def __cmp__(self,other):
         #  this function included for backwards compatibility
-#  As of 2.1, lists implement the "rich comparison"
-#  methods overloaded above.
+        #  As of 2.1, lists implement the "rich comparison"
+        #  methods overloaded above.
         if type(other) == type(3) or type(other) == type(3.0):
             return cmp(self.value, other)
         elif hasattr(other,"value"):
@@ -400,6 +447,7 @@ class di:
         else:
             return cmp(self,other)
 
+    
     def roll(self,min=1):
         if isinstance(self.sides, basestring) and self.sides.lower() == 'f':
             self.value = random.randint(-1, 1)
@@ -409,6 +457,7 @@ class di:
         self.history = []
         self.history.append(self.value)
 
+    
     def extraroll(self):
         if isinstance(self.sides, basestring) and self.sides.lower() == 'f':
             result = random.randint(-1, 1)
@@ -419,56 +468,68 @@ class di:
         self.value += result
         self.history.append(result)
 
+    
     def lastroll(self):
         return self.history[len(self.history)-1]
 
+    
     def set_value(self,value):
         self.value = value
         self.history = []
         self.history.append(self.value)
 
+    
     def modify(self,mod):
         self.value += mod
         self.history.append(mod)
 
+    
     def gethistory(self):
         return self.history[:]
 
 class static_di(di):
+    
     def __init__(self,value):
         di.__init__(self,value,value)
         self.set_value(value)
 
 
 class std(die_base):
+    
     def __init__(self,source=[]):
         die_base.__init__(self,source)
 
     #  Examples of adding member functions through inheritance.
 
+    
     def ascending(self):
         result = self[:]
         result.sort()
         return result
 
+    
     def descending(self):
         result = self[:]
         result.sort()
         result.reverse()
         return result
 
+    
     def takeHighest(self,num_dice):
         return self.descending()[:num_dice]
 
+    
     def takeLowest(self,num_dice):
         return self.ascending()[:num_dice]
 
+    
     def extra(self,num):
         for i in range(len(self.data)):
             if self.data[i].lastroll() >= num:
                 self.data[i].extraroll()
         return self
 
+    
     def open(self,num):
         if num <= 1:
             self
@@ -482,12 +543,14 @@ class std(die_base):
         else:
             return self.open(num)
 
+    
     def minroll(self,min):
         for i in range(len(self.data)):
             if self.data[i].lastroll() < min:
                 self.data[i].roll(min)
         return self
 
+    
     def each(self,mod):
         mod = int(mod)
         for i in range(len(self.data)):
@@ -495,6 +558,7 @@ class std(die_base):
         return self
 
 
+    
     def vs(self, target):
         for dn in self.data:
             dn.target = target
@@ -505,6 +569,7 @@ class std(die_base):
     ## greater than or equal to against the target value and
     ## we only return the number of successful saves.  A negative
     ## value will never be generated.
+    
     def sum(self):
         retValue = 0
         for dn in self.data:

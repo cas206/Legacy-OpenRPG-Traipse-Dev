@@ -64,9 +64,10 @@ def cmp_zorder(first,second):
     return value
 
 class BmpMiniature:
-    def __init__(self, id,path, bmp, pos=cmpPoint(0,0), heading=FACE_NONE, face=FACE_NONE, label="", locked=False, hide=False, snap_to_align=SNAPTO_ALIGN_CENTER, zorder=0, width=0, height=0, log=None, local=False, localPath='', localTime=-1):
-        self.log = log
-        self.log.log("Enter BmpMiniature", ORPG_DEBUG)
+    def __init__(self, id,path, bmp, pos=cmpPoint(0,0), 
+                heading=FACE_NONE, face=FACE_NONE, label="", 
+                locked=False, hide=False, snap_to_align=SNAPTO_ALIGN_CENTER, 
+                zorder=0, width=0, height=0, log=None, local=False, localPath='', localTime=-1):
         self.heading = heading
         self.face = face
         self.label = label
@@ -92,22 +93,15 @@ class BmpMiniature:
         self.bottom = bmp.GetHeight()
         self.isUpdated = False
         self.gray = False
-        self.log.log("Exit BmpMiniature", ORPG_DEBUG)
 
     def __del__(self):
-        self.log.log("Enter BmpMiniature->__del__(self)", ORPG_DEBUG)
         del self.bmp
         self.bmp = None
-        self.log.log("Exit BmpMiniature->__del__(self)", ORPG_DEBUG)
 
     def set_bmp(self, bmp):
-        self.log.log("Enter BmpMiniature->set_bmp(self, bmp)", ORPG_DEBUG)
         self.bmp = bmp
-        self.log.log("Exit BmpMiniature->set_bmp(self, bmp)", ORPG_DEBUG)
 
     def set_min_props(self, heading=FACE_NONE, face=FACE_NONE, label="", locked=False, hide=False, width=0, height=0):
-        self.log.log("Enter BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", 
-            ORPG_DEBUG)
         self.heading = heading
         self.face = face
         self.label = label
@@ -118,33 +112,24 @@ class BmpMiniature:
         self.width = int(width)
         self.height = int(height)
         self.isUpdated = True
-        self.log.log("Exit BmpMiniature->set_min_props(self, heading, face, label, locked, hide, width, height)", 
-            ORPG_DEBUG)
 
     def hit_test(self, pt):
-        self.log.log("Enter BmpMiniature->hit_test(self, pt)", ORPG_DEBUG)
         rect = self.get_rect()
         result = None
         result = rect.InsideXY(pt.x, pt.y)
-        self.log.log("Exit BmpMiniature->hit_test(self, pt)", ORPG_DEBUG)
         return result
 
     def get_rect(self):
-        self.log.log("Enter BmpMiniature->get_rect(self)", ORPG_DEBUG)
         ret = wx.Rect(self.pos.x, self.pos.y, self.bmp.GetWidth(), self.bmp.GetHeight())
-        self.log.log("Exit BmpMiniature->get_rect(self)", ORPG_DEBUG)
         return ret
 
     def draw(self, dc, mini_layer, op=wx.COPY):
-        self.log.log("Enter BmpMiniature->draw(self, dc, mini_layer, op)", ORPG_DEBUG)
         if isinstance(self.bmp, tuple):
-            self.log.log("bmp is a tuple, it shouldnt be!", ORPG_INFO)
             self.bmp = wx.ImageFromMime(self.bmp[1], self.bmp[2]).ConvertToBitmap()
         if self.bmp != None and self.bmp.Ok():
             # check if hidden and GM: we outline the mini in grey (little bit smaller than the actual size)
             # and write the label in the center of the mini
             if self.hide and mini_layer.canvas.frame.session.my_role() == mini_layer.canvas.frame.session.ROLE_GM:
-                self.log.log("Enter BmpMiniature->draw->Draw Hidden", ORPG_DEBUG)
                 # set the width and height of the image
                 if self.width and self.height:
                     tmp_image = self.bmp.ConvertToImage()
@@ -199,12 +184,10 @@ class BmpMiniature:
                     dc.DrawRectangle(self.pos.x, self.pos.y, self.bmp.GetWidth(), self.bmp.GetHeight())
                     dc.SetBrush(wx.NullBrush)
                     dc.SetPen(wx.NullPen)
-                self.log.log("Exit BmpMiniature->draw->Draw Hidden", ORPG_DEBUG)
                 return True
-            elif self.hide: self.log.log("Enter/Exit BmpMiniature->draw->Skip Hidden", ORPG_DEBUG); return True
+            elif self.hide: return True
 
             else:
-                self.log.log("Enter BmpMiniature->draw->Not Hidden", ORPG_DEBUG)
                 # set the width and height of the image
                 bmp = self.bmp
                 if self.width and self.height:
@@ -362,17 +345,12 @@ class BmpMiniature:
                 self.bottom+=5
                 self.left-=5
                 self.right+=5
-                self.log.log("Exit BmpMiniature->draw->Not Hidden", ORPG_DEBUG)
                 return True
-        else: self.log.log("Exit BmpMiniature->draw(self, dc, mini_layer, op) return False", ORPG_DEBUG); return False
-        self.log.log("Exit BmpMiniature->draw(self, dc, mini_layer, op)", ORPG_DEBUG)
+        else: return False
 
     def toxml(self, action="update"):
-        self.log.log("Enter BmpMiniature->toxml(self, " + action + ")", ORPG_DEBUG)
         if action == "del":
             xml_str = "<miniature action='del' id='" + self.id + "'/>"
-            self.log.log(xml_str, ORPG_DEBUG)
-            self.log.log("Exit BmpMiniature->toxml(self, " + action + ")", ORPG_DEBUG)
             return xml_str
         xml_str = "<miniature"
         xml_str += " action='" + action + "'"
@@ -397,58 +375,41 @@ class BmpMiniature:
             xml_str += ' localPath="' + str(urllib.quote(self.localPath).replace('%3A', ':')) + '"'
             xml_str += ' localTime="' + str(self.localTime) + '"'
         xml_str += " />"
-        self.log.log(xml_str, ORPG_DEBUG)
-        self.log.log("Exit BmpMiniature->toxml(self, " + action + ")", ORPG_DEBUG)
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
             return xml_str
         else: return ''
 
     def takedom(self, xml_dom):
-        self.log.log("Enter BmpMiniature->takedom(self, xml_dom)", ORPG_DEBUG)
         self.id = xml_dom.getAttribute("id")
-        self.log.log("self.id=" + str(self.id), ORPG_DEBUG)
         if xml_dom.hasAttribute("posx"):
             self.pos.x = int(xml_dom.getAttribute("posx"))
-            self.log.log("self.pos.x=" + str(self.pos.x), ORPG_DEBUG)
         if xml_dom.hasAttribute("posy"):
             self.pos.y = int(xml_dom.getAttribute("posy"))
-            self.log.log("self.pos.y=" + str(self.pos.y), ORPG_DEBUG)
         if xml_dom.hasAttribute("heading"):
             self.heading = int(xml_dom.getAttribute("heading"))
-            self.log.log("self.heading=" + str(self.heading), ORPG_DEBUG)
         if xml_dom.hasAttribute("face"):
             self.face = int(xml_dom.getAttribute("face"))
-            self.log.log("self.face=" + str(self.face), ORPG_DEBUG)
         if xml_dom.hasAttribute("path"):
             self.path = urllib.unquote(xml_dom.getAttribute("path"))
             self.set_bmp(ImageHandler.load(self.path, 'miniature', self.id))
-            self.log.log("self.path=" + self.path, ORPG_DEBUG)
         if xml_dom.hasAttribute("locked"):
             if xml_dom.getAttribute("locked") == '1' or xml_dom.getAttribute("locked") == 'True': self.locked = True
             else: self.locked = False
-            self.log.log("self.locked=" + str(self.locked), ORPG_DEBUG)
         if xml_dom.hasAttribute("hide"):
             if xml_dom.getAttribute("hide") == '1' or xml_dom.getAttribute("hide") == 'True': self.hide = True
             else: self.hide = False
-            self.log.log("self.hide=" + str(self.hide), ORPG_DEBUG)
         if xml_dom.hasAttribute("label"):
             self.label = xml_dom.getAttribute("label")
-            self.log.log("self.label=" + self.label, ORPG_DEBUG)
         if xml_dom.hasAttribute("zorder"):
             self.zorder = int(xml_dom.getAttribute("zorder"))
-            self.log.log("self.zorder=" + str(self.zorder), ORPG_DEBUG)
         if xml_dom.hasAttribute("align"):
             if xml_dom.getAttribute("align") == '1' or xml_dom.getAttribute("align") == 'True': self.snap_to_align = 1
             else: self.snap_to_align = 0
-            self.log.log("self.snap_to_align=" + str(self.snap_to_align), ORPG_DEBUG)
         if xml_dom.hasAttribute("width"):
             self.width = int(xml_dom.getAttribute("width"))
-            self.log.log("self.width=" + str(self.width), ORPG_DEBUG)
         if xml_dom.hasAttribute("height"):
             self.height = int(xml_dom.getAttribute("height"))
-            self.log.log("self.height=" + str(self.height), ORPG_DEBUG)
-        self.log.log("Exit BmpMiniature->takedom(self, xml_dom)", ORPG_DEBUG)
 
 ##-----------------------------
 ## miniature layer
@@ -456,8 +417,6 @@ class BmpMiniature:
 class miniature_layer(layer_base):
     def __init__(self, canvas):
         self.canvas = canvas
-        self.log = self.canvas.log
-        self.log.log("Enter miniature_layer", ORPG_DEBUG)
         self.settings = self.canvas.settings
         layer_base.__init__(self)
         self.id = -1 #added.
@@ -470,22 +429,16 @@ class miniature_layer(layer_base):
         if (font_size >= 10): font_size -= 2
         self.label_font = wx.Font(font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
                                   False, self.settings.get_setting('defaultfont'))
-        self.log.log("Exit miniature_layer", ORPG_DEBUG)
 
     def next_serial(self):
-        self.log.log("Enter miniature_layer->next_serial(self)", ORPG_DEBUG)
         self.serial_number += 1
-        self.log.log("Exit miniature_layer->next_serial(self)", ORPG_DEBUG)
         return self.serial_number
 
     def get_next_highest_z(self):
-        self.log.log("Enter miniature_layer->get_next_highest_z(self)", ORPG_DEBUG)
         z = len(self.miniatures)+1
-        self.log.log("Exit miniature_layer->get_next_highest_z(self)", ORPG_DEBUG)
         return z
 
     def cleanly_collapse_zorder(self):
-        self.log.log("Enter miniature_layer->cleanly_collapse_zorder(self)", ORPG_DEBUG)
         #  lock the zorder stuff
         sorted_miniatures = self.miniatures[:]
         sorted_miniatures.sort(cmp_zorder)
@@ -493,11 +446,9 @@ class miniature_layer(layer_base):
         for mini in sorted_miniatures:
             mini.zorder = i
             i = i + 1
-        self.log.log("Exit miniature_layer->cleanly_collapse_zorder(self)", ORPG_DEBUG)
         #  unlock the zorder stuff
 
     def collapse_zorder(self):
-        self.log.log("Enter miniature_layer->collapse_zorder(self)", ORPG_DEBUG)
         #  lock the zorder stuff
         sorted_miniatures = self.miniatures[:]
         sorted_miniatures.sort(cmp_zorder)
@@ -506,46 +457,31 @@ class miniature_layer(layer_base):
             if (mini.zorder != MIN_STICKY_BACK) and (mini.zorder != MIN_STICKY_FRONT): mini.zorder = i
             else: pass
             i = i + 1
-        self.log.log("Exit miniature_layer->collapse_zorder(self)", ORPG_DEBUG)
         #  unlock the zorder stuff
 
     def rollback_serial(self):
-        self.log.log("Enter miniature_layer->rollback_serial(self)", ORPG_DEBUG)
         self.serial_number -= 1
-        self.log.log("Exit miniature_layer->rollback_serial(self)", ORPG_DEBUG)
 
     def add_miniature(self, id, path, pos=cmpPoint(0,0), label="", heading=FACE_NONE, 
             face=FACE_NONE, width=0, height=0, local=False, localPath='', localTime=-1):
-        self.log.log("Enter miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", 
-            ORPG_DEBUG)
-        self.log.log("Before mini creation: " + str(self.get_next_highest_z()), ORPG_DEBUG)
         bmp = ImageHandler.load(path, 'miniature', id)
         if bmp:
             mini = BmpMiniature(id, path, bmp, pos, heading, face, label, 
                 zorder=self. get_next_highest_z(), width=width, 
-                height=height, log=self.log, local=local, localPath=localPath, localTime=localTime)
-            self.log.log("After mini creation:" + str(self.get_next_highest_z()), ORPG_DEBUG)
+                height=height, local=local, localPath=localPath, localTime=localTime)
             self.miniatures.append(mini)
-            self.log.log("After mini addition:" + str(self.get_next_highest_z()), ORPG_DEBUG)
             xml_str = "<map><miniatures>"
             xml_str += mini.toxml("new")
             xml_str += "</miniatures></map>"
             self.canvas.frame.session.send(xml_str)
-        else: self.log.log("Invalid image " + path + " has been ignored!", ORPG_DEBUG)
-        self.log.log("Exit miniature_layer->add_miniature(self, id, path, pos, label, heading, face, width, height)", 
-            ORPG_DEBUG)
 
     def get_miniature_by_id(self, id):
-        self.log.log("Enter miniature_layer->get_miniature_by_id(self, id)", ORPG_DEBUG)
         for mini in self.miniatures:
             if str(mini.id) == str(id):
-                self.log.log("Exit miniature_layer->get_miniature_by_id(self, id) return miniID: " + str(id), ORPG_DEBUG)
                 return mini
-        self.log.log("Exit miniature_layer->get_miniature_by_id(self, id) return None", ORPG_DEBUG)
         return None
 
     def del_miniature(self, min):
-        self.log.log("Enter miniature_layer->del_miniature(self, min)", ORPG_DEBUG)
         xml_str = "<map><miniatures>"
         xml_str += min.toxml("del")
         xml_str += "</miniatures></map>"
@@ -553,18 +489,14 @@ class miniature_layer(layer_base):
         self.miniatures.remove(min)
         del min
         self.collapse_zorder()
-        self.log.log("Exit miniature_layer->del_miniature(self, min)", ORPG_DEBUG)
 
     def del_all_miniatures(self):
-        self.log.log("Enter miniature_layer->del_all_miniatures(self)", ORPG_DEBUG)
         while len(self.miniatures):
             min = self.miniatures.pop()
             del min
         self.collapse_zorder()
-        self.log.log("Exit miniature_layer->del_all_miniatures(self)", ORPG_DEBUG)
 
     def layerDraw(self, dc, topleft, size):
-        self.log.log("Enter miniature_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
         dc.SetFont(self.label_font)
         sorted_miniatures = self.miniatures[:]
         sorted_miniatures.sort(cmp_zorder)
@@ -574,10 +506,8 @@ class miniature_layer(layer_base):
                 m.pos.x<topleft[0]+size[0]-m.left and
                 m.pos.y<topleft[1]+size[1]-m.top):
                 m.draw(dc, self)
-        self.log.log("Exit miniature_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
 
     def find_miniature(self, pt, only_unlocked=False):
-        self.log.log("Enter miniature_layer->find_miniature(self, pt, only_unlocked)", ORPG_DEBUG)
         min_list = []
         for m in self.miniatures:
             if m.hit_test(pt):
@@ -586,13 +516,11 @@ class miniature_layer(layer_base):
                 elif not only_unlocked and m.locked: min_list.append(m)
                 else: continue
         if len(min_list) > 0:
-            self.log.log("Exit miniature_layer->find_miniature(self, pt, only_unlocked)", ORPG_DEBUG)
             return min_list
-        else: self.log.log("Exit miniature_layer->find_miniature(self, pt, only_unlocked)", ORPG_DEBUG); return None
+        else: return None
 
     def layerToXML(self, action="update"):
         """ format  """
-        self.log.log("Enter miniature_layer->layerToXML(self, " + action + ")", ORPG_DEBUG)
         minis_string = ""
         if self.miniatures:
             for m in self.miniatures: minis_string += m.toxml(action)
@@ -602,12 +530,10 @@ class miniature_layer(layer_base):
             s += ">"
             s += minis_string
             s += "</miniatures>"
-            self.log.log("Exit miniature_layer->layerToXML(self, " + action + ")", ORPG_DEBUG)
             return s
-        else: self.log.log("Exit miniature_layer->layerToXML(self, " + action + ") return None", ORPG_DEBUG); return ""
+        else: return ""
 
     def layerTakeDOM(self, xml_dom):
-        self.log.log("Enter miniature_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
         if xml_dom.hasAttribute('serial'):
             self.serial_number = int(xml_dom.getAttribute('serial'))
         children = xml_dom._get_childNodes()
@@ -619,7 +545,6 @@ class miniature_layer(layer_base):
                 if mini:
                     self.miniatures.remove(mini)
                     del mini
-                else: self.log.log("Map Synchronization Error :: Update of unknown mini attempted", ORPG_DEBUG)
             elif action == "new":
                 pos = cmpPoint(int(c.getAttribute('posx')),int(c.getAttribute('posy')))
                 path = urllib.unquote(c.getAttribute('path'))
@@ -635,7 +560,7 @@ class miniature_layer(layer_base):
                 if c.hasAttribute('align'): snap_to_align = int(c.getAttribute('align'))
                 if c.getAttribute('zorder'): zorder = int(c.getAttribute('zorder'))
                 min = BmpMiniature(id, path, ImageHandler.load(path, 'miniature', id), pos, heading, 
-                    face, label, locked, hide, snap_to_align, zorder, width, height, self.log)
+                    face, label, locked, hide, snap_to_align, zorder, width, height)
                 self.miniatures.append(min)
                 if c.hasAttribute('local') and c.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(c.getAttribute('localPath'))):
                     localPath = urllib.unquote(c.getAttribute('localPath'))
@@ -655,8 +580,6 @@ class miniature_layer(layer_base):
             else:
                 mini = self.get_miniature_by_id(id)
                 if mini: mini.takedom(c)
-                else: self.log.log("Map Synchronization Error :: Update of unknown mini attempted", ORPG_DEBUG)
-        self.log.log("Exit miniature_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
 
     def upload(self, postdata, filename, modify=False, pos=cmpPoint(0,0)):
         self.lock.acquire()

@@ -66,16 +66,11 @@ class map_msg(map_element_msg_base):
             for c in xml_dom._get_childNodes():
                 name = c._get_nodeName()
                 if not self.children.has_key(name):
-                    if name == "miniatures":
-                        self.children[name] = minis_msg(self.p_lock)
-                    elif name == "grid":
-                        self.children[name] = grid_msg(self.p_lock)
-                    elif name == "bg":
-                        self.children[name] = bg_msg(self.p_lock)
-                    elif name == "whiteboard":
-                        self.children[name] = whiteboard_msg(self.p_lock)
-                    elif name == "fog":
-                        self.children[name] = fog_msg(self.p_lock)
+                    if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
+                    elif name == "grid": self.children[name] = grid_msg(self.p_lock)
+                    elif name == "bg": self.children[name] = bg_msg(self.p_lock)
+                    elif name == "whiteboard": self.children[name] = whiteboard_msg(self.p_lock)
+                    elif name == "fog": self.children[name] = fog_msg(self.p_lock)
                     else:
                         print "Unrecognized tag " + name + " found in map_msg.init_from_dom - skipping"
                         continue

@@ -33,8 +33,9 @@ import thread
 from threading import Lock
 import time
 from orpg.orpg_wx import *
-from orpg.orpgCore import *
+from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
+from orpg.tools.orpg_log import logger
 
 def singleton(cls):
     instances = {}
@@ -51,40 +52,38 @@ class ImageHandlerClass(object):
     __lock = Lock()
 
     def load(self, path, image_type, imageId):
-        # Load an image, with a intermideary fetching image shown while it loads in a background thread
+        """Load an image, with a intermideary fetching image shown while it loads in a background thread"""
         if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
                                                 self.__cache[path][2]).ConvertToBitmap()
         if not self.__fetching.has_key(path):
             self.__fetching[path] = True
-            #Start Image Loading Thread
+            """Start Image Loading Thread"""
             thread.start_new_thread(self.__loadThread, (path, image_type, imageId))
         else:
             if self.__fetching[path] is True: thread.start_new_thread(self.__loadCacheThread, (path, image_type, imageId))
         return wx.Bitmap(dir_struct["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
 
     def directLoad(self, path):
-        # Directly load an image, no threads
+        """Directly load an image, no threads"""
         if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
                                                 self.__cache[path][2]).ConvertToBitmap()
         uriPath = urllib.unquote(path)
         try:
             d = urllib.urlretrieve(uriPath)
-            # We have to make sure that not only did we fetch something, but that
-            # it was an image that we got back.
+            """We have to make sure that not only did we fetch something, but that
+               it was an image that we got back."""
             if d[0] and d[1].getmaintype() == "image":
                 self.__cache[path] = (path, d[0], d[1].gettype(), None)
                 return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
             else:
-                component.get('log').log("Image refused to load or URI did not reference a valid image: " + path, 
-                    ORPG_GENERAL, True)
+                logger.general("Image refused to load or URI did not reference a valid image: " + path) ##logger.general
                 return None
         except IOError:
-            component.get('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, 
-                ORPG_GENERAL, True)
+            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path) ##logger.general
             return None
 
     def cleanCache(self):
-        # Shrinks the Cache down to the proper size
+        """Shrinks the Cache down to the proper size"""
         try: cacheSize = int(component.get('settings').get_setting("ImageCacheSize"))
         except: cacheSize = 32
         cache = self.__cache.keys()
@@ -92,7 +91,7 @@ class ImageHandlerClass(object):
         for key in cache[cacheSize:]: del self.__cache[key]
 
     def flushCache(self):
-        #    This function will flush all images contained within the image cache.
+        """This function will flush all images contained within the image cache."""
         self.__lock.acquire()
         try:
             keyList = self.__cache.keys()
@@ -100,26 +99,24 @@ class ImageHandlerClass(object):
         finally: self.__lock.release()
         urllib.urlcleanup()
 
-    #Private Methods
+    """Private Methods"""
     def __loadThread(self, path, image_type, imageId):
         uriPath = urllib.unquote(path)
         self.__lock.acquire()
         try:
             d = urllib.urlretrieve(uriPath)
-            # We have to make sure that not only did we fetch something, but that
-            # it was an image that we got back.
+            """We have to make sure that not only did we fetch something, but that
+               it was an image that we got back."""
             if d[0] and d[1].getmaintype() == "image":
                 self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
                 self.__queue.put((self.__cache[path], image_type, imageId))
-                if self.__fetching.has_key(path): del self.__fetching[path]
+                if self.__fetching.has_key(path): self.__fetching[path] = False #Fix for failed multi-load?
             else:
-                component.get('log').log("Image refused to load or URI did not reference a valid image: " + path, 
-                    ORPG_GENERAL, True)
+                logger.general("Image refused to load or URI did not reference a valid image: " + path) ##logger.general
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            component.get('log').log("Unable to resolve/open the specified URI; image was NOT laoded: " + path, 
-                ORPG_GENERAL, True)
+            logger.general("Unable to resolve/open the specified URI; image was NOT laoded: " + path) ##logger.general
         finally: self.__lock.release()
 
     def __loadCacheThread(self, path, image_type, imageId):
@@ -129,26 +126,26 @@ class ImageHandlerClass(object):
                 while self.__fetching.has_key(path) and self.__fetching[path] is not False:
                     time.sleep(0.025)
                     if (time.time()-st) > 120:
-                        component.get('log').log("Timeout: " + path, ORPG_GENERAL, True)
+                        logger.general("Timeout: " + path)
                         break
             except:
                 del self.__fetching[path]
-                component.get('log').log("Unable to resolve/open the specified URI; image was NOT loaded: " + path, ORPG_GENERAL, True)
+                logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path) ##logger.general
                 return 
             self.__lock.acquire()
             try:
-                component.get('log').log("Adding Image to Queue from Cache: " + str(self.__cache[path]), ORPG_DEBUG)
+                logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
                 self.__queue.put((self.__cache[path], image_type, imageId))
             finally: self.__lock.release()
 
-    #Property Methods
+    """Property Methods"""
     def _getCache(self):
         return self.__cache
 
     def _getQueue(self):
         return self.__queue
 
-    #Properties
+    """Properties"""
     Cache = property(_getCache)
     Queue = property(_getQueue)
 

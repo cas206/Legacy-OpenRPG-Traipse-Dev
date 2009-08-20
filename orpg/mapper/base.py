@@ -30,7 +30,6 @@ __version__ = "$Id: base.py,v 1.18 2007/02/12 02:29:08 digitalxero Exp $"
 from images import ImageHandler
 from orpg.tools.rgbhex import *
 from orpg.orpg_windows import *
-from orpg.orpg_xml import *
 from math import *
 from threading import Lock
 import time

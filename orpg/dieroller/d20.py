@@ -25,27 +25,33 @@ __version__ = "$Id: d20.py,v 1.9 2006/11/04 21:24:19 digitalxero Exp $"
 # d20 stands for "d20 system" not 20 sided die :)
 
 class d20(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
 
 # these methods return new die objects for specific options
 
+    
     def attack(self,AC,mod,critical):
         return d20attack(self,AC,mod,critical)
 
+    
     def dc(self,DC,mod):
         return d20dc(self,DC,mod)
 
 class d20dc(std):
+    
     def __init__(self,source=[],DC=10,mod=0):
         std.__init__(self,source)
         self.DC = DC
         self.mod = mod
         self.append(static_di(mod))
 
+    
     def is_success(self):
         return ((self.sum() >= self.DC or self.data[0] == 20) and self.data[0] != 1)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -64,6 +70,7 @@ class d20dc(std):
 
 
 class d20attack(std):
+    
     def __init__(self,source=[],AC=10,mod=0,critical=20):
         std.__init__(self,source)
         self.mod = mod
@@ -72,11 +79,13 @@ class d20attack(std):
         self.append(static_di(mod))
         self.critical_check()
 
+    
     def attack(AC=10,mod=0,critical=20):
         self.mod = mod
         self.critical = critical
         self.AC = AC
 
+    
     def critical_check(self):
         self.critical_result = 0
         self.critical_roll = 0
@@ -85,12 +94,15 @@ class d20attack(std):
             if self.critical_roll.sum() >= self.AC:
                 self.critical_result = 1
 
+    
     def is_critical(self):
         return self.critical_result
 
+    
     def is_hit(self):
         return ((self.sum() >= self.AC or self.data[0] == 20) and self.data[0] != 1)
 
+    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:

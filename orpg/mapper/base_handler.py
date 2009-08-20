@@ -51,15 +51,15 @@ class base_layer_handler(wx.Panel):
         self.buttonsizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.zoom_in_button = createMaskedButton( self, 
-            orpg.dirpath.dir_struct["icon"]+'zoom_in.gif', "Zoom in from x1.0", wx.ID_ANY )
+            dir_struct["icon"]+'zoom_in.gif', "Zoom in from x1.0", wx.ID_ANY )
         self.zoom_out_button = createMaskedButton( self, 
-            orpg.dirpath.dir_struct["icon"]+'zoom_out.gif', "Zoom out from x1.0", wx.ID_ANY )
+            dir_struct["icon"]+'zoom_out.gif', "Zoom out from x1.0", wx.ID_ANY )
         props = createMaskedButton( self, 
-            orpg.dirpath.dir_struct["icon"]+'compass.gif', 'Edit map properties', wx.ID_ANY )
+            dir_struct["icon"]+'compass.gif', 'Edit map properties', wx.ID_ANY )
         mapopen = createMaskedButton( self, 
-            orpg.dirpath.dir_struct["icon"]+'open.bmp', 'Load a map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
+            dir_struct["icon"]+'open.bmp', 'Load a map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
         mapsave = createMaskedButton( self, 
-            orpg.dirpath.dir_struct["icon"]+'save.bmp', 'Save the map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
+            dir_struct["icon"]+'save.bmp', 'Save the map', wx.ID_ANY, '#c0c0c0', wx.BITMAP_TYPE_BMP )
         self.buttonsizer.Add(self.zoom_in_button, 0, wx.ALIGN_CENTER )
         self.buttonsizer.Add(self.zoom_out_button, 0, wx.ALIGN_CENTER )
         self.buttonsizer.Add(props, 0, wx.ALIGN_CENTER )
@@ -98,7 +98,7 @@ class base_layer_handler(wx.Panel):
         self.main_menu = main_menu
 
     def on_save_map_jpg(self, evt):
-        directory = orpg.dirpath.dir_struct["user"]
+        directory = dir_struct["user"]
         if directory == None:
             directory = ""
         d = wx.FileDialog(self.GetParent(), "Save map as a jpg", directory, "", "*.jpg", wx.SAVE)

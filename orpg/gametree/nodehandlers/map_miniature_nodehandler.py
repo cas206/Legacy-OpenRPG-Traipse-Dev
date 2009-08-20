@@ -33,7 +33,6 @@ from orpg.mapper.miniatures_msg import mini_msg
 from orpg.mapper.images import ImageHandler
 import urllib
 
-
 class map_miniature_handler(node_handler):
 
     """ A node handler for miniatures

@@ -28,7 +28,7 @@
 
 
 from core import *
-import wx.lib.splitter
+from wx.lib.splitter import MultiSplitterWindow
 
 
 ##########################
@@ -295,7 +295,7 @@ class splitter_handler(container_handler):
 
         self.pane = splitter_panel(parent, self)
 
-        self.splitter = wx.lib.splitter.MultiSplitterWindow(self.pane, -1, style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
+        self.splitter = MultiSplitterWindow(self.pane, -1, style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
 
         if self.split == '1':
             self.splitter.SetOrientation(wx.VERTICAL)

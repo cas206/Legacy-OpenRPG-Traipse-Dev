@@ -71,10 +71,6 @@ class fog_msg(map_element_msg_base):
         return self.toxml(action,output_action)
 
     def toxml(self,action,output_action):
-        #print "fog_msg.toxml called"
-        #print "use_fog :",self.use_fog
-        #print "output_action :",output_action
-        #print "action :",action
         if not (self.use_fog): return ""
         fog_string = ""
         if self.fogregion.isEmpty(): fog_string=self.get_line("all","del",output_action)
@@ -116,11 +112,11 @@ class fog_msg(map_element_msg_base):
                 list = l._get_childNodes()
                 for node in list:
                     polyline.append( IPoint().make( int(node.getAttribute("x")), int(node.getAttribute("y")) ) )
-                # pointarray = outline.split(";")
-                # for m in range(len(pointarray)):
-                #     pt=pointarray[m].split(",")
-                #     polyline.append(IPoint().make(int(pt[0]),int(pt[1])))
-            #print "length of polyline", len(polyline)
+                    # pointarray = outline.split(";")
+                    # for m in range(len(pointarray)):
+                    #     pt=pointarray[m].split(",")
+                    #     polyline.append(IPoint().make(int(pt[0]),int(pt[1])))
+                    #print "length of polyline", len(polyline)
             if (len(polyline)>2):
                 if action=="del": self.fogregion.FromPolygon(polyline,0)
                 else: self.fogregion.FromPolygon(polyline,1)

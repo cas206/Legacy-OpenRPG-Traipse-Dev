@@ -38,18 +38,23 @@ __version__ = "$Id: hackmaster.py,v 1.8 2006/11/15 12:11:22 digitalxero Exp $"
 
 #hackmaster Class basically passes into functional classes
 class hackmaster(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
 
+    
     def damage(self, mod, hon):
         return HMdamage(self, mod, hon)
 
+    
     def attack(self, mod, hon):
         return HMattack(self, mod, hon)
 
+    
     def help(self):
         return HMhelp(self)
 
+    
     def severity(self, honor):
         return HMSeverity(self, honor)
 
@@ -58,6 +63,7 @@ class hackmaster(std):
 # and this appears to be invisible to the user ( if a 4 on a d4 is rolled a 3 will appear and be followed by another
 # die. if High honor then a 4 will appear followed by a another die.
 class HMdamage(std):
+    
     def __init__(self,source=[], mod = 0, hon = 0):
         std.__init__(self,source)
         self.mod = mod
@@ -68,12 +74,14 @@ class HMdamage(std):
         #here we roll the honor die
         self.append(static_di(self.hon))
 
+    
     def damage(mod = 0, hon = 0):
         self.mod = mod
         self.hon = hon
 
 # This function is called by default to display the die string to the chat window.
 # Our die string attempts to explain the results
+    
     def __str__(self):
         myStr = "Damage "
         myStr += "[Damage Roll, Modifiers, Honor]: " + " [" + str(self.data[0])
@@ -85,12 +93,14 @@ class HMdamage(std):
         return myStr
 
 # This function checks to see if we need to reroll for penetration
+    
     def check_pen(self):
         for i in range(len(self.data)):
             if self.data[i].lastroll() >= self.data[i].sides:
                 self.pen_roll(i)
 
 #this function rolls the penetration die, and checks to see if it needs to be re-rolled again.
+    
     def pen_roll(self,num):
         result = int(random.uniform(1,self.data[num].sides+1))
         self.data[num].value += (result - 1 + self.hon)
@@ -101,6 +111,7 @@ class HMdamage(std):
 # this function rolls for the HM Attack. the function checks for a 20 and displays critical, and a 1
 # and displays fumble
 class HMattack(std):
+    
     def __init__(self, source=[], mod = 0, base_severity = 0, hon = 0, size = 0):
         std.__init__(self,source)
         self.size = size
@@ -116,6 +127,7 @@ class HMattack(std):
         self.append(static_di(self.hon))
 
 
+    
     def check_crit(self):
         if self.data[0] == self.data[0].sides:
             self.crit = 1
@@ -125,6 +137,7 @@ class HMattack(std):
 
     #this function is the out put to the chat window, it basicaly just displays the roll unless
     #it's a natural 20, or a natural 1
+    
     def __str__(self):
         if self.crit > 0:
             myStr = "Critical Hit!!: "
@@ -140,10 +153,12 @@ class HMattack(std):
         return myStr
 
 class HMhelp(std):
+    
     def __init__(self,source=[]):
         std.__init__(self,source)
         self.source = source
 
+    
     def __str__(self):
         myStr = " <br /> .attack(Bonus, Honor): <br />"
         myStr += " The attack roll rolles the dice and adds your bonus <br />"
@@ -171,6 +186,7 @@ class HMhelp(std):
 # the severity roll is for critical resolution. The die is rerolled and added
 #on a natural 8 and rerolled and subtracted on a 1
 class HMSeverity(std):
+    
     def __init__(self, source =[], honor=0):
         std.__init__(self,source)
         self.source = source
@@ -181,6 +197,7 @@ class HMSeverity(std):
         self.append(static_di(self.hon))
 
 
+    
     def __str__(self):
         myStr = "[Severity Dice, Honor]" + " [" + str(self.data[0])
         for a in self.data[1:]:
@@ -189,6 +206,7 @@ class HMSeverity(std):
         myStr += "] = (" + str(self.sum()) + ")"
         return myStr
 
+    
     def CheckReroll(self):
         if self.data[0] == self.data[0].sides:
             self.crit_chain(0,1)
@@ -196,6 +214,7 @@ class HMSeverity(std):
             self.crit_chain(0,-1)
 
     #this function needes moved for severity
+    
     def crit_chain(self,num,neg):
         result = int(random.uniform(1,self.data[num].sides+1))
         self.data[num].value += (((result - 1) * neg) + self.hon)

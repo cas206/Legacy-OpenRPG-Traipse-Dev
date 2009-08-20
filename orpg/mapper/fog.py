@@ -33,33 +33,25 @@ COURSE = 10
 
 class FogArea:
     def __init__(self, outline, log):
-        self.log = log
-        self.log.log("Enter FogArea", ORPG_DEBUG)
         self.outline = outline
-        self.log.log("Exit FogArea", ORPG_DEBUG)
 
     def set_fog_props(self, str):
-        self.log.log("Enter FogArea->set_fog_props(self, str)", ORPG_DEBUG)
         self.outline = str
-        self.log.log("Exit FogArea->set_fog_props(self, str)", ORPG_DEBUG)
 
     def points_to_elements(self, points=None):
-        self.log.log("Enter FogArea->points_to_elements(self, points)", ORPG_DEBUG)
         result = []
         if points == None:
-            self.log.log("Exit FogArea->points_to_elements(self, points)", ORPG_DEBUG)
             return result
+
         for pairs in string.split( points, ';' ):
             pair = string.split( pairs, ',' )
             p = Element( "point" )
             p.setAttribute( "x", pair[0] )
             p.setAttribute( "y", pair[1] )
             result.append( p )
-        self.log.log("Exit FogArea->points_to_elements(self, points)", ORPG_DEBUG)
         return result
 
     def toxml(self, action="update"):
-        self.log.log("Enter FogArea->toxml(self, " + action + ")", ORPG_DEBUG)
         xml_str = ""
         localOutline = self.outline
         if localOutline != None and localOutline != "all" and localOutline != "none":
@@ -73,8 +65,6 @@ class FogArea:
                 for p in list: elem.appendChild( p )
             str = elem.toxml()
             elem.unlink()
-            self.log.log(str, ORPG_DEBUG)
-            self.log.log("Exit FogArea->toxml(self, " + action + ")", ORPG_DEBUG)
             return str
         elem.setAttribute( "action", action )
         if  localOutline != None:
@@ -84,15 +74,11 @@ class FogArea:
                 for p in list: elem.appendChild( p )
         xml_str = elem.toxml()
         elem.unlink()
-        self.log.log(xml_str, ORPG_DEBUG)
-        self.log.log("Exit FogArea->toxml(self, " + action + ")", ORPG_DEBUG)
         return xml_str
 
 class fog_layer(layer_base):
     def __init__(self, canvas):
         self.canvas = canvas
-        self.log = self.canvas.log
-        self.log.log("Enter fog_layer", ORPG_DEBUG)
         layer_base.__init__(self)
         self.color = wx.Color(128,128,128)
         if "__WXGTK__" not in wx.PlatformInfo: self.color = wx.Color(128,128,128, 128)
@@ -103,51 +89,38 @@ class fog_layer(layer_base):
         self.height = 0
         self.use_fog = False
         self.last_role = ""
-        self.log.log("Exit fog_layer", ORPG_DEBUG)
 
     def clear(self):
-        self.log.log("Enter fog_layer->clear(self)", ORPG_DEBUG)
         self.fogregion.Clear()
         self.use_fog = True
         self.del_area("all")
         self.recompute_fog()
-        self.log.log("Exit fog_layer->clear(self)", ORPG_DEBUG)
 
     def remove_fog(self):
-        self.log.log("Enter fog_layer->remove_fog(self)", ORPG_DEBUG)
         self.fogregion.Clear()
         self.use_fog = False
         self.del_area("all")
         self.add_area("none")
         self.fog_bmp = None
-        self.log.log("Exit fog_layer->remove_fog(self)", ORPG_DEBUG)
 
     def resize(self, size):
-        self.log.log("Enter fog_layer->resize(self, size)", ORPG_DEBUG)
         try:
             if self.width == size[0] and self.height == size[1]:
-                self.log.log("Exit fog_layer->resize(self, size)", ORPG_DEBUG)
                 return
             self.recompute_fog()
         except: pass
-        self.log.log("Exit fog_layer->resize(self, size)", ORPG_DEBUG)
 
     def recompute_fog(self):
-        self.log.log("Enter fog_layer->recompute_fog(self)", ORPG_DEBUG)
         if not self.use_fog:
-            self.log.log("Exit fog_layer->recompute_fog(self)", ORPG_DEBUG)
             return
         size = self.canvas.size
         self.width = size[0]/COURSE+1
         self.height = size[1]/COURSE+1
         self.fog_bmp = wx.EmptyBitmap(self.width+2,self.height+2)
         self.fill_fog()
-        self.log.log("Exit fog_layer->recompute_fog(self)", ORPG_DEBUG)
 
     def fill_fog(self):
-        self.log.log("Enter fog_layer->fill_fog(self)", ORPG_DEBUG)
         if not self.use_fog:
-            self.log.log("Exit fog_layer->fill_fog(self)", ORPG_DEBUG)
             return
         if "__WXGTK__" in wx.PlatformInfo:
             mdc = wx.MemoryDC()
@@ -165,12 +138,9 @@ class fog_layer(layer_base):
                 mdc.DrawRectangle(0, 0, self.width+2, self.height+2)
             mdc.SelectObject(wx.NullBitmap)
             del mdc
-        self.log.log("Exit fog_layer->fill_fog(self)", ORPG_DEBUG)
 
     def layerDraw(self, dc, topleft, size):
-        self.log.log("Enter fog_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
         if self.fog_bmp == None or not self.fog_bmp.Ok() or not self.use_fog:
-            self.log.log("Exit fog_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
             return
         if self.last_role != self.canvas.frame.session.role: self.fill_fog()
         if "__WXGTK__" not in wx.PlatformInfo:
@@ -209,10 +179,8 @@ class fog_layer(layer_base):
             dc.SetUserScale(sc[0],sc[1])
             mdc.SelectObject(wx.NullBitmap)
             del mdc
-        self.log.log("Exit fog_layer->layerDraw(self, dc, topleft, size)", ORPG_DEBUG)
 
     def createregn2(self, polyline, mode, show):
-        self.log.log("Enter fog_layer->createregn2(self, polyline, mode, show)", ORPG_DEBUG)
         regn = self.scanConvert(polyline)
         area = ""
         for i in polyline:
@@ -231,59 +199,46 @@ class fog_layer(layer_base):
                 self.fogregion = wx.Region(0, 0, self.canvas.size[0]+2, self.canvas.size[1]+2)
                 self.fogregion.SubtractRegion(regn)
             self.del_area(area, show)
-        self.log.log("Exit fog_layer->createregn2(self, polyline, mode, show)", ORPG_DEBUG)
 
     def createregn(self, polyline, mode, show="Yes"):
-        self.log.log("Enter fog_layer->createregn(self, polyline, mode, show)", ORPG_DEBUG)
         if not self.use_fog and mode == 'del':
             self.clear()
             self.canvas.Refresh(False)
         if self.use_fog:
             self.createregn2(polyline, mode, show)
             self.fill_fog()
-        self.log.log("Exit fog_layer->createregn(self, polyline, mode, show)", ORPG_DEBUG)
 
     def scanConvert(self, polypt):
-        self.log.log("Enter fog_layer->scanConvert(self, polypt)", ORPG_DEBUG)
         regn = wx.Region()
         regn.Clear()
         list = IRegion().scan_Convert(polypt)
         for i in list:
             if regn.IsEmpty():
-                if "__WXGTK__" not in wx.PlatformInfo:
-                    regn = wx.Region(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
+                if "__WXGTK__" not in wx.PlatformInfo: regn = wx.Region(i.left*COURSE, i.y*COURSE, 
+                                                                        i.right*COURSE+1-i.left*COURSE, 1*COURSE)
                 else: regn = wx.Region(i.left, i.y, i.right+1-i.left, 1)
             else:
-                if "__WXGTK__" not in wx.PlatformInfo:
-                    regn.Union(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
+                if "__WXGTK__" not in wx.PlatformInfo: regn.Union(i.left*COURSE, i.y*COURSE, 
+                                                                i.right*COURSE+1-i.left*COURSE, 1*COURSE)
                 else: regn.Union(i.left, i.y, i.right+1-i.left, 1)
-        self.log.log("Exit fog_layer->scanConvert(self, polypt)", ORPG_DEBUG)
         return regn
 
     def add_area(self, area="", show="Yes"):
-        self.log.log("Enter fog_layer->add_area(self, area, show)", ORPG_DEBUG)
         poly = FogArea(area, self.log)
         xml_str = "<map><fog>"
         xml_str += poly.toxml("new")
         xml_str += "</fog></map>"
         if show == "Yes": self.canvas.frame.session.send(xml_str)
-        self.log.log(xml_str, ORPG_DEBUG)
-        self.log.log("Exit fog_layer->add_area(self, area, show)", ORPG_DEBUG)
 
     def del_area(self, area="", show="Yes"):
-        self.log.log("Enter fog_layer->del_area(self, area, show)", ORPG_DEBUG)
         poly = FogArea(area, self.log)
         xml_str = "<map><fog>"
         xml_str += poly.toxml("del")
         xml_str += "</fog></map>"
         if show == "Yes": self.canvas.frame.session.send(xml_str)
-        self.log.log(xml_str, ORPG_DEBUG)
-        self.log.log("Exit fog_layer->del_area(self, area, show)", ORPG_DEBUG)
 
     def layerToXML(self, action="update"):
-        self.log.log("Enter fog_layer->layerToXML(self, " + action + ")", ORPG_DEBUG)
         if not self.use_fog:
-            self.log.log("Exit fog_layer->layerToXML(self, " + action + ") return None", ORPG_DEBUG)
             return ""
         fog_string = ""
         ri = wx.RegionIterator(self.fogregion)
@@ -310,15 +265,11 @@ class fog_layer(layer_base):
             s += ">"
             s += fog_string
             s += "</fog>"
-            self.log.log(s, ORPG_DEBUG)
-            self.log.log("Exit fog_layer->layerToXML(self, " + action + ")", ORPG_DEBUG)
             return s
         else:
-            self.log.log("Exit fog_layer->layerToXML(self, " + action + ") return None", ORPG_DEBUG)
             return ""
 
     def layerTakeDOM(self, xml_dom):
-        self.log.log("Enter fog_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
         try:
             if not self.use_fog:
                 self.use_fog = True
@@ -350,5 +301,4 @@ class fog_layer(layer_base):
                         lasty = y
                 if (len(polyline) > 1): self.createregn2(polyline, action, "No")
             self.fill_fog()
-        except: self.log.log(traceback.format_exc(), ORPG_GENERAL)
-        self.log.log("Exit fog_layer->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
+        except: pass
