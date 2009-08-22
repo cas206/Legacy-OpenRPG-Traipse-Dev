@@ -142,7 +142,7 @@ class ImageHandlerClass(object):
             self.__lock.acquire()
             try:
                 logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
-                component.debug('chat').InfoPost("<font color='#FF0000'>Adding Image to Queue from Cache: " + str(self.__cache[path]) + "</font>)
+                component.debug('chat').InfoPost("<font color='#FF0000'>Adding Image to Queue from Cache: " + str(self.__cache[path]) + "</font>")
                 self.__queue.put((self.__cache[path], image_type, imageId))
             finally: self.__lock.release()
 
