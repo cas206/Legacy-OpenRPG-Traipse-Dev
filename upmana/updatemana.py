@@ -422,14 +422,13 @@ class Control(wx.Panel):
         self.get_packages()
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-
         self.buttons = {}
 
         ## Changelog / File List
         changelogcp = wx.Panel(self)
         self.changelogcp = wx.GridBagSizer(hgap=1, vgap=1)
-        self.changelog = wx.TextCtrl(changelogcp, wx.ID_ANY, size=(300, 240), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self.filelist = wx.TextCtrl(changelogcp, wx.ID_ANY, size=(300, 240), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.changelog = wx.TextCtrl(changelogcp, wx.ID_ANY, size=wx.DefaultSize, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.filelist = wx.TextCtrl(changelogcp, wx.ID_ANY, size=wx.DefaultSize, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.changelogcp.Add(self.changelog, (0,0), flag=wx.EXPAND)
         self.changelogcp.Add(self.filelist, (1,0), flag=wx.EXPAND)
         changelogcp.SetSizer(self.changelogcp)
@@ -441,29 +440,26 @@ class Control(wx.Panel):
         ## Branches / Revisions
         branchcp = wx.Panel(self)
         self.branchcp = wx.GridBagSizer(hgap=1, vgap=1)
-        self.branches = wx.Choice(branchcp, wx.ID_ANY, size=(125, 25), choices=self.package_list)
+        self.branches = wx.Choice(branchcp, wx.ID_ANY, choices=self.package_list)
         self.branch_txt = wx.StaticText(branchcp, wx.ID_ANY, "Branches")
+        self.branchcp.Add(self.branches, (0,0))
+        self.branchcp.Add(self.branch_txt, (0,1), flag=wx.ALIGN_CENTER_VERTICAL)
+        branchcp.SetSizer(self.branchcp)
+        self.branchcp.AddGrowableCol(1)
+        branchcp.SetAutoLayout(True)
 
         revlistcp = wx.Panel(self)
-        self.revlistcp = wx.GridBagSizer(hgap=1, vgap=1)
-        self.revlist1 = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=(290, 240), 
+        self.revlistcp = wx.GridBagSizer(hgap=2, vgap=2)
+        self.revlist = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=wx.DefaultSize, 
                                     style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_HRULES)
-        self.revlist1.InsertColumn(0, 'Revs', 145)
-        self.revlist1.InsertColumn(1, 'Revs', 145)
-        self.revlistcp.Add(self.revlist1, (0,0), span=(1,2), flag=wx.EXPAND)
+        self.revlist.InsertColumn(0, 'Revs', 145)
+        self.revlist.InsertColumn(1, 'Revs', 145)
+        self.revlistcp.Add(self.revlist, (0,0), flag=wx.EXPAND)
         revlistcp.SetSizer(self.revlistcp)
         self.revlistcp.AddGrowableCol(0)
         self.revlistcp.AddGrowableRow(0)
         self.revlistcp.AddGrowableRow(1)
         revlistcp.SetAutoLayout(True)
-
-        self.branchcp.Add(self.branches, (0,0), flag=wx.ALIGN_LEFT)
-        self.branchcp.Add(self.branch_txt, (0,1), flag=wx.ALIGN_CENTER_VERTICAL)
-        self.branchcp.Add(revlistcp, (1,13), flag=wx.EXPAND|wx.ALIGN_RIGHT)
-        branchcp.SetSizer(self.branchcp)
-        self.branchcp.AddGrowableCol(1)
-        self.branchcp.AddGrowableRow(0)
-        branchcp.SetAutoLayout(True)
 
         ## Control Panel
         cp = wx.Panel(self)
@@ -473,19 +469,17 @@ class Control(wx.Panel):
         self.cp.Add(self.buttons['update'], (0,0))
         self.cp.Add(self.buttons['delete'], (0,1))
         cp.SetSizer(self.cp)
-        self.cp.AddGrowableCol(0)
-        self.cp.AddGrowableRow(0)
         cp.SetAutoLayout(True)
 
-        self.sizer.Add(changelogcp, (0,0), span=(2,1),flag=wx.EXPAND)
-        self.sizer.Add(branchcp, (0,1))
-        self.sizer.Add(cp, (1,1), span=(2,1))
+        self.sizer.Add(changelogcp, (0,0), span=(3,1), flag=wx.EXPAND)
+        self.sizer.Add(branchcp, (0,1), span=(1,1))
+        self.sizer.Add(revlistcp, (2,1), span=(1,1), flag=wx.EXPAND)
+        self.sizer.Add(cp, (1,1), span=(1,1))
 
         self.buttons['delete'].Disable()
         self.sizer.AddGrowableCol(0)
-        self.sizer.AddGrowableRow(0)
         self.sizer.AddGrowableCol(1)
-        self.sizer.AddGrowableRow(1)
+        self.sizer.AddGrowableRow(2)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
 
@@ -496,15 +490,16 @@ class Control(wx.Panel):
         cs = self.repo.changectx( self.current ).changeset()
         rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
         #print self.repo.changelog.reachable(self.repo.branchtags()[self.current])
-        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]): #grabs revision list depending on branch.
+        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]): 
+        #grabs revision list depending on branch.
         #    print self.repo.changelog.rev(heads)
-        #self.changelog.SetValue('')
+        self.changelog.SetValue('')
         changelog = cs[4]
-        #self.changelog.AppendText(changelog + '\n')
-        #self.filelist.SetValue('')
-        #self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\n")
-        #self.filelist.AppendText("Files Modified (in update): \n")
-        #for f in cs[3]: self.filelist.AppendText(f+"\n")
+        self.changelog.AppendText(changelog + '\n')
+        self.filelist.SetValue('')
+        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\n")
+        self.filelist.AppendText("Files Modified (in update): \n")
+        for f in cs[3]: self.filelist.AppendText(f+"\n")
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
