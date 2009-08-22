@@ -35,7 +35,7 @@ from map_prop_dialog import *
 import random
 import os
 import thread
-import gc
+#import gc #Garbage Collecter Needed?
 import traceback
 
 from miniatures_handler import *
@@ -48,6 +48,7 @@ from fog_handler import *
 from orpg.dirpath import dir_struct
 from images import ImageHandler
 from orpg.orpgCore import component
+from orpg.tools.orpg_settings import settings
 
 # Various marker modes for player tools on the map
 MARKER_MODE_NONE = 0
@@ -58,8 +59,6 @@ MARKER_MODE_AREA_TARGET = 3
 class MapCanvas(wx.ScrolledWindow):
     def __init__(self, parent, ID, isEditor=0):
         self.parent = parent
-        self.log = component.get('log')
-        self.settings = component.get("settings")
         self.session = component.get("session")
         wx.ScrolledWindow.__init__(self, parent, ID, 
             style=wx.HSCROLL | wx.VSCROLL | wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER )
@@ -156,7 +155,7 @@ class MapCanvas(wx.ScrolledWindow):
                     self.parent.layer_tabs.EnableTab(cidx, True)
         if not self.cacheSizeSet:
             self.cacheSizeSet = True
-            cacheSize = self.settings.get_setting("ImageCacheSize")
+            cacheSize = component.get('settings').get_setting("ImageCacheSize")
             if len(cacheSize): self.cacheSize = int(cacheSize)
             else: pass
         if not ImageHandler.Queue.empty():
@@ -193,11 +192,11 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_scroll(self, evt):
         if self.drag: self.drag.Hide()
-        if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
+        if component.get('settings').get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
 
     def on_char(self, evt):
-        if self.settings.get_setting("AlwaysShowMapScale") == "1": self.printscale()
+        if component.get('settings').get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
 
     def printscale(self):
@@ -275,7 +274,7 @@ class MapCanvas(wx.ScrolledWindow):
             del dc
             wdc = self.preppaint()
             wdc.DrawBitmap(bmp, topleft[0], topleft[1])
-            if self.frame.settings.get_setting("AlwaysShowMapScale") == "1":
+            if settings.get_setting("AlwaysShowMapScale") == "1":
                 self.showmapscale(wdc)
         try: evt.Skip()
         except: pass
@@ -715,11 +714,9 @@ class MapCanvas(wx.ScrolledWindow):
 
 class map_wnd(wx.Panel):
     def __init__(self, parent, id):
-        self.log = component.get('log')
         wx.Panel.__init__(self, parent, id)
         self.canvas = MapCanvas(self, -1)
         self.session = component.get('session')
-        self.settings = component.get('settings')
         self.chat = component.get('chat')
         self.top_frame = component.get('frame')
         self.root_dir = os.getcwd()

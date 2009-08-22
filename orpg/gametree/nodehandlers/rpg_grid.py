@@ -30,6 +30,7 @@ __version__ = "$Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $"
 
 from core import *
 from forms import *
+from orpg.minidom import Element, Text
 
 class rpg_grid_handler(node_handler):
     """ Node handler for rpg grid tool
@@ -196,12 +197,12 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc.SetDimensions(rect.x+1, rect.y+1, rect.width+2, rect.height+2)
 
 
-    def Show(self, show, attr):
-        """
-        Show or hide the edit control.  You can use the attr (if not None)
-        to set colours or fonts for the control.
-        """
-        self.base_Show(show, attr) #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
+    #def Show(self, show, attr): #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
+    #    """
+    #    Show or hide the edit control.  You can use the attr (if not None)
+    #    to set colours or fonts for the control.
+    #    """
+    #    self.base_Show(show, attr) # Removed to prevent recursive error type.
 
 
     def BeginEdit(self, row, col, grid):
@@ -283,7 +284,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
             evt.Skip()
 
 
-
     def Destroy(self):
         """final cleanup"""
         self.base_Destroy()
@@ -341,7 +341,6 @@ class rpg_grid(wx.grid.Grid):
         value = self.GetCellValue(row,col)
         cells = self.rows[row].getElementsByTagName('cell')
         t_node = cells[col]._get_firstChild()
-        print t_node
         t_node._set_nodeValue(value)
         if col == 0:
             self.handler.refresh_rows()
@@ -362,7 +361,7 @@ class rpg_grid(wx.grid.Grid):
             if t_node == None:
                 #doc = cells[i].ownerDocument
                 #t_node = doc.createTextNode("")
-                t_node = minidom.Text("")
+                t_node = Text("")
                 t_node = cells[i].appendChild(t_node)
             self.SetCellValue(rowi,i,t_node._get_nodeValue())
 
@@ -370,12 +369,12 @@ class rpg_grid(wx.grid.Grid):
         cols = self.GetNumberCols()
         #doc = self.handler.grid.ownerDocument
         #row = doc.createElement('row')
-        row = minidom.Element('row')
+        row = Element('row')
         for i in range(0,cols):
             #cell = doc.createElement('cell')
-            cell = minidom.Element('cell')
+            cell = Element('cell')
             #t_node = doc.createTextNode("")
-            t_node = minidom.Text("")
+            t_node = Text("")
             t_node = cell.appendChild(t_node)
             row.appendChild(cell)
         self.handler.grid.appendChild(row)
@@ -387,9 +386,9 @@ class rpg_grid(wx.grid.Grid):
         #doc = self.handler.grid.ownerDocument
         for r in self.rows:
             #cell = doc.createElement('cell')
-            cell = minidom.Element('cell')
+            cell = Element('cell')
             #t_node = doc.createTextNode("")
-            t_node = minidom.Text("")
+            t_node = Text("")
             t_node = cell.appendChild(t_node)
             r.appendChild(cell)
         self.AppendCols(1)

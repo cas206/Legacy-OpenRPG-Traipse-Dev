@@ -34,6 +34,8 @@ import time
 import urllib
 import os.path
 
+from orpg.tools.orpg_settings import settings
+
 MIN_STICKY_BACK = -0XFFFFFF
 MIN_STICKY_FRONT = 0xFFFFFF
 
@@ -417,7 +419,6 @@ class BmpMiniature:
 class miniature_layer(layer_base):
     def __init__(self, canvas):
         self.canvas = canvas
-        self.settings = self.canvas.settings
         layer_base.__init__(self)
         self.id = -1 #added.
         self.miniatures = []
@@ -425,10 +426,10 @@ class miniature_layer(layer_base):
 
         # Set the font of the labels to be the same as the chat window
         # only smaller.
-        font_size = int(self.settings.get_setting('defaultfontsize'))
+        font_size = int(settings.get_setting('defaultfontsize'))
         if (font_size >= 10): font_size -= 2
         self.label_font = wx.Font(font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
-                                  False, self.settings.get_setting('defaultfont'))
+                                  False, settings.get_setting('defaultfont'))
 
     def next_serial(self):
         self.serial_number += 1
@@ -583,7 +584,7 @@ class miniature_layer(layer_base):
 
     def upload(self, postdata, filename, modify=False, pos=cmpPoint(0,0)):
         self.lock.acquire()
-        url = self.settings.get_setting('ImageServerBaseURL')
+        url = settings.get_setting('ImageServerBaseURL')
         file = urllib.urlopen(url, postdata)
         recvdata = file.read()
         file.close()

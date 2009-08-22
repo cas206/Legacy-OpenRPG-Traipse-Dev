@@ -100,7 +100,7 @@ def debugging(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        from orpg.tools.orpg_log import logger
+        from orpg_log import logger
 
         if not ORPG_DEBUG & logger.log_level:
             return func(*args, **kwargs)

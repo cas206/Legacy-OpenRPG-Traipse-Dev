@@ -40,6 +40,8 @@ from grid import GRID_HEXAGON
 from grid import GRID_ISOMETRIC
 import os
 
+from orpg.tools.orpg_settings import settings
+
 LABEL_TOOL = wx.NewId()
 LAYER_TOOL = wx.NewId()
 MIN_LIST_TOOL = wx.NewId()
@@ -103,7 +105,7 @@ class miniatures_handler(base_layer_handler):
         self.use_serial = 1
         self.auto_label_cb = None
         self.canvas = canvas
-        self.settings = self.canvas.settings
+        self.settings = settings
         self.mini_rclick_menu_extra_items = {}
         self.background_rclick_menu_extra_items = {}
         base_layer_handler.__init__(self, parent, id, canvas)

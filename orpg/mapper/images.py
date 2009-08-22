@@ -32,6 +32,7 @@ import Queue
 import thread
 from threading import Lock
 import time
+
 from orpg.orpg_wx import *
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
@@ -50,6 +51,7 @@ class ImageHandlerClass(object):
     __fetching = {}
     __queue = Queue.Queue(0)
     __lock = Lock()
+    chat = component.get("chat")
 
     def load(self, path, image_type, imageId):
         """Load an image, with a intermideary fetching image shown while it loads in a background thread"""
@@ -76,10 +78,12 @@ class ImageHandlerClass(object):
                 self.__cache[path] = (path, d[0], d[1].gettype(), None)
                 return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
             else:
-                logger.general("Image refused to load or URI did not reference a valid image: " + path) ##logger.general
+                logger.general("Image refused to load or URI did not reference a valid image: " + path)
+                component.get('chat').InfoPost("<font color='#FF0000'>Image refused to load or URI did not reference a valid image: " + path + "</font>")
                 return None
         except IOError:
-            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path) ##logger.general
+            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
+            component.get('chat').InfoPost("<font color='#FF0000'>Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
             return None
 
     def cleanCache(self):
@@ -112,11 +116,13 @@ class ImageHandlerClass(object):
                 self.__queue.put((self.__cache[path], image_type, imageId))
                 if self.__fetching.has_key(path): self.__fetching[path] = False #Fix for failed multi-load?
             else:
-                logger.general("Image refused to load or URI did not reference a valid image: " + path) ##logger.general
+                logger.general("Image refused to load or URI did not reference a valid image: " + path)
+                component.get('chat').InfoPost("<font color='#FF0000'>Image refused to load or URI did not reference a valid image: " + path +"</font>")
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            logger.general("Unable to resolve/open the specified URI; image was NOT laoded: " + path) ##logger.general
+            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
+            component.get('chat').InfoPost("<font color='#FF0000'> Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
         finally: self.__lock.release()
 
     def __loadCacheThread(self, path, image_type, imageId):
@@ -130,11 +136,13 @@ class ImageHandlerClass(object):
                         break
             except:
                 del self.__fetching[path]
-                logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path) ##logger.general
+                logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
+                component.get('chat').InfoPost("<font color='#FF0000'>Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
                 return 
             self.__lock.acquire()
             try:
                 logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
+                component.debug('chat').InfoPost("<font color='#FF0000'>Adding Image to Queue from Cache: " + str(self.__cache[path]) + "</font>)
                 self.__queue.put((self.__cache[path], image_type, imageId))
             finally: self.__lock.release()
 

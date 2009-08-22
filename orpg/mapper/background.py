@@ -34,6 +34,11 @@ import urllib
 import os.path
 import time
 
+from orpg.orpgCore import component
+from orpg.tools.orpg_log import logger
+from orpg.tools.decorators import debugging
+from orpg.tools.orpg_settings import settings
+
 ##-----------------------------
 ## background layer
 ##-----------------------------
@@ -44,27 +49,24 @@ BG_IMAGE = 2
 BG_COLOR = 3
 
 class layer_back_ground(layer_base):
+    @debugging
     def __init__(self, canvas):
         self.canvas = canvas
-        self.log = self.canvas.log
-        self.log.log("Enter layer_back_ground", ORPG_DEBUG)
-        self.settings = self.canvas.settings
+        self.log = component.get('log')
         layer_base.__init__(self)
         self.canvas = canvas
         self.r_h = RGBHex()
         self.clear()
-        self.log.log("Exit layer_back_ground", ORPG_DEBUG)
 
+    @debugging
     def error_loading_image(self, image):
-        self.log.log("Enter layer_back_ground->error_loading_image(self, image)", ORPG_DEBUG)
         msg = "Unable to load image:" + `image`
         dlg = wx.MessageDialog(self.canvas,msg,'File not Found',wx.ICON_EXCLAMATION)
         dlg.ShowModal()
         dlg.Destroy()
-        self.log.log("Exit layer_back_ground->error_loading_image(self, image)", ORPG_DEBUG)
 
+    @debugging
     def clear(self):
-        self.log.log("Enter layer_back_ground->clear(self)", ORPG_DEBUG)
         self.type = BG_NONE
         self.bg_bmp = None
         self.bg_color = None
@@ -73,75 +75,62 @@ class layer_back_ground(layer_base):
         self.localPath = ''
         self.localTime = -1
         self.isUpdated = True
-        self.log.log("Exit layer_back_ground->clear(self)", ORPG_DEBUG)
 
+    @debugging
     def get_type(self):
-        self.log.log("Enter layer_back_ground->get_type(self)", ORPG_DEBUG)
-        self.log.log("Exit layer_back_ground->get_type(self)", ORPG_DEBUG)
         return self.type
 
+    @debugging
     def get_img_path(self):
-        self.log.log("Enter layer_back_ground->get_type(self)", ORPG_DEBUG)
-        if self.img_path:
-            self.log.log("Exit layer_back_ground->get_type(self) return " + self.img_path, ORPG_DEBUG)
-            return self.img_path
-        else:
-            self.log.log("Exit layer_back_ground->get_type(self) return None", ORPG_DEBUG)
-            return ""
+        if self.img_path: return self.img_path
+        else: return ""
 
+    @debugging
     def get_color(self):
-        self.log.log("Enter layer_back_ground->get_color(self)", ORPG_DEBUG)
         hexcolor = "#FFFFFF"
         if self.bg_color:
             (red,green,blue) = self.bg_color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
-        self.log.log("Exit layer_back_ground->get_color(self)", ORPG_DEBUG)
         return hexcolor
 
+    @debugging
     def set_texture(self, path):
-        self.log.log("Enter layer_back_ground->set_texture(self, path)", ORPG_DEBUG)
         self.isUpdated = True
-
         self.type = BG_TEXTURE
         if self.img_path != path:
             try:
                 self.bg_bmp = ImageHandler.load(path, "texture", 0)
                 if self.bg_bmp == None:
-                    self.log.log("Invalid image type!", ORPG_GENERAL)
+                    logger.general("Invalid image type!")
                     raise Exception, "Invalid image type!"
             except: self.error_loading_image(path)
         self.img_path = path
-        self.log.log("Enter layer_back_ground->set_texture(self, path)", ORPG_DEBUG)
 
+    @debugging
     def set_image(self, path, scale):
-        self.log.log("Enter layer_back_ground->set_image(self, path, scale)", ORPG_DEBUG)
         self.isUpdated = True
-
         self.type = BG_IMAGE
         if self.img_path != path:
             self.bg_bmp = ImageHandler.load(path, "background", 0)
             try:
                 if self.bg_bmp == None:
-                    self.log.log("Invalid image type!", ORPG_GENERAL)
+                    logger.general("Invalid image type!")
                     raise Exception, "Invalid image type!"
             except: self.error_loading_image(path)
         self.img_path = path
-        self.log.log("Exit layer_back_ground->set_image(self, path, scale)", ORPG_DEBUG)
         return (self.bg_bmp.GetWidth(),self.bg_bmp.GetHeight())
 
+    @debugging
     def set_color(self, color):
-        self.log.log("Enter layer_back_ground->set_color(self, color)", ORPG_DEBUG)
         self.isUpdated = True
         self.type = BG_COLOR
         (r,g,b) = color.Get()
         self.bg_color = cmpColour(r,g,b)
         self.canvas.SetBackgroundColour(self.bg_color)
-        self.log.log("Exit layer_back_ground->set_color(self, color)", ORPG_DEBUG)
 
+    @debugging
     def layerDraw(self, dc, scale, topleft, size):
-        self.log.log("Enter layer_back_ground->layerDraw(self, dc, scale, topleft, size)", ORPG_DEBUG)
         if self.bg_bmp == None or not self.bg_bmp.Ok() or ((self.type != BG_TEXTURE) and (self.type != BG_IMAGE)):
-            self.log.log("Exit layer_back_ground->layerDraw(self, dc, scale, topleft, size) return False", ORPG_DEBUG)
             return False
         dc2 = wx.MemoryDC()
         dc2.SelectObject(self.bg_bmp)
@@ -212,11 +201,10 @@ class layer_back_ground(layer_base):
             dc.Blit(posx, posy, newW, newH, dc2, cl, ct)
         dc2.SelectObject(wx.NullBitmap)
         del dc2
-        self.log.log("Exit layer_back_ground->layerDraw(self, dc, scale, topleft, size)", ORPG_DEBUG)
         return True
 
+    @debugging
     def layerToXML(self, action="update"):
-        self.log.log("Enter layer_back_ground->layerToXML(self, " + action + ")", ORPG_DEBUG)
         xml_str = "<bg"
         if self.bg_color != None:
             (red,green,blue) = self.bg_color.Get()
@@ -229,21 +217,19 @@ class layer_back_ground(layer_base):
             xml_str += ' localPath="' + urllib.quote(self.localPath).replace('%3A', ':') + '"'
             xml_str += ' localTime="' + str(self.localTime) + '"'
         xml_str += "/>"
-        self.log.log(xml_str, ORPG_DEBUG)
-        self.log.log("Exit layer_back_ground->layerToXML(self, " + action + ")", ORPG_DEBUG)
+        logger.debug(xml_str)
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
             return xml_str
         else: return ''
 
+    @debugging
     def layerTakeDOM(self, xml_dom):
-        self.log.log("Enter layer_back_ground->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
         type = BG_COLOR
         color = xml_dom.getAttribute("color")
-        self.log.log("color=" + color, ORPG_DEBUG)
+        logger.debug("color=" + color)
         path = urllib.unquote(xml_dom.getAttribute("path"))
-        self.log.log("path=" + path, ORPG_DEBUG)
-
+        logger.debug("path=" + path)
         # Begin ted's map changes
         if xml_dom.hasAttribute("color"):
             r,g,b = self.r_h.rgb_tuple(xml_dom.getAttribute("color"))
@@ -251,16 +237,12 @@ class layer_back_ground(layer_base):
         # End ted's map changes
         if xml_dom.hasAttribute("type"):
             type = int(xml_dom.getAttribute("type"))
-            self.log.log("type=" + str(type), ORPG_DEBUG)
-
+            logger.debug("type=" + str(type))
         if type == BG_TEXTURE:
             if path != "": self.set_texture(path)
-
         elif type == BG_IMAGE:
             if path != "": self.set_image(path, 1)
-
         elif type == BG_NONE: self.clear()
-
         if xml_dom.hasAttribute('local') and xml_dom.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.getAttribute('localPath'))):
             self.localPath = urllib.unquote(xml_dom.getAttribute('localPath'))
             self.local = True
@@ -273,12 +255,12 @@ class layer_back_ground(layer_base):
                 (imgtype,j) = mimetypes.guess_type(filename[1])
                 postdata = urllib.urlencode({'filename':filename[1], 'imgdata':imgdata, 'imgtype':imgtype})
                 thread.start_new_thread(self.upload, (postdata, self.localPath, type))
-        self.log.log("Exit layer_back_ground->layerTakeDOM(self, xml_dom)", ORPG_DEBUG)
 
+    @debugging
     def upload(self, postdata, filename, type):
         self.lock.acquire()
         if type == 'Image' or type == 'Texture':
-            url = self.settings.get_setting('ImageServerBaseURL')
+            url = component.get('settings').get_setting('ImageServerBaseURL')
             file = urllib.urlopen(url, postdata)
             recvdata = file.read()
             file.close()

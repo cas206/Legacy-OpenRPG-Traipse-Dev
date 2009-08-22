@@ -35,10 +35,12 @@ import mimetypes
 import os
 from base import *
 
+from orpg.tools.orpg_settings import settings
+
 class background_handler(base_layer_handler):
     def __init__(self, parent, id, canvas):
         base_layer_handler.__init__(self, parent, id, canvas)
-        self.settings = self.canvas.settings
+        self.settings = settings
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)
