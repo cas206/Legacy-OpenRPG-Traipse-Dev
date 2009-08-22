@@ -1,4 +1,6 @@
 import wx
+import sys
+import os #just .sep maybe
 import manifest
 import shutil
 from orpg.orpgCore import component
@@ -21,7 +23,6 @@ class Updater(wx.Panel):
         self.c = self.repo.changectx('tip')
         self.manifest = manifest
         self.parent = parent
-        logger.debug("Enter updaterFrame")
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
         self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(325, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
@@ -561,7 +562,7 @@ class updateApp(wx.App):
     def OnInit(self):
         self.main = False
         logger._set_log_to_console(False)
-        logger.note(Updater Start", ORPG_NOTE)
+        logger.note("Updater Start")
         self.manifest = manifest.ManifestChanges()
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", 
