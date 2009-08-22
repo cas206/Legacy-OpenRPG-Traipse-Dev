@@ -143,12 +143,14 @@
 # r- resolved
 # o- open
 #
-import orpg.tools.orpg_settings #Not used??
+
+#import orpg.tools.orpg_settings #Not used??
 import orpg.minidom
-from core import *
+from core import component
 from containers import *
 from string import *  #a 1.6003
 from inspect import *  #a 1.9001
+from orpg.dirpath import dir_struct
 dnd3e_EXPORT = wx.NewId()
 ############Global Stuff##############
 
@@ -305,7 +307,7 @@ class dnd3echar_handler(container_handler):
         return html_str
 
     def about(self):
-        html_str = "<img src='" + orpg.dirpath.dir_struct["icon"]
+        html_str = "<img src='" + dir_struct["icon"]
         html_str += "dnd3e_logo.gif' ><br><b>dnd3e Character Tool "
         html_str += self.Version+"</b>" #m 1.6000 was hard coded.
         html_str += "<br>by Dj Gilcrease<br>digitalxero@gmail.com"
@@ -919,7 +921,7 @@ class class_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3eclasses.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3eclasses.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1550,12 +1552,12 @@ class feat_panel(wx.Panel):
     def on_add(self,evt):
 
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3efeats.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3efeats.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
-            self.temp_dom = xml_dom
-        f_list = self.temp_dom.getElementsByTagName('feat')
+            temp_dom = xml_dom
+        f_list = temp_dom.getElementsByTagName('feat')
         opts = []
         for f in f_list:
             opts.append(f.getAttribute('name') + "  -  [" +
@@ -1815,7 +1817,7 @@ class dnd3eattacks(combat_char_child):
 
     def updateFootN(self,n):#a 1.5012 this whole function
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3eweapons.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3eweapons.xml","r")
             #tmp = open("c:\clh\codeSamples\sample1.xml","r") #a (debug) 1.5012
             self.temp_dom = xml.dom.minidom.parse(tmp)
 
@@ -2248,7 +2250,7 @@ class weapon_panel(wx.Panel):
             fnFrame = wx.Frame(masterFrame, -1, title)
             fnFrame.panel = wx.html.HtmlWindow(fnFrame,-1)
             if not self.temp_dom:
-                tmp = open(orpg.dirpath.dir_struct["dnd3e"]+
+                tmp = open(dir_struct["dnd3e"]+
                             "dnd3eweapons.xml","r")
                 #tmp = open("c:\clh\codeSamples\sample1.xml","r")
                 xml_dom = parseXml_with_dlg(self,tmp.read())
@@ -2354,7 +2356,7 @@ class weapon_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3eweapons.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3eweapons.xml","r")
             #tmp = open("c:\clh\codeSamples\sample1.xml","r") #a (debug) 1.5012
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
@@ -2581,7 +2583,7 @@ class ac_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3earmor.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3earmor.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -2844,7 +2846,7 @@ class spells_panel(wx.Panel):
     def on_add(self,evt):
 
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3espells.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3espells.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -3051,7 +3053,7 @@ class divine_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3edivine.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3edivine.xml","r")
 
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
@@ -3288,7 +3290,7 @@ class power_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd3e"]+"dnd3epowers.xml","r")
+            tmp = open(dir_struct["dnd3e"]+"dnd3epowers.xml","r")
 
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()

@@ -1,13 +1,12 @@
 import wx
 import manifest
-from orpg.orpgCore import *
-#import tempfile
 import shutil
-
+from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 from upmana.validate import validate
+from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
 
@@ -22,7 +21,7 @@ class Updater(wx.Panel):
         self.c = self.repo.changectx('tip')
         self.manifest = manifest
         self.parent = parent
-        #logger.debug("Enter updaterFrame") #Need to set logging level
+        logger.debug("Enter updaterFrame")
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
         self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(325, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
@@ -94,12 +93,13 @@ class Updater(wx.Panel):
         self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
         component.get('validate').config_file(filename, "default_ignorelist.txt")
         self.mana = self.LoadDoc()
+        temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
         for ignore in self.ignorelist:
-            shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
+            shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
-            shutil.copyfile(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-            os.remove(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+            shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+            os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
 
     def LoadDoc(self):
         ignore = open(self.filename)
@@ -370,8 +370,8 @@ class Manifest(wx.Panel):
         self.manifestlist.sort()
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-        self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, self.manifestlist, 
-            wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
+        self.manifestlog = wx.CheckListBox( self, -1, wx.DefaultPosition, wx.DefaultSize, 
+                                            self.manifestlist, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
         filename = 'ignorelist.txt'
         self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
         component.get('validate').config_file(filename, "default_ignorelist.txt")
@@ -445,7 +445,8 @@ class Control(wx.Panel):
 
         revlistcp = wx.Panel(self)
         self.revlistcp = wx.GridBagSizer(hgap=1, vgap=1)
-        self.revlist1 = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=(290, 240), style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_HRULES)
+        self.revlist1 = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=(290, 240), 
+                                    style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_HRULES)
         self.revlist1.InsertColumn(0, 'Revs', 145)
         self.revlist1.InsertColumn(1, 'Revs', 145)
         self.revlistcp.Add(self.revlist1, (0,0), span=(1,2), flag=wx.EXPAND)
@@ -559,8 +560,8 @@ class updaterFrame(wx.Frame):
 class updateApp(wx.App):
     def OnInit(self):
         self.main = False
-        #logger.setLogToConsol(False)
-        #logger. ??? ("Updater Start", ORPG_NOTE)
+        logger._set_log_to_console(False)
+        logger.note(Updater Start", ORPG_NOTE)
         self.manifest = manifest.ManifestChanges()
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", 
@@ -589,15 +590,15 @@ class updateApp(wx.App):
             filename = 'ignorelist.txt'
             self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
             component.get('validate').config_file(filename, "default_ignorelist.txt")
-
             self.mana = self.LoadDoc()
+            temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
             for ignore in self.ignorelist:
-                shutil.copy(ignore, dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep +ignore.split('/')[len(ignore.split('/')) - 1])
+                shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
                 print ignore.split('/')[len(ignore.split('/')) - 1]
-                shutil.copyfile(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-                os.remove(dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep + ignore.split('/')[len(ignore.split('/')) - 1])
+                shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+                os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
         else: print 'No default repository set, skipping Auto Update!' #Add better warning!
 
     def LoadDoc(self):

@@ -34,33 +34,27 @@ from orpg.orpgCore import *
 from orpg_version import *
 from orpg.orpg_windows import *
 
-from orpg.dirpath import dir_struct
-
+import wx.py
 from orpg import minidom
-
 import orpg.player_list
-
 import orpg.tools.pluginui as pluginUI
 import orpg.tools.aliaslib
 import orpg.tools.toolBars
 import orpg.tools.orpg_sound
 import orpg.tools.rgbhex
-
 import orpg.gametree.gametree
 import orpg.chat.chatwnd
-
 import orpg.networking.gsclient
 import orpg.networking.mplay_client
-
 import orpg.mapper.map
 import orpg.mapper.images
 
 import upmana.updatemana
 import upmana.manifest as manifest
-import wx.py
 
+from orpg.dirpath import dir_struct
 from orpg.dieroller.utils import DiceManager
-from orpg.tools.orpg_settings import settings #imported, not used yet
+from orpg.tools.orpg_settings import settings
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
 from orpg.tools.orpg_log import logger
@@ -72,7 +66,6 @@ from orpg.tools.metamenus import MenuBarEx
 from orpg.orpg_xml import xml #to be replaced by etree
 
 
-
 ####################################
 ## Main Frame
 ####################################
@@ -82,11 +75,9 @@ class orpgFrame(wx.Frame):
     @debugging
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, wx.Point(100, 100), wx.Size(600,420), style=wx.DEFAULT_FRAME_STYLE)
-        self.orpgLog = component.get('log')
-        self.xml = component.get("xml")
         self.validate = component.get("validate")
-        self.orpgLog.log("Enter orpgFrame", ORPG_DEBUG)
-        self.rgbcovert = orpg.tools.rgbhex.RGBHex()
+        logger.debug("Enter orpgFrame")
+        self.rgb = orpg.tools.rgbhex.RGBHex()
         self._mgr = AUI.AuiManager(self)
 
         # Determine which icon format to use
@@ -130,7 +121,7 @@ class orpgFrame(wx.Frame):
         component.add("map",self.map)
         component.add("alias", self.aliaslib)
 
-        self.orpgLog.log("openrpg components all added", ORPG_DEBUG)
+        logger.debug("openrpg components all added")
         self.tree.load_tree(settings.get_setting("gametree"))
         logger.debug("Tree Loaded")
         self.players.size_cols()
@@ -291,11 +282,11 @@ class orpgFrame(wx.Frame):
         if kwargs.has_key('style'): newstyle = kwargs['style']
         else:
             try: newstyle = args[1]
-            except: self.orpgLog.log('Invalid Syntax for orpgFrame->SetTabStyles(self, *args, **kwargs)', ORPG_GENERAL); return
+            except: logger.general('Invalid Syntax for orpgFrame->SetTabStyles(self, *args, **kwargs)'); return
         if kwargs.has_key('menu'): menu = kwargs['menu']
         else:
             try: menu = args[0]
-            except: self.orpgLog.log('Invalid Syntax for orpgFrame->SetTabStyles(self, *args, **kwargs)', ORPG_GENERAL); return
+            except: logger.general('Invalid Syntax for orpgFrame->SetTabStyles(self, *args, **kwargs)'); return
 
         if kwargs.has_key('graidentTo'): graidentTo = kwargs['graidentTo']
         else: graidentTo = None
@@ -306,7 +297,6 @@ class orpgFrame(wx.Frame):
 
         #Run though the current tabbed window list and remove those that have been closed
         tabbedwindows = component.get("tabbedWindows")
-        rgbc = orpg.tools.rgbhex.RGBHex()
         new = []
         for wnd in tabbedwindows:
             try: style = wnd.GetWindowStyleFlag(); new.append(wnd)
@@ -316,8 +306,7 @@ class orpgFrame(wx.Frame):
 
         #Run though the new list and set the proper styles
         tabbg = settings.get_setting('TabBackgroundGradient')
-        rgbc = orpg.tools.rgbhex.RGBHex()
-        (red, green, blue) = rgbc.rgb_tuple(tabbg)
+        (red, green, blue) = self.rgb.rgb_tuple(tabbg)
 
         for wnd in tabbedwindows:
             style = wnd.GetWindowStyleFlag()
@@ -363,15 +352,14 @@ class orpgFrame(wx.Frame):
     def OnMB_OpenRPGTabStylesSlantedCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedCustom"):
             settings.set_setting('TabTheme', 'customslant')
-            rgbc = orpg.tools.rgbhex.RGBHex()
             gfrom = settings.get_setting('TabGradientFrom')
-            (fred, fgreen, fblue) = rgbc.rgb_tuple(gfrom)
+            (fred, fgreen, fblue) = self.rgb.rgb_tuple(gfrom)
             gto = settings.get_setting('TabGradientTo')
-            (tored, togreen, toblue) = rgbc.rgb_tuple(gto)
+            (tored, togreen, toblue) = self.rgb.rgb_tuple(gto)
             tabtext = settings.get_setting('TabTextColor')
-            (tred, tgreen, tblue) = rgbc.rgb_tuple(tabtext)
+            (tred, tgreen, tblue) = self.rgb.rgb_tuple(tabtext)
             tabbg = settings.get_setting('TabBackgroundGradient')
-            (red, green, blue) = rgbc.rgb_tuple(tabbg)
+            (red, green, blue) = self.rgb.rgb_tuple(tabbg)
             self.SetTabStyles("OpenRPGTabStylesSlantedCustom", FNB.FNB_VC8, 
                 graidentTo=wx.Color(tored, togreen, toblue), graidentFrom=wx.Color(fred, fgreen, fblue), 
                 textColor=wx.Color(tred, tgreen, tblue))
@@ -397,15 +385,14 @@ class orpgFrame(wx.Frame):
     def OnMB_OpenRPGTabStylesFlatCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatCustom"):
             settings.set_setting('TabTheme', 'customflat')
-            rgbc = orpg.tools.rgbhex.RGBHex()
             gfrom = settings.get_setting('TabGradientFrom')
-            (fred, fgreen, fblue) = rgbc.rgb_tuple(gfrom)
+            (fred, fgreen, fblue) = self.rgb.rgb_tuple(gfrom)
             gto = settings.get_setting('TabGradientTo')
-            (tored, togreen, toblue) = rgbc.rgb_tuple(gto)
+            (tored, togreen, toblue) = self.rgb.rgb_tuple(gto)
             tabtext = settings.get_setting('TabTextColor')
-            (tred, tgreen, tblue) = rgbc.rgb_tuple(tabtext)
+            (tred, tgreen, tblue) = self.rgb.rgb_tuple(tabtext)
             tabbg = settings.get_setting('TabBackgroundGradient')
-            (red, green, blue) = rgbc.rgb_tuple(tabbg)
+            (red, green, blue) = self.rgb.rgb_tuple(tabbg)
             self.SetTabStyles("OpenRPGTabStylesFlatCustom", FNB.FNB_FANCY_TABS, 
                 graidentTo=wx.Color(tored, togreen, toblue), graidentFrom=wx.Color(fred, fgreen, fblue), 
                 textColor=wx.Color(tred, tgreen, tblue))
@@ -608,7 +595,6 @@ class orpgFrame(wx.Frame):
     #################################
     @debugging
     def build_gui(self):
-        self.orpgLog.log("Enter orpgFrame->build_gui()", ORPG_DEBUG)
         self.Freeze()
         self.validate.config_file("layout.xml","default_layout.xml")
 
@@ -625,7 +611,6 @@ class orpgFrame(wx.Frame):
 
         base = etree.getroot()
         """
-
         self.windowsmenu = wx.Menu()
         self.mainwindows = {}
 
@@ -633,7 +618,7 @@ class orpgFrame(wx.Frame):
         self.pluginsFrame = pluginUI.PluginFrame(self)
         component.add("plugins", self.get_activeplugins())
         component.add("startplugs", self.get_startplugins())
-        self.orpgLog.log("Menu Created", ORPG_DEBUG)
+        logger.debug("Menu Created")
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))
         posx = int(xml_dom.getAttribute("posx"))
@@ -646,7 +631,7 @@ class orpgFrame(wx.Frame):
         self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
             "OpenRPG Update Manager Beta 0.7.2", component, self.manifest, True)
-        self.orpgLog.log("Menu Created", ORPG_DEBUG)
+        logger.debug("Menu Created")
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))
         posx = int(xml_dom.getAttribute("posx"))
@@ -713,7 +698,7 @@ class orpgFrame(wx.Frame):
         self._mgr.AddPane(self.mapToolBar, wndinfo)
         logger.debug("Map Tool Bar Created")
 
-        #Create the Browse Server Window
+        #Create the Browse Server Window #Turn into frame, as with others.
         self.gs = orpg.networking.gsclient.game_server_panel(self)
         wndinfo = AUI.AuiPaneInfo()
         wndinfo.DestroyOnClose(False)
@@ -749,11 +734,11 @@ class orpgFrame(wx.Frame):
             self._mgr.LoadPerspective(textnode._get_nodeValue())
         except: pass
         xml_dom.unlink()
-        self.orpgLog.log("Perspective Loaded", ORPG_DEBUG)
+        logger.debug("Perspective Loaded")
         self._mgr.GetPane("Browse Server Window").Hide()
         self._mgr.Update()
         self.Maximize(maximized)
-        self.orpgLog.log("GUI is all created", ORPG_DEBUG)
+        logger.debug("GUI is all created")
         self.Thaw()
 
     @debugging
@@ -779,7 +764,7 @@ class orpgFrame(wx.Frame):
     def build_window(self, xml_dom, parent_wnd):
         name = xml_dom._get_nodeName()
         if name == "DockLayout" or name == "dock": return
-        dir = xml_dom.getAttribute("direction")
+        dirc = xml_dom.getAttribute("direction") #should NOT use dir, it is a built in function.
         pos = xml_dom.getAttribute("pos")
         height = xml_dom.getAttribute("height")
         width = xml_dom.getAttribute("width")
@@ -834,11 +819,11 @@ class orpgFrame(wx.Frame):
         wndinfo.Caption(cap)
 
         # Lambda here should work! (future dev)
-        if dir.lower() == 'top': wndinfo.Top()
-        elif dir.lower() == 'bottom': wndinfo.Bottom()
-        elif dir.lower() == 'left': wndinfo.Left()
-        elif dir.lower() == 'right': wndinfo.Right()
-        elif dir.lower() == 'center': wndinfo.Center(); wndinfo.CaptionVisible(False)
+        if dirc.lower() == 'top': wndinfo.Top()
+        elif dirc.lower() == 'bottom': wndinfo.Bottom()
+        elif dirc.lower() == 'left': wndinfo.Left()
+        elif dirc.lower() == 'right': wndinfo.Right()
+        elif dirc.lower() == 'center': wndinfo.Center(); wndinfo.CaptionVisible(False)
 
         if dockable != 1:
             wndinfo.Dockable(False)
@@ -847,12 +832,10 @@ class orpgFrame(wx.Frame):
             wndinfo.Position(int(pos))
         wndinfo.Show()
         self._mgr.AddPane(temp_wnd, wndinfo)
-        self.orpgLog.log("Exit orpgFrame->build_window(" + name + ")", ORPG_DEBUG)
         return temp_wnd
 
     @debugging
     def onPaneClose(self, evt):
-        self.orpgLog.log("Enter orpgFrame->onPaneClose()", ORPG_DEBUG)
         pane = evt.GetPane()
         #Arbitrary If ELIF fix. Items had incorrect ID's set. Finding correct ID will fix it for the iteration.
         #Adding ID also fixed docking. Go figure.
@@ -866,11 +849,9 @@ class orpgFrame(wx.Frame):
                 if pane.name == wname: self.windowsmenu.Check(wndid, False); break
         evt.Skip()
         self._mgr.Update()
-        self.orpgLog.log("Exit orpgFrame->onPaneClose()", ORPG_DEBUG)
 
     @debugging
     def saveLayout(self):
-        self.orpgLog.log("Enter orpgFrame->saveLayout()", ORPG_DEBUG)
         filename = dir_struct["user"] + "layout.xml"
         temp_file = open(filename)
         txt = temp_file.read()
@@ -898,53 +879,41 @@ class orpgFrame(wx.Frame):
         temp_file = open(filename, "w")
         temp_file.write(xml_dom.toxml(1))
         temp_file.close()
-        self.orpgLog.log("Exit saveLayout()", ORPG_DEBUG)
 
     @debugging
     def build_hotkeys(self):
-        self.orpgLog.log("Enter orpgFrame->build_hotkeys(self)", ORPG_DEBUG)
         self.mainmenu.accel.xaccel.extend(self.chat.get_hot_keys())
         self.mainmenu.accel.xaccel.extend(self.map.get_hot_keys())
-        self.orpgLog.log("Exit orpgFrame->build_hotkeys(self)", ORPG_DEBUG)
 
     @debugging
     def start_timer(self):
-        self.orpgLog.log("Enter orpgFrame->start_timer(self)", ORPG_DEBUG)
         self.poll_timer.Start(100)
         s = component.get('settings')
         if s.get_setting("Heartbeat") == "1":
             self.ping_timer.Start(1000*60)
-            self.orpgLog.log("starting heartbeat...", ORPG_DEBUG, True)
-        self.orpgLog.log("Exit orpgFrame->start_timer(self)", ORPG_DEBUG)
+            logger.debug("starting heartbeat...", True)
 
     @debugging
     def kill_mplay_session(self):
-        self.orpgLog.log("Enter orpgFrame->kill_mplay_session(self)", ORPG_DEBUG)
         self.game_name = ""
         self.session.start_disconnect()
-        self.orpgLog.log("Exit orpgFrame->kill_mplay_session(self)", ORPG_DEBUG)
 
     @debugging
     def quit_game(self, evt):
-        self.orpgLog.log("Enter orpgFrame->quit_game(self, evt)", ORPG_DEBUG)
         dlg = wx.MessageDialog(self,"Exit gaming session?","Game Session",wx.YES_NO)
         if dlg.ShowModal() == wx.ID_YES:
             self.session.exitCondition.notifyAll()
             dlg.Destroy()
             self.kill_mplay_session()
-        self.orpgLog.log("Exit orpgFrame->quit_game(self, evt)", ORPG_DEBUG)
 
     @debugging
     def on_status_event(self, evt):
-        self.orpgLog.log("Enter orpgFrame->on_status_event(self, evt)", ORPG_DEBUG)
         id = evt.get_id()
         status = evt.get_data()
         if id == orpg.networking.mplay_client.STATUS_SET_URL: self.status.set_url(status)
-        self.orpgLog.log("Exit orpgFrame->on_status_event(self, evt)", ORPG_DEBUG)
 
     @debugging
     def on_player_event(self, evt):
-        self.orpgLog.log("Enter orpgFrame->on_player_event(self, evt)", ORPG_DEBUG)
         id = evt.get_id()
         player = evt.get_data()
         display_name = self.chat.chat_display_name(player)
@@ -958,32 +927,26 @@ class orpgFrame(wx.Frame):
         elif id == orpg.networking.mplay_client.PLAYER_UPDATE:
             self.players.update_player(player)
         self.players.Refresh()
-        self.orpgLog.log("Exit orpgFrame->on_player_event(self, evt)", ORPG_DEBUG)
 
     @debugging
     def on_group_event(self, evt):
-        self.orpgLog.log("Enter orpgFrame->on_group_event(self, evt)", ORPG_DEBUG)
         id = evt.get_id()
         data = evt.get_data()
-
         if id == orpg.networking.mplay_client.GROUP_NEW: self.gs.add_room(data)
         elif id == orpg.networking.mplay_client.GROUP_DEL:
             self.password_manager.RemoveGroupData(data)
             self.gs.del_room(data)
         elif id == orpg.networking.mplay_client.GROUP_UPDATE: self.gs.update_room(data)
-        self.orpgLog.log("Exit orpgFrame->on_group_event(self, evt)", ORPG_DEBUG)
 
     @debugging
     def on_receive(self, data, player):
-        self.orpgLog.log("Enter orpgFrame->on_receive(self, data, player)", ORPG_DEBUG)
-
         # see if we are ignoring this user
         (ignore_id,ignore_name) = self.session.get_ignore_list()
         for m in ignore_id:
             if m == player[2]: logger.debug("ignoring message from player:" + player[0], True); return
 
         # ok we are not ignoring this message
-        #recvSound = "RecvSound"                #  this will be the default sound.  Whisper will change this below
+        #recvSound = "RecvSound"     #  this will be the default sound.  Whisper will change this below
         if player: display_name = self.chat.chat_display_name(player)
         else: display_name = "Server Administrator"
 
@@ -1182,11 +1145,11 @@ class orpgApp(wx.App):
         component.add('validate', validate)
         component.add("tabbedWindows", [])
 
+        logger._set_log_level = int(settings.get_setting('LoggingLevel'))
+        logger._set_log_to_console(False)
+
         self.manifest = manifest.ManifestChanges()
 
-        self.orpgLog = component.get('log')
-        self.validate = component.get('validate')
-        logger.log_level = int(settings.get_setting('LoggingLevel'))
         self.called = False
         wx.InitAllImageHandlers()
         self.splash = orpgSplashScreen(None, dir_struct["icon"] + 'splash13.jpg', 3000, self.AfterSplash)
@@ -1228,7 +1191,7 @@ class orpgApp(wx.App):
 
     @debugging
     def OnExit_CleanUp(self):
-        self.orpgLog.log("Preforming cleanup\n", ORPG_DEBUG)
+        logger.debug("Preforming cleanup\n")
         try: del os.environ["OPENRPG_BASE"]
         except: pass
         try: os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.py')
@@ -1240,4 +1203,4 @@ class orpgApp(wx.App):
     def OnExit(self):
         self.OnExit_CleanUp()
         #Exit
-        self.orpgLog.log("Main Application Exit\n\n", ORPG_DEBUG)
+        logger.debug("Main Application Exit\n\n")
