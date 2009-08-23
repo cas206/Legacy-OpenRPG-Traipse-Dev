@@ -25,11 +25,11 @@
 #
 # Description: classes for orpg log messages
 #
-from __future__ import with_statement
-import sys
-import os, os.path
-import time
 
+from __future__ import with_statement
+import sys, os, os.path, wx, time, traceback
+
+from orpg.orpgCore import component
 from orpg.external.terminalwriter import TerminalWriter
 from orpg.tools.decorators import pending_deprecation
 from orpg.dirpath import dir_struct
@@ -42,6 +42,38 @@ ORPG_GENERAL        = 2
 ORPG_INFO           = 4
 ORPG_NOTE           = 8
 ORPG_DEBUG          = 16
+
+def Crash(type, value, crash):
+    crash_report = open(dir_struct["home"] + 'crash-report.txt', "w")
+    traceback.print_exception(type, value, crash, file=crash_report)
+    crash_report.close()
+    msg = ''
+    crash_report = open(dir_struct["home"] + 'crash-report.txt', "r")
+    for line in crash_report: msg += line
+    logger.exception(msg)
+    crash_report.close()
+    logger.exception("Crash Report Created!!")
+    logger.info("Printed out a datafile called crash-report.txt\nPress <enter> to exit!", True); raw_input('')
+    exit()
+
+class DebugConsole(wx.Frame):
+    def __init__(self, parent):
+        super(DebugConsole, self).__init__(parent, -1, "Debug Window")
+        icon = None
+        icon = wx.Icon(dir_struct["icon"]+'note.ico', wx.BITMAP_TYPE_ICO)
+        self.SetIcon( icon )
+        self.console = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.console, 1, wx.EXPAND)
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        self.SetSize((300, 175))
+        self.Bind(wx.EVT_CLOSE, self.Min) 
+        self.Min(None)
+        component.add('debugger', self.console)
+
+    def Min(self, evt):
+        self.Hide()
 
 class orpgLog(object):
     _log_level = 7
@@ -90,7 +122,8 @@ class orpgLog(object):
     def log(self, msg, log_type, to_console=False):
         if self.log_to_console or to_console or log_type == ORPG_CRITICAL:
             self._io.line(str(msg), **self._lvl_args[log_type]['colorizer'])
-
+            try: component.get('debugger').AppendText(".. " + str(msg) +'\n')
+            except: pass
 
         if log_type & self.log_level or to_console:
             atr = {'msg': msg, 'level': self._lvl_args[log_type]['log_string']}
@@ -156,3 +189,4 @@ class orpgLog(object):
     log_to_console = property(_get_log_to_console, _set_log_to_console)
 
 logger = orpgLog(dir_struct.get("user") + "runlogs/")
+crash = sys.excepthook = Crash

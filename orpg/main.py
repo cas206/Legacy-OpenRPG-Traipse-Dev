@@ -57,7 +57,7 @@ from orpg.dieroller.utils import DiceManager
 from orpg.tools.orpg_settings import settings
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
-from orpg.tools.orpg_log import logger
+from orpg.tools.orpg_log import logger, crash
 from orpg.tools.decorators import debugging
 from orpg.tools.metamenus import MenuBarEx
 
@@ -135,6 +135,11 @@ class orpgFrame(wx.Frame):
         #Load Update Manager
         component.add('updatemana', self.updateMana)
         logger.debug("update manager reloaded")
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+
+        #Load Update Manager
+        component.add('debugconsole', self.debugger)
+        logger.debug("debugger window")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
     @debugging
@@ -255,12 +260,17 @@ class orpgFrame(wx.Frame):
         self.pluginMenu.AppendSeparator()
         self.mainmenu.Insert(2, self.pluginMenu, "&Plugins")
 
-        self.updateMana = wx.Menu()
-        mana = wx.MenuItem(self.updateMana, wx.ID_ANY, "Update Manager", "Update Manager")
-        self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
+        # Traipse Suite of Additions.
+        self.traipseSuite = wx.Menu()
+        self.mainmenu.Insert(5, self.traipseSuite, "&Traipse Suite")
 
-        self.updateMana.AppendItem(mana)
-        self.mainmenu.Insert(5, self.updateMana, "&Update Manager")
+        mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
+        self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
+        self.traipseSuite.AppendItem(mana)
+
+        debugger = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
+        self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, debugger)
+        self.traipseSuite.AppendItem(debugger)
        
 
     #################################
@@ -463,6 +473,11 @@ class orpgFrame(wx.Frame):
         else: self.updateMana.Show()
 
     @debugging
+    def OnMB_DebugConsole(self, evt):
+        if self.debugger.IsShown() == True: self.debugger.Hide()
+        else: self.debugger.Show()
+
+    @debugging
     def OnMB_ToolsLoggingLevelDebug(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelDebug"): lvl |= ORPG_DEBUG
@@ -631,6 +646,18 @@ class orpgFrame(wx.Frame):
         self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
             "OpenRPG Update Manager Beta 0.7.2", component, self.manifest, True)
+        logger.debug("Menu Created")
+        h = int(xml_dom.getAttribute("height"))
+        w = int(xml_dom.getAttribute("width"))
+        posx = int(xml_dom.getAttribute("posx"))
+        posy = int(xml_dom.getAttribute("posy"))
+        maximized = int(xml_dom.getAttribute("maximized"))
+        self.SetDimensions(posx, posy, w, h)
+        logger.debug("Dimensions Set")
+
+        #Update Manager
+        self.manifest = manifest.ManifestChanges()
+        self.debugger = orpg.tools.orpg_log.DebugConsole(self)
         logger.debug("Menu Created")
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))

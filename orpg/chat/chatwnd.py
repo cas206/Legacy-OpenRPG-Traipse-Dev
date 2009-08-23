@@ -148,7 +148,8 @@ class chat_html_window(wx.html.HtmlWindow):
     # !id :
     @debugging
     def __init__(self, parent, id):
-        wx.html.HtmlWindow.__init__(self, parent, id, style=wx.SUNKEN_BORDER | wx.html.HW_SCROLLBAR_AUTO|wx.NO_FULL_REPAINT_ON_RESIZE)
+        wx.html.HtmlWindow.__init__(self, parent, id, 
+                                    style=wx.SUNKEN_BORDER|wx.html.HW_SCROLLBAR_AUTO|wx.NO_FULL_REPAINT_ON_RESIZE)
         self.parent = parent
         self.build_menu()
         self.Bind(wx.EVT_LEFT_UP, self.LeftUp)
@@ -237,10 +238,8 @@ if NEWCHAT:
         @debugging
         def __init__(self, parent, id):
             wx.webview.WebView.__init__(self, parent, id)
-
             self.parent = parent
             self.__font = wx.Font(10, wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName='Ariel')
-
             self.build_menu()
             self.Bind(wx.EVT_LEFT_UP, self.LeftUp)
             self.Bind(wx.EVT_RIGHT_DOWN, self.onPopup)
@@ -265,7 +264,9 @@ if NEWCHAT:
 
         @debugging
         def SetDefaultFontAndSize(self, fontname, fontsize):
-            self.__font = wx.Font(int(fontsize), wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, faceName=fontname)
+            self.__font = wx.Font(int(fontsize), 
+                            wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, 
+                            wx.FONTWEIGHT_NORMAL, faceName=fontname)
             try: self.SetPageSource(self.Header() + self.StripHeader())
             except Exception, e: print e
             return (self.GetFont().GetFaceName(), self.GetFont().GetPointSize())
@@ -374,8 +375,7 @@ class chat_notebook(orpgTabberWnd):
         self.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGING, self.onPageChanging)
         self.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.onCloseTab)
         # html font/fontsize is global to all the notebook tabs.
-        self.font, self.fontsize =  self.MainChatPanel.chatwnd.SetDefaultFontAndSize(self.settings.get_setting('defaultfont'), 
-                                                                                        self.settings.get_setting('defaultfontsize'))
+        self.font, self.fontsize =  self.MainChatPanel.chatwnd.SetDefaultFontAndSize(self.settings.get_setting('defaultfont'), self.settings.get_setting('defaultfontsize'))
         self.GMChatPanel = None
         if self.settings.get_setting("GMWhisperTab") == '1':
             self.create_gm_tab()
@@ -525,6 +525,7 @@ class chat_panel(wx.Panel):
     @debugging
     def __init__(self, parent, id, tab_type, sendtarget):
         wx.Panel.__init__(self, parent, id)
+        logger._set_log_to_console(False)
         self.session = component.get('session')
         self.settings = component.get('settings')
         self.activeplugins = component.get('plugins')
@@ -572,7 +573,8 @@ class chat_panel(wx.Panel):
 
     @debugging
     def set_default_font(self, fontname=None, fontsize=None):
-        """Set all chatpanels to new default fontname/fontsize. Returns current font settings in a (fontname, fontsize) tuple."""
+        """Set all chatpanels to new default fontname/fontsize. 
+        Returns current font settings in a (fontname, fontsize) tuple."""
         if (fontname is not None): newfont = fontname
         else: newfont = self.font
         if (fontsize is not None): newfontsize = int(fontsize)
@@ -1291,7 +1293,7 @@ class chat_panel(wx.Panel):
 
         ## END
         elif event.GetKeyCode() == wx.WXK_END:
-            logger.debug("event.GetKeyCode() == wx.WXK_END", ORPG_DEBUG)
+            logger.debug("event.GetKeyCode() == wx.WXK_END")
             if self.lockscroll:
                 self.lock_scroll(0)
                 self.Post()
@@ -1299,7 +1301,7 @@ class chat_panel(wx.Panel):
 
         ## NOTHING
         else: event.Skip()
-        logger.debug("Exit chat_panel->OnChar(self, event)", ORPG_DEBUG)
+        logger.debug("Exit chat_panel->OnChar(self, event)")
     # def OnChar - end
 
     @debugging
