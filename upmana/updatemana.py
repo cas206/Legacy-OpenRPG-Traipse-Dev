@@ -3,9 +3,10 @@ import sys
 import os #just .sep maybe
 import manifest
 import shutil
+
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
-from orpg.tools.orpg_log import logger
+from orpg.tools.orpg_log import logger, crash
 from orpg.tools.decorators import debugging
 from upmana.validate import validate
 from orpg.dirpath import dir_struct
@@ -173,10 +174,6 @@ class Updater(wx.Panel):
 
     def BranchInfo(self, branch):
         cs = self.repo.changectx( self.current ).changeset()
-        rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
-        #print self.repo.changelog.reachable(self.repo.branchtags()[self.current])
-        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]):
-        #    print self.repo.changelog.rev(heads)
         self.changelog.SetValue('')
         changelog = cs[4]
         self.changelog.AppendText(changelog + '\n')
@@ -445,15 +442,17 @@ class Control(wx.Panel):
         self.branchcp.Add(self.branches, (0,0))
         self.branchcp.Add(self.branch_txt, (0,1), flag=wx.ALIGN_CENTER_VERTICAL)
         branchcp.SetSizer(self.branchcp)
-        self.branchcp.AddGrowableCol(1)
         branchcp.SetAutoLayout(True)
 
         revlistcp = wx.Panel(self)
         self.revlistcp = wx.GridBagSizer(hgap=2, vgap=2)
         self.revlist = wx.ListCtrl(revlistcp, -1, wx.DefaultPosition, size=wx.DefaultSize, 
                                     style=wx.LC_REPORT|wx.SUNKEN_BORDER|wx.LC_HRULES)
-        self.revlist.InsertColumn(0, 'Revs', 145)
-        self.revlist.InsertColumn(1, 'Revs', 145)
+        self.revlist.InsertColumn(0, 'Revs')
+        self.revlist.InsertColumn(1, 'Changeset')
+        self.revlist.SetColumnWidth(0, -1)
+        self.revlist.SetColumnWidth(1, -1)
+        self.revlist.Refresh()
         self.revlistcp.Add(self.revlist, (0,0), flag=wx.EXPAND)
         revlistcp.SetSizer(self.revlistcp)
         self.revlistcp.AddGrowableCol(0)
@@ -484,22 +483,48 @@ class Control(wx.Panel):
         self.SetAutoLayout(True)
 
         self.current = self.repo.dirstate.branch()
+
+        self.RevInfo(self.current)
+        self.revlist.Select(self.revlist.FindItem(0, 
+                            str(self.repo.changelog.rev(self.repo.branchtags()[self.current]))), 
+                            True)
+
         self.BranchInfo(self.current)
+        self.Bind(wx.EVT_CHOICE, self.PackageSet)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.PackageSet)
+
+    def PackageSet(self, event):
+
+        self.current = self.branches.GetStringSelection()
+        branches = self.repo.branchtags()
+        heads = dict.fromkeys(self.repo.heads(), 1)
+        l = [((n in heads), self.repo.changelog.rev(n), n, t) for t, n in branches.items()]
+
+        if self.current != type:
+            heads = dict.fromkeys(self.repo.heads(), self.repo.branchtags())
+            branches = dict.copy(self.repo.branchtags())
+            self.BranchInfo(self.current)
+            self.RevInfo(self.current)
+
+    def RevInfo(self, branch):
+        self.revlist.DeleteAllItems()
+        for heads in self.repo.changelog.reachable(self.repo.branchtags()[branch]): 
+            self.revlist.InsertStringItem(0, str(self.repo.changelog.rev(heads)), 0 )
+            self.revlist.SetStringItem(0, 1, str(self.repo.changectx(heads)))
+            self.revlist.SetColumnWidth(0, -1)
+            self.revlist.SetColumnWidth(1, -1)
+        self.revlist.Refresh()
 
     def BranchInfo(self, branch):
-        cs = self.repo.changectx( self.current ).changeset()
-        rev = self.repo.changelog.rev(self.repo.branchtags()[self.current]) #Current revision number. Use in Controls
-        #print self.repo.changelog.reachable(self.repo.branchtags()[self.current])
-        #for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]): 
-        #grabs revision list depending on branch.
-        #    print self.repo.changelog.rev(heads)
+        rev = self.revlist.GetItemText( self.revlist.GetFirstSelected() )
+        rs = self.repo.changectx( rev ).changeset()
         self.changelog.SetValue('')
-        changelog = cs[4]
+        changelog = rs[4]
         self.changelog.AppendText(changelog + '\n')
         self.filelist.SetValue('')
-        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+cs[1]+"\n\n")
+        self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+rs[1]+"\n\n")
         self.filelist.AppendText("Files Modified (in update): \n")
-        for f in cs[3]: self.filelist.AppendText(f+"\n")
+        for f in rs[3]: self.filelist.AppendText(f+"\n")
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
