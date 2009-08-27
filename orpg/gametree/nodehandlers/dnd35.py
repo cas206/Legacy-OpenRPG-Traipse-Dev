@@ -1,9 +1,10 @@
-import orpg.tools.orpg_settings #Settings
-import orpg.minidom
+#from orpg.tools.orpg_settings import settings #Settings used?
+#import orpg.minidom
 from core import *
 from containers import *
 from string import *  #a 1.6003
 from inspect import *  #a 1.9001
+from orpg.dirpath import dir_struct
 dnd35_EXPORT = wx.NewId()
 
 ############Global Stuff##############
@@ -90,7 +91,7 @@ class dnd35char_handler(container_handler):
         return html_str
 
     def about(self):
-        html_str = "<img src='" + orpg.dirpath.dir_struct["icon"]
+        html_str = "<img src='" + dir_struct["icon"]
         html_str += "dnd3e_logo.gif' ><br /><b>dnd35 Character Tool "
         html_str += self.Version+"</b>" #m 1.6000 was hard coded.
         html_str += "<br />by Dj Gilcrease<br />digitalxero@gmail.com"
@@ -680,7 +681,7 @@ class class_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd35"]+"dnd35classes.xml","r")
+            tmp = open(dir_struct["dnd35"]+"dnd35classes.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1314,7 +1315,7 @@ class feat_panel(wx.Panel):
     def on_add(self,evt):
 
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd35"]+"dnd35feats.xml","r")
+            tmp = open(dir_struct["dnd35"]+"dnd35feats.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()
@@ -1330,6 +1331,7 @@ class feat_panel(wx.Panel):
             new_node = self.master_dom.appendChild(f_list[i].cloneNode(False))
             self.grid.AppendRows(1)
             self.refresh_row(self.grid.GetNumberRows()-1)
+        f_list=0; opts=0
         dlg.Destroy()
 
 
@@ -1579,7 +1581,7 @@ class dnd35attacks(combat_char_child):
 
     def updateFootN(self,n):#a 1.5012 this whole function
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd35"]+"dnd35weapons.xml","r")
+            tmp = open(dir_struct["dnd35"]+"dnd35weapons.xml","r")
             #tmp = open("c:\clh\codeSamples\sample1.xml","r") #a (debug) 1.5012
             self.temp_dom = xml.dom.minidom.parse(tmp)
 
@@ -2048,7 +2050,7 @@ class weapon_panel(wx.Panel):
             fnFrame = wx.Frame(masterFrame, -1, title)
             fnFrame.panel = wx.html.HtmlWindow(fnFrame,-1)
             if not self.temp_dom:
-                tmp = open(orpg.dirpath.dir_struct["dnd35"]+
+                tmp = open(dir_struct["dnd35"]+
                             "dnd35weapons.xml","r")
                 #tmp = open("c:\clh\codeSamples\sample1.xml","r")
                 xml_dom = parseXml_with_dlg(self,tmp.read())
@@ -2141,11 +2143,11 @@ class weapon_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd35"]+"dnd35weapons.xml","r")
+            tmp = open(dir_struct["dnd35"]+"dnd35weapons.xml","r")
             #tmp = open("c:\clh\codeSamples\sample1.xml","r") #a (debug) 1.5012
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
-            tmp.close()
+            tmp.close(); print
             self.temp_dom = xml_dom
         f_list = self.temp_dom.getElementsByTagName('weapon')
         opts = []
@@ -2368,7 +2370,7 @@ class ac_panel(wx.Panel):
 
     def on_add(self,evt):
         if not self.temp_dom:
-            tmp = open(orpg.dirpath.dir_struct["dnd35"]+"dnd35armor.xml","r")
+            tmp = open(dir_struct["dnd35"]+"dnd35armor.xml","r")
             xml_dom = parseXml_with_dlg(self,tmp.read())
             xml_dom = xml_dom._get_firstChild()
             tmp.close()

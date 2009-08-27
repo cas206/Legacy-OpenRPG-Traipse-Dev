@@ -66,6 +66,7 @@ import cStringIO # for reading inline imagedata as a stream
 from HTMLParser import HTMLParser
 import chat_util
 import traceback
+from wx.lib.expando import EVT_ETC_LAYOUT_NEEDED 
 
 from orpg.tools.validate import validate
 from orpg.tools.orpg_settings import settings
@@ -558,10 +559,8 @@ class chat_panel(wx.Panel):
         self.lastSend = 0         #  this is used to help implement the player typing indicator
         self.lastPress = 0        #  this is used to help implement the player typing indicator
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(EVT_ETC_LAYOUT_NEEDED, self.OnSize) #require to keep text at bottom of chat when text entry expands --SD
         self.build_ctrls()
-        #openrpg dir
-        #self.root_dir = dir_struct["home"] #Removing!
-        # html font/fontsize is global to all the notebook tabs.
         StartupFont = self.settings.get_setting("defaultfont")
         StartupFontSize = self.settings.get_setting("defaultfontsize")
         if(StartupFont != "") and (StartupFontSize != ""):

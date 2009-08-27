@@ -54,10 +54,7 @@ def Crash(type, value, crash):
     crash_report.close()
     logger.exception("Crash Report Created!!")
     logger.info("Printed out crash-report.txt in your System folder", True)
-    if sys.platform in ('win32', 'win64'):
-        logger.info("Press <enter> to continue!", True)
-        raw_input('')
-    #exit()
+    wx.MessageBox('Crash Report Created!', 'System Failure')
 
 class DebugConsole(wx.Frame):
     def __init__(self, parent):
@@ -124,7 +121,8 @@ class orpgLog(object):
 
     def log(self, msg, log_type, to_console=False):
         if self.log_to_console or to_console or log_type == ORPG_CRITICAL:
-            self._io.line(str(msg), **self._lvl_args[log_type]['colorizer'])
+            try: self._io.line(str(msg), **self._lvl_args[log_type]['colorizer'])
+            except: pass #Fails without the Debug Console
             try: component.get('debugger').AppendText(".. " + str(msg) +'\n')
             except: pass
 

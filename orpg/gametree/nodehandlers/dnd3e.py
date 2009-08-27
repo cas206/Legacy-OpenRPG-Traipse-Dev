@@ -145,12 +145,13 @@
 #
 
 #import orpg.tools.orpg_settings #Not used??
-import orpg.minidom
-from core import component
+#import orpg.minidom
+from core import *
 from containers import *
 from string import *  #a 1.6003
 from inspect import *  #a 1.9001
 from orpg.dirpath import dir_struct
+
 dnd3e_EXPORT = wx.NewId()
 ############Global Stuff##############
 
@@ -302,7 +303,6 @@ class dnd3echar_handler(container_handler):
         html_str += "<P>" + self.pp.tohtml()
         html_str += "<P>" + self.skills.tohtml() +"</td>"
         #a block for 1.6009 end
-
         html_str += "</tr></table>"
         return html_str
 
