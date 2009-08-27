@@ -483,41 +483,51 @@ class Control(wx.Panel):
         self.SetAutoLayout(True)
 
         self.current = self.repo.dirstate.branch()
-
-        self.RevInfo(self.current)
-        self.revlist.Select(self.revlist.FindItem(0, 
-                            str(self.repo.changelog.rev(self.repo.branchtags()[self.current]))), 
-                            True)
-
+        self.currev = self.repo.changelog.rev(self.repo.branchtags()[self.current])
+        self.RevInfo(self.currev)
+        self.revlist.Select(self.revlist.FindItem(0, str(self.currev), 1))
         self.BranchInfo(self.current)
         self.Bind(wx.EVT_CHOICE, self.PackageSet)
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.PackageSet)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.RevSet)
+        self.Bind(wx.EVT_BUTTON, self.RevUpdate, self.buttons['update'])
+
 
     def PackageSet(self, event):
-
         self.current = self.branches.GetStringSelection()
         branches = self.repo.branchtags()
         heads = dict.fromkeys(self.repo.heads(), 1)
         l = [((n in heads), self.repo.changelog.rev(n), n, t) for t, n in branches.items()]
-
         if self.current != type:
             heads = dict.fromkeys(self.repo.heads(), self.repo.branchtags())
             branches = dict.copy(self.repo.branchtags())
             self.BranchInfo(self.current)
             self.RevInfo(self.current)
 
-    def RevInfo(self, branch):
+    def RevSet(self, event):
+        self.currev = self.revlist.GetItemText( self.revlist.GetFirstSelected() )
+        i = event.GetIndex()
+        self.revlist.Select(i, True)
+        self.revlist.Focus(i)
+        if self.currev != self.revlist.GetItemText( self.revlist.GetFirstSelected() ):
+            self.RevInfo(self.currev)
+
+    def RevInfo(self, rev):
         self.revlist.DeleteAllItems()
-        for heads in self.repo.changelog.reachable(self.repo.branchtags()[branch]): 
-            self.revlist.InsertStringItem(0, str(self.repo.changelog.rev(heads)), 0 )
-            self.revlist.SetStringItem(0, 1, str(self.repo.changectx(heads)))
+        self.revlist_a = []; self.revlist_b = {}
+        for heads in self.repo.changelog.reachable(self.repo.branchtags()[self.current]):
+            self.revlist_a.append(str(self.repo.changelog.rev(heads)))
+            self.revlist_b[str(self.repo.changelog.rev(heads))] = str(self.repo.changectx(heads))
+        self.revlist_a.sort()
+        for i in self.revlist_a:
+            self.revlist.InsertStringItem(0, str(i), 0 )
+            self.revlist.SetStringItem(0, 1, self.revlist_b[i])
             self.revlist.SetColumnWidth(0, -1)
             self.revlist.SetColumnWidth(1, -1)
         self.revlist.Refresh()
+        self.BranchInfo(self.current)
 
     def BranchInfo(self, branch):
-        rev = self.revlist.GetItemText( self.revlist.GetFirstSelected() )
-        rs = self.repo.changectx( rev ).changeset()
+        rs = self.repo.changectx( self.currev ).changeset()
         self.changelog.SetValue('')
         changelog = rs[4]
         self.changelog.AppendText(changelog + '\n')
@@ -525,6 +535,30 @@ class Control(wx.Panel):
         self.filelist.AppendText("Currently selected branch: " + branch + "\n\nAuthor: "+rs[1]+"\n\n")
         self.filelist.AppendText("Files Modified (in update): \n")
         for f in rs[3]: self.filelist.AppendText(f+"\n")
+
+    def DelBranch(self, event):
+        pass
+
+    def RevUpdate(self, event):
+        filename = 'ignorelist.txt'
+        self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
+        component.get('validate').config_file(filename, "default_ignorelist.txt")
+        self.mana = self.LoadDoc()
+        temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
+        for ignore in self.ignorelist:
+            shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
+        hg.clean(self.repo, self.currev)
+        for ignore in self.ignorelist:
+            shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+            os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
+        pass
+
+    def LoadDoc(self):
+        ignore = open(self.filename)
+        self.ignorelist = []
+        for i in ignore: self.ignorelist.append(str(i [:len(i)-1]))
+        manifest = ignore.readlines()
+        ignore.close()
 
     def get_packages(self, type=None):
         #Fixed and ready for Test. Can be cleaner
@@ -617,10 +651,9 @@ class updateApp(wx.App):
                 shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
-                print ignore.split('/')[len(ignore.split('/')) - 1]
                 shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
                 os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
-        else: print 'No default repository set, skipping Auto Update!' #Add better warning!
+        else: wx.MessageBox('No default Rpository set.  Skipping Auto Update!', 'Info')
 
     def LoadDoc(self):
         ignore = open(self.filename)

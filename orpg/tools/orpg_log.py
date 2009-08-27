@@ -53,8 +53,11 @@ def Crash(type, value, crash):
     logger.exception(msg)
     crash_report.close()
     logger.exception("Crash Report Created!!")
-    logger.info("Printed out a datafile called crash-report.txt\nPress <enter> to exit!", True); raw_input('')
-    exit()
+    logger.info("Printed out crash-report.txt in your System folder", True)
+    if sys.platform in ('win32', 'win64'):
+        logger.info("Press <enter> to continue!", True)
+        raw_input('')
+    #exit()
 
 class DebugConsole(wx.Frame):
     def __init__(self, parent):

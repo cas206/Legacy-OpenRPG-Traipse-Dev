@@ -12,7 +12,7 @@ import os
 class Validate:
     def __init__(self, userpath=None):
         if userpath is None:
-            userpath = dir_struct["user"]
+            userpath = dir_struct["home"] + os.sep + 'upmana' +os.sep
         self.__loadUserPath = userpath
 
     def config_file(self, user_file, template_file):
