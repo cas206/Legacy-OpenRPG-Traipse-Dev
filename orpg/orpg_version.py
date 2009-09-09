@@ -2,7 +2,7 @@ VERSION = "1.8.0"
 SERVER_MIN_CLIENT_VERSION = "1.7.1"
 
 #BUILD NUMBER FORMAT: "YYMMDD-##" where ## is the incremental daily build index (if needed)
-DISTRO = "Traipse Alpha"
+DISTRO = "Traipse Beta"
 DIS_VER = "Ornery Orc"
 BUILD = "090909-00"
 
