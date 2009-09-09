@@ -33,6 +33,7 @@ COURSE = 10
 
 class FogArea:
     def __init__(self, outline, log):
+        self.log = log
         self.outline = outline
 
     def set_fog_props(self, str):
@@ -79,6 +80,7 @@ class FogArea:
 class fog_layer(layer_base):
     def __init__(self, canvas):
         self.canvas = canvas
+        self.log = component.get('log')
         layer_base.__init__(self)
         self.color = wx.Color(128,128,128)
         if "__WXGTK__" not in wx.PlatformInfo: self.color = wx.Color(128,128,128, 128)

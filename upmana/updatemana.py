@@ -508,6 +508,7 @@ class Control(wx.Panel):
         i = event.GetIndex()
         self.revlist.Select(i, True)
         self.revlist.Focus(i)
+        self.BranchInfo(self.current)
         if self.currev != self.revlist.GetItemText( self.revlist.GetFirstSelected() ):
             self.RevInfo(self.currev)
 
@@ -619,7 +620,7 @@ class updateApp(wx.App):
         logger.note("Updater Start")
         self.manifest = manifest.ManifestChanges()
         component.add('validate', validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.7.2 (open beta)", 
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.8 (open beta)", 
                                 component, self.manifest, self.main)
         if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()

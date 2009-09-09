@@ -36,6 +36,7 @@ from orpg.dirpath import dir_struct
 import string
 import map_miniature_nodehandler
 import orpg.mapper.map_msg
+import orpg.minidom as minidom
 # import scriptkit
 
 # Constants
@@ -218,7 +219,7 @@ class minilib_handler( node_handler ):
             label = mini.getAttribute( ATTRIBUTE_NAME )
         else:
             label = ''
-        return msg().get_all_xml()
+        return msg.get_all_xml()
 
     def is_unique( self, mini ):
         unique = mini.getAttribute( ATTRIBUTE_UNIQUE )

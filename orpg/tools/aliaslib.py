@@ -325,15 +325,16 @@ class AliasLib(wx.Frame):
             defaultcolor = settings.get_setting("mytextcolor")
             settings.set_setting("mytextcolor", self.alias[1])
             self.chat.set_colors()
-        opts = []
+        opts = []; idlist = []
         myid = self.session.get_id()
         for p in players:
             if p[2] != myid: opts.append("(" + p[2] + ") " + self.chat.html_strip(p[0]))
+            if p[2] != myid: idlist.append(p[2])
         dlg = orpgMultiCheckBoxDlg(self, opts, "Select Players:", "Whisper To", [])
         sendto = []
         if dlg.ShowModal() == wx.ID_OK:
             selections = dlg.get_selections()
-            for s in selections: sendto.append(players[s][2])
+            for s in selections: sendto.append(idlist[s])
         line = self.textWnd.GetValue().replace("\n", "<br />")
         if self.checkFilterText.IsChecked() and self.filter != self.chat.defaultFilterName:
             for rule in self.filterRegEx: line = re.sub(rule[0], rule[1], line)

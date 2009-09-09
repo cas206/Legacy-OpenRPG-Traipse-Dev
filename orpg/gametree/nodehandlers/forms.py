@@ -29,6 +29,7 @@
 __version__ = "$Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $"
 
 from containers import *
+from orpg.orpg_xml import xml
 from wx.lib.scrolledpanel import ScrolledPanel
 
 def bool2int(b):
@@ -285,7 +286,7 @@ class text_panel(wx.Panel):
 
     def on_text(self,evt):
         txt = self.text.GetValue()
-        txt = strip_text(txt)
+        txt = xml.strip_text(txt)
         self.handler.text._set_nodeValue(txt)
 
     def on_send(self,evt):
@@ -364,7 +365,7 @@ class textctrl_edit_panel(wx.Panel):
             self.handler.rename(txt)
         if id == F_TEXT:
             txt = self.text.GetValue()
-            txt = strip_text(txt)
+            txt = xml.strip_text(txt)
             self.handler.text._set_nodeValue(txt)
 
     def on_button(self,evt):
