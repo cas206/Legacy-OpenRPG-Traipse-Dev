@@ -515,8 +515,8 @@ class mplay_client(client_base):
 
     def clear_players(self,save_self=0):
         self.statLock.acquire()
-        keys = self.players.keys()
-        for k in keys: del self.players[k]
+        self.players = {}
+        component.get('ImageHandler').flushCache()
         self.statLock.release()
 
     def clear_groups(self):

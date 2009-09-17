@@ -98,10 +98,11 @@ class ImageHandlerClass(object):
         """This function will flush all images contained within the image cache."""
         self.__lock.acquire()
         try:
-            keyList = self.__cache.keys()
-            for key in keyList: del self.__cache[key]
-        finally: self.__lock.release()
-        urllib.urlcleanup()
+            self.__cache = {}
+            self.__fetching = {}
+        finally: 
+            self.__lock.release()
+            urllib.urlcleanup()
 
     """Private Methods"""
     def __loadThread(self, path, image_type, imageId):
@@ -158,3 +159,4 @@ class ImageHandlerClass(object):
     Queue = property(_getQueue)
 
 ImageHandler = singleton(ImageHandlerClass)
+component.add('ImageHandler', ImageHandler)

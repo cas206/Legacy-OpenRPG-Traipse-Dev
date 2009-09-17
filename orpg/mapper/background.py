@@ -33,6 +33,7 @@ import thread
 import urllib
 import os.path
 import time
+import mimetypes
 
 from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
