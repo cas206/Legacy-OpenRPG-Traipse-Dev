@@ -268,9 +268,9 @@ class orpgFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
         self.traipseSuite.AppendItem(mana)
 
-        debugger = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
-        self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, debugger)
-        self.traipseSuite.AppendItem(debugger)
+        self.debugConsole = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
+        self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, self.debugConsole)
+        self.traipseSuite.AppendItem(self.debugConsole)
        
 
     #################################
@@ -474,6 +474,12 @@ class orpgFrame(wx.Frame):
 
     @debugging
     def OnMB_DebugConsole(self, evt):
+        ## Alpha ##
+        self.traipseSuite.RemoveItem(self.debugConsole)
+        self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
+        self.traipseSuite.AppendItem(self.debugConsole)
+        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+        ###########
         if self.debugger.IsShown() == True: self.debugger.Hide()
         else: self.debugger.Show()
 
@@ -645,7 +651,7 @@ class orpgFrame(wx.Frame):
         #Update Manager
         self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager Beta 0.7.2", component, self.manifest, True)
+            "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
         logger.debug("Menu Created")
         h = int(xml_dom.getAttribute("height"))
         w = int(xml_dom.getAttribute("width"))

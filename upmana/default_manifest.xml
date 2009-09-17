@@ -1,1 +1,13 @@
-<manifest></manifest>
+<manifest>
+	<updaterepo>
+		<repo-Traipse type="string">http://hg.assembla.com/traipse</repo-Traipse>
+		<default type="string">http://hg.assembla.com/traipse</default>
+	</updaterepo>
+	<UpdateManifest>
+		<repolist type="list">
+			<list>
+				<lobject type="str">repo-Traipse</lobject>
+			</list>
+		</repolist>
+	</UpdateManifest>
+</manifest>
