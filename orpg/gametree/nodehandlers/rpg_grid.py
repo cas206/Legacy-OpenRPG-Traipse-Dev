@@ -392,8 +392,7 @@ class rpg_grid(wx.grid.Grid):
             t_node = cell.appendChild(t_node)
             r.appendChild(cell)
         self.AppendCols(1)
-        self.fit_cols()
-
+        #self.fit_cols()::Where did this go? TaS.
 
     def del_row(self,evt=None):
         num = self.GetNumberRows()
@@ -409,7 +408,7 @@ class rpg_grid(wx.grid.Grid):
             cells = r.getElementsByTagName('cell')
             r.removeChild(cells[num-1])
         self.DeleteCols(num-1,1)
-        self.fit_cols()
+        #self.fit_cols()::Where did this go? TaS.
 
 
 G_TITLE = wx.NewId()

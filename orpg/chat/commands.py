@@ -14,6 +14,7 @@ import orpg.orpg_version
 import orpg.orpg_windows
 import traceback
 
+from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 
@@ -262,7 +263,7 @@ class chat_commands:
     @debugging
     def on_dieroller(self, cmdargs):
         args = string.split(cmdargs,None,-1)
-        rm = self.chat.DiceManager
+        rm = component.get('DiceManager')
         try:
             rm.setRoller(args[0])
             self.chat.SystemPost("You have changed your die roller to the <b>\"" + args[0] + "\"</b> roller.")
