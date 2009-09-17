@@ -26,7 +26,7 @@ class Updater(wx.Panel):
         self.parent = parent
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(325, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(300, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.filelist = wx.TextCtrl(self, wx.ID_ANY, size=(275, 300), style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.buttons = {}
         self.buttons['progress_bar'] = wx.Gauge(self, wx.ID_ANY, 100)
@@ -436,8 +436,10 @@ class Control(wx.Panel):
 
         ## Branches / Revisions
         branchcp = wx.Panel(self)
+        self.current = self.repo.dirstate.branch()
         self.branchcp = wx.GridBagSizer(hgap=1, vgap=1)
         self.branches = wx.Choice(branchcp, wx.ID_ANY, choices=self.package_list)
+        self.branches.SetSelection(self.package_list.index(self.current))
         self.branch_txt = wx.StaticText(branchcp, wx.ID_ANY, "Branches")
         self.branchcp.Add(self.branches, (0,0))
         self.branchcp.Add(self.branch_txt, (0,1), flag=wx.ALIGN_CENTER_VERTICAL)
@@ -482,7 +484,6 @@ class Control(wx.Panel):
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
 
-        self.current = self.repo.dirstate.branch()
         self.currev = self.repo.changelog.rev(self.repo.branchtags()[self.current])
         self.RevInfo(self.currev)
         self.revlist.Select(self.revlist.FindItem(0, str(self.currev), 1))
@@ -541,18 +542,22 @@ class Control(wx.Panel):
         pass
 
     def RevUpdate(self, event):
-        filename = 'ignorelist.txt'
-        self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
-        component.get('validate').config_file(filename, "default_ignorelist.txt")
-        self.mana = self.LoadDoc()
-        temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
-        for ignore in self.ignorelist:
-            shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
-        hg.clean(self.repo, self.currev)
-        for ignore in self.ignorelist:
-            shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-            os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
-        pass
+        dlg = wx.MessageDialog(None, 'Revision Updates are recommended for Developers only.\n\nAre you sure to preform a Revision Update?\n\nNewer builds tend to have less bugs while older revisions may no longer function properly.', 'Expert Feature', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            dlg.Destroy()
+            filename = 'ignorelist.txt'
+            self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
+            component.get('validate').config_file(filename, "default_ignorelist.txt")
+            self.mana = self.LoadDoc()
+            temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
+            for ignore in self.ignorelist:
+                shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
+            hg.clean(self.repo, self.currev)
+            for ignore in self.ignorelist:
+                shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
+                os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
+        else:
+            dlg.Destroy(); pass
 
     def LoadDoc(self):
         ignore = open(self.filename)
