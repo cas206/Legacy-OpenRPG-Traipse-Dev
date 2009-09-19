@@ -271,6 +271,15 @@ class orpgFrame(wx.Frame):
         self.debugConsole = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
         self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, self.debugConsole)
         self.traipseSuite.AppendItem(self.debugConsole)
+
+    def TraipseSuiteWarn(self, menuitem):
+        ### Beta ### Allows for the reuse of the 'Attention' menu.
+        ### component.get('frame').TraipseSuiteWarn('item') ### Portable
+        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
+        if menuitem == 'debug':
+            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+            self.traipseSuite.RemoveItem(self.debugConsole)
+            self.traipseSuite.AppendItem(self.debugConsole)
        
 
     #################################
