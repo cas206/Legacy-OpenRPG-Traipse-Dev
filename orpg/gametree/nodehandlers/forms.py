@@ -29,6 +29,7 @@
 __version__ = "$Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $"
 
 from containers import *
+import orpg.minidom as minidom
 from orpg.orpg_xml import xml
 from wx.lib.scrolledpanel import ScrolledPanel
 
@@ -66,7 +67,7 @@ class form_handler(container_handler):
             else:
                 self.tree.load_xml(c,self.mytree_node)
         if not self.atts:
-            elem = self.xml.minidom.Element('form')
+            elem = minidom.Element('form')
             elem.setAttribute("width","400")
             elem.setAttribute("height","600")
             self.atts = self.master_dom.appendChild(elem)

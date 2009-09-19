@@ -54,7 +54,12 @@ def Crash(type, value, crash):
     crash_report.close()
     logger.exception("Crash Report Created!!")
     logger.info("Printed out crash-report.txt in your System folder", True)
-    wx.MessageBox('Crash Report Created!', 'System Failure')
+    #component.get('frame').traipseSuite.SetTitle('&Traipse!!')
+    component.get('frame').mainmenu.Replace(8, component.get('frame').traipseSuite, '&Traipse Suite!')
+    component.get('frame').debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+    component.get('frame').traipseSuite.RemoveItem(component.get('frame').debugConsole)
+    component.get('frame').traipseSuite.AppendItem(component.get('frame').debugConsole)
+    #wx.MessageBox('Crash Report Created!', 'System Failure')
 
 class DebugConsole(wx.Frame):
     def __init__(self, parent):

@@ -71,6 +71,13 @@ class ORPGStorage(object):
         if self.__components.has_key(key): del self.__components[key]
         else: return
 
+    ###Grumpy to Ornery###
+    def add_component(self, key, com):
+        return self.add(key, com)
+
+    def get_component(self, key):
+        return self.get(key)
+
 def singleton(cls):
     instances = {}
     def getinstance():
@@ -81,3 +88,6 @@ def singleton(cls):
 
 ORPGStorage = singleton(ORPGStorage)
 component = ORPGStorage()
+
+###Grumpy to Ornery###
+open_rpg = ORPGStorage()

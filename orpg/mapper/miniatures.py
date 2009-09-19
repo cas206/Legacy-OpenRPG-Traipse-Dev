@@ -33,7 +33,9 @@ import thread
 import time
 import urllib
 import os.path
+import mimetypes
 
+import xml.dom.minidom as minidom
 from orpg.tools.orpg_settings import settings
 
 MIN_STICKY_BACK = -0XFFFFFF
@@ -610,8 +612,9 @@ class miniature_layer(layer_base):
         except Exception, e:
             print e
             print recvdata
-        urllib.urlcleanup()
-        self.lock.release()
+        finally:
+            urllib.urlcleanup()
+            self.lock.release()
 ####################################################################
         ## helper function
 

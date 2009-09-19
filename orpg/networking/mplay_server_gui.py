@@ -13,9 +13,8 @@ import os
 import sys
 import time
 import types
-from orpg.dirpath import dir_struct
-#import orpg.systempath looks old
-from orpg.tools.validate import Validate
+import orpg.dirpath
+import orpg.systempath
 from orpg.orpg_wx import *
 import webbrowser
 from threading import Thread
@@ -58,8 +57,10 @@ def format_bytes(b):
     f = ['b', 'Kb', 'Mb', 'Gb']
     i = 0
     while i < 3:
-        if b < 1024: return str(b) + f[i]
-        else: b = b/1024
+        if b < 1024:
+            return str(b) + f[i]
+        else:
+            b = b/1024
         i += 1
     return str(b) + f[3]
 
@@ -88,8 +89,10 @@ class ServerConfig:
 
     def __init__(self, owner ): 
         """ Loads default configuration settings."""
-        Validate(dir_struct["user"]).config_file("server_ini.xml", "default_server_ini.xml" ) 
-        configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
+        userPath = orpg.dirpath.dir_struct["user"] 
+        validate = orpg.tools.validate.Validate(userPath) 
+        validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+        configDom = minidom.parse(userPath + 'server_ini.xml') 
         port = configDom.childNodes[0].childNodes[1].getAttribute('port')
         OPENRPG_PORT = 6774 if port == '' else int(port) #Pretty ugly, but I couldn't find the tag any other way.
         self.owner = owner
@@ -143,14 +146,13 @@ class ServerMonitor(Thread):
 # Main = GUI
 class Connections(wx.ListCtrl):
     def __init__( self, parent, main ):
-        wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, 
-                            wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
+        wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES )
         self.main = main
         self.roomList = { 0 : "Lobby" }
         self._imageList = wx.ImageList( 16, 16, False )
-        img = wx.Image(dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
-        img = wx.Image(dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
+        img = wx.Image(orpg.dirpath.dir_struct["icon"]+"player-whisper.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self._imageList.Add( img )
         self.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
 
@@ -274,11 +276,13 @@ class Connections(wx.ListCtrl):
                 print "Send message to room..."
                 msg = self.GetMessageInput( "Send message to room of this player")
                 if len(msg): self.main.server.server.send_to_group('0', str(groupID), msg )
+
             elif menuItem == MENU_PLAYER_SEND_SERVER_MESSAGE:
                 print "broadcast a message..."
                 msg = self.GetMessageInput( "Broadcast Server Message" )
                 # If we got a message back, send it
-                if len(msg): self.main.server.server.broadcast( msg )
+                if len(msg):
+                    self.main.server.server.broadcast( msg )
 
     def GetMessageInput( self, title ):
         prompt = "Please enter the message you wish to send:"
@@ -289,10 +293,11 @@ class Connections(wx.ListCtrl):
 
 class ServerGUI(wx.Frame):
     STATUS = SERVER_STOPPED
+
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size = (760, 560) )
-        if wx.Platform == '__WXMSW__': icon = wx.Icon( dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
-        else: icon = wx.Icon( dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
+        else: icon = wx.Icon( orpg.dirpath.dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
         self.SetIcon(icon)
         self.serverName = "Server Name"
         self.bootPwd = ""
@@ -328,47 +333,52 @@ class ServerGUI(wx.Frame):
         self.total_messages_sent = 0
         self.total_data_sent = 0
 
-    """ Build GUI """
+    ### Build GUI ############################################
 
     def build_menu(self):
         """ Build the GUI menu. """
         self.mainMenu = wx.MenuBar()
-
         # File Menu
         menu = wx.Menu()
+        # Start
         menu.Append( MENU_START_SERVER, 'Start', 'Start server.')
         self.Bind(wx.EVT_MENU, self.OnStart, id=MENU_START_SERVER)
+        # Stop
         menu.Append( MENU_STOP_SERVER, 'Stop', 'Shutdown server.')
         self.Bind(wx.EVT_MENU, self.OnStop, id=MENU_STOP_SERVER)
+        # Exit
         menu.AppendSeparator()
         menu.Append( MENU_EXIT, 'E&xit', 'Exit application.')
         self.Bind(wx.EVT_MENU, self.OnExit, id=MENU_EXIT)
         self.mainMenu.Append(menu, '&Server')
-
         # Registration Menu
         menu = wx.Menu()
+        # Register
         menu.Append( MENU_REGISTER_SERVER, 'Register', 'Register with OpenRPG server directory.')
         self.Bind(wx.EVT_MENU, self.OnRegister, id=MENU_REGISTER_SERVER)
+        # Unregister
         menu.Append( MENU_UNREGISTER_SERVER, 'Unregister', 'Unregister from OpenRPG server directory.')
         self.Bind(wx.EVT_MENU, self.OnUnregister, id=MENU_UNREGISTER_SERVER)
+        # Add the registration menu
         self.mainMenu.Append( menu, '&Registration' )
-
         # Server Configuration Menu
         menu = wx.Menu()
+        # Ping Connected Players
         menu.Append( MENU_START_PING_PLAYERS, 'Start Ping', 'Ping players to validate remote connection.' )
         self.Bind(wx.EVT_MENU, self.PingPlayers, id=MENU_START_PING_PLAYERS)
+        # Stop Pinging Connected Players
         menu.Append( MENU_STOP_PING_PLAYERS, 'Stop Ping', 'Stop validating player connections.' )
         self.Bind(wx.EVT_MENU, self.StopPingPlayers, id=MENU_STOP_PING_PLAYERS)
+        # Set Ping Interval
         menu.Append( MENU_PING_INTERVAL, 'Ping Interval', 'Change the ping interval.' )
         self.Bind(wx.EVT_MENU, self.ConfigPingInterval, id=MENU_PING_INTERVAL)
         self.mainMenu.Append( menu, '&Configuration' )
-
+        # Add the menus to the main menu bar
         self.SetMenuBar( self.mainMenu )
-
+        # Disable register, unregister & stop server by default
         self.mainMenu.Enable( MENU_STOP_SERVER, False )
         self.mainMenu.Enable( MENU_REGISTER_SERVER, False )
         self.mainMenu.Enable( MENU_UNREGISTER_SERVER, False )
-
         # Disable the ping menu items
         self.mainMenu.Enable( MENU_START_PING_PLAYERS, False )
         self.mainMenu.Enable( MENU_STOP_PING_PLAYERS, False )
@@ -470,8 +480,10 @@ class ServerGUI(wx.Frame):
         if self.STATUS == SERVER_STOPPED:
             # see if we already have name specified 
             try:
-                Validate(dir_struct["user"]).config_file( "server_ini.xml", "default_server_ini.xml" ) 
-                configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
+                userPath = orpg.dirpath.dir_struct["user"] 
+                validate = orpg.tools.validate.Validate(userPath) 
+                validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+                configDom = minidom.parse(userPath + 'server_ini.xml') 
                 configDom.normalize() 
                 configDoc = configDom.documentElement 
                 if configDoc.hasAttribute("name"): self.serverName = configDoc.getAttribute("name")
@@ -482,18 +494,19 @@ class ServerGUI(wx.Frame):
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             # see if we already have password specified 
             try: 
-                Validate(dir_struct["user"]).config_file( "server_ini.xml", "default_server_ini.xml" ) 
-                configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
+                userPath = orpg.dirpath.dir_struct["user"] 
+                validate = orpg.tools.validate.Validate(userPath) 
+                validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
+                configDom = minidom.parse(userPath + 'server_ini.xml') 
                 configDom.normalize() 
                 configDoc = configDom.documentElement 
                 if configDoc.hasAttribute("admin"): self.bootPwd = configDoc.getAttribute("admin") 
                 elif configDoc.hasAttribute("boot"): self.bootPwd = configDoc.getAttribute("boot") 
             except: pass 
             if self.bootPwd == '': 
-                serverPasswordEntry = wx.TextEntryDialog(self, 
-                                            "Please Enter The Server Admin Password:", "Server's Password", 
-                                            self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
+                serverPasswordEntry = wx.TextEntryDialog(self, "Please Enter The Server Admin Password:", "Server's Password", self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
                 if serverPasswordEntry.ShowModal() == wx.ID_OK: self.bootPwd = serverPasswordEntry.GetValue()
+
             if len(self.serverName):
                 wx.BeginBusyCursor()
                 self.server = ServerMonitor(self.callbacks, self.conf, self.serverName, self.bootPwd)
@@ -519,6 +532,7 @@ class ServerGUI(wx.Frame):
             self.mainMenu.Enable( MENU_START_SERVER, True )
             self.mainMenu.Enable( MENU_REGISTER_SERVER, False )
             self.mainMenu.Enable( MENU_UNREGISTER_SERVER, False )
+            # Delete any items that are still in the player list
             self.conns.DeleteAllItems()
 
     def OnRegister(self, event = None):
@@ -572,7 +586,7 @@ class ServerGUIApp(wx.App):
     def OnInit(self):
         # Make sure our image handlers are loaded before we try to display anything
         wx.InitAllImageHandlers()
-        self.splash = wx.SplashScreen(wx.Bitmap(dir_struct["icon"]+'splash.gif'),
+        self.splash = wx.SplashScreen(wx.Bitmap(orpg.dirpath.dir_struct["icon"]+'splash.gif'),
                               wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT,
                               2000,
                               None)
@@ -590,6 +604,7 @@ class ServerGUIApp(wx.App):
 
 class HTMLMessageWindow(wx.html.HtmlWindow):
     "Widget used to present user to admin messages, in HTML format, to the server administrator"
+
     # Init using the derived from class
     def __init__( self, parent ):
         wx.html.HtmlWindow.__init__( self, parent )

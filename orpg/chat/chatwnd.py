@@ -73,6 +73,7 @@ from orpg.tools.orpg_settings import settings
 from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
+
 NEWCHAT = False
 try:
     import wx.webview
@@ -176,8 +177,8 @@ class chat_html_window(wx.html.HtmlWindow):
 
     @debugging
     def OnM_EditCopy(self, evt):
+        wx.TheClipboard.UsePrimarySelection(False)
         wx.TheClipboard.Open()
-        wx.TheClipboard.Clear()
         wx.TheClipboard.SetData(wx.TextDataObject(self.SelectionToText()))
         wx.TheClipboard.Close()
 
@@ -290,7 +291,10 @@ if NEWCHAT:
 
         @debugging
         def OnM_EditCopy(self, evt):
-            self.Copy()
+            wx.TheClipboard.UsePrimarySelection(False)
+            wx.TheClipboard.Open()
+            wx.TheClipboard.SetData(wx.TextDataObject(self.SelectionToText()))
+            wx.TheClipboard.Close()
 
         #Cutom Methods
         @debugging
@@ -874,13 +878,8 @@ class chat_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.lock_scroll, self.scroll_lock)
         self.chattxt.Bind(wx.EVT_MOUSEWHEEL, self.chatwnd.mouse_wheel)
         self.chattxt.Bind(wx.EVT_CHAR, self.chattxt.OnChar)
-        self.chattxt.Bind(wx.EVT_TEXT_COPY, self.textCopy)
+        self.chattxt.Bind(wx.EVT_TEXT_COPY, self.chatwnd.OnM_EditCopy)
     # def build_ctrls - end
-
-    @debugging
-    def textCopy(self, event):
-        if self.chattxt.GetStringSelection() == '': self.chatwnd.OnM_EditCopy(None)
-        else: self.chatwnd.Copy()
 
     @debugging
     def build_bar(self):

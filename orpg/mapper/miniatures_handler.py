@@ -33,7 +33,7 @@ import thread
 import time
 import mimetypes
 import urllib
-import xml.dom.minidom as minidom
+
 import wx
 from grid import GRID_RECTANGLE
 from grid import GRID_HEXAGON
@@ -167,38 +167,41 @@ class miniatures_handler(base_layer_handler):
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, 
                                     (postdata, dlg.GetPath()), {'pos':cmpPoint(x,y)})
         else:
-            try: min_url = component.get("cherrypy") + filename
-            except: return #chat.InfoPost('CherryPy is not started!')
-            min_url = dlg.GetDirectory().replace(dir_struct["user"]+'webfiles' + os.sep, 
-                component.get("cherrypy")) + '/' + filename
-            # build url
-            if min_url == "" or min_url == "http://": return
-            if min_url[:7] != "http://": min_url = "http://" + min_url
-            # make label
-            if self.auto_label and min_url[-4:-3] == '.':
-                start = min_url.rfind("/") + 1
-                min_label = min_url[start:len(min_url)-4]
-                if self.use_serial: min_label = '%s %d' % ( min_label, self.canvas.layers['miniatures'].next_serial() )
-            else: min_label = ""
-            if self.min_url.FindString(min_url) == -1: self.min_url.Append(min_url)
-            try:
-                id = 'mini-' + self.canvas.frame.session.get_next_id()
-                # make the new mini appear in top left of current viewable map
-                dc = wx.ClientDC(self.canvas)
-                self.canvas.PrepareDC(dc)
-                dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
-                x = dc.DeviceToLogicalX(0)
-                y = dc.DeviceToLogicalY(0)
-                self.canvas.layers['miniatures'].add_miniature(id, min_url, pos=cmpPoint(x,y), label=min_label)
-            except:
-                # When there is an exception here, we should be decrementing the serial_number for reuse!!
-                unablemsg= "Unable to load/resolve URL: " + min_url + " on resource \"" + min_label + "\"!!!\n\n"
-                dlg = wx.MessageDialog(self,unablemsg, 'Url not found',wx.ICON_EXCLAMATION)
-                dlg.ShowModal()
-                dlg.Destroy()
-                self.canvas.layers['miniatures'].rollback_serial()
-            self.canvas.send_map_data()
-            self.canvas.Refresh(False)
+            self.CherryPy(dlg.GetDirectory(), filename)
+
+    def CherryPit(self, path, filename):
+        try: min_url = component.get("cherrypy") + filename
+        except: return #chat.InfoPost('CherryPy is not started!')
+        min_url = path.replace(orpg.dirpath.dir_struct["user"]+'webfiles', 
+                component.get("cherrypy")).replace(os.sep, '/') + '/' + filename
+        # build url
+        if min_url == "" or min_url == "http://": return
+        if min_url[:7] != "http://": min_url = "http://" + min_url
+        # make label
+        if self.auto_label and min_url[-4:-3] == '.':
+            start = min_url.rfind("/") + 1
+            min_label = min_url[start:len(min_url)-4]
+            if self.use_serial: min_label = '%s %d' % ( min_label, self.canvas.layers['miniatures'].next_serial() )
+        else: min_label = ""
+        if self.min_url.FindString(min_url) == -1: self.min_url.Append(min_url)
+        try:
+            id = 'mini-' + self.canvas.frame.session.get_next_id()
+            # make the new mini appear in top left of current viewable map
+            dc = wx.ClientDC(self.canvas)
+            self.canvas.PrepareDC(dc)
+            dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
+            x = dc.DeviceToLogicalX(0)
+            y = dc.DeviceToLogicalY(0)
+            self.canvas.layers['miniatures'].add_miniature(id, min_url, pos=cmpPoint(x,y), label=min_label)
+        except:
+            # When there is an exception here, we should be decrementing the serial_number for reuse!!
+            unablemsg= "Unable to load/resolve URL: " + min_url + " on resource \"" + min_label + "\"!!!\n\n"
+            dlg = wx.MessageDialog(self,unablemsg, 'Url not found',wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            self.canvas.layers['miniatures'].rollback_serial()
+        self.canvas.send_map_data()
+        self.canvas.Refresh(False)
 
 
     def build_menu(self,label = "Miniature"):
@@ -614,7 +617,10 @@ class miniatures_handler(base_layer_handler):
         y = dc.DeviceToLogicalY(y)
         (imgtype,j) = mimetypes.guess_type(filename)
         postdata = urllib.urlencode({'filename':filename, 'imgdata':imgdata, 'imgtype':imgtype})
-        thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, filepath), {'pos':cmpPoint(x,y)})
+        if self.settings.get_setting('LocalorRemote') == 'Remote':
+            thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, filepath), {'pos':cmpPoint(x,y)})
+        else:
+            self.CherryPit(filepath, '')
 
     def on_tooltip_timer(self, *args):
         pos = args[0]

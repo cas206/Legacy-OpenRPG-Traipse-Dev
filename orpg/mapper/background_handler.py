@@ -90,8 +90,8 @@ class background_handler(base_layer_handler):
             else:
                 try: min_url = component.get("cherrypy") + filename
                 except: return
-                min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles' + os.sep, 
-                    component.get("cherrypy")) + '/' + filename
+                min_url = dlg.GetDirectory().replace(orpg.dirpath.dir_struct["user"]+'webfiles', 
+                    component.get("cherrypy")).replace(os.sep, '/') + '/' + filename
 
                 if self.bg_type.GetStringSelection() == 'Texture': self.canvas.layers['bg'].set_texture(min_url)
                 elif self.bg_type.GetStringSelection() == 'Image': self.size = self.canvas.layers['bg'].set_image(min_url,1)

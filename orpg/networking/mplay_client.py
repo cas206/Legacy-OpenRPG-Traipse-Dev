@@ -29,7 +29,7 @@
 
 __version__ = "$Id: mplay_client.py,v 1.71 2007/05/12 20:41:54 digitalxero Exp $"
 
-#import orpg.minidom
+import orpg.minidom
 import socket
 import Queue
 import thread
@@ -38,22 +38,24 @@ from threading import Event, Lock
 from xml.sax.saxutils import escape
 from struct import pack, unpack, calcsize
 from string import *
-from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
+from orpg.orpg_version import *
 import errno
 import os
 import time
-from orpg.orpgCore import component
 from orpg.orpg_xml import xml
+import orpg.minidom as minidom
 
 try:
     import bz2
     cmpBZ2 = True
-except: cmpBZ2 = False
+except:
+    cmpBZ2 = False
 
 try:
     import zlib
     cmpZLIB = True
-except: cmpZLIB = False
+except:
+    cmpZLIB = False
 
 
 # This should be configurable
@@ -83,7 +85,7 @@ STATUS_SET_URL = 1
 def parseXml(data):
     "parse and return doc"
     #print data
-    doc = xml.parseXml(data)
+    doc = minidom.parseString(data)
     doc.normalize()
     return doc
 
@@ -117,11 +119,9 @@ class client_base:
         self.group_id = "0"
         self.name = ""
         self.role = "GM"
-        ## Soon to be removed
         self.ROLE_GM = "GM"
         self.ROLE_PLAYER = "Player"
         self.ROLE_LURKER = "Lurker"
-        ## --TaS
         self.ip = socket.gethostbyname(socket.gethostname())
         self.remote_ip = None
         self.version = VERSION
@@ -135,6 +135,9 @@ class client_base:
         self.text_status = "Idle"
         self.statLock = Lock()
         self.useroles = 0
+        self.ROLE_GM = "GM"
+        self.ROLE_PLAYER = "Player"
+        self.ROLE_LURKER = "Lurker"
         self.lastmessagetime = time.time()
         self.connecttime = time.time()
 
@@ -146,7 +149,8 @@ class client_base:
 
         # Loop as long as we have a connection
         while( self.get_status() == MPLAY_CONNECTED ):
-            try: readMsg = self.outbox.get( block=1 )
+            try:
+                readMsg = self.outbox.get( block=1 )
             except Exception, text:
                 self.log_msg( ("outbox.get() got an exception:  ", text) )
 
@@ -174,13 +178,15 @@ class client_base:
             try:
                 if self.useCompression and self.compressionType != None:
                     readMsg = self.compressionType.decompress(readMsg)
-            except: pass
+            except:
+                pass
 
             # Check the length of the message
             bytes = len( readMsg )
 
             # Make sure we are still connected
-            if bytes == 0: break
+            if bytes == 0:
+                break
             else:
                 # Pass along the message so it can be processed
                 self.inbox.put( readMsg )
@@ -219,9 +225,12 @@ class client_base:
 
                 # Now, send the message the the length was describing
                 sentm = sock.send( msg )
-                if self.isServer(): self.log_msg(("data_sent", sentl+sentm))
-            except socket.error, e: self.log_msg( e )
-            except Exception, e: self.log_msg( e )
+                if self.isServer():
+                    self.log_msg(("data_sent", sentl+sentm))
+            except socket.error, e:
+                self.log_msg( e )
+            except Exception, e:
+                self.log_msg( e )
         return sentm
 
     def recvData( self, sock, readSize ):
@@ -269,8 +278,10 @@ class client_base:
                 # Make the peer IP address available for reference later
                 if self.remote_ip is None:
                     self.remote_ip = self.sock.getpeername()
-        except IOError, e: self.log_msg( e )
-        except Exception, e: self.log_msg( e )
+        except IOError, e:
+            self.log_msg( e )
+        except Exception, e:
+            self.log_msg( e )
         return msgData
 
     def initialize_threads(self):
@@ -286,7 +297,8 @@ class client_base:
         self.set_status(MPLAY_DISCONNECTING)
         self.log_msg("client stub " + self.ip +" disconnecting...")
         self.log_msg("closing sockets...")
-        try: self.sock.shutdown( 2 )
+        try:
+            self.sock.shutdown( 2 )
         except Exception, e:
             print "Caught exception:  " + str(e)
             print
@@ -308,15 +320,13 @@ class client_base:
         else:
             return 0
     def update_self_from_player(self, player):
-        try: (self.name, self.ip, self.id, 
-                self.text_status, self.version, 
-                self.protocol_version, self.client_string, role) = player
+        try:
+            (self.name, self.ip, self.id, self.text_status, self.version, self.protocol_version, self.client_string,role) = player
         except Exception, e:
             print e
-    """
-     The IP field should really be deprecated as too many systems are NAT'd and/or behind firewalls for a
-     client provided IP address to have much value.  As such, we now label it as deprecated.
-    """
+
+# The IP field should really be deprecated as too many systems are NAT'd and/or behind firewalls for a
+# client provided IP address to have much value.  As such, we now label it as deprecated.
     def toxml(self,action):
         xml_data = '<player name="' + myescape(self.name) + '"'
         xml_data += ' action="' + action + '" id="' + self.id + '"'
@@ -330,13 +340,16 @@ class client_base:
             xml_data += ' cmpType="bz2"'
         elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
             xml_data += ' cmpType="zlib"'
-        else: xml_data += ' cmpType="None"'
+        else:
+            xml_data += ' cmpType="None"'
         xml_data += ' />'
         return xml_data
 
     def log_msg(self,msg):
         if self.log_console:
             self.log_console(msg)
+#        else:
+#            print "message", msg
 
     def get_status(self):
         self.statLock.acquire()
@@ -345,9 +358,7 @@ class client_base:
         return status
 
     def my_role(self):
-        #Leaving this for testing.
-        return self.role
-        """
+#Why create the three different objects?  Why not just assign a value to self.role and use that? Prof_Ebral ponders.
         if self.role == "GM":
             return self.ROLE_GM
         elif self.role == "Player":
@@ -355,7 +366,6 @@ class client_base:
         elif self.role == "Lurker":
             return self.ROLE_LURKER
         return -1
-        """
 
     def set_status(self,status):
         self.statLock.acquire()
@@ -383,9 +393,12 @@ class client_base:
         idletime = self.idle_time()
         idlemins = idletime / 60
         status = "Unknown"
-        if idlemins < 3: status = "Active"
-        elif idlemins < 10:  status = "Idle ("+str(int(idlemins))+" mins)"
-        else: status = "Inactive ("+str(int(idlemins))+" mins)"
+        if idlemins < 3:
+            status = "Active"
+        elif idlemins < 10:
+            status = "Idle ("+str(int(idlemins))+" mins)"
+        else:
+            status = "Inactive ("+str(int(idlemins))+" mins)"
         return status
 
     def connected_time(self):
@@ -414,8 +427,6 @@ class mplay_client(client_base):
     "mplay client"
     def __init__(self,name,callbacks):
         client_base.__init__(self)
-        component.add('mp_client', self)
-        self.xml = component.get('xml')
         self.set_name(name)
         self.on_receive = callbacks['on_receive']
         self.on_mplay_event = callbacks['on_mplay_event']
@@ -428,6 +439,9 @@ class mplay_client(client_base):
         # Should really find a better solution. -- SD 8/03
         self.orpgFrame_callback = callbacks['orpgFrame']
         self.settings = self.orpgFrame_callback.settings
+        #self.version = VERSION
+        #self.protocol_version = PROTOCOL_VERSION
+        #self.client_string = CLIENT_STRING
         self.ignore_id = []
         self.ignore_name = []
         self.players = {}
@@ -495,17 +509,15 @@ class mplay_client(client_base):
         players = self.get_players()
         if self.players.has_key(player):
             for m in players:
-                if player == m[2]: return m
+                if player == m[2]:
+                    return m
         return -1
 
     def get_id(self):
         return self.id
 
     def get_my_info(self):
-        return (self.name, self.ip, self.id, 
-                self.text_status, self.version, 
-                self.protocol_version, self.client_string, 
-                self.role)
+        return (self.name, self.ip, self.id, self.text_status, self.version, self.protocol_version, self.client_string, self.role)
 
     def is_valid_id(self,id):
         self.statLock.acquire()
@@ -516,21 +528,25 @@ class mplay_client(client_base):
     def clear_players(self,save_self=0):
         self.statLock.acquire()
         keys = self.players.keys()
-        for k in keys: del self.players[k]
+        for k in keys:
+            del self.players[k]
         self.statLock.release()
 
     def clear_groups(self):
         self.statLock.acquire()
         keys = self.groups.keys()
-        for k in keys: del self.groups[k]
+        for k in keys:
+            del self.groups[k]
         self.statLock.release()
 
     def find_role(self,id):
         return self.players[id].role
 
     def get_ignore_list(self):
-        try: return (self.ignore_id, self.ignore_name)
-        except: return (None, None)
+        try:
+            return (self.ignore_id, self.ignore_name)
+        except:
+            return (None, None)
 
     def toggle_ignore(self, id):
         for m in self.ignore_id:
@@ -553,10 +569,7 @@ class mplay_client(client_base):
 #---------------------------------------------------------
 
     def set_room_pass(self,npwd,pwd=""):
-        recycle_bin = "<alter key=\"pwd\" "
-        recycle_bin += "val=\"" +npwd+ "\" bpw=\"" + pwd + "\" "
-        recycle_bin += "plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+        self.outbox.put("<alter key=\"pwd\" val=\"" +npwd+ "\" bpw=\"" + pwd + "\" plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />")
         self.update()
 
     def set_room_name(self,name,pwd=""):
@@ -587,10 +600,7 @@ class mplay_client(client_base):
                 e = name[loc+1:]
                 name = b + "&#39;" + e
                 oldloc = loc+1
-        recycle_bin = "<alter key=\"name\" "
-        recycle_bin += "val=\"" + name + "\" bpw=\"" + pwd + "\" "
-        recycle_bin += "plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+        self.outbox.put("<alter key=\"name\" val=\"" + name + "\" bpw=\"" + pwd + "\" plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />")
         self.update()
 
 #---------------------------------------------------------
@@ -604,9 +614,7 @@ class mplay_client(client_base):
         self.outbox.put("<role action=\"get\" player=\"" + self.id +"\" group_id=\""+self.group_id + "\" />")
 
     def set_role(self,player,role,pwd=""):
-        recycle_bin = "<role action=\"set\" player=\"" + player + "\" "
-        recycle_bin += "role=\"" +role+ "\" boot_pwd=\"" + pwd + "\" group_id=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easer to read. --TaS
+        self.outbox.put("<role action=\"set\" player=\"" + player + "\" role=\"" +role+ "\" boot_pwd=\"" + pwd + "\" group_id=\"" + self.group_id + "\" />")
         self.update()
 
     def send(self,msg,player="all"):
@@ -620,13 +628,12 @@ class mplay_client(client_base):
         self.check_my_status()
 
     def send_create_group(self,name,pwd,boot_pwd,minversion):
-        recycle_bin = "<create_group from=\""+self.id+"\" "
-        recycle_bin += "pwd=\""+pwd+"\" name=\""+ name+"\" boot_pwd=\""+boot_pwd+"\" "
-        recycle_bin += "min_version=\"" + minversion +"\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+        self.outbox.put("<create_group from=\""+self.id+"\" pwd=\""+pwd+"\" name=\""+
+                        name+"\" boot_pwd=\""+boot_pwd+"\" min_version=\"" + minversion +"\" />")
 
     def send_join_group(self,group_id,pwd):
-        if (group_id != 0): self.update_role("Lurker")
+        if (group_id != 0):
+            self.update_role("Lurker")
         self.outbox.put("<join_group from=\""+self.id+"\" pwd=\""+pwd+"\" group_id=\""+str(group_id)+"\" />")
 
     def poll(self, evt=None):
@@ -636,7 +643,8 @@ class mplay_client(client_base):
             if self.get_status() != MPLAY_CONNECTED:
                 self.check_my_status()
         else:
-            try: self.pretranslate(msg)
+            try:
+                self.pretranslate(msg)
             except Exception, e:
                 print "The following  message: " + str(msg)
                 print "created the following exception: "
@@ -645,13 +653,16 @@ class mplay_client(client_base):
     def add_msg_handler(self, tag, function, core=False):
         if not self.msg_handlers.has_key(tag):
             self.msg_handlers[tag] = function
-            if core: self.core_msg_handlers.append(tag)
-        else: print 'XML Messages ' + tag + ' already has a handler'
+            if core:
+                self.core_msg_handlers.append(tag)
+        else:
+            print 'XML Messages ' + tag + ' already has a handler'
 
     def remove_msg_handler(self, tag):
         if self.msg_handlers.has_key(tag) and not tag in self.core_msg_handlers:
             del self.msg_handlers[tag]
-        else: print 'XML Messages ' + tag + ' already deleted'
+        else:
+            print 'XML Messages ' + tag + ' already deleted'
 
     def load_core_msg_handlers(self):
         self.add_msg_handler('msg', self.on_msg, True)
@@ -665,16 +676,19 @@ class mplay_client(client_base):
     def pretranslate(self,data):
         # Pre-qualify our data.  If we don't have atleast 5-bytes, then there is
         # no way we even have a valid message!
-        if len(data) < 5: return
+        if len(data) < 5:
+            return
         end = data.find(">")
         head = data[:end+1]
         msg = data[end+1:]
-        xml_dom = self.xml.parseXml(head)
+        xml_dom = xml.parseXml(head)
         xml_dom = xml_dom._get_documentElement()
         tag_name = xml_dom._get_tagName()
         id = xml_dom.getAttribute("from")
-        if id == '': id = xml_dom.getAttribute("id")
-        if self.msg_handlers.has_key(tag_name): self.msg_handlers[tag_name](id, data, xml_dom)
+        if id == '':
+            id = xml_dom.getAttribute("id")
+        if self.msg_handlers.has_key(tag_name):
+            self.msg_handlers[tag_name](id, data, xml_dom)
         else:
             #Unknown messages recived ignoring
             #using pass insted or printing an error message
@@ -682,7 +696,8 @@ class mplay_client(client_base):
             #if someone is using a plugin to send messages and this user does not
             #have the plugin they would be getting errors
             pass
-        if xml_dom: xml_dom.unlink()
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_sound(self, id, data, xml_dom):
         (ignore_id,ignore_name) = self.get_ignore_list()
@@ -704,8 +719,10 @@ class mplay_client(client_base):
             self.on_receive(msg,None)      #  None get's interpreted in on_receive as the sys admin.
                                            #  Doing it this way makes it harder to impersonate the admin
         else:
-            if self.is_valid_id(id): self.on_receive(msg,self.players[id])
-        if xml_dom: xml_dom.unlink()
+            if self.is_valid_id(id):
+                self.on_receive(msg,self.players[id])
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_ping(self, id, msg, xml_dom):
         #a REAL ping time implementation by Snowdog 8/03
@@ -720,7 +737,8 @@ class mplay_client(client_base):
         latency = float( latency) / 10.0
         ping_msg = "Ping Results: " + str(latency) + " ms (parsed message, round trip)"
         self.on_receive(ping_msg,None)
-        if xml_dom: xml_dom.unlink()
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_group(self, id, msg, xml_dom):
         name = xml_dom.getAttribute("name")
@@ -738,7 +756,8 @@ class mplay_client(client_base):
         elif act == 'update':
             self.groups[id] = group_data
             self.on_group_event(mplay_event(GROUP_UPDATE, group_data))
-        if xml_dom: xml_dom.unlink()
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_role(self, id, msg, xml_dom):
         act = xml_dom.getAttribute("action")
@@ -749,10 +768,13 @@ class mplay_client(client_base):
                 if id == self.id:
                     self.players[id] = (a,b,c,d,e,f,g,role)
                     self.update_role(role)
-                else: self.players[id] = (a,b,c,d,e,f,g,role)
+                else:
+                    self.players[id] = (a,b,c,d,e,f,g,role)
                 self.on_player_event(mplay_event(PLAYER_UPDATE,self.players[id]))
-            except: pass
-        if xml_dom: xml_dom.unlink()
+            except:
+                pass
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_player(self, id, msg, xml_dom):
         act = xml_dom.getAttribute("action")
@@ -762,39 +784,42 @@ class mplay_client(client_base):
         version = xml_dom.getAttribute("version")
         protocol_version = xml_dom.getAttribute("protocol_version")
         client_string = xml_dom.getAttribute("client_string")
-        try: player = (name, ip, id, status, 
-                        version, protocol_version, 
-                        client_string, self.players[id][7])
+        try:
+            player = (name,ip,id,status,version,protocol_version,client_string,self.players[id][7])
         except Exception, e:
-            player = (name, ip, id, status, 
-                        version, protocol_version, 
-                        client_string, "Player")
+            player = (name,ip,id,status,version,protocol_version,client_string,"Player")
         if act == "new":
             self.players[id] = player
-            self.on_player_event(mplay_event(PLAYER_NEW, self.players[id]))
+            self.on_player_event(mplay_event(PLAYER_NEW,self.players[id]))
         elif act == "group":
             self.group_id = xml_dom.getAttribute("group_id")
             self.clear_players()
-            self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE, self.groups[self.group_id]))
+            self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE,self.groups[self.group_id]))
             self.players[self.id] = self.get_my_info() #(self.name,self.ip,self.id,self.text_status)
-            self.on_player_event(mplay_event(PLAYER_NEW, self.players[self.id]))
+            self.on_player_event(mplay_event(PLAYER_NEW,self.players[self.id]))
         elif act == "failed":
             self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE_F))
         elif act == "del":
             self.on_player_event(mplay_event(PLAYER_DEL,self.players[id]))
-            if self.players.has_key(id): del self.players[id]
-            if id == self.id: self.do_disconnect()
+            if self.players.has_key(id):
+                del self.players[id]
+            if id == self.id:
+                self.do_disconnect()
         #  the next two cases handle the events that are used to let you know when others are typing
         elif act == "update":
             if id == self.id:
                 self.players[id] = player
                 self.update_self_from_player(player)
-            else: self.players[id] = player
+            else:
+                self.players[id] = player
             dont_send = 0
             for m in self.ignore_id:
-                if m == id: dont_send=1
-            if dont_send != 1: self.on_player_event(mplay_event(PLAYER_UPDATE,self.players[id]))
-        if xml_dom: xml_dom.unlink()
+                if m == id:
+                    dont_send=1
+            if dont_send != 1:
+                self.on_player_event(mplay_event(PLAYER_UPDATE,self.players[id]))
+        if xml_dom:
+            xml_dom.unlink()
 
     def on_password(self, id, msg, xml_dom):
         signal = type = id = data = None
@@ -808,7 +833,8 @@ class mplay_client(client_base):
 
     def check_my_status(self):
         status = self.get_status()
-        if status == MPLAY_DISCONNECTING: self.do_disconnect()
+        if status == MPLAY_DISCONNECTING:
+            self.do_disconnect()
 
     def connect(self, addressport):
         """Establish a connection to a server while still using sendThread & recvThread for its
@@ -834,7 +860,7 @@ class mplay_client(client_base):
             self.sendMsg( self.sock, self.toxml("new") )
             data = self.recvMsg( self.sock )
             # get new id and group_id
-            xml_dom = self.xml.parseXml(data)
+            xml_dom = xml.parseXml(data)
             xml_dom = xml_dom._get_documentElement()
             self.id = xml_dom.getAttribute("id")
             self.group_id = xml_dom.getAttribute("group_id")
@@ -845,29 +871,31 @@ class mplay_client(client_base):
                         self.compressionType = bz2
                     elif cmpZLIB and xml_dom.getAttribute('cmpType') == 'zlib':
                         self.compressionType = zlib
-                    else: self.compressionType = None
-                else: self.compressionType = bz2
+                    else:
+                        self.compressionType = None
+                else:
+                    self.compressionType = bz2
             #send confirmation
             self.sendMsg( self.sock, self.toxml("new") )
         except Exception, e:
             self.log_msg(e)
-            if xml_dom: xml_dom.unlink()
+            if xml_dom:
+                xml_dom.unlink()
             return 0
 
         # Start things rollings along
         self.initialize_threads()
         self.on_mplay_event(mplay_event(MPLAY_CONNECTED))
-        self.players[self.id] = (self.name, self.ip, self.id, 
-                                self.text_status, self.version, 
-                                self.protocol_version, self.client_string, self.role)
+        self.players[self.id] = (self.name,self.ip,self.id,self.text_status,self.version,self.protocol_version,self.client_string,self.role)
         self.on_player_event(mplay_event(PLAYER_NEW,self.players[self.id]))
-        if xml_dom: xml_dom.unlink()
+        if xml_dom:
+            xml_dom.unlink()
         return 1
 
     def start_disconnect(self):
         self.on_mplay_event(mplay_event(MPLAY_DISCONNECTING))
         self.outbox.put( self.toxml("del") )
-        ## Client Side Disconect Forced -- Snowdog 10-09-2003
+            ## Client Side Disconect Forced -- Snowdog 10-09-2003
         #pause to allow GUI events time to sync.
         time.sleep(1)
         self.do_disconnect()
