@@ -167,7 +167,7 @@ class miniatures_handler(base_layer_handler):
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, 
                                     (postdata, dlg.GetPath()), {'pos':cmpPoint(x,y)})
         else:
-            self.CherryPy(dlg.GetDirectory(), filename)
+            self.CherryPit(dlg.GetDirectory(), filename)
 
     def CherryPit(self, path, filename):
         try: min_url = component.get("cherrypy") + filename

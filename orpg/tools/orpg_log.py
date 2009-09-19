@@ -54,16 +54,10 @@ def Crash(type, value, crash):
     crash_report.close()
     logger.exception("Crash Report Created!!")
     logger.info("Printed out crash-report.txt in your System folder", True)
-    #component.get('frame').traipseSuite.SetTitle('&Traipse!!')
-    component.get('frame').mainmenu.Replace(8, component.get('frame').traipseSuite, '&Traipse Suite!')
-    component.get('frame').debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
-    component.get('frame').traipseSuite.RemoveItem(component.get('frame').debugConsole)
-    component.get('frame').traipseSuite.AppendItem(component.get('frame').debugConsole)
-    #wx.MessageBox('Crash Report Created!', 'System Failure')
 
 class DebugConsole(wx.Frame):
     def __init__(self, parent):
-        super(DebugConsole, self).__init__(parent, -1, "Debug Window")
+        super(DebugConsole, self).__init__(parent, -1, "Debug Console")
         icon = None
         icon = wx.Icon(dir_struct["icon"]+'note.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon( icon )
@@ -122,6 +116,8 @@ class orpgLog(object):
         self.log(msg, ORPG_GENERAL, to_console)
 
     def exception(self, msg, to_console=True):
+        ### Beta ### Every 'Critical' exception will draw attention to the Debug Console
+        component.get('frame').TraipseSuiteWarn('debug')
         self.log(msg, ORPG_CRITICAL, to_console)
 
     def log(self, msg, log_type, to_console=False):

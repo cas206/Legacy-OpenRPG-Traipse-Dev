@@ -34,6 +34,7 @@
 import string
 from orpg.orpg_windows import *
 from wx.lib.expando import ExpandoTextCtrl
+from orpg.tools.orpg_log import logger
 
 #  This line added to test CVS commit
 
@@ -434,6 +435,12 @@ class predTextCtrl(ExpandoTextCtrl):
                                                            #  clobber the prediction.
 
                     return                                 #  Don't pass tab on in this case
+            elif event.GetKeyCode() == wx.WXK_RETURN and event.ShiftDown():
+                logger.exception('Shift + Enter Not completed, 439, predtextCtrl', True)
+                st = self.GetValue()
+                st += '<br />'
+                return
+
 
             elif event.GetKeyCode() == wx.WXK_RETURN:            #  We want to hook returns, so that we can update the word list
 
