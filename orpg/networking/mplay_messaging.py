@@ -36,22 +36,22 @@ from threading import Event, Lock
 from xml.sax.saxutils import escape
 from struct import pack, unpack, calcsize
 from string import *
-from orpg.orpg_version import VERSION, PROTOCOL_VERSION, CLIENT_STRING, SERVER_MIN_CLIENT_VERSION
+from orpg.orpg_version import *
 import os
 import time
 
-from orpg.tools.orpg_log import logger
-from orpg.orpgCore import component
+from orpg.orpgCore import *
 
 def myescape(data):
     return escape(data,{"\"":""})
 
 class messenger:
     def __init__(self, *args, **kwargs):
-        #self.xml = component.get("xml") used once, no need for the object.
-        self.dir_struct = component.get("dir_struct") #used?
-        self.validate = component.get("validate") #used??
-        #self.settings = component.get("settings") ## used once, no need for the object.
+        self.log = open_rpg.get_component("log")
+        self.xml = open_rpg.get_component("xml")
+        self.dir_struct = open_rpg.get_component("dir_struct")
+        self.validate = open_rpg.get_component("validate")
+        self.settings = open_rpg.get_component("settings")
         if kwargs.has_key('isServer'):
             self.isServer = kwargs['isServer']
         else:
@@ -64,7 +64,7 @@ class messenger:
         self.exitEvent = Event()
         self.sendThreadExitEvent = Event()
         self.recvThreadExitEvent = Event()
-        self.port = int(component.get("settings").get_setting("port")) ##used even?
+        self.port = int(self.settings.get_setting("port"))
         self.ip = socket.gethostbyname(socket.gethostname())
         self.lensize = calcsize('i')
         self.mplay_type = ('disconnected', 'connected', 'disconnecting', 'group change', 'group change failed')
@@ -137,12 +137,12 @@ class messenger:
 
     def disconnect(self):
         self.set_status(2)
-        logger.debug("client stub " + self.ip +" disconnecting...")
-        logger.debug("closing sockets...")
+        self.log.log("client stub " + self.ip +" disconnecting...", ORPG_DEBUG)
+        self.log.log("closing sockets...", ORPG_DEBUG)
         try:
             self.sock.shutdown( 2 )
         except:
-            logger.general("Caught exception:\n" + traceback.format_exc())
+            self.log.log("Caught exception:\n" + traceback.format_exc(), ORPG_GENERAL)
         self.set_status(0)
 
     def reset(self, sock):
@@ -161,10 +161,10 @@ class messenger:
         try:
             (self.name, self.ip, self.id, self.text_status, self.version, self.protocol_version, self.client_string,role) = player
         except:
-            logger.general("Exception:  messenger->update_self_from_player():\n" + traceback.format_exc())
+            self.log.log("Exception:  messenger->update_self_from_player():\n" + traceback.format_exc(), ORPG_GENERAL)
 
     def toxml(self, act):
-        logger.exception("DEPRECIATED! messenger->toxml()")
+        self.log.log("DEPRECIATED! messenger->toxml()", ORPG_CRITICAL)
         xml_data = self.build_message('player',
                                 name=myescape(self.name),
                                 action=act,
@@ -290,7 +290,7 @@ class messenger:
     #Message Handaling
     def message_handler(self, arg):
         xml_dom = None
-        logger.note("message handler thread running...", ORPG_NOTE)
+        self.log.log("message handler thread running...", ORPG_NOTE)
         while self.alive or self.status == 'connected':
             data = None
             try:
@@ -308,24 +308,24 @@ class messenger:
                 del data
                 data = None
             except Exception, e:
-                logger.general(traceback.format_exc())
+                self.log.log(traceback.format_exc(), ORPG_GENERAL)
                 if xml_dom: xml_dom.unlink()
         if xml_dom: xml_dom.unlink()
-        logger.note("message handler thread exiting...")
+        self.log.log("message handler thread exiting...", ORPG_NOTE)
         self.inbox_event.set()
 
     def parse_incoming_dom(self, data):
         #print data
         xml_dom = None
         try:
-            xml_dom = component.get("xml").parseXml(data)
+            xml_dom = self.xml.parseXml(data)
             xml_dom = xml_dom._get_documentElement()
             self.message_action(xml_dom, data)
 
         except Exception, e:
-            logger.general("Error in parse of inbound message. Ignoring message.")
-            logger.general("\tOffending data(" + str(len(data)) + "bytes)=" + data)
-            logger.general("Exception=" + traceback.format_exc())
+            self.log.log("Error in parse of inbound message. Ignoring message.", ORPG_GENERAL)
+            self.log.log("\tOffending data(" + str(len(data)) + "bytes)=" + data, ORPG_GENERAL)
+            self.log.log("Exception=" + traceback.format_exc(), ORPG_GENERAL)
         if xml_dom: xml_dom.unlink()
 
     def message_action(self, xml_dom, data):
@@ -333,8 +333,8 @@ class messenger:
         if self.msg_handlers.has_key(tag_name):
             self.msg_handlers[tag_name](xml_dom, data)
         else:
-            logger.general("Unknown Message Type")
-            logger.general(data)
+            self.log.log("Unknown Message Type", ORPG_GENERAL)
+            self.log.log(data, ORPG_GENERAL)
         #Message Action thread expires and closes here.
         return
 
@@ -350,7 +350,7 @@ class messenger:
                 readMsg = self.outbox.get( block=1 )
 
             except Exception, text:
-                logger.exception("Exception:  messenger->sendThread():  " + str(text)
+                self.log.log("Exception:  messenger->sendThread():  " + str(text), ORPG_CRITICAL)
 
             # If we are here, it's because we have data to send, no doubt!
             if self.status == 'connected':
@@ -358,12 +358,12 @@ class messenger:
                     # Send the entire message, properly formated/encoded
                     sent = self.sendMsg( self.sock, readMsg )
                 except:
-                    logger.exception("Exception:  messenger->sendThread():\n" + traceback.format_exc()
+                    self.log.log("Exception:  messenger->sendThread():\n" + traceback.format_exc(), ORPG_CRITICAL)
             else:
                 # If we are not connected, purge the data queue
-                logger.note("Data queued without a connection, purging data from queue...")
+                self.log.log("Data queued without a connection, purging data from queue...", ORPG_NOTE)
         self.sendThreadExitEvent.set()
-        logger.note( "sendThread has terminated...")
+        self.log.log( "sendThread has terminated...", ORPG_NOTE)
 
     def sendMsg( self, sock, msg ):
         """Very simple function that will properly encode and send a message to te
@@ -382,12 +382,12 @@ class messenger:
             # Now, send the message the the length was describing
             sentm = sock.send( msg )
             if self.isServer:
-                logger.debug("('data_sent', " + str(sentl+sentm) + ")")
+                self.log.log("('data_sent', " + str(sentl+sentm) + ")", ORPG_DEBUG)
             return sentm
         except socket.error, e:
-            logger.exception("Socket Error: messenger->sendMsg(): " +  traceback.format_exc())
+            self.log.log("Socket Error: messenger->sendMsg(): " +  traceback.format_exc(), ORPG_CRITICAL)
         except:
-            logger.exception("Exception:  messenger->sendMsg(): " +  traceback.format_exc())
+            self.log.log("Exception:  messenger->sendMsg(): " +  traceback.format_exc(), ORPG_CRITICAL)
 
     def recvThread( self, arg ):
         "Receiving thread.  This thread reads from the socket and writes to the data queue."
@@ -413,11 +413,11 @@ class messenger:
                 self.inbox.put( readMsg )
                 self.update_idle_time() #update the last message time
         if bytes == 0:
-            logger.note("Remote has disconnected!")
+            self.log.log("Remote has disconnected!", ORPG_NOTE)
             self.set_status(2)
         self.outbox.put( "" )    # Make sure the other thread is woken up!
         self.sendThreadExitEvent.set()
-        logger.note("messenger->recvThread() has terminated...")
+        self.log.log("messenger->recvThread() has terminated...", ORPG_NOTE)
 
     def recvData( self, sock, readSize ):
         """Simple socket receive method.  This method will only return when the exact
@@ -439,7 +439,7 @@ class messenger:
                     offset += rs
                     data += frag
         except socket.error, e:
-            logger.exception("Socket Error: messenger->recvData(): " +  str(e))
+            self.log.log("Socket Error: messenger->recvData(): " +  str(e), ORPG_CRITICAL)
             data = ""
         return data
 
@@ -465,9 +465,9 @@ class messenger:
             msgData = self.recvData( sock, length )
 
             if self.isServer:
-                logger.debug("('data_recv', " + str(length+4) + ")")
+                self.log.log("('data_recv', " + str(length+4) + ")", ORPG_DEBUG)
         except:
-            logger.exception("Exception: messenger->recvMsg():\n" + traceback.format_exc())
+            self.log.log("Exception: messenger->recvMsg():\n" + traceback.format_exc(), ORPG_CRITICAL)
         return msgData
 
 if __name__ == "__main__":

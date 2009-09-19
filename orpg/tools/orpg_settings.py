@@ -33,41 +33,47 @@ from rgbhex import *
 import sys
 import os
 from orpg.orpg_xml import xml
+from orpg.tools.orpg_log import logger
+from orpg.tools.validate import validate
+from orpg.orpg_xml import xml
 
 class orpgSettings:
     def __init__(self):
-        self.validate = component.get("validate")
-        component.add('xml', xml)
         self.xml = component.get("xml")
-        self.orpgLog = component.get("log")
         self.changes = []
-        self.validate.config_file("settings.xml","default_settings.xml")
+        validate.config_file("settings.xml","default_settings.xml")
         self.filename = dir_struct["user"] + "settings.xml"
         temp_file = open(self.filename)
         txt = temp_file.read()
         temp_file.close()
 
-        self.xml_dom = self.xml.parseXml(txt)
+        self.xml_dom = xml.parseXml(txt)
 
         if self.xml_dom is None: self.rebuildSettings()
         self.xml_dom = self.xml_dom._get_documentElement()
 
     def rebuildSettings(self):
-        self.orpgLog.log("Settings file has be corrupted, rebuilding settings.", ORPG_INFO, True)
+        logger.info("Settings file has be corrupted, rebuilding settings.", True)
         try: os.remove(self.filename)
         except: pass
 
-        self.validate.config_file("settings.xml","default_settings.xml")
+        validate.config_file("settings.xml","default_settings.xml")
         temp_file = open(self.filename)
         txt = temp_file.read()
         temp_file.close()
-        self.xml_dom = self.xml.parseXml(txt)
+        self.xml_dom = xml.parseXml(txt)
 
-    def get_setting(self, name):
+    def get_setting(self, name): ##Depricated
+        return self.get(name)
+
+    def get(self, name): 
         try: return self.xml_dom.getElementsByTagName(name)[0].getAttribute("value")
         except: return 0
 
-    def get_setting_keys(self):
+    def get_setting_keys(self): ##Depricated
+        return self.get_keys()
+
+    def get_keys(self):
         keys = []
         tabs = self.xml_dom.getElementsByTagName("tab")
         for i in xrange(0, len(tabs)):
@@ -76,13 +82,19 @@ class orpgSettings:
                 for c in children: keys.append(c._get_tagName())
         return keys
 
-    def set_setting(self, name, value):
+    def set_setting(self, name, value): ##Depricated
+        self.change(name, value)
+
+    def change(self, name, value):
         self.xml_dom.getElementsByTagName(name)[0].setAttribute("value", value)
 
-    def add_setting(self, tab, setting, value, options, help):
+    def add_setting(self, tab, setting, value, options, help): ##Depricated
+        return self.add(tab, setting, value, options, help)
+
+    def add(self, tab, setting, value, options, help):
         if len(self.xml_dom.getElementsByTagName(setting)) > 0: return False
         tabs = self.xml_dom.getElementsByTagName("tab")
-        newsetting = self.xml.parseXml('<' + setting + ' value="' + value + '" options="' + 
+        newsetting = xml.parseXml('<' + setting + ' value="' + value + '" options="' + 
                                         options + '" help="' + help + '" />')._get_documentElement()
         for i in xrange(0, len(tabs)):
             if tabs[i].getAttribute("name") == tab and tabs[i].getAttribute("type") == 'grid':
@@ -94,7 +106,7 @@ class orpgSettings:
         tab_xml = '<tab '
         if tabtype == 'text': tab_xml += 'name="' + tabname + '" type="text" />'
         else: tab_xml += 'name="' + tabname + '" type="' + tabtype + '"></tab>'
-        newtab = self.xml.parseXml(tab_xml)._get_documentElement()
+        newtab = xml.parseXml(tab_xml)._get_documentElement()
         if parent != None:
             tabs = self.xml_dom.getElementsByTagName("tab")
             for i in xrange(0, len(tabs)):
@@ -117,7 +129,7 @@ class orpgSettings:
         temp_file = open(defaultFile)
         txt = temp_file.read()
         temp_file.close()
-        default_dom = self.xml.parseXml(txt)._get_documentElement()
+        default_dom = xml.parseXml(txt)._get_documentElement()
         for child in default_dom.getChildren():
             if child._get_tagName() == 'tab' and child.hasChildNodes(): self.proccessChildren(child)
         default_dom.unlink()
@@ -136,7 +148,7 @@ class orpgSettings:
 
     def save(self):
         temp_file = open(self.filename, "w")
-        temp_file.write(self.xml.toxml(self.xml_dom,1))
+        temp_file.write(xml.toxml(self.xml_dom,1))
         temp_file.close()
 
 class orpgSettingsWnd(wx.Dialog):
@@ -145,7 +157,6 @@ class orpgSettingsWnd(wx.Dialog):
                             wx.DefaultPosition,size = wx.Size(-1,-1), 
                             style=wx.RESIZE_BORDER | wx.SYSTEM_MENU | wx.CAPTION)
         self.Freeze()
-        self.validate = component.get("validate")
         self.settings = component.get("settings")
         self.chat = component.get("chat")
         self.changes = []
@@ -172,7 +183,7 @@ class orpgSettingsWnd(wx.Dialog):
         self.winsizer.SetDimension(0,0,w,h-25)
 
     def build_gui(self):
-        self.validate.config_file("settings.xml","default_settings.xml")
+        validate.config_file("settings.xml","default_settings.xml")
         filename = dir_struct["user"] + "settings.xml"
         temp_file = open(filename)
         temp_file.close()

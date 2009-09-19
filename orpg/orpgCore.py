@@ -73,10 +73,10 @@ class ORPGStorage(object):
 
     ###Grumpy to Ornery###
     def add_component(self, key, com):
-        self.add(self, key, com)
+        return self.add(key, com)
 
     def get_component(self, key):
-        self.get(self, key)
+        return self.get(key)
 
 def singleton(cls):
     instances = {}
@@ -90,4 +90,4 @@ ORPGStorage = singleton(ORPGStorage)
 component = ORPGStorage()
 
 ###Grumpy to Ornery###
-open_rpg = component
+open_rpg = ORPGStorage()

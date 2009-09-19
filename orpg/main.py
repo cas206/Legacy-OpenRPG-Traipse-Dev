@@ -738,6 +738,7 @@ class orpgFrame(wx.Frame):
         wndinfo.Name("Browse Server Window")
         wndinfo.Caption("Game Server")
         wndinfo.Float()
+        wndinfo.FloatingPosition((50,50))
         wndinfo.Dockable(False)
         wndinfo.MinSize(wx.Size(640,480))
         wndinfo.Hide()
