@@ -1854,6 +1854,7 @@ class chat_panel(wx.Panel):
         matches = reg.findall(s)
         for i in xrange(0,len(matches)):
             newstr = self.PraseUnknowns(matches[i])
+            newstr = self.ParseMathOrder(matches[i])
             qmode = 0
             newstr1 = newstr
             if newstr[0].lower() == 'q':
@@ -1884,6 +1885,20 @@ class chat_panel(wx.Panel):
             if newstr == '': newstr = '0'
             s = s.replace(matches[i][0], newstr, 1).replace(matches[i][1], '', 1).replace(matches[i][2], '', 1)
             dlg.Destroy()
+        return s
+
+    def ParseMathOrder(self, s):
+        ### Alpha ### New Code allows for Math Ordering with ()'s. Currently allows only pairs.
+        reg = re.compile("\(([^]]*?)\)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            node_math = self.ParseNode(matches[i])
+            do_math = list(str(node_math))
+            if do_math[1] == '+': math = int(do_math[0]) + int(do_math[2])
+            if do_math[1] == '-': math = int(do_math[0]) - int(do_math[2])
+            if do_math[1] == '*': math = int(do_math[0]) * int(do_math[2])
+            if do_math[1] == '/': math = int(do_math[0]) / int(do_math[2])
+            s = s.replace(matches[i], str(math)).replace('(', '').replace(')','')
         return s
 
     # This subroutine builds a chat display name.

@@ -25,7 +25,6 @@ class BasePluginsClass(object):
     def initBase(self):
         self._startPlugins()
 
-
     #Methods
     def _startPlugins(self):
         autoload = []
@@ -60,7 +59,6 @@ class BasePluginsClass(object):
         self._load(pluginData)
 
         #Write to the autoload file for this plugin
-
         self.__plugins[pluginName].Activated = True
         self.__plugins[pluginName].start()
 
@@ -68,13 +66,12 @@ class BasePluginsClass(object):
         if not self.__plugins.has_key(pluginName):
             #Print some error about invalid plugin
             return
-        pluginData = self.__plugins[pluginName]
 
+        pluginData = self.__plugins[pluginName]
         self.__plugins[pluginName].stop()
 
         #Unload it
         self._unload(pluginData)
-
         #Remove this plugin from the autoload file
 
     #Private Methods
@@ -84,7 +81,10 @@ class BasePluginsClass(object):
         return ('plugins.' + self.__ptype + '.' + s2[0], s2[0])
 
     def _unload(self, pluginData):
-        self.__plugins[pluginData.Name] = PluginData(pluginData.Name, pluginData.File, pluginData.Author, pluginData.Help)
+        self.__plugins[pluginData.Name] = PluginData(pluginData.Name, 
+                                                    pluginData.File, 
+                                                    pluginData.Author, 
+                                                    pluginData.Help)
         unload = []
         mod = self._findModule(pluginData.File)[0]
         for key, module in sys.modules.iteritems():
@@ -115,8 +115,6 @@ class BasePluginsClass(object):
 
     def _getType(self):
         return self.__ptype
-
-
     #Properties
     Plugins = property(_getPlugins, None)
     Type = property(_getType, None)
@@ -132,18 +130,15 @@ class ServerPluginsClass(BasePluginsClass):
     def preParseIncoming(self, xml_dom, data):
         sent = True
         errmsg = ""
-
         for pluginName, pluginData in self.Plugins.iteritems():
             if pluginData.Activated:
                 xml_dom, data = pluginData.preParseIncoming(xml_dom, data)
-
         return xml_dom, data
 
     def postParseIncoming(self, data):
         for pluginName, pluginData in self.Plugins.iteritems():
             if pluginData.Activated:
                 data = pluginData.postParseIncoming(data)
-
         return data
 
     def getPlayer(self):
@@ -152,7 +147,6 @@ class ServerPluginsClass(BasePluginsClass):
             if pluginData.Activated:
                 playerName = pluginData.addPlayer(data)
                 players.append(playerName)
-
         return players
 
     def setPlayer(self, playerData):
@@ -161,7 +155,6 @@ class ServerPluginsClass(BasePluginsClass):
             if pluginData.Activated:
                 playerName = pluginData.addPlayer(data)
                 players.append(playerName)
-
         return
 
     def preParseOutgoing(self):
@@ -171,7 +164,6 @@ class ServerPluginsClass(BasePluginsClass):
                 xml = pluginData.preParseOutgoing()
                 for msg in xml:
                     data.append(msg)
-
         return data
 
     def postParseOutgoing(self):
@@ -181,7 +173,6 @@ class ServerPluginsClass(BasePluginsClass):
                 xml = pluginData.postParseOutgoing()
                 for msg in xml:
                     data.append(msg)
-
         return data
 
 __key = _SingletonKey()

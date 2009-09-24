@@ -277,8 +277,20 @@ class orpgFrame(wx.Frame):
         ### component.get('frame').TraipseSuiteWarn('item') ### Portable
         self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
         if menuitem == 'debug':
-            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+            if self.debugger.IsShown() == True:
+                self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+            else:
+                self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+                self.traipseSuite.RemoveItem(self.debugConsole)
+                self.traipseSuite.AppendItem(self.debugConsole)
+
+    def TraipseSuiteWarnCleanup(self, menuitem):
+        ### Beta ### Allows for portable cleanup of the 'Attention' menu.
+        ### component.get('frame').TraipseSuiteWarnCleanup('item') ### Portable
+        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+        if menuitem == 'debug':
             self.traipseSuite.RemoveItem(self.debugConsole)
+            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
             self.traipseSuite.AppendItem(self.debugConsole)
        
 
@@ -483,12 +495,7 @@ class orpgFrame(wx.Frame):
 
     @debugging
     def OnMB_DebugConsole(self, evt):
-        ## Alpha ##
-        self.traipseSuite.RemoveItem(self.debugConsole)
-        self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
-        self.traipseSuite.AppendItem(self.debugConsole)
-        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
-        ###########
+        self.TraipseSuiteWarnCleanup('debug') ### Beta ###
         if self.debugger.IsShown() == True: self.debugger.Hide()
         else: self.debugger.Show()
 
@@ -607,12 +614,12 @@ class orpgFrame(wx.Frame):
     @debugging
     def OnMB_HelpOnlineUserGuide(self):
         wb = webbrowser.get()
-        wb.open("https://www.assembla.com/wiki/show/traipse/User_Manual")
+        wb.open("http://www.assembla.com/wiki/show/traipse/User_Manual")
 
     @debugging
     def OnMB_HelpChangeLog(self):
         wb = webbrowser.get()
-        wb.open("http://www.assembla.com/spaces/milestones/index/traipse_dev?spaces_tool_id=Milestones")
+        wb.open("http://www.assembla.com/spaces/milestones/index/traipse?spaces_tool_id=Milestones")
 
     @debugging
     def OnMB_HelpReportaBug(self):
