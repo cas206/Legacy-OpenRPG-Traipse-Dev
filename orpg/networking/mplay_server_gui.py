@@ -20,8 +20,9 @@ from orpg.orpg_wx import *
 import webbrowser
 from threading import Thread
 from meta_server_lib import post_server_data, remove_server
-from mplay_server import mplay_server
+from mplay_server import mplay_server, server
 from xml.dom import minidom
+from orpg.orpgCore import component
 
 # Constants ######################################
 SERVER_RUNNING = 1
@@ -42,6 +43,8 @@ MENU_MODIFY_BANLIST = wx.NewId()
 MENU_PLAYER_BOOT = wx.NewId()
 ### Alpha ###
 MENU_ADMIN_BAN = wx.NewId()
+MENU_BAN_LIST = wx.NewId()
+MENU_ADMIN_UNBAN = wx.NewId()
 #############
 MENU_PLAYER_CREATE_ROOM = wx.NewId()
 MENU_PLAYER_SEND_MESSAGE = wx.NewId()
@@ -98,17 +101,6 @@ class ServerConfig:
         port = configDom.childNodes[0].childNodes[1].getAttribute('port')
         OPENRPG_PORT = 6774 if port == '' else int(port) #Pretty ugly, but I couldn't find the tag any other way.
         self.owner = owner
-
-        ### Early Alpha ### This is prep for the Modify Ban List Dialog, just working out the details.
-        validate.config_file("ban_list.xml", "default_ban_list.xml" ) 
-        configDom = minidom.parse(dir_struct["user"] + 'ban_list.xml')
-        ban_dict = {}
-        for element in configDom.getElementsByTagName('banned'):
-            player = element.getAttribute('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
-            playerIP = element.getAttribute('ip')
-            ban_dict[player] = playerIP
-        print ban_dict
-        ###################
 
     def load_xml(self, xml):
         """ Load configuration from XML data.
@@ -346,6 +338,11 @@ class ServerGUI(wx.Frame):
         self.build_body()
         self.build_status()
 
+        ### Alpha ###
+        # Ban List Dialog
+        self.BanListDialog = BanListDialog(self)
+        #############
+
         # Server Callbacks
         cb = {}
         cb["log"]        = self.Log
@@ -394,6 +391,8 @@ class ServerGUI(wx.Frame):
 
         # Server Configuration Menu
         menu = wx.Menu()
+        menu.Append( MENU_BAN_LIST, 'Ban List', 'Modify Ban List.' )
+        self.Bind(wx.EVT_MENU, self.ModifyBanList, id=MENU_BAN_LIST)
         menu.Append( MENU_START_PING_PLAYERS, 'Start Ping', 'Ping players to validate remote connection.' )
         self.Bind(wx.EVT_MENU, self.PingPlayers, id=MENU_START_PING_PLAYERS)
         menu.Append( MENU_STOP_PING_PLAYERS, 'Stop Ping', 'Stop validating player connections.' )
@@ -591,6 +590,12 @@ class ServerGUI(wx.Frame):
         self.SetTitle(__appname__ + "- (running) - (unregistered)")
         wx.EndBusyCursor()
 
+    ### Alpha ###
+    def ModifyBanList(self, event):
+        if self.BanListDialog.IsShown() == True: self.BanListDialog.Hide()
+        else: self.BanListDialog.Show()
+    #############
+
     def PingPlayers( self, event = None ):
         "Ping all players that are connected at a periodic interval, detecting dropped connections."
         wx.BeginBusyCursor()
@@ -606,7 +611,78 @@ class ServerGUI(wx.Frame):
     def OnExit(self, event = None):
         """ Quit the program. """
         self.OnStop()
+        self.BanListDialog.Destroy() ### Alpha ###
         wx.CallAfter(self.Destroy)
+
+### Alpha ###
+class BanListDialog(wx.Frame):
+    def __init__(self, parent):
+        super(BanListDialog, self).__init__(parent, -1, "Ban List")
+        icon = wx.Icon(dir_struct["icon"]+'noplayer.gif', wx.BITMAP_TYPE_GIF)
+        self.SetIcon( icon )
+        self.BanList = wx.ListCtrl(self, wx.ID_ANY, style=wx.LC_SINGLE_SEL|wx.LC_REPORT|wx.LC_HRULES)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.BanList, 1, wx.EXPAND)
+        self.BuildList()
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        self.SetSize((300, 175))
+        self.Bind(wx.EVT_CLOSE, self.Min) 
+        self.Min(None)
+
+        # Ban List Dialog Pop Up Menu, more can be added
+        self.menu = wx.Menu()
+        self.menu.SetTitle( "Modify Ban List" )
+        self.menu.Append( MENU_ADMIN_UNBAN, "Un-Ban Player" )
+
+        # Even Association
+        self.BanList.Bind(wx.EVT_RIGHT_DOWN, self.BanPopupMenu)
+        self.Bind(wx.EVT_MENU, self.BanPopupMenuItem, id=MENU_ADMIN_UNBAN)
+
+    # When we right click, cause our popup menu to appear
+    def BanPopupMenu( self, event ):
+        pos = wx.Point( event.GetX(), event.GetY() )
+        (item, flag) = self.BanList.HitTest( pos )
+        if item > -1:
+            self.selectedItem = item
+            self.PopupMenu( self.menu, pos )
+
+    def BanPopupMenuItem( self, event):
+        menuItem = event.GetId()
+        player = str(self.BanList.GetItemData(self.selectedItem))
+        playerIP = str(self.BanList.GetItem((int(player)), 1).GetText())
+        if menuItem == MENU_ADMIN_UNBAN:
+            server.admin_unban(playerIP)
+            self.BanList.DeleteItem(self.BanList.GetItemData(self.selectedItem))
+            self.BanList.Refresh()   
+
+    def BuildList(self):
+        # Build Dialog Columns
+        self.BanList.ClearAll()
+        self.BanList.InsertColumn(0, "User Name")
+        self.BanList.InsertColumn(1, "IP")
+
+        validate.config_file("ban_list.xml", "default_ban_list.xml" ) 
+        configDom = minidom.parse(dir_struct["user"] + 'ban_list.xml')
+        ban_dict = {}
+        for element in configDom.getElementsByTagName('banned'):
+            player = element.getAttribute('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+            playerIP = element.getAttribute('ip')
+            ban_dict[player] = playerIP
+        for key in ban_dict:
+            i = self.BanList.InsertImageStringItem( 0, key, 0 )
+            self.BanList.SetStringItem(i, 1, ban_dict[key])
+            self.BanList.RefreshItem(i)
+        self.AutoAdjust()
+
+    def AutoAdjust(self):
+        self.BanList.SetColumnWidth(0, -1)
+        self.BanList.SetColumnWidth(1, -1)
+        self.BanList.Refresh()
+
+    def Min(self, evt):
+        self.Hide()
+###############
 
 class ServerGUIApp(wx.App):
     def OnInit(self):

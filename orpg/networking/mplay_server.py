@@ -2080,8 +2080,22 @@ class mplay_server:
             traceback.print_exc()
             self.log_msg('Exception in admin_kick() ' + str(e))
 
+    ### Alpha ### Addition added to assist in Un Banning users.
+    def admin_build_banlist(self):
+        validate.config_file("ban_list.xml", "default_ban_list.xml" ) 
+        configDom = minidom.parse(dir_struct["user"] + 'ban_list.xml')
+        self.ban_list = {}
+        for element in configDom.getElementsByTagName('banned'):
+            player = element.getAttribute('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+            ip = element.getAttribute('ip')
+            self.ban_list[ip] = {}
+            self.ban_list[ip]['ip'] = ip
+            self.ban_list[ip]['name'] = element.getAttribute('name')
+    ################
+
     def admin_banip(self, ip, name="", silent = 0):
         "Ban a player from a server from the console"
+        self.adming_buile_banlist() ### Alpha ###
         try:
             self.ban_list[ip] = {}
             self.ban_list[ip]['ip'] = ip
@@ -2125,6 +2139,7 @@ class mplay_server:
             self.log_msg('Exception in admin_ban() ' + str(e))
 
     def admin_unban(self, ip):
+        self.admin_build_banlist()
         try:
             if self.ban_list.has_key(ip): del self.ban_list[ip]
             self.saveBanList()
@@ -2571,3 +2586,5 @@ class mplay_server:
         except Exception, e: self.log_msg(str(e))
         self.p_lock.release()
         return pl
+
+server = mplay_server()
