@@ -78,12 +78,10 @@ class ImageHandlerClass(object):
                 self.__cache[path] = (path, d[0], d[1].gettype(), None)
                 return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
             else:
-                logger.general("Image refused to load or URI did not reference a valid image: " + path)
-                component.get('chat').InfoPost("<font color='#FF0000'>Image refused to load or URI did not reference a valid image: " + path + "</font>")
+                logger.exception(str("Image refused to load or URI did not reference a valid image: " + path), True)
                 return None
         except IOError:
-            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
-            component.get('chat').InfoPost("<font color='#FF0000'>Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
+            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
             return None
 
     def cleanCache(self):
@@ -115,37 +113,32 @@ class ImageHandlerClass(object):
             if d[0] and d[1].getmaintype() == "image":
                 self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
                 self.__queue.put((self.__cache[path], image_type, imageId))
-                if self.__fetching.has_key(path): self.__fetching[path] = False #Fix for failed multi-load?
+                if self.__fetching.has_key(path): del self.__fetching[path]
             else:
-                logger.general("Image refused to load or URI did not reference a valid image: " + path)
-                component.get('chat').InfoPost("<font color='#FF0000'>Image refused to load or URI did not reference a valid image: " + path +"</font>")
+                logger.exception(str("Image refused to load or URI did not reference a valid image: " + path), True)
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
-            component.get('chat').InfoPost("<font color='#FF0000'> Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
+            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
         finally: self.__lock.release()
 
     def __loadCacheThread(self, path, image_type, imageId):
-        if self.__cache.has_key(path):
-            try:
-                st = time.time()
-                while self.__fetching.has_key(path) and self.__fetching[path] is not False:
-                    time.sleep(0.025)
-                    if (time.time()-st) > 120:
-                        logger.general("Timeout: " + path)
-                        break
-            except:
-                del self.__fetching[path]
-                logger.general("Unable to resolve/open the specified URI; image was NOT loaded: " + path)
-                component.get('chat').InfoPost("<font color='#FF0000'>Unable to resolve/open the specified URI; image was NOT loaded: " + path + "</font>")
-                return 
-            self.__lock.acquire()
-            try:
-                logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
-                component.debug('chat').InfoPost("<font color='#FF0000'>Adding Image to Queue from Cache: " + str(self.__cache[path]) + "</font>")
-                self.__queue.put((self.__cache[path], image_type, imageId))
-            finally: self.__lock.release()
+        try:
+            st = time.time()
+            while self.__fetching.has_key(path) and self.__fetching[path] is not False:
+                time.sleep(0.025)
+                if (time.time()-st) > 120:
+                    logger.general("Timeout: " + path)
+                    break
+        except:
+            del self.__fetching[path]
+            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
+            return 
+        self.__lock.acquire()
+        try:
+            logger.info("Adding Image to Queue from Cache: " + str(self.__cache[path]), True)
+            self.__queue.put((self.__cache[path], image_type, imageId))
+        finally: self.__lock.release()
 
     """Property Methods"""
     def _getCache(self):
