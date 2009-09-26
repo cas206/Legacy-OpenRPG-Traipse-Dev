@@ -277,8 +277,20 @@ class orpgFrame(wx.Frame):
         ### component.get('frame').TraipseSuiteWarn('item') ### Portable
         self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
         if menuitem == 'debug':
-            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+            if self.debugger.IsShown() == True:
+                self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+            else:
+                self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+                self.traipseSuite.RemoveItem(self.debugConsole)
+                self.traipseSuite.AppendItem(self.debugConsole)
+
+    def TraipseSuiteWarnCleanup(self, menuitem):
+        ### Beta ### Allows for portable cleanup of the 'Attention' menu.
+        ### component.get('frame').TraipseSuiteWarnCleanup('item') ### Portable
+        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+        if menuitem == 'debug':
             self.traipseSuite.RemoveItem(self.debugConsole)
+            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
             self.traipseSuite.AppendItem(self.debugConsole)
        
 
@@ -483,12 +495,7 @@ class orpgFrame(wx.Frame):
 
     @debugging
     def OnMB_DebugConsole(self, evt):
-        ## Alpha ##
-        self.traipseSuite.RemoveItem(self.debugConsole)
-        self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
-        self.traipseSuite.AppendItem(self.debugConsole)
-        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
-        ###########
+        self.TraipseSuiteWarnCleanup('debug') ### Beta ###
         if self.debugger.IsShown() == True: self.debugger.Hide()
         else: self.debugger.Show()
 
@@ -572,47 +579,18 @@ class orpgFrame(wx.Frame):
     #Help Menu #Needs a custom Dialog because it is ugly on Windows
     @debugging
     def OnMB_HelpAbout(self):
-
-        description = "OpenRPG is a Virtual Game Table that allows users to connect via a network and play table\n"
-        description += "top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb \n"
-        description += "functionality.  OpenRPG is originally designed by Chris Davis. \n"
-
-        license = "OpenRPG is free software; you can redistribute it and/or modify it "
-        license += "under the terms of the GNU General Public License as published by the Free Software Foundation; \n"
-        license += "either version 2 of the License, or (at your option) any later version.\n\n"
-        license += "OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; \n"
-        license += "without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  \n"
-        license += "See the GNU General Public License for more details. You should have received a copy of \n"
-        license += "the GNU General Public License along with Traipse 'OpenRPG'; if not, write to \n"
-        license += "the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n\n"
-        license += "'Traipse' and the 'Traipse' Logo are trademarks of Mad Mathematics Laboratories."
-
-        info = wx.AboutDialogInfo()
-        info.SetIcon(wx.Icon(dir_struct["icon"]+'splash.gif', wx.BITMAP_TYPE_GIF))
-        info.SetName('Traipse')
-        info.SetVersion('OpenRPG ' + VERSION)
-        info.SetDescription(description)
-        info.SetCopyright('(C) Copyright 2009 Mad Math Labs')
-        info.SetWebSite('http://www.openrpg.com')
-        info.SetLicence(license)
-        orpg_devs = ['Thomas Baleno', 'Andrew Bennett', 'Lex Berezhny', 'Ted Berg',
-		'Bernhard Bergbauer', 'Chris Blocher', 'David Byron', 'Ben Collins-Sussman', 'Robin Cook', 'Greg Copeland',
-		'Chris Davis', 'Michael Edwards', 'Andrew Ettinger', 'Todd Faris', 'Dj Gilcrease',
-        'Christopher Hickman', 'Paul Hosking', 'Brian Manning', 'Scott Mackay', 'Jesse McConnell', 
-		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain']
-        for dev in orpg_devs:
-            info.AddDeveloper(dev)
-        wx.AboutBox(info)
+        if self.AboutORPG.IsShown() == True: self.AboutORPG.Hide()
+        else: self.AboutORPG.Show()
 
     @debugging
     def OnMB_HelpOnlineUserGuide(self):
         wb = webbrowser.get()
-        wb.open("https://www.assembla.com/wiki/show/traipse/User_Manual")
+        wb.open("http://www.assembla.com/wiki/show/traipse/User_Manual")
 
     @debugging
     def OnMB_HelpChangeLog(self):
         wb = webbrowser.get()
-        wb.open("http://www.assembla.com/spaces/milestones/index/traipse_dev?spaces_tool_id=Milestones")
+        wb.open("http://www.assembla.com/spaces/milestones/index/traipse?spaces_tool_id=Milestones")
 
     @debugging
     def OnMB_HelpReportaBug(self):
@@ -644,6 +622,9 @@ class orpgFrame(wx.Frame):
         self.windowsmenu = wx.Menu()
         self.mainwindows = {}
 
+        # About Window
+        self.AboutORPG = AboutORPG(self)
+
         #Plugins Window
         self.pluginsFrame = pluginUI.PluginFrame(self)
         component.add("plugins", self.get_activeplugins())
@@ -657,7 +638,7 @@ class orpgFrame(wx.Frame):
         self.SetDimensions(posx, posy, w, h)
         logger.debug("Dimensions Set")
 
-        #Update Manager
+        # Update Manager
         self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
             "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
@@ -670,8 +651,7 @@ class orpgFrame(wx.Frame):
         self.SetDimensions(posx, posy, w, h)
         logger.debug("Dimensions Set")
 
-        #Update Manager
-        self.manifest = manifest.ManifestChanges()
+        # Debug Console
         self.debugger = orpg.tools.orpg_log.DebugConsole(self)
         logger.debug("Menu Created")
         h = int(xml_dom.getAttribute("height"))
@@ -1165,6 +1145,58 @@ class orpgFrame(wx.Frame):
         except Exception:
             pass
 
+########################################
+## About Dialog class
+########################################
+class AboutORPG(wx.Frame):
+    def __init__(self, parent):
+        super(AboutORPG, self).__init__(parent, -1, "About 'Traipse' OpenRPG")
+        icon = None
+        icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
+        self.SetIcon( icon )
+        sizer = wx.GridBagSizer(hgap=1, vgap=1)
+        height = 425; width = 350
+        self.About = wx.TextCtrl(self, -1, size=wx.DefaultSize, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        img = wx.Image(dir_struct['icon']+'splash.gif', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        image = wx.StaticBitmap(self, -1, img, size=wx.DefaultSize)
+        sizer.Add(image, (0,0), flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ADJUST_MINSIZE)
+        sizer.Add(self.About, (1,0), flag=wx.EXPAND)
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        self.SetSize((width, height))
+        sizer.AddGrowableCol(0)
+        sizer.AddGrowableCol(1)
+        sizer.AddGrowableRow(1)
+        self.Bind(wx.EVT_CLOSE, self.Min) 
+        self.Min(None)
+
+        description = "OpenRPG is a Virtual Game Table that allows users to connect via a network and play table "
+        description += "top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb "
+        description += "functionality.  OpenRPG is originally designed by Chris Davis."
+
+        license = "OpenRPG is free software; you can redistribute it and/or modify it "
+        license += "under the terms of the GNU General Public License as published by the Free Software Foundation; "
+        license += "either version 2 of the License, or (at your option) any later version.\n\n"
+        license += "OpenRPG and Traipse 'OpenRPG' is distributed in the hope that it will be useful, but WITHOUT ANY "
+        license += "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. "
+        license += "See the GNU General Public License for more details. You should have received a copy of "
+        license += "the GNU General Public License along with Traipse 'OpenRPG'; if not, write to "
+        license += "the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA \n\n"
+        license += "'Traipse' and the 'Traipse' Logo are trademarks of Mad Mathematics Laboratories."
+
+        self.About.AppendText(description+'\n\n')
+        self.About.AppendText(license+'\n\n')
+        self.About.AppendText('OpenRPG Developers:\n')
+        orpg_devs = ['Thomas Baleno', 'Andrew Bennett', 'Lex Berezhny', 'Ted Berg',
+		'Bernhard Bergbauer', 'Chris Blocher', 'David Byron', 'Ben Collins-Sussman', 'Robin Cook', 'Greg Copeland',
+		'Chris Davis', 'Michael Edwards', 'Andrew Ettinger', 'Todd Faris', 'Dj Gilcrease',
+        'Christopher Hickman', 'Paul Hosking', 'Brian Manning', 'Scott Mackay', 'Jesse McConnell', 
+		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain']
+        for dev in orpg_devs:
+            self.About.AppendText(dev+'\n')
+
+    def Min(self, evt):
+        self.Hide()
 
 ########################################
 ## Application class

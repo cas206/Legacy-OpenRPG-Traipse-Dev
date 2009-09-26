@@ -1,7 +1,9 @@
 from orpg.mapper.map_msg import *
 
 class game_group:
-    def __init__( self, id, name, pwd, desc="", boot_pwd="", minVersion="", mapFile=None, messageFile=None, persist =0 ):
+    def __init__( self, id, name, pwd, desc="", 
+                    boot_pwd="", minVersion="", 
+                    mapFile=None, messageFile=None, persist=0 ):
         self.id = id
         self.name = name
         self.desc = desc
@@ -33,8 +35,7 @@ class game_group:
         self.players.append(id)
 
     def remove_player(self,id):
-        if self.voice.has_key(id):
-            del self.voice[id]
+        if self.voice.has_key(id): del self.voice[id]
         self.players.remove(id)
 
     def get_num_players(self):
@@ -44,7 +45,6 @@ class game_group:
     def get_player_ids(self):
         tmp = self.players
         return tmp
-
 
     def check_pwd(self,pwd):
         return (pwd==self.pwd)
@@ -61,13 +61,10 @@ class game_group:
             w=max(len(minVersion[i]),len(version[i]))
             v1=minVersion[i].rjust(w);
             v2=version[i].rjust(w);
-            if v1<v2:
-                return 1
-            if v1>v2:
-                return 0
+            if v1<v2: return 1
+            if v1>v2: return 0
 
-        if len(minVersion)>len(version):
-            return 0
+        if len(minVersion)>len(version): return 0
         return 1
 
     #depreciated - see send_group_list()

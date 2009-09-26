@@ -82,7 +82,7 @@ class roller_manager:
     #  Use this to convert ndm-style (3d6) dice to d_base format
     
     def convertTheDieString(self,s):
-        reg = re.compile("\d+\s*[a-zA-Z]+\s*[\dFf]+")
+        reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[\dFf]+")
         (result, num_matches) = reg.subn(self.stdDieToDClass, s)
         if num_matches == 0 or result is None:
             try:
