@@ -100,9 +100,10 @@ class game_server_panel(wx.Panel):
         self.texts = {}
         self.svrList = []
         self.build_ctrls()
+        self.bookmarks()
         self.refresh_server_list()
 	self.refresh_room_list()
-        self.build_bookmarks() ## Not yet implemented
+        self.build_bookmark_menu() ## Not yet implemented
         #self.refresh_server_list()
         #self.refresh_room_list()
 
@@ -232,15 +233,17 @@ class game_server_panel(wx.Panel):
         img = wx.Image(dir_struct["icon"]+"star.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
         self._imageList.Add( img )
         self.server_list.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
-
-    def build_bookmarks(self):
-        gsm = self.frame.mainmenu.GetMenu(
-            self.frame.mainmenu.FindMenu('Game Server'))
-        self.bookmarks_menu = wx.Menu()
+        
+    def bookmarks(self):
         validate.config_file('server_bookmarks.xml',
                              'default_server_bookmarks.xml')
         self.bookmarks = ElementTree()
         self.bookmarks.parse(dir_struct['user'] + 'server_bookmarks.xml')
+
+    def build_bookmark_menu(self):
+        gsm = self.frame.mainmenu.GetMenu(
+            self.frame.mainmenu.FindMenu('Game Server'))
+        self.bookmarks_menu = wx.Menu()
         x = 0
         for server in self.bookmarks.findall('server'):
             for svr in self.svrList:
@@ -259,10 +262,10 @@ class game_server_panel(wx.Panel):
         id = evt.GetId()
         menu = self.bookmarks_menu.FindItemById(id)
         for server in self.bookmarks.findall('server'):
-            if server.name == menu.GetLabel():
-                address = server.addy
+            if server.get('name') == menu.GetLabel():
+                address = server.get('address')
                 self.cur_server_index = 999
-                self.name = server.name
+                self.name = server.get('name')
                 if self.session.is_connected():
                     if self.session.host_server == address : return
                     else: self.frame.kill_mplay_session()
@@ -522,6 +525,8 @@ class game_server_panel(wx.Panel):
                     name = n.name
                     players = n.user
                     self.server_list.InsertImageStringItem(i, '', 0)
+                    for server in self.bookmarks.findall('server'):
+                        if server.get('name') == name: self.server_list.SetItemImage(i, 1)
                     self.server_list.SetStringItem(i,1,players)
                     self.server_list.SetStringItem(i,2,name)
                     r,g,b = hex.rgb_tuple(color1)
@@ -562,14 +567,7 @@ class game_server_panel(wx.Panel):
         except Exception, e:
             print "Server List not available."
             traceback.print_exc()
-        x = 0
-        try: ### Alpha ###
-            for server in self.bookmarks.findall('server'):
-                for svr in self.svrList:
-                    name = svr.name
-                    if server.get('name') == name: self.server_list.SetItemImage(x, 1)
-                    x += 1
-        except: pass
+
                 
     def failed_connection(self):
         if(self.cur_server_index >= 0):
