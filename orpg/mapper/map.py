@@ -108,6 +108,15 @@ class MapCanvas(wx.ScrolledWindow):
         # miniatures drag
         self.drag = None
 
+        #self.Bind(wx.EVT_MOUSEWHEEL, self.MouseWheel)
+
+    def MouseWheel(self, evt):
+        if evt.CmdDown():
+            print evt.GetWheelRotation()
+            if evt.GetWheelRotation() > 0: self.on_zoom_in(None)
+            elif evt.GetWheelRotation() < 0: self.on_zoom_out(None)
+            else: pass
+
     def better_refresh(self, event=None):
         self.Refresh(True)
 
@@ -118,41 +127,41 @@ class MapCanvas(wx.ScrolledWindow):
         self.session = component.get("session")
         if self.session.my_role() == self.session.ROLE_LURKER or (str(self.session.group_id) == '0' and str(self.session.status) == '1'):
             cidx = self.parent.get_tab_index("Background")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
             cidx = self.parent.get_tab_index("Grid")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
             cidx = self.parent.get_tab_index("Miniatures")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
             cidx = self.parent.get_tab_index("Whiteboard")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
             cidx = self.parent.get_tab_index("Fog")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
             cidx = self.parent.get_tab_index("General")
-            self.parent.layer_tabs.EnableTab(cidx, False)
+            self.parent.tabs.EnableTab(cidx, False)
         else:
             cidx = self.parent.get_tab_index("Background")
-            if not self.parent.layer_tabs.GetEnabled(cidx):
+            if not self.parent.tabs.GetEnabled(cidx):
                 cidx = self.parent.get_tab_index("Miniatures")
-                self.parent.layer_tabs.EnableTab(cidx, True)
+                self.parent.tabs.EnableTab(cidx, True)
                 cidx = self.parent.get_tab_index("Whiteboard")
-                self.parent.layer_tabs.EnableTab(cidx, True)
+                self.parent.tabs.EnableTab(cidx, True)
                 cidx = self.parent.get_tab_index("Background")
-                self.parent.layer_tabs.EnableTab(cidx, False)
+                self.parent.tabs.EnableTab(cidx, False)
                 cidx = self.parent.get_tab_index("Grid")
-                self.parent.layer_tabs.EnableTab(cidx, False)
+                self.parent.tabs.EnableTab(cidx, False)
                 cidx = self.parent.get_tab_index("Fog")
-                self.parent.layer_tabs.EnableTab(cidx, False)
+                self.parent.tabs.EnableTab(cidx, False)
                 cidx = self.parent.get_tab_index("General")
-                self.parent.layer_tabs.EnableTab(cidx, False)
+                self.parent.tabs.EnableTab(cidx, False)
                 if self.session.my_role() == self.session.ROLE_GM:
                     cidx = self.parent.get_tab_index("Background")
-                    self.parent.layer_tabs.EnableTab(cidx, True)
+                    self.parent.tabs.EnableTab(cidx, True)
                     cidx = self.parent.get_tab_index("Grid")
-                    self.parent.layer_tabs.EnableTab(cidx, True)
+                    self.parent.tabs.EnableTab(cidx, True)
                     cidx = self.parent.get_tab_index("Fog")
-                    self.parent.layer_tabs.EnableTab(cidx, True)
+                    self.parent.tabs.EnableTab(cidx, True)
                     cidx = self.parent.get_tab_index("General")
-                    self.parent.layer_tabs.EnableTab(cidx, True)
+                    self.parent.tabs.EnableTab(cidx, True)
         if not self.cacheSizeSet:
             self.cacheSizeSet = True
             cacheSize = component.get('settings').get_setting("ImageCacheSize")
@@ -172,7 +181,6 @@ class MapCanvas(wx.ScrolledWindow):
             except: pass
             # Flag that we now need to refresh!
             self.requireRefresh += 1
-
             """ Randomly purge an item from the cache, while this is lamo, it does
                 keep the cache from growing without bounds, which is pretty important!"""
             if len(ImageHandler.Cache) >= self.cacheSize:
@@ -191,6 +199,7 @@ class MapCanvas(wx.ScrolledWindow):
             else: self.lastRefreshValue = self.requireRefresh
 
     def on_scroll(self, evt):
+        print 'scrolling'
         if self.drag: self.drag.Hide()
         if component.get('settings').get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
@@ -721,29 +730,34 @@ class map_wnd(wx.Panel):
         self.top_frame = component.get('frame')
         self.root_dir = os.getcwd()
         self.current_layer = 2
-        self.layer_tabs = orpgTabberWnd(self, style=FNB.FNB_NO_X_BUTTON|FNB.FNB_BOTTOM|FNB.FNB_NO_NAV_BUTTONS)
-        self.layer_handlers = []
-        self.layer_handlers.append(background_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[0],"Background")
-        self.layer_handlers.append(grid_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[1],"Grid")
-        self.layer_handlers.append(miniatures_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[2],"Miniatures", True)
-        self.layer_handlers.append(whiteboard_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[3],"Whiteboard")
-        self.layer_handlers.append(fog_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[4],"Fog")
-        self.layer_handlers.append(map_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[5],"General")
-        self.layer_tabs.SetSelection(2)
+        self.tabs = orpgTabberWnd(self, style=FNB.FNB_NO_X_BUTTON|FNB.FNB_BOTTOM|FNB.FNB_NO_NAV_BUTTONS)
+        self.handlers = {}
+        self.handlers[0]=(background_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[0],"Background")
+        self.handlers[1]=(grid_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[1],"Grid")
+        self.handlers[2]=(miniatures_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[2],"Miniatures", True)
+        self.handlers[3]=(whiteboard_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[3],"Whiteboard")
+        self.handlers[4]=(fog_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[4],"Fog")
+        self.handlers[5]=(map_handler(self.tabs,-1,self.canvas))
+        self.tabs.AddPage(self.handlers[5],"General")
+        self.tabs.SetSelection(2)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, 1, wx.EXPAND)
-        self.sizer.Add(self.layer_tabs, 0, wx.EXPAND)
+        self.sizer.Add(self.tabs, 0, wx.EXPAND)
         self.SetSizer(self.sizer)
         self.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.on_layer_change)
         #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeave)
         self.load_default()
+
+        ## Components for making Map Based plugins that create new tabs.
+        component.add('map_tabs', self.tabs)
+        component.add('map_layers', self.handlers)
+        component.add('map_wnd', self)
 
     def OnLeave(self, evt):
         if "__WXGTK__" in wx.PlatformInfo: wx.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
@@ -798,41 +812,41 @@ class map_wnd(wx.Panel):
         os.chdir(self.root_dir)
 
     def get_current_layer_handler(self):
-        return self.layer_handlers[self.current_layer]
+        return self.handlers[self.current_layer]
 
     def get_tab_index(self, layer):
         """Return the index of a chatpanel in the wxNotebook."""
-        for i in xrange(self.layer_tabs.GetPageCount()):
-            if (self.layer_tabs.GetPageText(i) == layer):
+        for i in xrange(self.tabs.GetPageCount()):
+            if (self.tabs.GetPageText(i) == layer):
                 return i
         return 0
 
     def on_layer_change(self, evt):
-        layer = self.layer_tabs.GetPage(evt.GetSelection())
-        for i in xrange(0, len(self.layer_handlers)):
-            if layer == self.layer_handlers[i]: self.current_layer = i
+        layer = self.tabs.GetPage(evt.GetSelection())
+        for i in xrange(0, len(self.handlers)):
+            if layer == self.handlers[i]: self.current_layer = i
         if self.current_layer == 0:
-            bg = self.layer_handlers[0]
+            bg = self.handlers[0]
             if (self.session.my_role() != self.session.ROLE_GM): bg.url_path.Show(False)
             else: bg.url_path.Show(True)
         self.canvas.Refresh(False)
         evt.Skip()
 
     def on_left_down(self, evt):
-        self.layer_handlers[self.current_layer].on_left_down(evt)
+        self.handlers[self.current_layer].on_left_down(evt)
 
     #double click handler added by Snowdog 5/03
     def on_left_dclick(self, evt):
-        self.layer_handlers[self.current_layer].on_left_dclick(evt)
+        self.handlers[self.current_layer].on_left_dclick(evt)
 
     def on_right_down(self, evt):
-        self.layer_handlers[self.current_layer].on_right_down(evt)
+        self.handlers[self.current_layer].on_right_down(evt)
 
     def on_left_up(self, evt):
-        self.layer_handlers[self.current_layer].on_left_up(evt)
+        self.handlers[self.current_layer].on_left_up(evt)
 
     def on_motion(self, evt):
-        self.layer_handlers[self.current_layer].on_motion(evt)
+        self.handlers[self.current_layer].on_motion(evt)
 
     def MapBar(self, id, data):
         self.canvas.MAP_MODE = data
@@ -849,8 +863,8 @@ class map_wnd(wx.Panel):
         except: pass
 
     def update_tools(self):
-        for h in self.layer_handlers:
-            h.update_info()
+        for h in self.handlers:
+            self.handlers[h].update_info()
 
     def on_hk_map_layer(self, evt):
         id = self.top_frame.mainmenu.GetHelpString(evt.GetId())
@@ -860,7 +874,7 @@ class map_wnd(wx.Panel):
         elif id == "Whiteboard Layer": self.current_layer = self.get_tab_index("Whiteboard")
         elif id == "Fog Layer": self.current_layer = self.get_tab_index("Fog")
         elif id == "General Properties": self.current_layer = self.get_tab_index("General")
-        self.layer_tabs.SetSelection(self.current_layer)
+        self.tabs.SetSelection(self.current_layer)
 
     def on_flush_cache(self, evt):
         ImageHandler.flushCache()
