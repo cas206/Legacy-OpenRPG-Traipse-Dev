@@ -1274,6 +1274,7 @@ class mplay_server:
                 open_msg.close()
 
             # Send the server's lobby message to the client no matter what
+            lobbyMsg = '<chat type="1" version="1.0">'+lobbyMsg+'</chat>' ### Alpha, should fix deprecated modules in Main's on_receive
             self.sendMsg(socket, "<msg to='" + player_id + "' from='0' group_id='0' />" + lobbyMsg, 
                         self.players[player_id].useCompression, self.players[player_id].compressionType)
             if self.sendLobbySound:
