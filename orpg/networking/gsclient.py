@@ -655,10 +655,7 @@ class game_server_panel(wx.Panel):
         if name == "":
             wx.MessageBox("Invalid Name","Error");
         else:
-            ### Alpha ### Should fix the depricated module in Main
-            #msg = "%s is creating room \'%s.\'" % (self.session.name, name) #Old Method
             msg = "%s is creating room \'%s.\'" % (self.session.name, name)
-            msg = '<chat type="1" version="1.0">'+msg+'</chat>' % (self.session.name, name) #new method
             self.session.send( msg )
             self.session.send_create_group(name,pwd,boot_pwd,minversion)
             self.set_lobbybutton(1); #enable the Lobby quickbutton
