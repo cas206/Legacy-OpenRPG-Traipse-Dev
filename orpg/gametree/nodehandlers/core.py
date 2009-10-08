@@ -36,6 +36,7 @@ try:
     import webbrowser
     from orpg.mapper import map
     import os
+    from wx import DisplaySize
 except:
     import wx
 
@@ -75,23 +76,13 @@ class node_handler:
     def on_ldclick(self,evt):
         return 0
 
-    def traverse(self, traverseroot, function, cookie=0, event=None, recursive=True):
-        """ walk tree control """
-        if traverseroot.IsOk():
-            # step in subtree if there are items or ...
-            if self.tree.ItemHasChildren(traverseroot) and recursive:
-                firstchild, cookie = self.tree.GetFirstChild(traverseroot)
-                obj = self.tree.GetPyData(firstchild)
-                function(obj, event)
-                self.traverse(firstchild, function, cookie, event, recursive)
-
-            # ... loop siblings
-            obj = self.tree.GetPyData(traverseroot)
-            function(obj, event)
-
-            child = self.tree.GetNextSibling(traverseroot)
-            if child.IsOk():
-                self.traverse(child, function, cookie, event, recursive)
+    def traverse(self, root, function, data=None, recurse=True):
+        child, cookie = self.tree.GetFirstChild(root)
+        while child.IsOk(): 
+            function(self.tree.GetPyData(child), data) 
+            if recurse: 
+                self.traverse(child, function, data) 
+            child, cookie = self.tree.GetNextChild(root, cookie) 
 
 
     def usefulness(self,text):

@@ -54,9 +54,7 @@ class container_handler(node_handler):
 
 
     def on_send_to_map(self, evt):
-        child = self.tree.GetFirstChild(self.mytree_node)
-        if child[0].IsOk():
-            self.traverse(child[0], self.check_map_aware, 0, evt)
+        self.traverse(self.mytree_node, self.check_map_aware, evt) 
 
 
     def checkChildToMap(self, obj, evt):
@@ -65,9 +63,7 @@ class container_handler(node_handler):
 
     def checkToMapMenu(self):
         self.mapcheck = False
-        child = self.tree.GetFirstChild(self.mytree_node)
-        if child[0].IsOk():
-            self.traverse(child[0], self.checkChildToMap, 0, self.mapcheck)
+        self.traverse(self.mytree_node, self.checkChildToMap)
 
         return self.mapcheck
 
@@ -93,8 +89,7 @@ class container_handler(node_handler):
         self.html_str += "</td></tr>\n"
         self.html_str += "<tr><td>"
 
-        child = self.tree.GetFirstChild(self.mytree_node)
-        self.traverse(child[0], self.gen_html, 0, None)
+        self.traverse(self.mytree_node, self.gen_html, recurse=False)
 
         self.html_str += "</td></tr></table>"
         return self.html_str
@@ -153,9 +148,7 @@ class group_handler(container_handler):
         self.i = 0
         self.tdatas = {}
 
-        child = self.tree.GetFirstChild(self.mytree_node)
-        if child[0].IsOk():
-            self.traverse(child[0], self.gen_html, 0, None)
+        self.traverse(self.mytree_node, self.gen_html, recurse=False)
 
         for td in self.tdatas:
             self.html_str += "<td valign=\"top\" >" + self.tdatas[td] + "</td>\n";
@@ -239,10 +232,7 @@ class tabbed_panel(orpgTabberWnd):
         orpgTabberWnd.__init__(self, parent, style=FNB.FNB_NO_X_BUTTON)
         self.handler = handler
         self.parent = parent
-        tree = self.handler.tree
-        child = tree.GetFirstChild(handler.mytree_node)
-        if child[0].IsOk():
-            handler.traverse(child[0], self.pick_panel, 0, mode, False)
+        handler.traverse(handler.mytree_node, self.pick_panel, mode, False)
 
         parent.SetSize(self.GetBestSize())
 
@@ -252,7 +242,7 @@ class tabbed_panel(orpgTabberWnd):
         else:
             panel = obj.get_use_panel(self)
 
-        name = obj.master_dom.getAttribute("name")
+        name = obj.master_dom.getAttribute("name");print 'here '+name
 
         if panel:
             self.AddPage(panel, name, False)
@@ -305,10 +295,7 @@ class splitter_handler(container_handler):
         self.bestSizex = -1
         self.bestSizey = -1
 
-        cookie = 0
-        (child, cookie) = self.tree.GetFirstChild(self.mytree_node)
-        if child.IsOk():
-            self.traverse(child, self.doSplit, 0, mode, False)
+        self.traverse(self.mytree_node, self.doSplit, mode, False) 
 
         self.pane.sizer.Add(self.splitter, 1, wx.EXPAND)
 

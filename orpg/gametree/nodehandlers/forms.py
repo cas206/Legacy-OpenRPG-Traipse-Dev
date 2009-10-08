@@ -88,16 +88,13 @@ class form_panel(ScrolledPanel):
         ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
         self.height = int(handler.atts.getAttribute("height"))
         self.width = int(handler.atts.getAttribute("width"))
-
-
+        
         self.SetSize((0,0))
         self.handler = handler
         self.parent = parent
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         tree = self.handler.tree
-        child = tree.GetFirstChild(handler.mytree_node)
-        if child[0].IsOk():
-            handler.traverse(child[0], self.create_child_wnd, 0, None, False)
+        handler.traverse(handler.mytree_node, self.create_child_wnd, None, False)
 
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
