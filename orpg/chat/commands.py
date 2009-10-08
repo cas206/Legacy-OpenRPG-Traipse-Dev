@@ -661,7 +661,7 @@ class chat_commands:
                 msg = "<br /><b>Remote Administrator Config:</b>"
                 if pass_state != 1 : msg += " Password not set. Remote admin functions disabled<br />"
                 else:
-                    msg += " Enabled. Using password \""+pwd+"\"<br />"
+                    msg += " Enabled. Using password '"+pwd+"'<br />"
                 self.chat.SystemPost(msg)
                 return
 
@@ -669,15 +669,16 @@ class chat_commands:
                 #no commands under this point will execute unless an admin password has been previously set
                 self.chat.SystemPost("Command ignored. No remote administrator password set!!")
                 return
-            msgbase = "<admin id=\""+self.session.id+"\" group_id=\""+self.session.group_id+"\" pwd=\""+pwd+"\" "
+            msgbase = "<admin id='"+self.session.id+"' group_id='"+self.session.group_id+"' pwd='"+pwd+"'"
+
             if args[0] == "set":
                 if len( args ) > 1:
                     self.session.orpgFrame_callback.password_manager.server = str( args[1] )
-                    self.chat.SystemPost( "Remote administration commands using password: \""+str(self.session.orpgFrame_callback.password_manager.GetSilentPassword("server"))+"\"" )
+                    self.chat.SystemPost( "Remote administration commands using password: "+str(self.session.orpgFrame_callback.password_manager.GetSilentPassword("server"))+"" )
                 else:
                     pwd = self.session.orpgFrame_callback.password_manager.GetPassword("server")
                     if pwd != None:
-                        self.chat.SystemPost( "Remote administration commands using password: \""+pwd+"\"" )
+                        self.chat.SystemPost( "Remote administration commands using password: "+pwd+"" )
 
             elif args[0] == "ban":
                 #Ban a player from the server
@@ -686,10 +687,8 @@ class chat_commands:
 
             elif args[0] == "banip":
                 #Ban a player from the server
-                try:
-                    bname = str(args[2])
-                except:
-                    bname = 'Unknown'
+                try: bname = str(args[2])
+                except: bname = 'Unknown'
                 msg = msgbase + ' cmd="banip" bip="' + str(args[1]) + '" bname="' + bname + '"/>'
                 self.session.outbox.put(msg)
 
@@ -705,37 +704,37 @@ class chat_commands:
 
             elif args[0] == "help":
                 #request help from server
-                msg = msgbase + " cmd=\"help\" />"
+                msg = msgbase + " cmd='help' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "nameroom":
                 #reqest room renaming on server
-                msg = msgbase + " cmd=\"nameroom\" rmid=\""+ str(args[1])+"\" name=\""+ string.join(args[2:])+"\" />"
+                msg = msgbase + " cmd='nameroom' rmid="+ str(args[1])+" name="+ string.join(args[2:])+" />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "roompasswords":
                 #reqest room renaming on server
-                msg = msgbase + " cmd=\"roompasswords\"/>"
+                msg = msgbase + " cmd='roompasswords' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "message":
                 #send message to a specific player on the server via the system administrator
-                msg = msgbase + " cmd=\"message\" to_id=\""+ str(args[1])+"\" msg=\""+ string.join(args[2:])+"\" />"
+                msg = msgbase + " cmd='message' to_id='"+ str(args[1])+"' msg='"+ string.join(args[2:])+"' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "broadcast":
                 #send a message to all players on server from the system administrator
-                msg = msgbase + " cmd=\"broadcast\" msg=\""+ string.join(args[1:])+"\" />"
+                msg = msgbase + " cmd='broadcast' msg='"+ string.join(args[1:])+"' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "killgroup":
                 #remove a group from the server and drop all players within the group
-                msg = msgbase + " cmd=\"killgroup\" gid=\""+ str(args[1])+"\" />"
+                msg = msgbase + " cmd='killgroup' gid='"+ str(args[1])+"' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "uptime":
                 #request uptime report from server
-                msg = msgbase + " cmd=\"uptime\" />"
+                msg = msgbase + " cmd='uptime' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "createroom":
@@ -747,30 +746,29 @@ class chat_commands:
                     self.chat.SystemPost( "You must supply a boot password also.<br />/admin createroom &lt;name&gt; &lt;boot password&gt; [password]" )
                     return
                 if len(args) < 4: args.append("")
-                msg = msgbase + " cmd=\"createroom\" name=\""+str(args[1])+"\" boot=\""+ str(args[2])+"\" pass=\""+ str(args[3])+"\" />"
+                msg = msgbase + " cmd='createroom' name='"+str(args[1])+"' boot='"+ str(args[2])+"' pass='"+ str(args[3])+"' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "passwd":
                 #request boot password change on a room
-                msg = msgbase + " cmd=\"passwd\" gid=\""+str(args[1])+"\" pass=\""+ str(args[2])+"\" />"
+                msg = msgbase + " cmd='passwd' gid='"+str(args[1])+"' pass='"+ str(args[2])+"' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "list":
                 #request a list of rooms and players from server
-                msg = msgbase + " cmd=\"list\" />"
+                msg = msgbase + " cmd='list' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "killserver":
                 #remotely kill the server
-                msg = msgbase + " cmd=\"killserver\" />"
+                msg = msgbase + " cmd='killserver' />"
                 self.session.outbox.put(msg)
 
             elif args[0] == "savemaps":
                 msg = msgbase + ' cmd="savemaps" />'
                 self.session.outbox.put(msg)
 
-            else:
-                self.chat.InfoPost("Unknown administrator command"  )
+            else: self.chat.InfoPost("Unknown administrator command"  )
         except:
             self.chat.InfoPost("An error has occured while processing a Remote Administrator command!")
             traceback.print_exc()
