@@ -1,2 +1,3 @@
-
-<nodehandler class="splitter_handler" icon="divider" module="containers" name="Splitter" version="1.0"/>
+  <nodehandler class="splitter_handler" icon="divider" module="containers" name="Splitter" version="1.0">
+    <splitter_atts horizontal="0"/>
+  </nodehandler>

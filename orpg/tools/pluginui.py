@@ -51,9 +51,9 @@ class PluginFrame(wx.Frame):
         self.err_sizer.Add(self.errorMessage, 0, wx.EXPAND)
         self.main_sizer.Add(self.err_sizer, 0, wx.EXPAND)
         self.pluginList = wx.ListCtrl(self.panel, wx.ID_ANY, style=wx.LC_SINGLE_SEL|wx.LC_REPORT|wx.LC_HRULES|wx.LC_SORT_ASCENDING)
-        self.pluginList.InsertColumn(0, "Autostart")
-        self.pluginList.InsertColumn(1, "Name")
-        self.pluginList.InsertColumn(2, "Author")
+        #self.pluginList.InsertColumn(0, "Autostart")
+        self.pluginList.InsertColumn(0, "Name")
+        self.pluginList.InsertColumn(1, "Author")
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._selectPlugin, self.pluginList)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self._deselectPlugin, self.pluginList)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._togglePlugin, self.pluginList)
@@ -166,14 +166,14 @@ class PluginFrame(wx.Frame):
     def _selectPlugin(self, evt):
         self._selectedPlugin = evt.GetIndex()
         self.__enablePluginBtns()
-        pname = self.pluginList.GetItem(self._selectedPlugin, 1).GetText()
+        pname = self.pluginList.GetItem(self._selectedPlugin, 0).GetText()
         info = self.available_plugins[pname]
 
         if info[0] in self.enabled_plugins:
             self.enableBtn.Disable()
         else:
             self.disableBtn.Disable()
-        if self.pluginList.GetItem(self._selectedPlugin, 0).GetText() == "X":
+        if pname in self.startplugs:
             self.autostartBtn.Label = "Disable Autostart"
 
         self.__doLayout()
@@ -185,14 +185,12 @@ class PluginFrame(wx.Frame):
 
     def _togglePlugin(self, evt):
         idx = evt.GetIndex()
-        pname = self.pluginList.GetItem(idx, 0).GetText()
+        pname = self.pluginList.GetItem(idx, 1).GetText()
         info = self.available_plugins[pname]
-
         if info[0] in self.enabled_plugins:
             self._disable(idx)
         else:
             self._enable(idx)
-
         self.pluginList.SetItemState(self._selectedPlugin, 0, wx.LIST_STATE_SELECTED)
 
     def _enableAll(self, evt):
@@ -206,7 +204,7 @@ class PluginFrame(wx.Frame):
         idx = self.__checkIdx(evt)
         if idx is None:
             return
-        pname = self.pluginList.GetItem(idx, 1).GetText()
+        pname = self.pluginList.GetItem(idx, 0).GetText()
         info = self.available_plugins[pname]
         info[1].menu_start()
 
@@ -227,14 +225,16 @@ class PluginFrame(wx.Frame):
 
     def _disableAll(self, evt):
         for entry in self.enabled_plugins.keys():
-            #idx = self.pluginList.FindItem(1, self.enabled_plugins[entry].name) #Old Method
-            self._disable(self.enabled_plugins[entry]) #New Method
+            #print self.pluginList.FindItem(1, self.enabled_plugins[entry])
+            idx = self.pluginList.FindItem(0, self.enabled_plugins[entry].name)
+            print self.pluginList
+            self._disable(idx) #New Method
 
     def _disable(self, evt):
         idx = self.__checkIdx(evt)
         if idx is None:
             return
-        pname = self.pluginList.GetItem(idx, 1).GetText()
+        pname = self.pluginList.GetItem(idx, 0).GetText()
         info = self.available_plugins[pname]
         info[1].menu_cleanup()
         try:
@@ -254,12 +254,12 @@ class PluginFrame(wx.Frame):
         idx = self.__checkIdx(evt)
         if idx is None:
             return
-        if self.pluginList.GetItem(idx, 1).GetText() in self.startplugs:
-            self.startplugs.remove(self.pluginList.GetItem(idx, 1).GetText())
+        if self.pluginList.GetItem(idx, 0).GetText() in self.startplugs:
+            self.startplugs.remove(self.pluginList.GetItem(idx, 0).GetText())
             self.pluginList.SetItemImage(idx, 0, 0)
             self.autostartBtn.Label = "Autostart"
         else:
-            self.startplugs.append(self.pluginList.GetItem(idx, 1).GetText())
+            self.startplugs.append(self.pluginList.GetItem(idx, 0).GetText())
             self.pluginList.SetItemImage(idx, 1, 0)
             self.autostartBtn.Label = "Disable Autostart"
 
@@ -304,15 +304,17 @@ class PluginFrame(wx.Frame):
         i = 0
         for plugname, info in self.available_plugins.iteritems():
             self.pluginNames.append(plugname)
-            idx = self.pluginList.InsertImageItem(self.pluginList.GetItemCount(), 0)
-            self.pluginList.SetStringItem(idx, 2, info[2])
-            self.pluginList.SetStringItem(idx, 1, plugname)
+            #idx = self.pluginList.InsertImageItem(self.pluginList.GetItemCount(), 0)
+            idx = self.pluginList.InsertStringItem(self.pluginList.GetItemCount(), plugname)
+            self.pluginList.SetStringItem(idx, 1, info[2])
+            self.pluginList.SetItemImage(idx, 0, 0)
+            #self.pluginList.SetStringItem(idx, 1, plugname)
             if plugname in self.startplugs:
                 self.pluginList.SetItemImage(idx, 1, 0)
                 self._enable(idx)
             self.pluginList.SetItemData(idx, i)
             i += 1
-        self.pluginList.SetColumnWidth(0, 75)
+        self.pluginList.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.pluginList.SetColumnWidth(1, wx.LIST_AUTOSIZE)
         self.pluginList.SetColumnWidth(2, wx.LIST_AUTOSIZE)
         self.__doLayout()

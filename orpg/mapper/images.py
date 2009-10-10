@@ -25,131 +25,148 @@
 #
 # Description:
 #
-__version__ = "$Id: images.py,v 1.21 2007/12/11 04:07:15 digitalxero Exp $"
+from __future__ import with_statement
 
 import urllib
 import Queue
 import thread
 from threading import Lock
 import time
-
 from orpg.orpg_wx import *
-from orpg.orpgCore import component
+from orpg.orpgCore import *
+
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger
-
-def singleton(cls):
-    instances = {}
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance()
+from orpg.tools.orpg_settings import settings
 
 class ImageHandlerClass(object):
     __cache = {}
     __fetching = {}
     __queue = Queue.Queue(0)
     __lock = Lock()
-    chat = component.get("chat")
+
+    def __new__(cls):
+        it = cls.__dict__.get("__it__")
+        if it is not None:
+            return it
+        cls.__it__ = it = object.__new__(cls)
+        return it
 
     def load(self, path, image_type, imageId):
-        """Load an image, with a intermideary fetching image shown while it loads in a background thread"""
-        if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
-                                                self.__cache[path][2]).ConvertToBitmap()
-        if not self.__fetching.has_key(path):
+        # Load an image, with a intermideary fetching image shown while it loads in a background thread
+        if self.__cache.has_key(path):
+            return wx.ImageFromMime(self.__cache[path][1],
+                                    self.__cache[path][2]).ConvertToBitmap()
+        if path not in self.__fetching:
             self.__fetching[path] = True
-            """Start Image Loading Thread"""
-            thread.start_new_thread(self.__loadThread, (path, image_type, imageId))
+            #Start Image Loading Thread
+            thread.start_new_thread(self.__loadThread,
+                                    (path, image_type, imageId))
         else:
-            if self.__fetching[path] is True: thread.start_new_thread(self.__loadCacheThread, (path, image_type, imageId))
-        return wx.Bitmap(dir_struct["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
+            if self.__fetching[path]:
+                thread.start_new_thread(self.__loadCacheThread,
+                                        (path, image_type, imageId))
+        return wx.Bitmap(dir_struct["icon"] + "fetching.png",
+                         wx.BITMAP_TYPE_PNG)
 
     def directLoad(self, path):
-        """Directly load an image, no threads"""
-        if self.__cache.has_key(path): return wx.ImageFromMime(self.__cache[path][1], 
-                                                self.__cache[path][2]).ConvertToBitmap()
+        # Directly load an image, no threads
+        if path in self.__cache:
+            return wx.ImageFromMime(self.__cache[path][1],
+                                    self.__cache[path][2]).ConvertToBitmap()
+
         uriPath = urllib.unquote(path)
         try:
             d = urllib.urlretrieve(uriPath)
-            """We have to make sure that not only did we fetch something, but that
-               it was an image that we got back."""
+            # We have to make sure that not only did we fetch something, but that
+            # it was an image that we got back.
             if d[0] and d[1].getmaintype() == "image":
-                self.__cache[path] = (path, d[0], d[1].gettype(), None)
-                return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2]).ConvertToBitmap()
+                with self.__lock:
+                    self.__cache[path] = (path, d[0], d[1].gettype(), None)
+                return wx.ImageFromMime(self.__cache[path][1],
+                                        self.__cache[path][2]).ConvertToBitmap()
             else:
-                logger.exception(str("Image refused to load or URI did not reference a valid image: " + path), True)
+                logger.general("Image refused to load or URI did not "
+                               "reference a valid image: " + path, True)
                 return None
         except IOError:
-            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
+            logger.general("Unable to resolve/open the specified URI; "
+                           "image was NOT loaded: " + path, True)
             return None
 
     def cleanCache(self):
-        """Shrinks the Cache down to the proper size"""
-        try: cacheSize = int(component.get('settings').get_setting("ImageCacheSize"))
-        except: cacheSize = 32
+        # Shrinks the Cache down to the proper size
+        try:
+            cacheSize = int(settings.get("ImageCacheSize"))
+        except:
+            cacheSize = 32
         cache = self.__cache.keys()
         cache.sort()
-        for key in cache[cacheSize:]: del self.__cache[key]
+        for key in cache[cacheSize:]:
+            del self.__cache[key]
 
     def flushCache(self):
-        """This function will flush all images contained within the image cache."""
-        self.__lock.acquire()
-        try:
+        # This function will flush all images contained within the image cache.
+        with self.__lock:
             self.__cache = {}
             self.__fetching = {}
-        finally: 
-            self.__lock.release()
             urllib.urlcleanup()
 
-    """Private Methods"""
+#Private Methods
     def __loadThread(self, path, image_type, imageId):
         uriPath = urllib.unquote(path)
-        self.__lock.acquire()
+
         try:
             d = urllib.urlretrieve(uriPath)
-            """We have to make sure that not only did we fetch something, but that
-               it was an image that we got back."""
+            # We have to make sure that not only did we fetch something, but that
+            # it was an image that we got back.
             if d[0] and d[1].getmaintype() == "image":
-                self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
-                self.__queue.put((self.__cache[path], image_type, imageId))
-                if self.__fetching.has_key(path): del self.__fetching[path]
+                with self.__lock:
+                    self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
+                    self.__queue.put((self.__cache[path], image_type, imageId))
+
+                if path in self.__fetching:
+                    del self.__fetching[path]
             else:
-                logger.exception(str("Image refused to load or URI did not reference a valid image: " + path), True)
+                logger.general("Image refused to load or URI did not "
+                               "reference a valid image: " + path, True)
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
-            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
-        finally: self.__lock.release()
+            logger.general("Unable to resolve/open the specified URI; "
+                           "image was NOT laoded: " + path, True)
 
     def __loadCacheThread(self, path, image_type, imageId):
         try:
             st = time.time()
-            while self.__fetching.has_key(path) and self.__fetching[path] is not False:
+            while path in self.__fetching and self.__fetching[path] is not False:
                 time.sleep(0.025)
                 if (time.time()-st) > 120:
-                    logger.general("Timeout: " + path)
+                    logger.general("Timeout: " + path, True)
+                    del self.__fetching[path]
                     break
         except:
             del self.__fetching[path]
-            logger.exception(str("Unable to resolve/open the specified URI; image was NOT loaded: " + path), True)
-            return 
-        self.__lock.acquire()
-        try:
-            logger.info("Adding Image to Queue from Cache: " + str(self.__cache[path]), True)
-            self.__queue.put((self.__cache[path], image_type, imageId))
-        finally: self.__lock.release()
+            logger.general("Unable to resolve/open the specified URI; "
+                           "image was NOT loaded: " + path, True)
+            return
 
-    """Property Methods"""
+        with self.__lock:
+            if path in self.__cache:
+                logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
+                self.__queue.put((self.__cache[path], image_type, imageId))
+            else:
+                self.__loadThread(path, image_type, imageId)
+
+    #Property Methods
     def _getCache(self):
         return self.__cache
 
     def _getQueue(self):
         return self.__queue
 
-    """Properties"""
+    #Properties
     Cache = property(_getCache)
     Queue = property(_getQueue)
 
-ImageHandler = singleton(ImageHandlerClass)
-component.add('ImageHandler', ImageHandler)
+ImageHandler = ImageHandlerClass()
