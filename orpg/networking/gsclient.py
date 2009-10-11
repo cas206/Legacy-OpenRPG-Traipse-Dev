@@ -26,6 +26,7 @@
 # Description: The file contains code for the game server browser
 #
 
+from __future__ import with_statement
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
 
 from orpg.dirpath import dir_struct
@@ -103,9 +104,7 @@ class game_server_panel(wx.Panel):
         self.bookmarks()
         self.refresh_server_list()
 	self.refresh_room_list()
-        self.build_bookmark_menu() ## Not yet implemented
-        #self.refresh_server_list()
-        #self.refresh_room_list()
+        self.build_bookmark_menu() 
 
     def build_ctrls(self):
         ## Section Sizers (with frame edges and text captions)
@@ -250,7 +249,6 @@ class game_server_panel(wx.Panel):
                 name = svr.name
                 if server.get('name') == name: self.server_list.SetItemImage(x, 1)
                 x += 1
-            #self.server_list.SetItemImage( self.server_list.FindItem(0, server.get('name')), 1 ) 
             item = wx.MenuItem(self.bookmarks_menu, wx.ID_ANY,
                                server.get('name'), server.get('name'))
             open_rpg.get_component('frame').Bind(wx.EVT_MENU,

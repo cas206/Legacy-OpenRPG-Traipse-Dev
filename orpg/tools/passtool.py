@@ -100,8 +100,18 @@ class PassTool:
     def GetSilentPassword( self, type="server", groupid = 0):
         try:
             self.CheckGroupData( groupid )
+            ### Pre-Alpha ### How types will work
+            # Server - top dog
+            # Admin - second in command
+            # Mod - some privileges
+            # Room - You got it, unchanged (passwords the room entry)
+            # Boot - This is the room admin password.
             if type == "admin":
-                if self.groups[int(groupid)].admin != None: return str(self.groups[int(groupid)].admin)
+                try: print self.groups[int(groupid)].admin
+                except: pass
+                try: print str(self.groups[int(groupid)].admin)
+                except: pass
+                if self.groups[int(groupid)].admin != None: print str(self.groups[int(groupid)].admin); return str(self.groups[int(groupid)].admin)
                 else: return None
             elif type == "room":
                 if self.groups[int(groupid)].room != None: return str(self.groups[int(groupid)].room)

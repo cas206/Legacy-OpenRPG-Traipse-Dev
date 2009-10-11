@@ -684,6 +684,11 @@ class chat_commands:
                 #Ban a player from the server
                 msg = msgbase + ' cmd="ban" bid="' + str(args[1]) + '" />'
                 self.session.outbox.put(msg)
+                
+            elif args[0] == "boot":
+                #Ban a player from the server
+                msg = msgbase + ' cmd="boot" bid="' + str(args[1]) + '" />'
+                self.session.outbox.put(msg)
 
             elif args[0] == "banip":
                 #Ban a player from the server

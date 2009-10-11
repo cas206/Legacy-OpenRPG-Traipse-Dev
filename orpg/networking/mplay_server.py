@@ -2335,6 +2335,13 @@ class mplay_server:
                 msg = "<msg to='" + id + "' from='0' group_id='" + gid + "'> Banned!"
                 self.players[pid].outbox.put(msg)
                 self.admin_ban(id, "")
+            ### Alpha ### and untested
+            elif cmd == "boot":
+                id = xml_dom.getAttribute("bid")
+                msg = "<msg to='" + id + "' from='0' group_id='" + gid + "'> Booted!"
+                self.players[pid].outbox.put(msg)
+                self.admin_kick(id, "")
+            #############
             elif cmd == "unban":
                 ip = xml_dom.getAttribute("ip")
                 self.admin_unban(ip)
