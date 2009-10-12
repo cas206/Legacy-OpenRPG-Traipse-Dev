@@ -49,8 +49,9 @@ import orpg.networking.mplay_client
 import orpg.mapper.map
 import orpg.mapper.images
 
-import upmana.updatemana
-import upmana.manifest as manifest
+#Update Manager# Un remark if you have Mercurial installed
+#import upmana.updatemana
+#import upmana.manifest as manifest
 
 from orpg.dirpath import dir_struct
 from orpg.dieroller.utils import DiceManager
@@ -132,12 +133,12 @@ class orpgFrame(wx.Frame):
         logger.debug("plugins reloaded and startup plugins launched")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-        #Load Update Manager
-        component.add('updatemana', self.updateMana)
-        logger.debug("update manager reloaded")
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        #Load Update Manager# Un remark if you have Mercurial installed
+        #component.add('updatemana', self.updateMana)
+        #logger.debug("update manager reloaded")
+        #self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-        #Load Update Manager
+        #Load Debug Console
         component.add('debugconsole', self.debugger)
         logger.debug("debugger window")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
@@ -264,9 +265,10 @@ class orpgFrame(wx.Frame):
         self.traipseSuite = wx.Menu()
         self.mainmenu.Insert(5, self.traipseSuite, "&Traipse Suite")
 
-        mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
-        self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
-        self.traipseSuite.AppendItem(mana)
+	#Update Manager# Un remark if you have Mercurial installed
+        #mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
+        #self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
+        #self.traipseSuite.AppendItem(mana)
 
         self.debugConsole = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
         self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, self.debugConsole)
@@ -638,18 +640,18 @@ class orpgFrame(wx.Frame):
         self.SetDimensions(posx, posy, w, h)
         logger.debug("Dimensions Set")
 
-        # Update Manager
-        self.manifest = manifest.ManifestChanges()
-        self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
-        logger.debug("Menu Created")
-        h = int(xml_dom.getAttribute("height"))
-        w = int(xml_dom.getAttribute("width"))
-        posx = int(xml_dom.getAttribute("posx"))
-        posy = int(xml_dom.getAttribute("posy"))
-        maximized = int(xml_dom.getAttribute("maximized"))
-        self.SetDimensions(posx, posy, w, h)
-        logger.debug("Dimensions Set")
+        # Update Manager # Un remark if you have Mercurial installed
+        #self.manifest = manifest.ManifestChanges()
+        #self.updateMana = upmana.updatemana.updaterFrame(self, 
+        #    "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
+        #logger.debug("Menu Created")
+        #h = int(xml_dom.getAttribute("height"))
+        #w = int(xml_dom.getAttribute("width"))
+        #posx = int(xml_dom.getAttribute("posx"))
+        #posy = int(xml_dom.getAttribute("posy"))
+        #maximized = int(xml_dom.getAttribute("maximized"))
+        #self.SetDimensions(posx, posy, w, h)
+        #logger.debug("Dimensions Set")
 
         # Debug Console
         self.debugger = orpg.tools.orpg_log.DebugConsole(self)
@@ -974,8 +976,13 @@ class orpgFrame(wx.Frame):
         else: display_name = "Server Administrator"
 
         if data[:5] == "<tree":
-            self.tree.on_receive_data(data,player)
-            self.chat.InfoPost(display_name + " has sent you a tree node...")
+            ### Alpha ### Allows users to decide if they want the node or not.
+            dlg = wx.MessageDialog(None, display_name + 'is trying to send you a tree node. Accept?', 'Question', 
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+            if dlg.ShowModal() == wx.ID_YES:
+              dlg.Destroy()
+              self.tree.on_receive_data(data,player)
+              self.chat.InfoPost(display_name + " has sent you a tree node...")
 
         elif data[:4] == "<map": self.map.new_data(data)
 
@@ -1223,7 +1230,8 @@ class orpgApp(wx.App):
         logger._set_log_level = int(settings.get_setting('LoggingLevel'))
         logger._set_log_to_console(False)
 
-        self.manifest = manifest.ManifestChanges()
+	#Update Manager# Un remark if you have Mercurial installed
+        #self.manifest = manifest.ManifestChanges()
 
         self.called = False
         wx.InitAllImageHandlers()
