@@ -267,7 +267,7 @@ class Repos(wx.Panel):
         self.sizers["main"].AddGrowableRow(1)
         self.SetSizer(self.sizers["main"])
         self.SetAutoLayout(True)
-        self.Fit()
+        #self.Fit()
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
 
     def NewRepoList(self, event):

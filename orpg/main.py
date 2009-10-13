@@ -50,8 +50,8 @@ import orpg.mapper.map
 import orpg.mapper.images
 
 #Update Manager# Un remark if you have Mercurial installed
-#import upmana.updatemana
-#import upmana.manifest as manifest
+import upmana.updatemana
+import upmana.manifest as manifest
 
 from orpg.dirpath import dir_struct
 from orpg.dieroller.utils import DiceManager
@@ -1230,7 +1230,7 @@ class orpgApp(wx.App):
         logger._set_log_level = int(settings.get_setting('LoggingLevel'))
         logger._set_log_to_console(False)
 
-	Update Manager
+	#Update Manager
         self.manifest = manifest.ManifestChanges()
 
         self.called = False

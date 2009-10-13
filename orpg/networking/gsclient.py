@@ -246,8 +246,8 @@ class game_server_panel(wx.Panel):
         x = 0
         for server in self.bookmarks.findall('server'):
             for svr in self.svrList:
-                name = svr.name
-                if server.get('name') == name: self.server_list.SetItemImage(x, 1)
+                address = svr.addy
+                if server.get('address') == address: self.server_list.SetItemImage(x, 1)
                 x += 1
             item = wx.MenuItem(self.bookmarks_menu, wx.ID_ANY,
                                server.get('name'), server.get('name'))
