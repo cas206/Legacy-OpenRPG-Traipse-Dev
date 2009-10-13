@@ -133,10 +133,10 @@ class orpgFrame(wx.Frame):
         logger.debug("plugins reloaded and startup plugins launched")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
-        #Load Update Manager# Un remark if you have Mercurial installed
-        #component.add('updatemana', self.updateMana)
-        #logger.debug("update manager reloaded")
-        #self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        #Load Update Manager
+        component.add('updatemana', self.updateMana)
+        logger.debug("update manager reloaded")
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
         #Load Debug Console
         component.add('debugconsole', self.debugger)
@@ -265,10 +265,10 @@ class orpgFrame(wx.Frame):
         self.traipseSuite = wx.Menu()
         self.mainmenu.Insert(5, self.traipseSuite, "&Traipse Suite")
 
-	#Update Manager# Un remark if you have Mercurial installed
-        #mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
-        #self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
-        #self.traipseSuite.AppendItem(mana)
+	#Update Manager
+        mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
+        self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
+        self.traipseSuite.AppendItem(mana)
 
         self.debugConsole = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
         self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, self.debugConsole)
@@ -640,18 +640,18 @@ class orpgFrame(wx.Frame):
         self.SetDimensions(posx, posy, w, h)
         logger.debug("Dimensions Set")
 
-        # Update Manager # Un remark if you have Mercurial installed
-        #self.manifest = manifest.ManifestChanges()
-        #self.updateMana = upmana.updatemana.updaterFrame(self, 
-        #    "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
-        #logger.debug("Menu Created")
-        #h = int(xml_dom.getAttribute("height"))
-        #w = int(xml_dom.getAttribute("width"))
-        #posx = int(xml_dom.getAttribute("posx"))
-        #posy = int(xml_dom.getAttribute("posy"))
-        #maximized = int(xml_dom.getAttribute("maximized"))
-        #self.SetDimensions(posx, posy, w, h)
-        #logger.debug("Dimensions Set")
+        # Update Manager 
+        self.manifest = manifest.ManifestChanges()
+        self.updateMana = upmana.updatemana.updaterFrame(self, 
+            "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
+        logger.debug("Menu Created")
+        h = int(xml_dom.getAttribute("height"))
+        w = int(xml_dom.getAttribute("width"))
+        posx = int(xml_dom.getAttribute("posx"))
+        posy = int(xml_dom.getAttribute("posy"))
+        maximized = int(xml_dom.getAttribute("maximized"))
+        self.SetDimensions(posx, posy, w, h)
+        logger.debug("Dimensions Set")
 
         # Debug Console
         self.debugger = orpg.tools.orpg_log.DebugConsole(self)
@@ -1230,8 +1230,8 @@ class orpgApp(wx.App):
         logger._set_log_level = int(settings.get_setting('LoggingLevel'))
         logger._set_log_to_console(False)
 
-	#Update Manager# Un remark if you have Mercurial installed
-        #self.manifest = manifest.ManifestChanges()
+	Update Manager
+        self.manifest = manifest.ManifestChanges()
 
         self.called = False
         wx.InitAllImageHandlers()
