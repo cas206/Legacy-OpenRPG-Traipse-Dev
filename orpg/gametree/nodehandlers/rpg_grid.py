@@ -30,7 +30,6 @@ __version__ = "$Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $"
 
 from core import *
 from forms import *
-from orpg.minidom import Element, Text
 
 class rpg_grid_handler(node_handler):
     """ Node handler for rpg grid tool
@@ -50,14 +49,14 @@ class rpg_grid_handler(node_handler):
   </macros>
 </nodehandler>
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.grid = self.master_dom.getElementsByTagName('grid')[0]
-        if self.grid.getAttribute("border") == "":
-            self.grid.setAttribute("border","1")
-        if self.grid.getAttribute("autosize") == "":
-            self.grid.setAttribute("autosize","1")
-        self.macros = self.master_dom.getElementsByTagName('macros')[0]
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.grid = self.xml.find('grid')
+        if self.grid.get("border") == "":
+            self.grid.set("border","1")
+        if self.grid.get("autosize") == "":
+            self.grid.set("autosize","1")
+        self.macros = self.xml.find('macros')
         self.myeditor = None
         self.refresh_rows()
 
@@ -69,38 +68,31 @@ class rpg_grid_handler(node_handler):
         tree = self.tree
         icons = self.tree.icons
         tree.CollapseAndReset(self.mytree_node)
-        node_list = self.master_dom.getElementsByTagName('row')
-        for n in node_list:
-            cells = n.getElementsByTagName('cell')
-            t_node = cells[0]._get_firstChild()
-            if t_node == None:
-                name = "Row"
-            else:
-                name = t_node._get_nodeValue()
-            if name == "":
+        for row in self.grid.findall('row'):
+            first_cell = row.find('cell')
+            name = first_cell.text
+            if name == None or name == '':
                 name = "Row"
             new_tree_node = tree.AppendItem(self.mytree_node,name,icons['gear'],icons['gear'])
-            handler = grid_row_handler(n,new_tree_node,self)
+            handler = grid_row_handler(row,new_tree_node,self)
             tree.SetPyData(new_tree_node,handler)
 
-
     def tohtml(self):
-        border = self.grid.getAttribute("border")
-        name = self.master_dom.getAttribute('name')
-        rows = self.grid.getElementsByTagName('row')
-        colspan = str(len(rows[0].getElementsByTagName('cell')))
+        border = self.grid.get("border")
+        name = self.xml.get('name')
+        rows = self.grid.findall('row')
+        colspan = str(len(rows[0].findall('cell')))
         html_str = "<table border=\""+border+"\" align=center><tr bgcolor=\""+TH_BG+"\" ><th colspan="+colspan+">"+name+"</th></tr>"
         for r in rows:
-            cells = r.getElementsByTagName('cell')
+            cells = r.findall('cell')
             html_str += "<tr>"
             for c in cells:
-                #html_str += "<td width='"+c.getAttribute('size')+"' >" bug here
+                #html_str += "<td width='"+c.get('size')+"' >" bug here
                 html_str += "<td >"
-                t_node = c._get_firstChild()
-                if t_node == None:
-                    html_str += "<br /></td>"
-                else:
-                    html_str += t_node._get_nodeValue() + "</td>"
+                text = c.text
+                if text == None or text == '':
+                    text = '<br />'
+                html_str += text + "</td>"
             html_str += "</tr>"
         html_str += "</table>"
         return html_str
@@ -115,16 +107,16 @@ class rpg_grid_handler(node_handler):
         return 1
 
     def is_autosized(self):
-        return self.grid.getAttribute("autosize")
+        return self.grid.get("autosize")
 
     def set_autosize(self,autosize=1):
-        self.grid.setAttribute("autosize",str(autosize))
+        self.grid.set("autosize",str(autosize))
 
 class grid_row_handler(node_handler):
     """ Node Handler grid row.
     """
-    def __init__(self,xml_dom,tree_node,parent):
-        node_handler.__init__(self,xml_dom,tree_node)
+    def __init__(self,xml,tree_node,parent):
+        node_handler.__init__(self,xml,tree_node)
         self.drag = False
 
     def on_drop(self,evt):
@@ -134,18 +126,29 @@ class grid_row_handler(node_handler):
         return 0;
 
     def tohtml(self):
-        cells = self.master_dom.getElementsByTagName('cell')
+        cells = self.xml.findall('cell')
         html_str = "<table border=1 align=center><tr >"
-        for c in cells:
+        for c in cells: # should loop over rows first, then cells
             html_str += "<td >"
-            t_node = c._get_firstChild()
-            if t_node == None:
-                html_str += "<br /></td>"
-            else:
-                html_str += t_node._get_nodeValue() + "</td>"
+            text = c.text
+            if text == '' or text is None:
+                text = '<br />'
+            html_str += text + "</td>"
             html_str += "</tr>"
         html_str += "</table>"
         return html_str
+
+    def get_value(self):
+        cells = self.xml.findall('cell')
+        if len(cells) == 2:
+            return getText(cells[1])
+        else:
+            return None
+
+    def set_value(self, new_value):
+        cells = self.xml.findall('cell')
+        if len(cells) == 2:
+            cells[1].text = new_value
 
 class MyCellEditor(wx.grid.PyGridCellEditor):
     """
@@ -284,6 +287,7 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
             evt.Skip()
 
 
+
     def Destroy(self):
         """final cleanup"""
         self.base_Destroy()
@@ -308,9 +312,9 @@ class rpg_grid(wx.grid.Grid):
         #  Registers a "custom" cell editor (really the example from Robin Dunn with minor mods
         self.RegisterDataType(wx.grid.GRID_VALUE_STRING, wx.grid.GridCellStringRenderer(),MyCellEditor())
 
-        self.rows = handler.grid.getElementsByTagName('row')
+        self.rows = handler.grid.findall('row')
         rows = len(self.rows)
-        cols = len(self.rows[0].getElementsByTagName('cell'))
+        cols = len(self.rows[0].findall('cell'))
         self.CreateGrid(rows,cols)
         self.SetRowLabelSize(0)
         self.SetColLabelSize(0)
@@ -330,85 +334,76 @@ class rpg_grid(wx.grid.Grid):
 
     def on_col_size(self, evt):
         col = evt.GetRowOrCol()
-        cells = self.rows[0].getElementsByTagName('cell')
+        cells = self.rows[0].findall('cell')
         size = self.GetColSize(col)
-        cells[col].setAttribute('size',str(size))
+        cells[col].set('size',str(size))
         evt.Skip()
 
     def on_cell_change(self,evt):
         row = evt.GetRow()
         col = evt.GetCol()
         value = self.GetCellValue(row,col)
-        cells = self.rows[row].getElementsByTagName('cell')
-        t_node = cells[col]._get_firstChild()
-        t_node._set_nodeValue(value)
+        cells = self.rows[row].findall('cell')
+        cells[col].text = value
         if col == 0:
             self.handler.refresh_rows()
 
     def set_col_widths(self):
-        cells = self.rows[0].getElementsByTagName('cell')
+        cells = self.rows[0].findall('cell')
         for i in range(0,len(cells)):
             try:
-                size = int(cells[i].getAttribute('size'))
+                size = int(cells[i].get('size'))
                 self.SetColSize(i,size)
             except:
                 continue
 
     def refresh_row(self,rowi):
-        cells = self.rows[rowi].getElementsByTagName('cell')
+        cells = self.rows[rowi].findall('cell')
         for i in range(0,len(cells)):
-            t_node = cells[i]._get_firstChild()
-            if t_node == None:
-                #doc = cells[i].ownerDocument
-                #t_node = doc.createTextNode("")
-                t_node = Text("")
-                t_node = cells[i].appendChild(t_node)
-            self.SetCellValue(rowi,i,t_node._get_nodeValue())
+            text = cells[i].text
+            if text == None or text == '':
+                text = ''
+                cells[i].text = text
+            self.SetCellValue(rowi,i,text)
 
     def add_row(self,evt=None):
         cols = self.GetNumberCols()
-        #doc = self.handler.grid.ownerDocument
-        #row = doc.createElement('row')
-        row = Element('row')
+        row = ET.Element('row')
         for i in range(0,cols):
-            #cell = doc.createElement('cell')
-            cell = Element('cell')
-            #t_node = doc.createTextNode("")
-            t_node = Text("")
-            t_node = cell.appendChild(t_node)
-            row.appendChild(cell)
-        self.handler.grid.appendChild(row)
+            cell = ET.Element('cell')
+            cell.text = ''
+            row.append(cell)
+        self.handler.grid.append(row)
         self.AppendRows(1)
-        self.rows = self.handler.grid.getElementsByTagName('row')
+        self.rows = self.handler.grid.findall('row')
         self.handler.refresh_rows()
 
     def add_col(self,evt=None):
-        #doc = self.handler.grid.ownerDocument
         for r in self.rows:
-            #cell = doc.createElement('cell')
-            cell = Element('cell')
-            #t_node = doc.createTextNode("")
-            t_node = Text("")
-            t_node = cell.appendChild(t_node)
-            r.appendChild(cell)
+            cell = ET.Element('cell')
+            cell.text = ''
+            r.append(cell)
         self.AppendCols(1)
-        #self.fit_cols()::Where did this go? TaS.
+        self.set_col_widths()
 
     def del_row(self,evt=None):
         num = self.GetNumberRows()
-        row = self.rows[num-1]
-        self.handler.grid.removeChild(row)
+        if num == 1:
+            return
+        self.handler.grid.remove(self.handler.grid[num-1])#always remove last row -- nasty
         self.DeleteRows(num-1,1)
-        self.rows = self.handler.grid.getElementsByTagName('row')
+        self.rows = self.handler.grid.findall('row')
         self.handler.refresh_rows()
 
     def del_col(self,evt=None):
         num = self.GetNumberCols()
+        if num == 1:
+            return
         for r in self.rows:
-            cells = r.getElementsByTagName('cell')
-            r.removeChild(cells[num-1])
+            cells = r.findall('cell')
+            r.remove(r[num-1])# always remove the last column -- nasty
         self.DeleteCols(num-1,1)
-        #self.fit_cols()::Where did this go? TaS.
+        self.set_col_widths()
 
 
 G_TITLE = wx.NewId()
@@ -418,7 +413,7 @@ class rpg_grid_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         self.grid = rpg_grid(self,handler)
-        label = handler.master_dom.getAttribute('name')
+        label = handler.xml.get('name')
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
         self.main_sizer.Add(self.grid,1,wx.EXPAND)
@@ -439,10 +434,10 @@ class rpg_grid_edit_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         self.grid = rpg_grid(self,handler)
-        self.title = wx.TextCtrl(self, G_TITLE, handler.master_dom.getAttribute('name'))
+        self.title = wx.TextCtrl(self, G_TITLE, handler.xml.get('name'))
 
         radio_b = wx.RadioBox(self, GRID_BOR, "Border (HTML)", choices=["no","yes"])
-        border = handler.grid.getAttribute("border")
+        border = handler.grid.get("border")
         radio_b.SetSelection(int(border))
 
         self.auto_size = wx.CheckBox(self, G_AUTO_SIZE, " Auto Size")
@@ -487,10 +482,10 @@ class rpg_grid_edit_panel(wx.Panel):
         id = evt.GetId()
         index = evt.GetInt()
         if id == GRID_BOR:
-            self.handler.grid.setAttribute("border",str(index))
+            self.handler.grid.set("border",str(index))
 
     def on_text(self,evt):
         txt = self.title.GetValue()
         if txt != "":
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)

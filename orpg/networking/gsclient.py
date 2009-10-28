@@ -360,9 +360,9 @@ class game_server_panel(wx.Panel):
         self.texts["address"].SetValue(address + ":" + str(port))
         self.refresh_room_list()
 
-    def on_text(self,evt):
+    def on_text(self, evt):
         id = evt.GetId()
-        if (id == ADDRESS) and (self.cur_server_index >= 0):
+        if (id == self.texts["address"].GetValue()) and (self.cur_server_index >= 0):
             #print "ADDRESS id = ", id, "index = ", self.cur_server_index
             self.cur_server_index = -1
         evt.Skip()

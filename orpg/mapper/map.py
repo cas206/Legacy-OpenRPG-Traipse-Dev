@@ -62,6 +62,7 @@ class MapCanvas(wx.ScrolledWindow):
         self.session = component.get("session")
         wx.ScrolledWindow.__init__(self, parent, ID, 
             style=wx.HSCROLL | wx.VSCROLL | wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER )
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
         self.frame = parent
         self.MAP_MODE = 1      #Mode 1 = MINI, 2 = DRAW, 3 = TAPE MEASURE
         self.layers = {}
@@ -125,43 +126,21 @@ class MapCanvas(wx.ScrolledWindow):
 
     def processImages(self, evt=None):
         self.session = component.get("session")
+        tabs = ['Background', 'Grid', 'Miniatures', 'Whiteboard', 'Fog', 'General']
         if self.session.my_role() == self.session.ROLE_LURKER or (str(self.session.group_id) == '0' and str(self.session.status) == '1'):
-            cidx = self.parent.get_tab_index("Background")
-            self.parent.tabs.EnableTab(cidx, False)
-            cidx = self.parent.get_tab_index("Grid")
-            self.parent.tabs.EnableTab(cidx, False)
-            cidx = self.parent.get_tab_index("Miniatures")
-            self.parent.tabs.EnableTab(cidx, False)
-            cidx = self.parent.get_tab_index("Whiteboard")
-            self.parent.tabs.EnableTab(cidx, False)
-            cidx = self.parent.get_tab_index("Fog")
-            self.parent.tabs.EnableTab(cidx, False)
-            cidx = self.parent.get_tab_index("General")
-            self.parent.tabs.EnableTab(cidx, False)
-        else:
-            cidx = self.parent.get_tab_index("Background")
-            if not self.parent.tabs.GetEnabled(cidx):
-                cidx = self.parent.get_tab_index("Miniatures")
+            for tab in tabs:
+                cidx = self.parent.get_tab_index(tab)
+                self.parent.tabs.EnableTab(cidx, False)
+        elif self.session.my_role() == self.session.ROLE_PLAYER:
+            for tab in tabs:
+                cidx = self.parent.get_tab_index(tab)
+                if tab == "Miniatures" or tab == "Whiteboard": 
+                    self.parent.tabs.EnableTab(cidx, True)
+                else: self.parent.tabs.EnableTab(cidx, False)
+        elif self.session.my_role() == self.session.ROLE_GM and str(self.session.group_id) != '0':
+            for tab in tabs:
+                cidx = self.parent.get_tab_index(tab)
                 self.parent.tabs.EnableTab(cidx, True)
-                cidx = self.parent.get_tab_index("Whiteboard")
-                self.parent.tabs.EnableTab(cidx, True)
-                cidx = self.parent.get_tab_index("Background")
-                self.parent.tabs.EnableTab(cidx, False)
-                cidx = self.parent.get_tab_index("Grid")
-                self.parent.tabs.EnableTab(cidx, False)
-                cidx = self.parent.get_tab_index("Fog")
-                self.parent.tabs.EnableTab(cidx, False)
-                cidx = self.parent.get_tab_index("General")
-                self.parent.tabs.EnableTab(cidx, False)
-                if self.session.my_role() == self.session.ROLE_GM:
-                    cidx = self.parent.get_tab_index("Background")
-                    self.parent.tabs.EnableTab(cidx, True)
-                    cidx = self.parent.get_tab_index("Grid")
-                    self.parent.tabs.EnableTab(cidx, True)
-                    cidx = self.parent.get_tab_index("Fog")
-                    self.parent.tabs.EnableTab(cidx, True)
-                    cidx = self.parent.get_tab_index("General")
-                    self.parent.tabs.EnableTab(cidx, True)
         if not self.cacheSizeSet:
             self.cacheSizeSet = True
             cacheSize = component.get('settings').get_setting("ImageCacheSize")
@@ -169,16 +148,14 @@ class MapCanvas(wx.ScrolledWindow):
             else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
-            img = wx.ImageFromMime(path[1], path[2]).ConvertToBitmap()
-            try:
-                # Now, apply the image to the proper object
-                if image_type == "miniature":
-                    min = self.layers['miniatures'].get_miniature_by_id(imageId)
-                    min.set_bmp(img)
-                elif image_type == "background" or image_type == "texture":
-                    self.layers['bg'].bg_bmp = img
-                    if image_type == "background": self.set_size([img.GetWidth(), img.GetHeight()])
-            except: pass
+            img = wx.ImageFromMime(path[1], path[2])
+            # Now, apply the image to the proper object
+            if image_type == "miniature":
+                min = self.layers['miniatures'].get_miniature_by_id(imageId)
+                if min: min.set_bmp(img)
+            elif image_type == "background" or image_type == "texture":
+                self.layers['bg'].bg_bmp = img.ConvertToBitmap()
+                if image_type == "background": self.set_size([img.GetWidth(), img.GetHeight()])
             # Flag that we now need to refresh!
             self.requireRefresh += 1
             """ Randomly purge an item from the cache, while this is lamo, it does
@@ -199,7 +176,6 @@ class MapCanvas(wx.ScrolledWindow):
             else: self.lastRefreshValue = self.requireRefresh
 
     def on_scroll(self, evt):
-        print 'scrolling'
         if self.drag: self.drag.Hide()
         if component.get('settings').get_setting("AlwaysShowMapScale") == "1": self.printscale()
         evt.Skip()
@@ -262,9 +238,10 @@ class MapCanvas(wx.ScrolledWindow):
         topleft1 = self.GetViewStart()
         topleft = [topleft1[0]*scrollsize[0], topleft1[1]*scrollsize[1]]
         if (clientsize[0] > 1) and (clientsize[1] > 1):
-            dc = wx.MemoryDC()
-            bmp = wx.EmptyBitmap(clientsize[0]+1, clientsize[1]+1)
-            dc.SelectObject(bmp)
+            #dc = wx.MemoryDC()
+            #bmp = wx.EmptyBitmap(clientsize[0]+1, clientsize[1]+1)
+            #dc.SelectObject(bmp)
+            dc = wx.AutoBufferedPaintDC(self)
             dc.SetPen(wx.TRANSPARENT_PEN)
             dc.SetBrush(wx.Brush(self.GetBackgroundColour(), wx.SOLID))
             dc.DrawRectangle(0,0,clientsize[0]+1,clientsize[1]+1)
@@ -279,12 +256,12 @@ class MapCanvas(wx.ScrolledWindow):
             self.layers['fog'].layerDraw(dc, topleft, clientsize)
             dc.SetPen(wx.NullPen)
             dc.SetBrush(wx.NullBrush)
-            dc.SelectObject(wx.NullBitmap)
-            del dc
-            wdc = self.preppaint()
-            wdc.DrawBitmap(bmp, topleft[0], topleft[1])
+            #dc.SelectObject(wx.NullBitmap)
+            #del dc
+            #wdc = self.preppaint()
+            #wdc.DrawBitmap(bmp, topleft[0], topleft[1])
             if settings.get_setting("AlwaysShowMapScale") == "1":
-                self.showmapscale(wdc)
+                self.showmapscale(dc)
         try: evt.Skip()
         except: pass
 

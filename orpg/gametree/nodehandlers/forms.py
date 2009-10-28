@@ -39,10 +39,8 @@ def bool2int(b):
     #if it was an int already, nothing changes. The difference between 1.0
     #and 1, i.e. between ints and floats, is potentially dangerous when we
     #use str() on it, but it seems to work fine right now.
-    if b:
-        return 1
-    else:
-        return 0
+    if b: return 1
+    else: return 0
 
 #################################
 ## form container
@@ -54,23 +52,19 @@ class form_handler(container_handler):
             <form width='100' height='100' />
             </nodehandler>
     """
-
-    def __init__(self,xml_dom,tree_node):
-        container_handler.__init__(self,xml_dom,tree_node)
+    def __init__(self,xml,tree_node):
+        container_handler.__init__(self,xml,tree_node)
 
     def load_children(self):
         self.atts = None
-        children = self.master_dom._get_childNodes()
-        for c in children:
-            if c._get_tagName() == "form":
-                self.atts = c
-            else:
-                self.tree.load_xml(c,self.mytree_node)
+        for child_xml in self.xml:
+            if child_xml.tag == "form": self.atts = child_xml
+            else: self.tree.load_xml(child_xml,self.mytree_node)
         if not self.atts:
-            elem = minidom.Element('form')
-            elem.setAttribute("width","400")
-            elem.setAttribute("height","600")
-            self.atts = self.master_dom.appendChild(elem)
+            self.atts = Element('form')
+            self.atts.set("width","400")
+            self.atts.set("height","600")
+            self.xml.append(self.atts)
 
     def get_design_panel(self,parent):
         return form_edit_panel(parent,self)
@@ -82,28 +76,21 @@ class form_handler(container_handler):
         # make sure its a contorl node
         container_handler.on_drop(self,evt)
 
-
 class form_panel(ScrolledPanel):
     def __init__(self, parent, handler):
         ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
-        self.height = int(handler.atts.getAttribute("height"))
-        self.width = int(handler.atts.getAttribute("width"))
-        
+        self.height = int(handler.atts.get("height"))
+        self.width = int(handler.atts.get("width"))
         self.SetSize((0,0))
         self.handler = handler
         self.parent = parent
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        tree = self.handler.tree
-        handler.traverse(handler.mytree_node, self.create_child_wnd, None, False)
-
+        handler.tree.traverse(handler.mytree_node, self.create_child_wnd, None, False)
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-
         self.SetupScrolling()
-
         parent.SetSize(self.GetSize())
         self.Fit()
-
 
     def SetSize(self, xy):
         (x, y) = self.GetSize()
@@ -113,15 +100,13 @@ class form_panel(ScrolledPanel):
         y += ny+11
         ScrolledPanel.SetSize(self, (x, y))
 
-
-    def create_child_wnd(self, obj, evt):
-        panel = obj.get_use_panel(self)
-        size = obj.get_size_constraint()
+    def create_child_wnd(self, treenode, evt):
+        node = self.handler.tree.GetPyData(treenode)
+        panel = node.get_use_panel(self)
+        size = node.get_size_constraint()
         if panel:
             self.main_sizer.Add(panel, size, wx.EXPAND)
             self.main_sizer.Add(wx.Size(10,10))
-
-
 
 F_HEIGHT = wx.NewId()
 F_WIDTH = wx.NewId()
@@ -131,9 +116,9 @@ class form_edit_panel(wx.Panel):
         self.handler = handler
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Form Properties"), wx.VERTICAL)
         wh_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name')),
-                        F_HEIGHT : wx.TextCtrl(self, F_HEIGHT, handler.atts.getAttribute('height')),
-                        F_WIDTH : wx.TextCtrl(self, F_WIDTH, handler.atts.getAttribute('width'))
+        self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')),
+                        F_HEIGHT : wx.TextCtrl(self, F_HEIGHT, handler.atts.get('height')),
+                        F_WIDTH : wx.TextCtrl(self, F_WIDTH, handler.atts.get('width'))
                       }
 
         wh_sizer.Add(wx.StaticText(self, -1, "Width:"), 0, wx.ALIGN_CENTER)
@@ -163,21 +148,13 @@ class form_edit_panel(wx.Panel):
         txt = self.text[id].GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == F_HEIGHT or id == F_WIDTH:
-            try:
-                int(txt)
-            except:
-                return 0
-            if id == F_HEIGHT:
-                self.handler.atts.setAttribute("height",txt)
-            elif id == F_WIDTH:
-                self.handler.atts.setAttribute("width",txt)
-
-
-
-
+            try: int(txt)
+            except: return 0
+            if id == F_HEIGHT: self.handler.atts.set("height",txt)
+            elif id == F_WIDTH: self.handler.atts.set("width",txt)
 
 ##########################
 ## control handler
@@ -186,12 +163,11 @@ class control_handler(node_handler):
     """ A nodehandler for form controls.
         <nodehandler name='?' module='forms' class='control_handler' />
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
+    def __init__(self, xml, tree_node):
+        node_handler.__init__(self, xml, tree_node)
 
     def get_size_constraint(self):
         return 0
-
 
 ##########################
 ## textctrl handler
@@ -207,16 +183,15 @@ class textctrl_handler(node_handler):
            <text multiline='0' send_button='0' raw_mode='0' hide_title='0'>Text In Node</text>
         </nodehandler>
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.text_elem = self.master_dom.getElementsByTagName('text')[0]
-        self.text = component.get('xml').safe_get_text_node(self.text_elem)
-        if self.text_elem.getAttribute("send_button") == "":
-            self.text_elem.setAttribute("send_button","0")
-        if self.text_elem.getAttribute("raw_mode") == "":
-            self.text_elem.setAttribute("raw_mode","0")
-        if self.text_elem.getAttribute("hide_title") == "":
-            self.text_elem.setAttribute("hide_title","0")
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.text_elem = self.xml.find('text')
+        if self.text_elem.get("send_button") == "":
+            self.text_elem.set("send_button","0")
+        if self.text_elem.get("raw_mode") == "":
+            self.text_elem.set("raw_mode","0")
+        if self.text_elem.get("hide_title") == "":
+            self.text_elem.set("hide_title","0")
 
     def get_design_panel(self,parent):
         return textctrl_edit_panel(parent,self)
@@ -225,28 +200,32 @@ class textctrl_handler(node_handler):
         return text_panel(parent,self)
 
     def get_size_constraint(self):
-        return int(self.text_elem.getAttribute("multiline"))
+        return int(self.text_elem.get("multiline",0))
 
     def is_multi_line(self):
-        return int(self.text_elem.getAttribute("multiline"))
+        return int(self.text_elem.get("multiline",0))
 
     def is_raw_send(self):
-        return int(self.text_elem.getAttribute("raw_mode"))
+        return int(self.text_elem.get("raw_mode",0))
 
     def is_hide_title(self):
-        return int(self.text_elem.getAttribute("hide_title"))
+        return int(self.text_elem.get("hide_title",0))
 
     def has_send_button(self):
-        return int(self.text_elem.getAttribute("send_button"))
-
+        return int(self.text_elem.get("send_button",0))
 
     def tohtml(self):
-        txt = self.text._get_nodeValue()
+        txt = self.get_value()
         txt = string.replace(txt,'\n',"<br />")
         if not self.is_hide_title():
-            txt = "<b>"+self.master_dom.getAttribute("name")+":</b> "+txt
+            txt = "<b>"+self.xml.get("name")+":</b> "+txt
         return txt
 
+    def get_value(self):
+        return self.text_elem.text
+
+    def set_value(self, new_value):
+        self.text_elem.text = str(new_value)
 
 FORM_TEXT_CTRL = wx.NewId()
 FORM_SEND_BUTTON = wx.NewId()
@@ -265,9 +244,10 @@ class text_panel(wx.Panel):
             text_style = 0
             sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        txt = handler.text._get_nodeValue()
+        txt = handler.get_value()
+        if txt == None: txt = ''
         self.text = wx.TextCtrl(self, FORM_TEXT_CTRL, txt, style=text_style)
-        sizer.Add(wx.StaticText(self, -1, handler.master_dom.getAttribute('name')+": "), 0, sizer_style)
+        sizer.Add(wx.StaticText(self, -1, handler.xml.get('name')+": "), 0, sizer_style)
         sizer.Add(wx.Size(5,0))
         sizer.Add(self.text, 1, sizer_style)
 
@@ -284,8 +264,8 @@ class text_panel(wx.Panel):
 
     def on_text(self,evt):
         txt = self.text.GetValue()
-        txt = xml.strip_text(txt)
-        self.handler.text._set_nodeValue(txt)
+        txt = strip_text(txt)
+        self.handler.text_elem.text = txt
 
     def on_send(self,evt):
         txt = self.text.GetValue()
@@ -315,7 +295,7 @@ class textctrl_edit_panel(wx.Panel):
         self.handler = handler
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Text Properties"), wx.VERTICAL)
 
-        self.title = wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name'))
+        self.title = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
         self.multi = wx.CheckBox(self, F_MULTI, " Multi-Line")
         self.multi.SetValue(handler.is_multi_line())
         self.raw_send = wx.CheckBox(self, F_RAW_SEND, " Send as Macro")
@@ -341,7 +321,7 @@ class textctrl_edit_panel(wx.Panel):
             sizer_style=wx.EXPAND
             text_style = 0
             multi = 0
-        self.text = wx.TextCtrl(self, F_TEXT, handler.text._get_nodeValue(),style=text_style)
+        self.text = wx.TextCtrl(self, F_TEXT, handler.get_value(),style=text_style)
         sizer.Add(wx.Size(5,0))
         sizer.Add(self.text, multi, sizer_style)
         self.SetSizer(sizer)
@@ -359,28 +339,24 @@ class textctrl_edit_panel(wx.Panel):
         if id == P_TITLE:
             txt = self.title.GetValue()
             if not len(txt): return
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         if id == F_TEXT:
             txt = self.text.GetValue()
-            txt = xml.strip_text(txt)
-            self.handler.text._set_nodeValue(txt)
+            txt = strip_text(txt)
+            self.handler.text_elem.text = txt
 
     def on_button(self,evt):
-        self.handler.text_elem.setAttribute("multiline",str(bool2int(evt.Checked())))
+        self.handler.text_elem.set("multiline",str(bool2int(evt.Checked())))
 
     def on_raw_button(self,evt):
-        self.handler.text_elem.setAttribute("raw_mode",str(bool2int(evt.Checked())))
+        self.handler.text_elem.set("raw_mode",str(bool2int(evt.Checked())))
 
     def on_hide_button(self,evt):
-        self.handler.text_elem.setAttribute("hide_title",str(bool2int(evt.Checked())))
+        self.handler.text_elem.set("hide_title",str(bool2int(evt.Checked())))
 
     def on_send_button(self,evt):
-        self.handler.text_elem.setAttribute("send_button",str(bool2int(evt.Checked())))
-
-
-
-
+        self.handler.text_elem.set("send_button",str(bool2int(evt.Checked())))
 
 
 #######################
@@ -406,14 +382,14 @@ class listbox_handler(node_handler):
         </list>
     </nodehandler>
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.list = self.master_dom.getElementsByTagName('list')[0]
-        self.options = self.list.getElementsByTagName('option')
-        if self.list.getAttribute("send_button") == "":
-            self.list.setAttribute("send_button","0")
-        if self.list.getAttribute("hide_title") == "":
-            self.list.setAttribute("hide_title","0")
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.list = self.xml.find('list')
+        self.options = self.list.findall('option')
+        if self.list.get("send_button") == "":
+            self.list.set("send_button","0")
+        if self.list.get("hide_title") == "":
+            self.list.set("hide_title","0")
 
     def get_design_panel(self,parent):
         return listbox_edit_panel(parent,self)
@@ -422,24 +398,24 @@ class listbox_handler(node_handler):
         return listbox_panel(parent,self)
 
     def get_type(self):
-        return int(self.list.getAttribute("type"))
+        return int(self.list.get("type"))
 
     def set_type(self,type):
-        self.list.setAttribute("type",str(type))
+        self.list.set("type",str(type))
 
     def is_hide_title(self):
-        return int(self.list.getAttribute("hide_title"))
+        return int(self.list.get("hide_title", 0))
 
     # single selection methods
     def get_selected_node(self):
         for opt in self.options:
-            if opt.getAttribute("selected") == "1": return opt
+            if opt.get("selected") == "1": return opt
         return None
 
     def get_selected_index(self):
         i = 0
         for opt in self.options:
-            if opt.getAttribute("selected") == "1":
+            if opt.get("selected") == "1":
                 return i
             i += 1
         return 0
@@ -447,7 +423,7 @@ class listbox_handler(node_handler):
     def get_selected_text(self):
         node = self.get_selected_node()
         if node:
-            return component.get('xml').safe_get_text_node(node)._get_nodeValue()
+            return node.text
         else:
             return ""
 
@@ -457,22 +433,22 @@ class listbox_handler(node_handler):
     def get_selections(self):
         opts = []
         for opt in self.options:
-            if opt.getAttribute("selected") == "1":
+            if opt.get("selected") == "1":
                 opts.append(opt)
         return opts
 
     def get_selections_text(self):
         opts = []
         for opt in self.options:
-            if opt.getAttribute("selected") == "1":
-                opts.append(component.get('xml').safe_get_text_node(opt)._get_nodeValue())
+            if opt.get("selected") == "1":
+                opts.append(opt.text)
         return opts
 
     def get_selections_index(self):
         opts = []
         i = 0
         for opt in self.options:
-            if opt.getAttribute("selected") == "1":
+            if opt.get("selected") == "1":
                 opts.append(i)
             i += 1
         return opts
@@ -482,41 +458,40 @@ class listbox_handler(node_handler):
     def set_selected_node(self,index,selected=1):
         if self.get_type() != L_CHECK:
             self.clear_selections()
-        self.options[index].setAttribute("selected", str(bool2int(selected)))
+        self.options[index].set("selected", str(bool2int(selected)))
 
     def clear_selections(self):
         for opt in self.options:
-            opt.setAttribute("selected","0")
+            opt.set("selected","0")
 
     # misc methods
 
     def get_options(self):
         opts = []
         for opt in self.options:
-            opts.append(component.get('xml').safe_get_text_node(opt)._get_nodeValue())
+            opts.append(opt.text)
         return opts
 
     def get_option(self,index):
-        return component.get('xml').safe_get_text_node(self.options[index])._get_nodeValue()
+        return self.options[index].text
 
     def add_option(self,opt):
-        elem = minidom.Element('option')
-        elem.setAttribute("value","0")
-        elem.setAttribute("selected","0")
-        t_node = minidom.Text(opt)
-        t_node = elem.appendChild(t_node)
-        self.list.appendChild(elem)
-        self.options = self.list.getElementsByTagName('option')
+        elem = Element('option')
+        elem.set("value","0")
+        elem.set("selected","0")
+        elem.text = opt
+        self.list.append(elem)
+        self.options = self.list.findall('option')
 
     def remove_option(self,index):
-        self.list.removeChild(self.options[index])
-        self.options = self.list.getElementsByTagName('option')
+        self.list.remove(self.options[index])
+        self.options = self.list.findall('option')
 
     def edit_option(self,index,value):
-        component.get('xml').safe_get_text_node(self.options[index])._set_nodeValue(value)
+        self.options[index].text = value
 
     def has_send_button(self):
-        if self.list.getAttribute("send_button") == '0':
+        if self.list.get("send_button") == '0':
             return False
         else:
             return True
@@ -531,11 +506,13 @@ class listbox_handler(node_handler):
         opts = self.get_selections_text()
         text = ""
         if not self.is_hide_title():
-            text = "<b>"+self.master_dom.getAttribute("name")+":</b> "
+            text = "<b>"+self.xml.get("name")+":</b> "
         comma = ", "
         text += comma.join(opts)
         return text
 
+    def get_value(self):
+        return "\n".join(self.get_selections_text())
 
 
 F_LIST = wx.NewId()
@@ -550,7 +527,7 @@ class listbox_panel(wx.Panel):
         opts = handler.get_options()
         cur_opt = handler.get_selected_text()
         type = handler.get_type()
-        label = handler.master_dom.getAttribute('name')
+        label = handler.xml.get('name')
 
         if type == L_DROP:
             self.list = wx.ComboBox(self, F_LIST, cur_opt, choices=opts, style=wx.CB_READONLY)
@@ -632,7 +609,7 @@ class listbox_edit_panel(wx.Panel):
         self.handler = handler
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "List Box Properties"), wx.VERTICAL)
 
-        self.text = wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name'))
+        self.text = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
 
         opts = handler.get_options()
         self.listbox = wx.ListBox(self, F_LIST, choices=opts, style=wx.LB_HSCROLL|wx.LB_SINGLE|wx.LB_NEEDED_SB)
@@ -714,15 +691,14 @@ class listbox_edit_panel(wx.Panel):
         txt = self.text.GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 
     def on_send_button(self,evt):
-        self.handler.list.setAttribute("send_button", str( bool2int(evt.Checked()) ))
+        self.handler.list.set("send_button", str( bool2int(evt.Checked()) ))
 
     def on_hide_button(self,evt):
-        print "hide_title, " + str(bool2int(evt.Checked()))
-        self.handler.list.setAttribute("hide_title", str( bool2int(evt.Checked()) ))
+        self.handler.list.set("hide_title", str( bool2int(evt.Checked()) ))
 
 
 ###############################
@@ -735,12 +711,12 @@ class link_handler(node_handler):
                 <link  href='http//??.??'  />
         </nodehandler >
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.link = self.master_dom._get_firstChild()
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.link = self.xml[0]
 
     def on_use(self,evt):
-        href = self.link.getAttribute("href")
+        href = self.link.get("href")
         wb = webbrowser.get()
         wb.open(href)
 
@@ -751,14 +727,14 @@ class link_handler(node_handler):
         return link_panel(parent,self)
 
     def tohtml(self):
-        href = self.link.getAttribute("href")
-        title = self.master_dom.getAttribute("name")
+        href = self.link.get("href")
+        title = self.xml.get("name")
         return "<a href=\""+href+"\" >"+title+"</a>"
 
 class link_panel(wx.StaticText):
     def __init__(self,parent,handler):
         self.handler = handler
-        label = handler.master_dom.getAttribute('name')
+        label = handler.xml.get('name')
         wx.StaticText.__init__(self,parent,-1,label)
         self.SetForegroundColour(wx.BLUE)
         self.Bind(wx.EVT_LEFT_DOWN, self.handler.on_use)
@@ -773,8 +749,8 @@ class link_edit_panel(wx.Panel):
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Link Properties"), wx.VERTICAL)
 
         self.text = {}
-        self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name'))
-        self.text[P_URL] = wx.TextCtrl(self, P_URL, handler.link.getAttribute('href'))
+        self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
+        self.text[P_URL] = wx.TextCtrl(self, P_URL, handler.link.get('href'))
 
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
@@ -790,10 +766,10 @@ class link_edit_panel(wx.Panel):
         txt = self.text[id].GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == P_URL:
-            self.handler.link.setAttribute('href',txt)
+            self.handler.link.set('href',txt)
 
 ##########################
 ## webimg node handler
@@ -804,21 +780,20 @@ class webimg_handler(node_handler):
                 <link  href='http//??.??'  />
         </nodehandler >
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.link = self.master_dom._get_firstChild()
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.link = self.xml[0]
 
     def get_design_panel(self,parent):
         return link_edit_panel(parent,self)
 
     def get_use_panel(self,parent):
-        img = img_helper().load_url(self.link.getAttribute("href"))
-        #print img
+        img = img_helper().load_url(self.link.get("href"))
         if not img is None:
             return wx.StaticBitmap(parent,-1,img,size= wx.Size(img.GetWidth(),img.GetHeight()))
         return wx.EmptyBitmap(1, 1)
 
     def tohtml(self):
-        href = self.link.getAttribute("href")
-        title = self.master_dom.getAttribute("name")
+        href = self.link.get("href")
+        title = self.xml.get("name")
         return "<img src=\""+href+"\" alt="+title+" >"

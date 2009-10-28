@@ -46,6 +46,9 @@ import time
 from orpg.orpgCore import component
 from orpg.orpg_xml import xml
 
+from xml.etree.ElementTree import ElementTree, Element
+from xml.etree.ElementTree import fromstring, tostring
+
 try:
     import bz2
     cmpBZ2 = True
@@ -319,6 +322,29 @@ class client_base:
      client provided IP address to have much value.  As such, we now label it as deprecated.
     """
     def toxml(self,action):
+        """
+        el = Element('player')
+        el.set('name', myescape(self.name))
+        el.set('action', action)
+        el.set('id', self.id)
+        el.set('group_id', self.group_id)
+        el.set('ip', self.ip)
+        el.set('status', self.text_status)
+        el.set('version', self.version)
+        el.set('protocol_version', self.protocol_version)
+        el.set('client_string', self.client_string)
+        el.set('useCompression', str(self.useCompression))
+
+        cmpType = 'None'
+        if cmpBZ2 and (self.compressionType == 'Undefined' or self.compressionType == bz2):
+            cmpType = 'bz2'
+        elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
+            cmpType = 'zlib'
+
+        el.set('cmpType', cmpType)
+        return el
+        """
+        
         xml_data = '<player name="' + myescape(self.name) + '"'
         xml_data += ' action="' + action + '" id="' + self.id + '"'
         xml_data += ' group_id="' + self.group_id + '" ip="' + self.ip + '"'

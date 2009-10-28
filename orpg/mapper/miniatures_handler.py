@@ -42,7 +42,11 @@ import os
 
 from orpg.tools.orpg_settings import settings
 
-LABEL_TOOL = wx.NewId()
+from xml.etree.ElementTree import ElementTree, Element
+from xml.etree.ElementTree import fromstring, tostring
+
+SHOW_LABELS_TOOL = wx.NewId()
+AUTO_LABEL_TOOL = wx.NewId()
 LAYER_TOOL = wx.NewId()
 MIN_LIST_TOOL = wx.NewId()
 MIN_TOOL = wx.NewId()
@@ -103,7 +107,6 @@ class miniatures_handler(base_layer_handler):
         self.sel_min = None
         self.auto_label = 1
         self.use_serial = 1
-        self.auto_label_cb = None
         self.canvas = canvas
         self.settings = settings
         self.mini_rclick_menu_extra_items = {}
@@ -119,19 +122,16 @@ class miniatures_handler(base_layer_handler):
         self.tooltip_timer.Stop()
         dt = myFileDropTarget(self)
         self.canvas.SetDropTarget(dt)
+        self.tooltip = wx.ToolTip('')
         #wxInitAllImageHandlers()
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)
         # add controls in reverse order! (unless you want them after the default tools)
-        self.auto_label_cb = wx.CheckBox(self, wx.ID_ANY, ' Auto Label ', (-1,-1),(-1,-1))
-        self.auto_label_cb.SetValue(self.auto_label)
         self.min_url = wx.ComboBox(self, wx.ID_ANY, "http://", style=wx.CB_DROPDOWN | wx.CB_SORT)
         self.localBrowse = wx.Button(self, wx.ID_ANY, 'Browse', style=wx.BU_EXACTFIT)
         minilist = createMaskedButton( self, dir_struct["icon"]+'questionhead.gif', 'Edit miniature properties', wx.ID_ANY)
         miniadd = wx.Button(self, wx.ID_OK, "Add Miniature", style=wx.BU_EXACTFIT)
-        self.sizer.Add(self.auto_label_cb,0,wx.ALIGN_CENTER)
-        self.sizer.Add((6, 0))
         self.sizer.Add(self.min_url, 1, wx.ALIGN_CENTER)
         self.sizer.Add((6, 0))
         self.sizer.Add(miniadd, 0, wx.ALIGN_CENTER)
@@ -142,7 +142,6 @@ class miniatures_handler(base_layer_handler):
         self.Bind(wx.EVT_BUTTON, self.on_min_list, minilist)
         self.Bind(wx.EVT_BUTTON, self.on_miniature, miniadd)
         self.Bind(wx.EVT_BUTTON, self.on_browse, self.localBrowse)
-        self.Bind(wx.EVT_CHECKBOX, self.on_label, self.auto_label_cb)
 
     def on_browse(self, evt):
         if not self.role_is_gm_or_player(): return
@@ -207,15 +206,18 @@ class miniatures_handler(base_layer_handler):
     def build_menu(self,label = "Miniature"):
         base_layer_handler.build_menu(self,label)
         self.main_menu.AppendSeparator()
-        self.main_menu.Append(LABEL_TOOL,"&Auto label","",1)
-        self.main_menu.Check(LABEL_TOOL,self.auto_label)
+        self.main_menu.Append(SHOW_LABELS_TOOL, "&Show Labels", '', 1)
+        self.main_menu.Check(SHOW_LABELS_TOOL, self.canvas.layers['miniatures'].show_labels)
+        self.main_menu.Append(AUTO_LABEL_TOOL,"&Auto label","",1)
+        self.main_menu.Check(AUTO_LABEL_TOOL, self.auto_label) 
         self.main_menu.Append(SERIAL_TOOL,"&Number minis","",1)
         self.main_menu.Check(SERIAL_TOOL, self.use_serial)
         self.main_menu.Append(MAP_REFRESH_MINI_URLS,"&Refresh miniatures")       #  Add the menu item
         self.main_menu.AppendSeparator()
         self.main_menu.Append(MIN_MOVE, "Move")
         self.canvas.Bind(wx.EVT_MENU, self.on_map_board_menu_item, id=MAP_REFRESH_MINI_URLS)          #  Set the handler
-        self.canvas.Bind(wx.EVT_MENU, self.on_label, id=LABEL_TOOL)
+        self.canvas.Bind(wx.EVT_MENU, self.on_show_labels, id=SHOW_LABELS_TOOL)
+        self.canvas.Bind(wx.EVT_MENU, self.on_auto_label, id=AUTO_LABEL_TOOL)
         self.canvas.Bind(wx.EVT_MENU, self.on_serial, id=SERIAL_TOOL)
         # build miniature meenu
         self.min_menu = wx.Menu()
@@ -355,15 +357,18 @@ class miniatures_handler(base_layer_handler):
             return
         elif id == MIN_REMOVE: self.canvas.layers['miniatures'].del_miniature(self.sel_rmin)
         elif id == MIN_TO_GAMETREE:
+            ### Alpha ### implements ElementTree
             min_xml = self.sel_rmin.toxml(action="new")
-            node_begin = "<nodehandler module='map_miniature_nodehandler' class='map_miniature_handler' name='"
-            if self.sel_rmin.label: node_begin += self.sel_rmin.label + "'"
-            else:  node_begin += "Unnamed Miniature'"
-            node_begin += ">"
-	    gametree = component.get('tree')
-            node_xml = node_begin + min_xml + '</nodehandler>'
-            #print "Sending this XML to insert_xml:" + node_xml
-            gametree.insert_xml(str(node_xml))
+            node = Element('nodehandler')
+            mini = fromstring(min_xml)
+            node.set('module', 'map_miniature_nodehandler')
+            node.set('class', 'map_miniature_handler')
+            name = self.sel_rmin.label if self.sel_rmin.label else 'Unnamed Miniature'
+            node.set('name', name)
+            node.append(mini)
+            gametree = component.get('tree')
+            gametree.insert_xml(tostring(node))
+            ### ElementTree is a nice decision from Core, kudos!! ###
         elif id == MIN_SHOW_HIDE:
             if self.sel_rmin.hide:  self.sel_rmin.hide = 0
             else: self.sel_rmin.hide = 1
@@ -500,6 +505,8 @@ class miniatures_handler(base_layer_handler):
         if min_url == "" or min_url == "http://": return
         if min_url[:7] != "http://" : min_url = "http://" + min_url
         # make label
+        if self.auto_label: print 'auto-label'
+        if not self.auto_label: print 'False'
         if self.auto_label and min_url[-4:-3] == '.':
             start = min_url.rfind("/") + 1
             min_label = min_url[start:len(min_url)-4]
@@ -510,6 +517,7 @@ class miniatures_handler(base_layer_handler):
         try:
             id = 'mini-' + self.canvas.frame.session.get_next_id()
             # make the new mini appear in top left of current viewable map
+            print id
             dc = wx.ClientDC(self.canvas)
             self.canvas.PrepareDC(dc)
             dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
@@ -529,9 +537,14 @@ class miniatures_handler(base_layer_handler):
         #except Exception, e:
             #wx.MessageBox(str(e),"Miniature Error")
 
-    def on_label(self,evt):
+    def on_show_labels(self, evt):
+        show_labels = not self.canvas.layers['miniatures'].show_labels
+        self.canvas.layers['miniatures'].show_labels = show_labels
+        self.canvas.Refresh()
+
+    def on_auto_label(self,evt):
         self.auto_label = not self.auto_label
-        self.auto_label_cb.SetValue(self.auto_label)
+        #self.auto_label_cb.SetValue(self.auto_label)
         #self.send_map_data()
         #self.Refresh()
 
@@ -541,7 +554,7 @@ class miniatures_handler(base_layer_handler):
             self.infoPost("You must be a GM to use this feature")
             return
         #d = min_list_panel(self.frame.GetParent(),self.canvas.layers,"Miniature list")
-        d = min_list_panel(self.canvas.frame,self.canvas.layers,"Miniature list")
+        d = min_list_panel(self.canvas.frame, self.canvas.layers, "Miniature list")
         if d.ShowModal() == wx.ID_OK: d.Destroy()
         self.canvas.Refresh(False)
 
@@ -630,9 +643,11 @@ class miniatures_handler(base_layer_handler):
         pos = wx.Point(dc.DeviceToLogicalX(pos.x), dc.DeviceToLogicalY(pos.y))
         mini_list = self.getMiniListOrSelectedMini(pos)
         if len(mini_list) > 0:
-            tooltip = self.get_mini_tooltip(mini_list)
-            self.canvas.SetToolTipString(tooltip)
-        else: self.canvas.SetToolTipString("")
+            tooltip = mini_list[0].label
+            #self.canvas.SetToolTipString(mini_list[0].label) 
+            #Once set, it never unsets, so it sucks.
+        else:
+            self.canvas.SetToolTipString('')
 
     def on_motion(self,evt):
         if evt.Dragging() and evt.LeftIsDown():
@@ -640,8 +655,6 @@ class miniatures_handler(base_layer_handler):
                 drag_bmp = self.drag_mini.bmp
                 if self.drag_mini.width and self.drag_mini.height:
                     tmp_image = drag_bmp.ConvertToImage()
-                    tmp_image.Rescale(int(self.drag_mini.width * self.canvas.layers['grid'].mapscale), 
-                        int(self.drag_mini.height * self.canvas.layers['grid'].mapscale))
                     tmp_image.ConvertAlphaToMask()
                     drag_bmp = tmp_image.ConvertToBitmap()
                     mask = wx.Mask(drag_bmp, wx.Colour(tmp_image.GetMaskRed(), 
@@ -662,7 +675,7 @@ class miniatures_handler(base_layer_handler):
                 self.canvas.drag.Move(evt.GetPosition())
                 self.canvas.drag.Show()
         # reset tool tip timer
-        self.canvas.SetToolTipString("")
+        self.canvas.SetToolTipString('')
         self.tooltip_timer.Restart(self.tooltip_delay_miliseconds, evt.GetPosition())
 
     def on_left_up(self,evt):

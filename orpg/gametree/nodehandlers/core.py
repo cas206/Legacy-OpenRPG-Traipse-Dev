@@ -29,6 +29,7 @@
 __version__ = "$Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $"
 
 from nodehandler_version import NODEHANDLER_VERSION
+
 try:
     from orpg.orpg_windows import *
     from orpg.dirpath import dir_struct
@@ -40,6 +41,7 @@ try:
 except:
     import wx
 
+from xml.etree.ElementTree import ElementTree, Element, tostring, XML
 
 #html defaults
 TH_BG = "#E9E9E9"
@@ -48,22 +50,33 @@ TH_BG = "#E9E9E9"
 ##########################
 class node_handler:
     """ Base nodehandler with virtual functions and standard implmentations """
-    def __init__(self,xml_dom,tree_node):
-        self.master_dom = xml_dom
+    def __init__(self,xml,tree_node):
+        self.xml = xml
         self.mytree_node = tree_node
-        self.tree = component.get('tree')
-        self.frame = component.get('frame')
-        self.chat = component.get('chat')
-        self.xml = component.get('xml') #Not used?
+        self.tree = open_rpg.get_component('tree')
+        self.frame = open_rpg.get_component('frame')
+        self.chat = open_rpg.get_component('chat')
         self.drag = True
         self.myeditor = None # designing
-        self.myviewer = None # pretty print
+        self.myviewer = None # prett print
         self.mywindow = None # using
         # call version hook
-        self.on_version(self.master_dom.getAttribute("version"))
+        self.on_version(self.xml.get("version"))
         # set to current version
-        self.master_dom.setAttribute("version",NODEHANDLER_VERSION)
+        self.xml.set("version",NODEHANDLER_VERSION)
         # null events
+        self.frame_size = None
+        self.frame_pos  = None
+        try:
+            frame = self.xml.get("frame")
+            if len(frame):
+                (sx,sy,px,py) = [int(value) for value in frame.split(',')]
+                self.frame_size = (sx, sy)
+                (maxx, maxy) = DisplaySize()
+                if px < maxx-80 and py < maxy-50:#if it's off screen ignore the saved pos
+                    self.frame_pos  = (px, py) 
+        except:
+            pass
 
     def on_version(self,old_version):
         ## added version control code here or implement a new on_version in your derived class.
@@ -76,22 +89,13 @@ class node_handler:
     def on_ldclick(self,evt):
         return 0
 
-    def traverse(self, root, function, data=None, recurse=True):
-        child, cookie = self.tree.GetFirstChild(root)
-        while child.IsOk(): 
-            function(self.tree.GetPyData(child), data) 
-            if recurse: 
-                self.traverse(child, function, data) 
-            child, cookie = self.tree.GetNextChild(root, cookie) 
-
-
     def usefulness(self,text):
         if text=="useful":
-            self.master_dom.setAttribute('status',"useful")
+            self.xml.set('status',"useful")
         elif text=="useless":
-            self.master_dom.setAttribute('status',"useless")
+            self.xml.set('status',"useless")
         elif text=="indifferent":
-            self.master_dom.setAttribute('status',"indifferent")
+            self.xml.set('status',"indifferent")
 
     def on_design(self,evt):
         try:
@@ -102,16 +106,17 @@ class node_handler:
             if self.create_designframe():
                 self.myeditor.Show()
                 self.myeditor.Raise()
-            else: return
+            else:
+                return
         wx.CallAfter(self.myeditor.Layout)
 
 
     def create_designframe(self):
-        title = self.master_dom.getAttribute('name') + " Editor"
+        title = self.xml.get('name') + " Editor"
         self.myeditor = wx.Frame(None, -1, title)
         self.myeditor.Freeze()
         if wx.Platform == '__WXMSW__':
-            icon = wx.Icon(dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
+            icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
             self.myeditor.SetIcon(icon)
             del icon
 
@@ -144,19 +149,23 @@ class node_handler:
         except:
             del self.mywindow
             if self.create_useframe():
+                self.mywindow.SetSize(self.frame_size)
+                if self.frame_pos:
+                    self.mywindow.SetPosition(self.frame_pos)
                 self.mywindow.Show()
                 self.mywindow.Raise()
             else:
                 return
         wx.CallAfter(self.mywindow.Layout)
 
+
     def create_useframe(self):
-        caption = self.master_dom.getAttribute('name')
+        caption = self.xml.get('name', '')
         self.mywindow = wx.Frame(None, -1, caption)
         self.mywindow.Freeze()
 
         if wx.Platform == '__WXMSW__':
-            icon = wx.Icon(dir_struct["icon"] + 'note.ico', wx.BITMAP_TYPE_ICO)
+            icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'note.ico', wx.BITMAP_TYPE_ICO)
             self.mywindow.SetIcon(icon)
             del icon
         self.mywindow.panel = self.get_use_panel(self.mywindow)
@@ -169,27 +178,36 @@ class node_handler:
         self.mywindow.SetSizer(sizer)
         self.mywindow.SetAutoLayout(True)
 
-        (x, y) = self.mywindow.GetSize()
-        if x < 400:
-            x = 400
-        if y < 400:
-            y = 400
+        if self.frame_size is None:
+            self.frame_size = self.mywindow.GetSize()
+            if self.frame_size.x < 400:
+                self.frame_size.x = 400
+            if self.frame_size.y < 400:
+                self.frame_size.y = 400
 
-        self.mywindow.SetSize((x, y))
         self.mywindow.Layout()
         self.mywindow.Thaw()
 
+        self.mywindow.Bind(wx.EVT_CLOSE, self.close_useframe)
+
         return True
+
+    def close_useframe(self, evt):
+        self.frame_size = self.mywindow.GetSize()
+        self.frame_pos  = self.mywindow.GetPosition()
+        frame_values = str(self.frame_size.x)+','+str(self.frame_size.y)+','+str(self.frame_pos.x)+','+str(self.frame_pos.y)
+        self.xml.set("frame", frame_values)
+        self.mywindow.Destroy()
 
 
     def on_html_view(self,evt):
         try:
             self.myviewer.Raise()
         except:
-            caption = self.master_dom.getAttribute('name')
+            caption = self.xml.get('name')
             self.myviewer = wx.Frame(None, -1, caption)
             if wx.Platform == '__WXMSW__':
-                icon = wx.Icon(dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
+                icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'grid.ico', wx.BITMAP_TYPE_ICO)
                 self.myviewer.SetIcon(icon)
                 del icon
             self.myviewer.panel = self.get_html_panel(self.myviewer)
@@ -204,7 +222,7 @@ class node_handler:
     def on_del(self,evt):
         print "on del"
 
-    def on_new_data(self,xml_dom):
+    def on_new_data(self,xml):
         pass
 
     def get_scaled_bitmap(self,x,y):
@@ -222,47 +240,53 @@ class node_handler:
             return
         #if self.is_my_child(self.mytree_node,drag_obj.mytree_node):
         #    return
-        xml_dom = self.tree.drag_obj.delete()
-        parent = self.master_dom._get_parentNode()
-        xml_dom = parent.insertBefore(xml_dom,self.master_dom)
+        drop_xml = self.tree.drag_obj.delete()
         parent_node = self.tree.GetItemParent(self.mytree_node)
         prev_sib = self.tree.GetPrevSibling(self.mytree_node)
+        if parent_node == self.tree.root:
+            parent_xml = self.tree.GetPyData(parent_node)
+        else:
+            parent_xml = self.tree.GetPyData(parent_node).xml
+        for i in range(len(parent_xml)):
+            if parent_xml[i] is self.xml:
+                parent_xml.insert(i, drop_xml)
+                break
         if not prev_sib.IsOk():
             prev_sib = parent_node
-        self.tree.load_xml(xml_dom, parent_node, prev_sib)
+        self.tree.load_xml(drop_xml, parent_node, prev_sib)
 
     def toxml(self,pretty=0):
-        return component.get('xml').toxml(self.master_dom,pretty)
+        return tostring(self.xml) #toxml(self.master_dom,pretty)
 
     def tohtml(self):
-        return self.master_dom.getAttribute("name")
+        return self.xml.get("name")
 
     def delete(self):
         """ removes the tree_node and xml_node, and returns the removed xml_node """
-
+        parent_node = self.tree.GetItemParent(self.mytree_node)
+        if parent_node == self.tree.root:
+            parent_xml = self.tree.GetPyData(parent_node)
+        else:
+            parent_xml = self.tree.GetPyData(parent_node).xml
+        parent_xml.remove(self.xml)
         self.tree.Delete(self.mytree_node)
-        parent = self.master_dom._get_parentNode()
-        return parent.removeChild(self.master_dom)
+        return self.xml
 
     def rename(self,name):
         if len(name):
             self.tree.SetItemText(self.mytree_node,name)
-            self.master_dom.setAttribute('name', name)
+            self.xml.set('name', name)
 
     def change_icon(self,icon):
-        self.master_dom.setAttribute("icon",icon)
+        self.xml.set("icon",icon)
         self.tree.SetItemImage(self.mytree_node, self.tree.icons[icon])
         self.tree.SetItemImage(self.mytree_node, self.tree.icons[icon], wx.TreeItemIcon_Selected)
         self.tree.Refresh()
 
     def on_save(self,evt):
-        f = wx.FileDialog(self.tree,"Select a file", dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
+        f = wx.FileDialog(self.tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
-            type = f.GetFilterIndex()
-            if f.GetPath()[:len(f.GetPath())-4] != '.xml': file = open(f.GetPath()+'.xml',"w")
-            else: file = open(f.GetPath(),"w")
-            file.write(self.toxml(1))
-            file.close()
+            ElementTree(self.xml).write(f.GetPath())
         f.Destroy()
 
     def get_design_panel(self,parent):
@@ -275,16 +299,43 @@ class node_handler:
         html_str = "<html><body bgcolor=\"#FFFFFF\" >"+self.tohtml()+"</body></html>"
         wnd = wx.html.HtmlWindow(parent,-1)
         html_str = self.chat.ParseDice(html_str)
-	wnd.SetPage(html_str)
+        wnd.SetPage(html_str)
         return wnd
 
     def get_size_constraint(self):
         return 0
 
     def about(self):
-        html_str = "<b>"+ self.master_dom.getAttribute('class')
+        html_str = "<b>"+ self.xml.get('class')
         html_str += " Applet</b><br />by Chris Davis<br />chris@rpgarchive.com"
         return html_str
+
+    def set_referenceable(self, value):
+        if value:
+            self.xml.set('referenceable', '1')
+        else:
+            self.xml.set('referenceable', '0')
+
+    def get_referenceable(self):
+        if 'referenceable' in self.xml.attrib and self.xml.get('referenceable')=="0":
+            return False
+        return True
+
+    def set_namespace(self, value):
+        if value:
+            self.xml.set('namespace', '1')
+        else:
+            self.xml.set('namespace', '0')
+
+    def get_namespace(self):
+        if 'namespace' in self.xml.attrib and self.xml.get('namespace')=="1":
+            return True
+        return False
+
+    def get_value(self):
+        return None
+        
+
 
 P_TITLE = 10
 P_BODY = 20
@@ -293,10 +344,10 @@ class text_edit_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name')),
-                        P_BODY : html_text_edit(self,P_BODY,handler.text._get_nodeValue(),self.on_text)
+        self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')),
+                        P_BODY : html_text_edit(self,P_BODY,handler.text,self.on_text)
                       }
-        #P_BODY : wx.TextCtrl(self, P_BODY,handler.text._get_nodeValue(), style=wx.TE_MULTILINE)
+        #P_BODY : wx.TextCtrl(self, P_BODY,handler.text, style=wx.TE_MULTILINE)
 
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
@@ -322,7 +373,7 @@ class text_edit_panel(wx.Panel):
                 wx.MessageBox("Some non 7-bit ASCII characters found and stripped","Warning!")
             txt = u_txt
             if txt != "":
-                self.handler.master_dom.setAttribute('name',txt)
+                self.handler.xml.set('name',txt)
                 self.handler.rename(txt)
         elif id == P_BODY:
             txt = self.text[id].get_text()
@@ -348,21 +399,19 @@ class node_loader(node_handler):
     """ clones childe node and insert it at top of tree
         <nodehandler name='?'  module='core' class='node_loader'  />
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
 
     def on_rclick(self,evt):
         pass
 
     def on_ldclick(self,evt):
-        title = self.master_dom.getAttribute('name')
-        new_node = self.master_dom._get_firstChild()
-        new_node = new_node.cloneNode(True)
-        child = self.tree.master_dom._get_firstChild()
-        new_node = self.tree.master_dom.insertBefore(new_node,child)
-        tree_node = self.tree.load_xml(new_node,self.tree.root,self.tree.root)
-        obj = self.tree.GetPyData(tree_node)
+        title = self.xml.get('name')
+        new_xml = XML(tostring(self.xml[0]))
+        self.tree.root_xml.insert(0, new_xml)
+        tree_node = self.tree.load_xml(new_xml,self.tree.root,self.tree.root)
         return 1
+        #obj = self.tree.GetPyData(tree_node)
         #obj.on_design(None)
 
 ##########################
@@ -375,25 +424,25 @@ class file_loader(node_handler):
         <file name="file_name.xml" />
         </nodehandler>
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.file_node = self.master_dom._get_firstChild()
-        self.frame = component.get('frame')
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.file_node = self.xml[0]
+        self.frame = open_rpg.get_component('frame')
 
     def on_ldclick(self,evt):
-        file_name = self.file_node.getAttribute("name")
-        self.tree.insert_xml(open(dir_struct["nodes"] + file_name,"r").read())
+        file_name = self.file_node.get("name")
+        self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
         return 1
 
     def on_design(self,evt):
         tlist = ['Title','File Name']
-        vlist = [self.master_dom.getAttribute("name"),
-                  self.file_node.getAttribute("name")]
+        vlist = [self.xml.get("name"),
+                  self.file_node.get("name")]
         dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")
         if dlg.ShowModal() == wx.ID_OK:
             vlist = dlg.get_values()
-            self.file_node.setAttribute('name', vlist[1])
-            self.master_dom.setAttribute('name', vlist[0])
+            self.file_node.set('name', vlist[1])
+            self.xml.set('name', vlist[0])
             self.tree.SetItemText(self.mytree_node,vlist[0])
         dlg.Destroy()
 
@@ -407,27 +456,27 @@ class url_loader(node_handler):
         <file name="http://file_name.xml" />
         </nodehandler>
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.file_node = self.master_dom._get_firstChild()
-        self.frame = component.get('frame')
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.file_node = self.xml[0]
+        self.frame = open_rpg.get_component('frame')
 
     def on_ldclick(self,evt):
-        file_name = self.file_node.getAttribute("url")
+        file_name = self.file_node.get("url")
         file = urllib.urlopen(file_name)
         self.tree.insert_xml(file.read())
         return 1
 
     def on_design(self,evt):
         tlist = ['Title','URL']
-        print "design filename",self.master_dom.getAttribute('name')
-        vlist = [self.master_dom.getAttribute("name"),
-                 self.file_node.getAttribute("url")]
+        print "design filename",self.xml.get('name')
+        vlist = [self.xml.get("name"),
+                 self.file_node.get("url")]
         dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")
         if dlg.ShowModal() == wx.ID_OK:
             vlist = dlg.get_values()
-            self.file_node.setAttribute('url', vlist[1])
-            self.master_dom.setAttribute('name', vlist[0])
+            self.file_node.set('url', vlist[1])
+            self.xml.set('name', vlist[0])
             self.tree.SetItemText(self.mytree_node,vlist[0])
         dlg.Destroy()
 
@@ -439,11 +488,11 @@ class min_map(node_handler):
     """ clones childe node and insert it at top of tree
         <nodehandler name='?'  module='core' class='min_map'  />
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.map = component.get('map')
-        self.mapdata = self.master_dom._get_firstChild()
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.map = open_rpg.get_component('map')
+        self.mapdata = self.xml[0]
 
     def on_ldclick(self,evt):
-        self.map.new_data(toxml(self.mapdata))
+        self.map.new_data(tostring(self.mapdata))
         return 1

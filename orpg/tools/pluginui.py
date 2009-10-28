@@ -316,7 +316,7 @@ class PluginFrame(wx.Frame):
             i += 1
         self.pluginList.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.pluginList.SetColumnWidth(1, wx.LIST_AUTOSIZE)
-        self.pluginList.SetColumnWidth(2, wx.LIST_AUTOSIZE)
+        #self.pluginList.SetColumnWidth(2, wx.LIST_AUTOSIZE)
         self.__doLayout()
         self.__disablePluginBtns()
 

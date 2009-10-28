@@ -62,8 +62,8 @@ from orpg.tools.orpg_log import logger, crash
 from orpg.tools.decorators import debugging
 from orpg.tools.metamenus import MenuBarEx
 
-#from xml.etree.ElementTree import ElementTree, Element
-#from xml.etree.ElementTree import fromstring, tostring
+from xml.etree.ElementTree import ElementTree, Element, iselement
+from xml.etree.ElementTree import fromstring, tostring
 from orpg.orpg_xml import xml #to be replaced by etree
 
 
@@ -972,73 +972,46 @@ class orpgFrame(wx.Frame):
 
         # ok we are not ignoring this message
         #recvSound = "RecvSound"     #  this will be the default sound.  Whisper will change this below
-        if player: display_name = self.chat.chat_display_name(player)
-        else: display_name = "Server Administrator"
-
-        if data[:5] == "<tree":
-            ### Alpha ### Allows users to decide if they want the node or not.
-            dlg = wx.MessageDialog(None, display_name + 'is trying to send you a tree node. Accept?', 'Question', 
-                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-            if dlg.ShowModal() == wx.ID_YES:
-              dlg.Destroy()
-              self.tree.on_receive_data(data,player)
-              self.chat.InfoPost(display_name + " has sent you a tree node...")
-
-        elif data[:4] == "<map": self.map.new_data(data)
-
-        elif data[:5] == "<chat":
-            msg = orpg.chat.chat_msg.chat_msg(data)
-            self.chat.post_incoming_msg(msg,player)
+        ### Alpha  ###
+        etreeEl = Element('msg')
+        try: etreeEl.append(fromstring(data))
+        except: etreeEl.text = data
+        ### Remove after Element Tree is integrated further ###
+        if player:
+            display_name = self.chat.chat_display_name(player)
         else:
-            """
-            all this below code is for comptiablity with older clients and can
-            be removed after a bit
-            """
-            import warnings
-            warnings.warn("Getting here is bad, find out how and fix it",
-          DeprecationWarning, 2)
-            if data[:3] == "/me":
-                """
-                This fixes the emote coloring to comply with what has been
-                asked for by the user population, not to mention, what I
-                committed to many moons ago. In doing so, Woody's scheme has
-                been tossed out.  I'm sure Woody won't be happy but I'm
-                invoking developer priveledge to satisfy user request, not to
-                mention, this scheme actually makes more sense.  In Woody's
-                scheme, a user could over-ride another users emote color. This
-                doesn't make sense, rather, people dictate their OWN colors...
-                which is as it should be in the first place and is as it has
-                been with normal text.  In short, this makes sense and is
-                consistent.
-                """
-                data = data.replace( "/me", "" )
-                """
-                Check to see if we find the closing '>' for the font within the
-                first 22 values
-                """
-                index = data[:22].find(  ">" )
-                if index == -1:
-                    data = "** " + self.chat.colorize( self.chat.infocolor, display_name + data ) + " **"
+            display_name = "Server Administrator"
 
-                else:
-                    """
-                    This means that we found a valid font string, so we can
-                    simply plug the name into the string between the start and
-                    stop font delimiter
-                    """
-                    print "pre data = " + data
-                    data = data[:22] + "** " + display_name + " " + data[22:] + " **"
-                    print "post data = " + data
+        if etreeEl.text:
+            self.chat.Post(etreeEl.text)
 
-            elif data[:2] == "/w":
-                data = data.replace("/w","")
-                data = "<b>" + display_name + "</b> (whispering): " + data
+        for child in etreeEl.getchildren():
+            if child.tag == 'tree':
+                ### Alpha ### Allows users to decide if they want the node or not.
+                dlg = wx.MessageDialog(None, display_name + 'is trying to send you a tree node. Accept?', 'Question', 
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+                if dlg.ShowModal() == wx.ID_YES:
+                  dlg.Destroy()
+                  self.tree.on_receive_data(data,player)
+                  self.chat.InfoPost(display_name + " has sent you a tree node...")
+                ### Core ### to be milked in later.
+                #TODO: Fix game tree to accepts elements
+                #self.tree.on_receive_data(child, player)
+                #self.chat.InfoPost(display_name + " has sent you a tree node...")
 
-            else:
-                # Normal text
-                if player: data = "<b>" + display_name + "</b>: " + data
-                else: data = "<b><i><u>" + display_name + "</u>-></i></b> " + data
-            self.chat.Post(data)
+            elif child.tag == 'map':
+                ### Core ### Adapted from, remove tostring later
+                #TODO: Fix map to accepts elements
+                self.map.new_data(tostring(child))
+
+            elif child.tag == 'chat':
+                msg = orpg.chat.chat_msg.chat_msg(data)
+                self.chat.post_incoming_msg(msg,player)
+                ### Core ### to be milked in later
+                #msg = orpg.chat.chat_msg.chat_msg()
+                #msg.takedom(child)
+                #self.chat.post_incoming_msg(msg, player)
+
 
     @debugging
     def on_mplay_event(self, evt):

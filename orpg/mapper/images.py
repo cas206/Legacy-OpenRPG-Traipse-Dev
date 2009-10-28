@@ -56,7 +56,7 @@ class ImageHandlerClass(object):
         # Load an image, with a intermideary fetching image shown while it loads in a background thread
         if self.__cache.has_key(path):
             return wx.ImageFromMime(self.__cache[path][1],
-                                    self.__cache[path][2]).ConvertToBitmap()
+                                    self.__cache[path][2])
         if path not in self.__fetching:
             self.__fetching[path] = True
             #Start Image Loading Thread
@@ -66,15 +66,13 @@ class ImageHandlerClass(object):
             if self.__fetching[path]:
                 thread.start_new_thread(self.__loadCacheThread,
                                         (path, image_type, imageId))
-        return wx.Bitmap(dir_struct["icon"] + "fetching.png",
-                         wx.BITMAP_TYPE_PNG)
+        return wx.Bitmap(dir_struct["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
 
     def directLoad(self, path):
         # Directly load an image, no threads
         if path in self.__cache:
             return wx.ImageFromMime(self.__cache[path][1],
-                                    self.__cache[path][2]).ConvertToBitmap()
-
+                                    self.__cache[path][2])
         uriPath = urllib.unquote(path)
         try:
             d = urllib.urlretrieve(uriPath)
@@ -83,8 +81,7 @@ class ImageHandlerClass(object):
             if d[0] and d[1].getmaintype() == "image":
                 with self.__lock:
                     self.__cache[path] = (path, d[0], d[1].gettype(), None)
-                return wx.ImageFromMime(self.__cache[path][1],
-                                        self.__cache[path][2]).ConvertToBitmap()
+                return wx.ImageFromMime(self.__cache[path][1], self.__cache[path][2])
             else:
                 logger.general("Image refused to load or URI did not "
                                "reference a valid image: " + path, True)
@@ -115,7 +112,6 @@ class ImageHandlerClass(object):
 #Private Methods
     def __loadThread(self, path, image_type, imageId):
         uriPath = urllib.unquote(path)
-
         try:
             d = urllib.urlretrieve(uriPath)
             # We have to make sure that not only did we fetch something, but that
@@ -124,9 +120,7 @@ class ImageHandlerClass(object):
                 with self.__lock:
                     self.__cache[path] = (path, d[0], d[1].gettype(), imageId)
                     self.__queue.put((self.__cache[path], image_type, imageId))
-
-                if path in self.__fetching:
-                    del self.__fetching[path]
+                if path in self.__fetching: del self.__fetching[path]
             else:
                 logger.general("Image refused to load or URI did not "
                                "reference a valid image: " + path, True)
@@ -150,13 +144,11 @@ class ImageHandlerClass(object):
             logger.general("Unable to resolve/open the specified URI; "
                            "image was NOT loaded: " + path, True)
             return
-
         with self.__lock:
             if path in self.__cache:
                 logger.debug("Adding Image to Queue from Cache: " + str(self.__cache[path]))
                 self.__queue.put((self.__cache[path], image_type, imageId))
-            else:
-                self.__loadThread(path, image_type, imageId)
+            else: self.__loadThread(path, image_type, imageId)
 
     #Property Methods
     def _getCache(self):

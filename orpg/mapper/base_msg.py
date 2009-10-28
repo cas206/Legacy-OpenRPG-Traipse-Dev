@@ -30,6 +30,8 @@ __version__ = "$Id: base_msg.py,v 1.9 2007/03/09 14:11:55 digitalxero Exp $"
 from threading import RLock
 from orpg.networking.mplay_client import *
 
+from xml.etree.ElementTree import XML
+
 class map_element_msg_base:
 #  This is a base class
 
@@ -195,40 +197,41 @@ class map_element_msg_base:
     #########################################
     #  XML importers begin
 
-    def _from_dom(self,xml_dom,prop_func):
+    def _from_dom(self,xml,prop_func):
         self.p_lock.acquire()
-        if xml_dom.tagName == self.tagname:
-            if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    prop_func(k,xml_dom.getAttribute(k))
+        if xml.tag == self.tagname:
+            if xml.keys():
+                for k in xml.keys():
+                    prop_func(k,xml.get(k))
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to modify a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
 
-    def init_from_dom(self,xml_dom):
-    #  xml_dom must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags.
-        self._from_dom(xml_dom,self.init_prop)
+    def init_from_dom(self,xml):
+    #  xml must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags.
+        self._from_dom(xml,self.init_prop)
 
-    def set_from_dom(self,xml_dom):
-    #  xml_dom must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags
-        self._from_dom(xml_dom,self.set_prop)
+    def set_from_dom(self,xml):
+    #  xml must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags
+        self._from_dom(xml,self.set_prop)
 
-    def init_from_xml(self,xml):
-        xml_dom = parseXml(xml)
-        node_list = xml_dom.getElementsByTagName(self.tagname)
-        if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
+    def init_from_xml(self,xmlString):
+        tree = XML(xmlString)
+        node_list = tree.findall(self.tagname)
+        if len(node_list) < 1:
+            print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
-            while len(node_list): self.init_from_dom(node_list.pop())
-        if xml_dom: xml_dom.unlink()
+            while len(node_list):
+                self.init_from_dom(node_list.pop())
 
-    def set_from_xml(self,xml):
-        xml_dom = parseXml(xml)
-        node_list = xml_dom.getElementsByTagName(self.tagname)
-        if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
+    def set_from_xml(self,xmlString):
+        tree = XML(xmlString)
+        node_list = tree.findall(self.tagname)
+        if len(node_list) < 1:
+            print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
-            while len(node_list): self.set_from_dom(node_list.pop())
-        if xml_dom: xml_dom.unlink()
-
+            while len(node_list):
+                self.set_from_dom(node_list.pop())
     # XML importers end
     #########################################
