@@ -492,12 +492,6 @@ class miniature_layer(layer_base):
             s = Element('miniatures')
             s.set('serial', str(self.serial_number))
             s.append(mini_string)
-            #s = "<miniatures"
-            #s += " serial='" + str(self.serial_number) + "'"
-            #s += ">"
-            #s += mini_string
-            #s += "</miniatures>"
-            #return s
             return tostring(s)
         else: return ""
 

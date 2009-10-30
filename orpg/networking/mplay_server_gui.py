@@ -200,19 +200,19 @@ class Connections(wx.ListCtrl):
 
     def add(self, player):
         i = self.InsertImageStringItem( 0, player["id"], 0 )
-        self.SetStringItem( i, 1, self.stripHtml( player["name"] ) )
-        self.SetStringItem( i, 2, "NEW" )
-        self.SetStringItem( i, 3, self.roomList[0] )
-        self.SetStringItem( i, 4, self.stripHtml( player["version"] ) )
-        self.SetStringItem( i, 5, 'Lurker' if self.stripHtml( player["role"] ) == '' else self.stripHtml( player["role"] ))
-        self.SetStringItem( i, 6, self.stripHtml( player["ip"] ) )
-        self.SetStringItem (i, 7, "PING" )
-        self.SetItemData( i, int(player["id"]) )
+        self.SetStringItem(i, 1, self.stripHtml(player["name"]))
+        self.SetStringItem(i, 2, "NEW")
+        self.SetStringItem(i, 3, self.roomList[0])
+        self.SetStringItem(i, 4, self.stripHtml(player["version"]))
+        self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
+        self.SetStringItem(i, 6, self.stripHtml(player["ip"]))
+        self.SetStringItem(i, 7, "PING")
+        self.SetItemData(i, int(player["id"]))
         self.AutoAjust()
 
     def remove(self, id):
-        i = self.FindItemData( -1, int(id) )
-        self.DeleteItem( i )
+        i = self.FindItemData( -1, int(id))
+        self.DeleteItem(i)
         self.AutoAjust()
 
     def AutoAjust(self):
@@ -491,12 +491,12 @@ class ServerGUI(wx.Frame):
         (room, room_id, player) = data
         self.conns.updateRoom(data)
 
-    def OnDeleteGroup( self, data ):
+    def OnDeleteGroup(self, data):
         (room_id, player) = data
         del self.conns.roomList[room_id]
 
-    def OnJoinGroup( self, data ):
-        self.conns.updateRoom( data )
+    def OnJoinGroup(self, data):
+        self.conns.updateRoom(data )
 
     def OnSetRole( self, data ):
         (id, role) = data
@@ -516,7 +516,7 @@ class ServerGUI(wx.Frame):
             except: pass 
             if self.serverName == '':
                 self.serverName = 'Server Name'
-                serverNameEntry = wx.TextEntryDialog( self, "Please Enter The Server Name You Wish To Use:",
+                serverNameEntry = wx.TextEntryDialog(self, "Please Enter The Server Name You Wish To Use:",
                                                  "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             # see if we already have password specified 

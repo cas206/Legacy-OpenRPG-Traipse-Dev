@@ -67,7 +67,8 @@ class messenger:
         self.port = int(component.get("settings").get_setting("port")) ##used even?
         self.ip = socket.gethostbyname(socket.gethostname())
         self.lensize = calcsize('i')
-        self.mplay_type = ('disconnected', 'connected', 'disconnecting', 'group change', 'group change failed')
+        self.mplay_type = ('disconnected', 'connected', 
+                            'disconnecting', 'group change', 'group change failed')
         self.status = self.mplay_type[0]
         self.alive = False
         self.sock = None
@@ -93,26 +94,31 @@ class messenger:
         self.groups = {}
 
         #Setup Stuff from the Server
-        if kwargs.has_key('inbox'):
-            self.inbox = kwargs['inbox']
-        if kwargs.has_key('sock'):
-            self.sock = kwargs['sock']
-        if kwargs.has_key('ip'):
-            self.ip = kwargs['ip']
-        if kwargs.has_key('role'):
-            self.role = kwargs['role']
-        if kwargs.has_key('id'):
-            self.id = kwargs['id']
-        if kwargs.has_key('group_id'):
-            self.group_id = kwargs['group_id']
-        if kwargs.has_key('name'):
-            self.name = kwargs['name']
-        if kwargs.has_key('version'):
-            self.version = kwargs['version']
-        if kwargs.has_key('protocol_version'):
-            self.protocol_version = kwargs['protocol_version']
-        if kwargs.has_key('client_string'):
-            self.client_string = kwargs['client_string']
+        """
+        if kwargs.has_key('inbox'): self.inbox = kwargs['inbox']
+        if kwargs.has_key('sock'): self.sock = kwargs['sock']
+        if kwargs.has_key('ip'): self.ip = kwargs['ip']
+        if kwargs.has_key('role'): self.role = kwargs['role']
+        if kwargs.has_key('id'): self.id = kwargs['id']
+        if kwargs.has_key('group_id'): self.group_id = kwargs['group_id']
+        if kwargs.has_key('name'): self.name = kwargs['name']
+        if kwargs.has_key('version'): self.version = kwargs['version']
+        if kwargs.has_key('protocol_version'): self.protocol_version = kwargs['protocol_version']
+        if kwargs.has_key('client_string'): self.client_string = kwargs['client_string']
+        """
+
+        ### Alpha ###
+        self.inbox = kwargs['inbox'] or pass
+        self.sock = kwargs['sock'] or pass
+        self.ip = kwargs['ip'] or pass
+        self.role = kwargs['role'] or pass
+        self.id = kwargs['id'] or pass
+        self.group_id = kwargs['group_id'] or pass
+        self.name = kwargs['name'] or pass
+        self.version = kwargs['version'] or pass
+        self.protocol_version = kwargs['protocol_version'] or pass
+        self.client_string = kwargs['client_string'] or pass
+
 
     def build_message(self, *args, **kwargs):
         #print args
@@ -159,7 +165,8 @@ class messenger:
 
     def update_self_from_player(self, player):
         try:
-            (self.name, self.ip, self.id, self.text_status, self.version, self.protocol_version, self.client_string,role) = player
+            (self.name, self.ip, self.id, self.text_status, 
+            self.version, self.protocol_version, self.client_string,role) = player
         except:
             logger.general("Exception:  messenger->update_self_from_player():\n" + traceback.format_exc())
 
@@ -218,12 +225,9 @@ class messenger:
         idletime = self.idle_time()
         idlemins = idletime / 60
         status = "Unknown"
-        if idlemins < 3:
-            status = "Active"
-        elif idlemins < 10:
-            status = "Idle ("+str(int(idlemins))+" mins)"
-        else:
-            status = "Inactive ("+str(int(idlemins))+" mins)"
+        if idlemins < 3: status = "Active"
+        elif idlemins < 10: status = "Idle ("+str(int(idlemins))+" mins)"
+        else: status = "Inactive ("+str(int(idlemins))+" mins)"
         return status
 
     def connected_time(self):
@@ -245,18 +249,14 @@ class messenger:
         self.timeout_time = None
 
     def check_time_out(self):
-        if self.timeout_time==None:
-            self.timeout_time = time.time()
+        if self.timeout_time == None: self.timeout_time = time.time()
         curtime = time.time()
         diff = curtime - self.timeout_time
-        if diff > 1800:
-            return 1
-        else:
-            return 0
+        if diff > 1800: return 1
+        else: return 0
 
     def send(self, msg):
-        if self.get_status() == 'connected':
-            self.outbox.put(msg)
+        if self.get_status() == 'connected': self.outbox.put(msg)
 
     def change_group(self, group_id, groups):
         old_group_id = str(self.group_id)
@@ -275,17 +275,13 @@ class messenger:
     def add_msg_handler(self, tag, function, core=False):
         if not self.msg_handlers.has_key(tag):
             self.msg_handlers[tag] = function
-            if core:
-                self.core_msg_handlers.append(tag)
-        else:
-            print 'XML Messages ' + tag + ' already has a handler'
+            if core: self.core_msg_handlers.append(tag)
+        else: print 'XML Messages ' + tag + ' already has a handler'
 
     def remove_msg_handler(self, tag):
         if self.msg_handlers.has_key(tag) and not tag in self.core_msg_handlers:
             del self.msg_handlers[tag]
-        else:
-            print 'XML Messages ' + tag + ' already deleted'
-
+        else: print 'XML Messages ' + tag + ' already deleted'
 
     #Message Handaling
     def message_handler(self, arg):

@@ -358,9 +358,8 @@ class miniatures_handler(base_layer_handler):
         elif id == MIN_REMOVE: self.canvas.layers['miniatures'].del_miniature(self.sel_rmin)
         elif id == MIN_TO_GAMETREE:
             ### Alpha ### implements ElementTree
-            min_xml = self.sel_rmin.toxml(action="new")
+            mini = self.sel_rmin.toxml(action="new")
             node = Element('nodehandler')
-            mini = fromstring(min_xml)
             node.set('module', 'map_miniature_nodehandler')
             node.set('class', 'map_miniature_handler')
             name = self.sel_rmin.label if self.sel_rmin.label else 'Unnamed Miniature'
@@ -498,6 +497,7 @@ class miniatures_handler(base_layer_handler):
     def on_miniature(self, evt):
         session = self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER) and (session.use_roles()):
+            print session.my_role()
             self.infoPost("You must be either a player or GM to use the miniature Layer")
             return
         min_url = self.min_url.GetValue()
@@ -771,14 +771,16 @@ class miniatures_handler(base_layer_handler):
 
     def role_is_gm_or_player(self):
         session = self.canvas.frame.session
-        if (session.my_role() <> session.ROLE_GM) and (session.my_role() <> session.ROLE_PLAYER) and (session.use_roles()):
+        print session.my_role(), session.ROLE_GM
+        if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER) and (session.use_roles()):
+            print 'role is gm or player'
             self.infoPost("You must be either a player or GM to use the miniature Layer")
             return False
         return True
 
     def role_is_gm(self):
         session = self.canvas.frame.session
-        if (session.my_role() <> session.ROLE_GM) and (session.use_roles()): return False
+        if (session.my_role() != session.ROLE_GM) and (session.use_roles()): return False
         return True
 
     def alreadyDealingWithMenu(self):

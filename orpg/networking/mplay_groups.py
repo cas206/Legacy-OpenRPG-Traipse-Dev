@@ -22,14 +22,11 @@ class game_group:
             f = open( mapFile )
             tree = f.read()
             f.close()
-
         else:
             f = open(orpg.dirpath.dir_struct["template"] + "default_map.xml")
             tree = f.read()
             f.close()
-
         self.game_map.init_from_xml(tree)
-
 
     def add_player(self,id):
         self.players.append(id)

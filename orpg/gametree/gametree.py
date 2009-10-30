@@ -177,7 +177,7 @@ class game_tree(wx.TreeCtrl):
     @debugging
     def on_char(self, evt):
         key_code = evt.GetKeyCode()
-        curSelection = self.GetSelection()                            #  Get the current selection
+        curSelection = self.GetSelection()  #  Get the current selection
         if evt.ShiftDown() and ((key_code == wx.WXK_UP) or (key_code == wx.WXK_DOWN)) and not self.dragging:
             curSelection = self.GetSelection()
             obj = self.GetPyData(curSelection)
@@ -238,14 +238,6 @@ class game_tree(wx.TreeCtrl):
             f.close()
             self.xml_root = None
         ### Alpha  ### Doing some work on Gametree to add Element Tree, slowly at first. 
-        
-        try:
-            logger.info("Reading Gametree file: " + filename + "...", True)
-            xml_doc = xml.parseXml(tostring(self.xml_root))
-            if xml_doc == None: pass
-            else: xml_dom = xml_doc._get_documentElement()
-            logger.info("done.", True)
-        except: pass
 
         if not self.xml_root:
             os.rename(filename,filename+".corrupt")

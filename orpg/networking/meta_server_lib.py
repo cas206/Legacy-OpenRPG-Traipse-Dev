@@ -46,6 +46,9 @@ import random
 import traceback
 import re
 
+from xml.etree.ElementTree import ElementTree, Element, iselement
+from xml.etree.ElementTree import fromstring, tostring
+
 metacache_lock = RLock()
 
 def get_server_dom(data=None,path=None):
@@ -78,29 +81,21 @@ def get_server_dom(data=None,path=None):
         print data
         print
     # build dom
-    xml = component.get('xml')
-    xml_dom = xml.parseXml(data)
-    xml_dom = xml_dom._get_documentElement()
-    return xml_dom
+    etreeEl = data
+    return etreeEl
 
-def post_server_data( name, realHostName=None):
-    if realHostName:
-        data = urllib.urlencode( {"server_data[name]":name,
+def post_server_data(name, realHostName=None):
+    if realHostName: data = urllib.urlencode({"server_data[name]":name,
                                   "server_data[version]":PROTOCOL_VERSION,
                                   "act":"new",
-                                  "REMOTE_ADDR": realHostName } )
-
-    else:
-        #print "Letting meta server decide the hostname to list..."
-        data = urllib.urlencode( {"server_data[name]":name,
+                                  "REMOTE_ADDR": realHostName })
+    # print "Letting meta server decide the hostname to list..."
+    else: data = urllib.urlencode({"server_data[name]":name,
                                   "server_data[version]":PROTOCOL_VERSION,
-                                  "act":"new"} )
-
-    #xml_dom = get_server_dom( data , "http://openrpg.sf.net/openrpg_servers.php")#Sourceforge still?
-    path = component.get('settings').get_setting('MetaServerBaseURL') #getMetaServerBaseURL()
-    xml_dom = get_server_dom(data, path)
-    ret_val = int( xml_dom.getAttribute( "id" ) )
-    return ret_val
+                                  "act":"new"})
+    path = component.get('settings').get('MetaServerBaseURL') #getMetaServerBaseURL()
+    etreeEl = get_server_dom(data, path)
+    return int(etreeEl.get('id'))
 
 def post_failed_connection(id,meta=None,address=None,port=None):
     #  For now, turning this off.  This needs to be re-vamped for
@@ -113,87 +108,64 @@ def post_failed_connection(id,meta=None,address=None,port=None):
 
 def remove_server(id):
     data = urllib.urlencode({"id":id,"act":"del"});
-    xml_dom = get_server_dom(data)
-    ret_val = int(xml_dom.getAttribute("return"))
-    return ret_val
+    etreeEl = get_server_dom(data)
+    return int(etreeEl.get("return"))
 
-
-def byStartAttribute(first,second):
-    #  This function is used to easily sort a list of nodes
-    #  by their start time
-
-    if first.hasAttribute("start"): first_start = int(first.getAttribute("start"))
-    else: first_start = 0
-
-    if second.hasAttribute("start"): second_start = int(second.getAttribute("start"))
-    else: second_start = 0
-
-    # Return the result of the cmp function on the two strings
-    return cmp(first_start,second_start)
-
-def byNameAttribute(first,second):
-    #  This function is used to easily sort a list of nodes
-    #  by their name attribute
-
+def byStartAttribute(first, second):
+    #  This function is used to easily sort a list of nodes by their start time
     # Ensure there is something to sort with for each
 
-    if first.hasAttribute("name"): first_name = str(first.getAttribute("name")).lower()
-    else: first_name = ""
+    first_start = int(first.get('start')) or 0
+    second_start = int(second.get('start')) or 0
 
-    if second.hasAttribute("name"): second_name = str(second.getAttribute("name")).lower()
-    else: second_name = ""
+    # Return the result of the cmp function on the two strings
+    return cmp(first_start, second_start)
 
+def byNameAttribute(first, second):
+    #  This function is used to easily sort a list of nodes by their name attribute
+    # Ensure there is something to sort with for each
+
+    first_name = first.get('name') or ''
+    second_name = second.get('name') or ''
+    
     # Return the result of the cmp function on the two strings
     return cmp(first_name,second_name)
 
 
-def get_server_list(versions = None,sort_by="start"):
+def get_server_list(versions = None, sort_by="start"):
     data = urllib.urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
-    all_metas = getMetaServers(versions,1)  # get the list of metas
+    all_metas = getMetaServers(versions, 1)  # get the list of metas
     base_meta = getMetaServerBaseURL()
 
     #all_metas.reverse()  # The last one checked will take precedence, so reverse the order
-                        #  so that the top one on the actual list is checked last
+                          #  so that the top one on the actual list is checked last
+    return_hash = {}      # this will end up with an amalgamated list of servers
 
-    return_hash = {}  # this will end up with an amalgamated list of servers
-
-    for meta in all_metas:                  # check all of the metas
-
+    for meta in all_metas: # check all of the metas
         #get the server's xml from the current meta
         bad_meta = 0
         #print "Getting server list from " + meta + "..."
-        try: xml_dom = get_server_dom(data=data,path=meta)
-        except:
-            #print "Trouble getting servers from " + meta + "..."
-            bad_meta = 1
-
-        if bad_meta:
-            continue
-
-        if base_meta == meta:
-            #print "This is our base meta: " + meta
-            updateMetaCache(xml_dom)
-
-        node_list = xml_dom.getElementsByTagName('server')
-
-        if len(node_list):                  # if there are entries in the node list
-                                            #  otherwise, just loop to next meta
+        try: xml_dom = get_server_dom(data=data, path=meta)
+        except: bad_meta = 1 #print "Trouble getting servers from " + meta + "..."
+        if bad_meta: continue
+        if base_meta == meta: updateMetaCache(xml_dom) #print "This is our base meta: " + meta
+        node_list = fromstring(xml_dom).findall('server')
+        if len(node_list):  # if there are entries in the node list
+                            #  otherwise, just loop to next meta
 
             #  for each node found, we're going to check the nodes from prior
             #  metas in the list.  If a match is found, then use the new values.
             for n in node_list:
-
                 # set them from current node
-
-                if not n.hasAttribute('name'): n.setAttribute('name','NO_NAME_GIVEN')
-                name = n.getAttribute('name')
-                if not n.hasAttribute('num_users'): n.setAttribute('num_users','N/A')
-                num_users = n.getAttribute('num_users')
-                if not n.hasAttribute('address'): n.setAttribute('address','NO_ADDRESS_GIVEN')
-                address = n.getAttribute('address')
-                if not n.hasAttribute('port'): n.setAttribute('port','6774')
-                port = n.getAttribute('port')
-                n.setAttribute('meta',meta)
+                if n.find('name') == None: n.set('name','NO_NAME_GIVEN')
+                name = n.get('name')
+                if n.find('num_users') == None: n.set('num_users','N/A')
+                num_users = n.get('num_users')
+                if n.find('address') == None: n.set('address','NO_ADDRESS_GIVEN')
+                address = n.get('address')
+                if n.find('port') == None: n.set('port','6774')
+                port = n.get('port')
+                n.set('meta',meta)
                 end_point = str(address) + ":" + str(port)
                 if return_hash.has_key(end_point):
                     if META_DEBUG: print "Replacing duplicate server entry at " + end_point
@@ -203,20 +175,19 @@ def get_server_list(versions = None,sort_by="start"):
     #  Now, we have to construct a new DOM to pass back.
 
     #  Create a servers element
-    return_dom = orpg.minidom.Element("servers")
+    server_list = Element('servers')
 
     #  get the nodes stored in return_hash
-    return_list = return_hash.values()
+    sort_list = return_hash.values()
 
     #  sort them by their name attribute.  Uses byNameAttribute()
     #  defined above as a comparison function
-
-    if sort_by == "start": return_list.sort(byStartAttribute)
-    elif sort_by == "name": return_list.sort(byNameAttribute)
+    if sort_by == "start": sort_list.sort(byStartAttribute)
+    elif sort_by == "name": sort_list.sort(byNameAttribute)
 
     #  Add each node to the DOM
-    for n in return_list: return_dom.appendChild(n)
-    return return_dom
+    for n in sort_list: server_list.append(n)
+    return server_list
 
 ## List Format:
 ## <servers>
@@ -226,21 +197,21 @@ def get_server_list(versions = None,sort_by="start"):
 def updateMetaCache(xml_dom):
     try:
         if META_DEBUG: print "Updating Meta Server Cache"
-        metaservers = xml_dom.getElementsByTagName( 'metaservers' )   # pull out the metaservers bit
+        metaservers = xml_dom.findall('metaservers')   # pull out the metaservers bit
         if len(metaservers) == 0:
             cmetalist = getRawMetaList()
             xml_dom = get_server_dom(cmetalist[0])
-            metaservers = xml_dom.getElementsByTagName( 'metaservers' )
-        authoritative = metaservers[0].getAttribute('auth')
+            metaservers = xml_dom.findall('metaservers')
+        authoritative = metaservers[0].get('auth')
         if META_DEBUG: print "  Authoritive Meta: "+str(authoritative)
-        metas = metaservers[0].getElementsByTagName("meta")                # get the list of metas
+        metas = metaservers[0].findall("meta")                # get the list of metas
         if META_DEBUG: print "  Meta List ("+str(len(metas))+" servers)"
         try:
             metacache_lock.acquire()
             ini = open(dir_struct["user"]+"metaservers.cache","w")
             for meta in metas:
-                if META_DEBUG: print "   Writing: "+str(meta.getAttribute('path'))
-                ini.write(str(meta.getAttribute('path')) + " " + str(meta.getAttribute('versions')) + "\n")
+                if META_DEBUG: print "   Writing: "+str(meta.get('path'))
+                ini.write(str(meta.get('path')) + " " + str(meta.get('versions')) + "\n")
             ini.close()
         finally:
             metacache_lock.release()
@@ -248,7 +219,18 @@ def updateMetaCache(xml_dom):
         if META_DEBUG: traceback.print_exc()
         print "Meta Server Lib: UpdateMetaCache(): " + str(e)
 
-def getRawMetaList():
+def getRawMetaList(path=None):
+    ### Alpha ### 
+    """This code will allow for a list of metas to be created.  Future developement  will more integrate the list of metas"""
+    if path != None: 
+        metas = []
+        data = urllib.urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
+        xml_dom = get_server_dom(data, path)
+        node_list = fromstring(xml_dom).findall('meta_server')
+        if len(node_list):
+             for n in node_list:
+                 metas.append(n.get('path'))
+        return metas
     try:
         try:
             metacache_lock.acquire()
@@ -268,16 +250,15 @@ def getRawMetaList():
 def getMetaServers(versions = None, pick_random=0):
     """
      get meta server URLs as a list
-
       versions is a list of acceptable version numbers.
         A False truth value will use getMetaServerBaseURL()
-
      set a default if we have weird reading problems
      default_url = "http://www.openrpg.com/openrpg_servers.php"
     """
 
+    ### Pre Alpha Design ###
+    """ Here is how to handle Multiple Meta servers, and probably the best way to do it.  Create an XML file that contains nodes with the various servers. Users will grab that meta data and have the option to connect to multiple meta servers which will allow them to find all the rooms.  A check box should be used so if one server faile the users can continue without much lag.  When creating a server hosts will need to select a meta to go too.  This should be in the final of Ornery Orc."""
     meta_names = []
-
     if(versions):  #  If versions are supplied, then look in metaservers.conf
         try:
             """
@@ -287,15 +268,13 @@ def getMetaServers(versions = None, pick_random=0):
               handle.  Generally, this will be either a 1 for the original Meta format, or
               2 for the new one.
             """
-
             #  Read in the metas
+            #Adding a path object will attempt to look for a meta_network.
             metas = getRawMetaList()
-            #print str(metas)
 
             # go through each one to check if it should be returned, based on the
             #   version numbers allowed.
             for meta in metas:
-
                 # split the line on whitespace
                 #   obviously, your meta servers urls shouldn't contain whitespace.  duh.
                 words = meta.split()
@@ -347,7 +326,6 @@ def getMetaServerBaseURL():
         node_list = tree.getElementsByTagName("MetaServerBaseURL")
         if node_list:
             url = node_list[0].getAttribute("value")
-
         # allow tree to be collected
         try: tree.unlink()
         except: pass
@@ -391,21 +369,19 @@ class registerThread(Thread):
        just written, i.e. TestDeleteStatus() and Delete()
     """
 
-    def __init__(self,name=None,realHostName=None,num_users = "Hmmm",MetaPath=None,port=6774,register_callback=None):
-
-        Thread.__init__(self,name="registerThread")
-        self.rlock = RLock()                    #  Re-entrant lock used to make this class thread safe
-        self.die_event = Event()                #  The main loop in run() will wait with timeout on this
-        if name:
-            self.name = name                        #  Name that the server want's displayed on the Meta
-        else:
-            self.name = "Unnamed server"             #  But use this if for some crazy reason no name is
-                                                    #  passed to the constructor
-        self.num_users = num_users               #  the number of users currently on this server
+    def __init__(self, name=None, realHostName=None, num_users="0", 
+                    MetaPath=None, port=6774, register_callback=None):
+        Thread.__init__(self, name="registerThread")
+        self.rlock = RLock()      #  Re-entrant lock used to make this class thread safe
+        self.die_event = Event()  #  The main loop in run() will wait with timeout on this
+        self.name = name or 'Unnamed Server'    #  Name that the server want's displayed on the Meta
+                                                #  But use Unnamed Server if for some crazy reason 
+                                                #  no name is passed to the constructor
+        self.num_users = num_users              #  the number of users currently on this server
         self.realHostName = realHostName        #  Name to advertise for connection
         self.id = "0"                           #  id returned from Meta.  Defaults to "0", which
                                                 #  indicates a new registration.
-        self.cookie = "0"                       #  cookie returned from Meta.  Defaults to "0",which
+        self.cookie = "0"                       #  cookie returned from Meta.  Defaults to "0", which
                                                 #  indicates a new registration.
         self.interval = 0                       #  interval returned from Meta.  Is how often to
                                                 #  re-register, in minutes.
@@ -422,11 +398,8 @@ class registerThread(Thread):
           it easier to have multiple registerThreads going to keep the server registered
           on multiple (compatible) Metas.
         """
-
-        if MetaPath == None:
-            self.path = getMetaServerBaseURL()  #  Do this if no Meta specified
-        else:
-            self.path = MetaPath
+        if MetaPath == None: self.path = getMetaServerBaseURL()  #  Do this if no Meta specified
+        else: self.path = MetaPath
 
     def getIdAndCookie(self):
         return self.id, self.cookie
@@ -435,15 +408,13 @@ class registerThread(Thread):
         try:
             self.rlock.acquire()
             return self.die_event.isSet()
-        finally:
-            self.rlock.release()
+        finally: self.rlock.release()
 
     def Delete(self):
         try:
             self.rlock.acquire()
             self.die_event.set()
-        finally:
-            self.rlock.release()
+        finally: self.rlock.release()
 
     def run(self):
         """
@@ -455,24 +426,23 @@ class registerThread(Thread):
           re-registers this server and sleeps Interval
           minutes until the thread is ordered to die in place
         """
-        while(not self.TestDeleteStatus()):         # Loop while until told to die
+        while(not self.TestDeleteStatus()): # Loop while until told to die
             #  Otherwise, call thread safe register().
             self.register(self.name, self.realHostName, self.num_users)
             if META_DEBUG: print "Sent Registration Data"
             #  register() will end up setting the state variables
             #  for us, including self.interval.
             try:
-                self.rlock.acquire()            #  Serialize access to this state information
+                self.rlock.acquire()    #  Serialize access to this state information
 
-                if self.interval >= 3:          #  If the number of minutes is one or greater
-                    self.interval -= 1          #  wake up with 30 seconds left to re-register
+                if self.interval >= 3:  #  If the number of minutes is one or greater
+                    self.interval -= 1  #  wake up with 30 seconds left to re-register
                 else:
-                    self.interval = .5           #  Otherwise, we probably experienced some kind
-                                                #  of error from the Meta in register().  Sleep
-                                                #  for 6 seconds and start from scratch.
+                    self.interval = .5  #  Otherwise, we probably experienced some kind
+                                        #  of error from the Meta in register().  Sleep
+                                        #  for 6 seconds and start from scratch.
 
-            finally:                            # no matter what, release the lock
-                self.rlock.release()
+            finally: self.rlock.release() # no matter what, release the lock
             #  Wait interval minutes for a command to die
             die_signal = self.die_event.wait(self.interval*60)
 
@@ -505,10 +475,10 @@ class registerThread(Thread):
                                         "server_data[cookie]":self.cookie,
                                         "server_data[version]":PROTOCOL_VERSION,
                                         "act":"unregister"} )
-            try:
-                xml_dom = get_server_dom(data=data, path=self.path)  #  this POSTS the request and returns the result
+            try: # this POSTS the request and returns the result
+                xml_dom = get_server_dom(data=data, path=self.path)  
                 if xml_dom.hasAttribute("errmsg"):
-                    print "Error durring unregistration:  " + xml_dom.getAttribute("errmsg")
+                    print "Error durring unregistration:  " + xml_dom.get("errmsg")
             except:
                 if META_DEBUG: print "Problem talking to Meta.  Will go ahead and die, letting Meta remove us."
             #  If there's an error, echo it to the console
@@ -562,8 +532,8 @@ class registerThread(Thread):
                                         "server_data[version]":PROTOCOL_VERSION,
                                         "server_data[num_users]":self.num_users,
                                         "act":"register"} )
-            try:
-                xml_dom = get_server_dom(data=data,path=self.path)  #  this POSTS the request and returns the result
+            try: # this POSTS the request and returns the result
+                etreeEl = get_server_dom(data=data, path=self.path)  
             except:
                 if META_DEBUG: print "Problem talking to server.  Setting interval for retry ..."
                 if META_DEBUG: print data
@@ -584,10 +554,10 @@ class registerThread(Thread):
                 return 0  # indicates that it was okay to call, not that no errors occurred
 
             #  If there is a DOM returned ....
-            if xml_dom:
+            if etreeEl:
                 #  If there's an error, echo it to the console
-                if xml_dom.hasAttribute("errmsg"):
-                    print "Error durring registration:  " + xml_dom.getAttribute("errmsg")
+                if etreeEl.hasAttribute("errmsg"):
+                    print "Error durring registration:  " + etreeEl.get("errmsg")
                     if META_DEBUG: print data
                     if META_DEBUG: print
                 """
@@ -609,24 +579,20 @@ class registerThread(Thread):
                   Is it wrong to have a method where there's more comments than code?  :)
                 """
                 try:
-                    self.interval = int(xml_dom.getAttribute("interval"))
-                    self.id = xml_dom.getAttribute("id")
-                    self.cookie = xml_dom.getAttribute("cookie")
-                    if not xml_dom.hasAttribute("errmsg"):
-                        updateMetaCache(xml_dom)
+                    self.interval = int(etreeEl.get("interval"))
+                    self.id = etreeEl.get("id")
+                    self.cookie = etreeEl.get("cookie")
+                    if not etreeEl.hasAttribute("errmsg"): updateMetaCache(xml_dom)
                 except:
                     if META_DEBUG: print
                     if META_DEBUG: print "OOPS!  Is the Meta okay?  It should be returning an id, cookie, and interval."
                     if META_DEBUG: print "Check to see what it really returned.\n"
                 #  Let xml_dom get garbage collected
-                try:
-                    xml_dom.unlink()
-                except:
-                    pass
+                try: xml_dom.unlink()
+                except: pass
             else:  #  else if no DOM is returned from get_server_dom()
                 print "Error - no DOM constructed from Meta message!"
             return 0  # Let caller know it was okay to call us
-        finally:
-            self.rlock.release()
+        finally: self.rlock.release()
     #  End of class registerThread
     ################################################################################

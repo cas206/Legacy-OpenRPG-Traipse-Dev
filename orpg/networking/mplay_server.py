@@ -77,7 +77,8 @@ def id_compare(a,b):
 
 
 class game_group(object):
-    def __init__( self, id, name, pwd, desc="", boot_pwd="", minVersion="", mapFile=None, messageFile=None, persist =0 ):
+    def __init__(self, id, name, pwd, desc="", boot_pwd="", 
+                    minVersion="", mapFile=None, messageFile=None, persist=0):
         self.id = id
         self.name = name
         self.desc = desc
@@ -94,16 +95,23 @@ class game_group(object):
         self.mapFile = None
 
         if mapFile != None:
+        """
+        try:
+            f = open(filename, "rb")
+            tree = parse(f)
+            self.xml_root = tree.getroot()
+        except:
+            f.close()
+            self.xml_root = None
+        """
             self.mapFile = mapFile
             f = open( mapFile )
             tree = f.read()
             f.close()
-
         else:
             f = open(dir_struct["template"] + "default_map.xml")
             tree = f.read()
             f.close()
-
         self.game_map.init_from_xml(tree)
 
     def save_map(self):
@@ -116,8 +124,7 @@ class game_group(object):
         self.players.append(id)
 
     def remove_player(self,id):
-        if self.voice.has_key(id):
-            del self.voice[id]
+        if self.voice.has_key(id): del self.voice[id]
         self.players.remove(id)
 
     def get_num_players(self):
@@ -149,14 +156,21 @@ class game_group(object):
         return 1
 
     #depreciated - see send_group_list()
-    def toxml(self,act="new"):
+    def toxml(self, act="new"):
         #  Please don't add the boot_pwd to the xml, as this will give it away to players watching their console
-        xml_data = "<group id=\"" + self.id
-        xml_data += "\" name=\"" + self.name
-        xml_data += "\" pwd=\"" + str(self.pwd!="")
-        xml_data += "\" players=\"" + str(self.get_num_players())
-        xml_data += "\" action=\"" + act + "\" />"
-        return xml_data
+        el = Element('group')
+        el.set('id', self.id)
+        el.set('name', self.name)
+        el.set('pwd', str(self.pwd!=""))
+        el.set('players', str(self.get_num_players()))
+        el.set('action', act)
+        return tostring(el)
+        #xml_data = "<group id=\"" + self.id
+        #xml_data += "\" name=\"" + self.name
+        #xml_data += "\" pwd=\"" + str(self.pwd!="")
+        #xml_data += "\" players=\"" + str(self.get_num_players())
+        #xml_data += "\" action=\"" + act + "\" />"
+        #return xml_data
 
 
 class client_stub(client_base):
@@ -190,8 +204,13 @@ class client_stub(client_base):
         if diff > 1800: return 1
         else: return 0
 
-    def send(self,msg,player,group):
+    def send(self, msg, player, group):
         if self.get_status() == MPLAY_CONNECTED:
+            #el = Element('msg')
+            #el.set('to', player)
+            #el.set('from', '0')
+            #el.set('group_id', group)
+            #el.text(msg)
             self.outbox.put("<msg to='" + player + "' from='0' group_id='" + group + "' />" + msg)
 
     def change_group(self,group_id,groups):
@@ -238,9 +257,9 @@ class mplay_server:
         self.next_group_id = 100
         self.metas = {}              #  This holds the registerThread objects for each meta
         self.be_registered = 0       #  Status flag for whether we want to be registered.
-        self.serverName = name            #  Name of this server in the metas
+        self.serverName = name       #  Name of this server in the metas
         self.boot_pwd = ""
-        self.server_address = None # IP or Name of server to post to the meta. None means the meta will auto-detect it.
+        self.server_address = None   # IP or Name of server to post to the meta. None means the meta will auto-detect it.
         self.defaultMessageFile = None
         self.userPath = dir_struct["user"]
         self.lobbyMapFile = "Lobby_map.xml"

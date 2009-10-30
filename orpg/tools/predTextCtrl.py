@@ -350,7 +350,33 @@ class predTextCtrl(ExpandoTextCtrl):
                                                            # It may be vestigal
 
         self.keyHook = keyHook                             #  Save the keyHook passed in
+        ExpandoTextCtrl._wrapLine = self._wrapLine
+        
 
+        def _wrapLine(self, line, dc, width):
+            # Estimate where the control will wrap the lines and
+            # return the count of extra lines needed.
+            # Re writes ExpandoTextCtrl _wrapLine function
+            print 'New _wrapLine Function'
+            pte = dc.GetPartialTextExtents(line)
+            width -= wx.SystemSettings.GetMetric(wx.SYS_VSCROLL_X)
+            idx = 0
+            start = 0
+            count = 0
+            spc = -1
+            while idx < len(pte):
+                if line[idx] == ' ': spc = idx
+                if pte[idx] - start > width:
+                    # we've reached the max width, add a new line
+                    count += 1
+                # did we see a space? if so restart the count at that pos
+                if spc != -1:
+                    idx = spc + 1
+                    spc = -1
+                start = pte[idx]
+            else:
+                idx += 1
+            return count
 
     # findWord subroutine.
     #

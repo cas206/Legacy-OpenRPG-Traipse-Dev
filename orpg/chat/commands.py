@@ -315,12 +315,9 @@ class chat_commands:
     def postLoggingState( self ):
         logfile = self.settings.get_setting( 'GameLogPrefix' )
         try:
-            if logfile[0] != ANTI_LOG_CHAR:
-                comment = 'is'
-            else:
-                comment = 'is not'
-        except:
-            comment = 'is not'
+            if logfile[0] != ANTI_LOG_CHAR: comment = 'is'
+            else: comment = 'is not'
+        except: comment = 'is not'
         suffix = time.strftime( '-%d-%m-%y.html', time.localtime( time.time() ) )
         self.chat.InfoPost('Log filename is "%s%s", system is %s logging.' % (logfile, suffix, comment) )
 
@@ -339,7 +336,6 @@ class chat_commands:
             self.session.set_name(str(cmdargs))
 
     # def on_status - end
-
         # This subroutine will set the players netork status.
         #
         # !self : instance of self
@@ -404,7 +400,6 @@ class chat_commands:
                 if self.shortcmdlist[shortcmd] == cmd:
                     msg += ', <b><font color="#0000CC">%s</font></b>' % (shortcmd)
             msg += ' %s' % (self.cmdlist[cmd]['help'])
-
         self.chat.InfoPost(msg)
 
         # This subroutine will either show the list of currently ignored users
@@ -459,8 +454,7 @@ class chat_commands:
                 if role_pwd != None:
                     for m in player_ids:
                         self.session.set_role(m.strip(),role,role_pwd)
-            except:
-                traceback.print_exc()
+            except:  traceback.print_exc()
 #        return
 
         # This subroutine implements the whisper functionality that enables a user
@@ -475,13 +469,11 @@ class chat_commands:
         delim = cmdargs.find("=")
 
         if delim < 0:
-            if self.previous_whisper:
-                player_ids = self.previous_whisper
+            if self.previous_whisper: player_ids = self.previous_whisper
             else:
                 self.chat.InfoPost("**Incorrect syntax for whisper." + str(delim))
                 return
-        else:
-            player_ids = string.split(cmdargs[:delim], ",")
+        else: player_ids = string.split(cmdargs[:delim], ",")
         self.previous_whisper = player_ids
         mesg = string.strip(cmdargs[delim+1:])
         self.chat.whisper_to_players(mesg,player_ids)
@@ -494,8 +486,7 @@ class chat_commands:
         args = string.split(cmdargs,None,-1)
         delim = cmdargs.find("=")
 
-        if delim > 0:
-            group_ids = string.split(cmdargs[:delim], ",")
+        if delim > 0: group_ids = string.split(cmdargs[:delim], ",")
         elif args[0] == "add":
             if not orpg.player_list.WG_LIST.has_key(args[2]):
                 orpg.player_list.WG_LIST[args[2]] = {}
@@ -540,10 +531,8 @@ class chat_commands:
         for gid in group_ids:
             idList = ""
             for n in orpg.player_list.WG_LIST[gid]:
-                if idList == "":
-                    idList = str(n)
-                else:
-                    idList = str(n) + ", " + idList
+                if idList == "": idList = str(n)
+                else: idList = str(n) + ", " + idList
             self.on_whisper(idList + "=" + self.settings.get_setting("gwtext") + msg)
 
 #---------------------------------------------------------
@@ -559,12 +548,10 @@ class chat_commands:
             if len(the_gms):
                 gmstring = ""
                 for each_gm in the_gms:
-                    if gmstring != "":
-                        gmstring += ","
+                    if gmstring != "": gmstring += ","
                     gmstring += each_gm
                 self.on_whisper(gmstring + "=" + cmdargs)
-            else:
-                self.chat.InfoPost("**No GMs to Whisper to.")
+            else: self.chat.InfoPost("**No GMs to Whisper to.")
 
     @debugging
     def on_moderate(self, cmdargs):
@@ -572,20 +559,16 @@ class chat_commands:
             pos = cmdargs.find("=")
             if (pos < 0):
                 plist = ""
-                if cmdargs.lower() == "on":
-                    action = "enable"
-                elif cmdargs.lower() == "off":
-                    action="disable"
+                if cmdargs.lower() == "on": action = "enable"
+                elif cmdargs.lower() == "off": action="disable"
                 else:
                     self.chat.InfoPost("Wrong syntax for moderate command!")
                     return
             else:
                 plist = string.strip(cmdargs[:pos])
                 tag = string.strip(cmdargs[pos+1:])
-                if tag.lower() == "on":
-                    action = "addvoice"
-                elif tag.lower() == "off":
-                    action = "delvoice"
+                if tag.lower() == "on": action = "addvoice"
+                elif tag.lower() == "off": action = "delvoice"
                 else:
                     self.chat.InfoPost("Wrong syntax for moderate command!")
                     return
@@ -594,8 +577,7 @@ class chat_commands:
                 msg = "<moderate"
                 msg += " action = '" + action + "'"
                 msg +=" from = '" + self.session.id + "' pwd='" + pwd + "'"
-                if (plist != ""):
-                    msg += " users='"+plist+"'"
+                if (plist != ""): msg += " users='"+plist+"'"
                 msg += " />"
                 self.session.outbox.put(msg)
             pass
@@ -630,8 +612,7 @@ class chat_commands:
                 if (panel.sendtarget == playerid):
                     self.chat.Post("Cannot invoke tab: Tab already exists.")
                     return
-            try:
-                displaypanel = self.chat.parent.create_whisper_tab(playerid)
+            try: displaypanel = self.chat.parent.create_whisper_tab(playerid)
             except:
                 self.chat.Post("That ID# is not valid.")
                 return
@@ -661,8 +642,7 @@ class chat_commands:
                 #raw command return state info
                 msg = "<br /><b>Remote Administrator Config:</b>"
                 if pass_state != 1 : msg += " Password not set. Remote admin functions disabled<br />"
-                else:
-                    msg += " Enabled. Using password '"+pwd+"'<br />"
+                else: msg += " Enabled. Using password '"+pwd+"'<br />"
                 self.chat.SystemPost(msg)
                 return
 

@@ -46,8 +46,10 @@ import time
 from orpg.orpgCore import component
 from orpg.orpg_xml import xml
 
-from xml.etree.ElementTree import ElementTree, Element
+from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring
+from xml.parsers.expat import ExpatError
+
 
 try:
     import bz2
@@ -150,7 +152,7 @@ class client_base:
 
         # Loop as long as we have a connection
         while( self.get_status() == MPLAY_CONNECTED ):
-            try: readMsg = self.outbox.get( block=1 )
+            try: readMsg = self.outbox.get(block=1)
             except Exception, text:
                 self.log_msg( ("outbox.get() got an exception:  ", text) )
 
@@ -192,7 +194,7 @@ class client_base:
         if bytes == 0:
             self.log_msg( "Remote has disconnected!" )
             self.set_status( MPLAY_DISCONNECTING )
-        self.outbox.put( "" )    # Make sure the other thread is woken up!
+        self.outbox.put("")    # Make sure the other thread is woken up!
         self.sendThreadExitEvent.set()
         self.log_msg( "recvThread has terminated..." )
 
@@ -211,16 +213,10 @@ class client_base:
                 offset += sent
             sentm = offset
         else:
-            # Calculate our message length
-            length = len(msg)
-
-            # Encode the message length into network byte order
-            lp = pack('!i', length)
-
+            length = len(msg) # Calculate our message length
+            lp = pack('!i', length) # Encode the message length into network byte order
             try:
-                # Send the encoded length
-                sentl = sock.send( lp )
-
+                sentl = sock.send( lp ) # Send the encoded length
                 # Now, send the message the the length was describing
                 sentm = sock.send( msg )
                 if self.isServer(): self.log_msg(("data_sent", sentl+sentm))
@@ -251,27 +247,18 @@ class client_base:
             data = ""
         return data
 
-    def recvMsg( self, sock ):
-        """This method now expects to receive a message having a 4-byte prefix length.  It will ONLY read
-        completed messages.  In the event that the remote's connection is terminated, it will throw an
-        exception which should allow for the caller to more gracefully handle this exception event.
+    def recvMsg(self, sock):
+        """This method now expects to receive a message having a 4-byte prefix length.  It will ONLY read completed messages.  In the event that the remote's connection is terminated, it will throw an exception which should allow for the caller to more gracefully handle this exception event.
 
-        Because we use strictly reading ONLY based on the length that is told to use, we no longer have to
-        worry about partially adjusting for fragmented buffers starting somewhere within a buffer that we've
-        read.  Rather, it will get ONLY a whole message and nothing more.  Everything else will remain buffered
-        with the OS until we attempt to read the next complete message."""
-
+        Because we use strictly reading ONLY based on the length that is told to use, we no longer have to worry about partially adjusting for fragmented buffers starting somewhere within a buffer that we've read.  Rather, it will get ONLY a whole message and nothing more.  Everything else will remain buffered with the OS until we attempt to read the next complete message."""
         msgData = ""
         try:
             lenData = self.recvData( sock, MPLAY_LENSIZE )
-            # Now, convert to a usable form
-            (length,) = unpack('!i', lenData)
-            # Read exactly the remaining amount of data
-            msgData = self.recvData( sock, length )
+            (length,) = unpack('!i', lenData) # Now, convert to a usable form
+            msgData = self.recvData( sock, length ) # Read exactly the remaining amount of data
             if self.isServer():
                 self.log_msg(("data_recv", length+4))
-                # Make the peer IP address available for reference later
-                if self.remote_ip is None:
+                if self.remote_ip is None: # Make the peer IP address available for reference later
                     self.remote_ip = self.sock.getpeername()
         except IOError, e: self.log_msg( e )
         except Exception, e: self.log_msg( e )
@@ -282,15 +269,15 @@ class client_base:
         self.status = MPLAY_CONNECTED
         self.sock.setblocking(1)
         # Confirm that our threads have started
-        thread.start_new_thread( self.sendThread,(0,) )
-        thread.start_new_thread( self.recvThread,(0,) )
+        thread.start_new_thread( self.sendThread,(0,))
+        thread.start_new_thread( self.recvThread,(0,))
         self.startedEvent.set()
 
     def disconnect(self):
         self.set_status(MPLAY_DISCONNECTING)
         self.log_msg("client stub " + self.ip +" disconnecting...")
         self.log_msg("closing sockets...")
-        try: self.sock.shutdown( 2 )
+        try: self.sock.shutdown(2)
         except Exception, e:
             print "Caught exception:  " + str(e)
             print
@@ -321,8 +308,7 @@ class client_base:
      The IP field should really be deprecated as too many systems are NAT'd and/or behind firewalls for a
      client provided IP address to have much value.  As such, we now label it as deprecated.
     """
-    def toxml(self,action):
-        """
+    def toxml(self, action):
         el = Element('player')
         el.set('name', myescape(self.name))
         el.set('action', action)
@@ -334,32 +320,13 @@ class client_base:
         el.set('protocol_version', self.protocol_version)
         el.set('client_string', self.client_string)
         el.set('useCompression', str(self.useCompression))
-
         cmpType = 'None'
         if cmpBZ2 and (self.compressionType == 'Undefined' or self.compressionType == bz2):
             cmpType = 'bz2'
         elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
             cmpType = 'zlib'
-
         el.set('cmpType', cmpType)
-        return el
-        """
-        
-        xml_data = '<player name="' + myescape(self.name) + '"'
-        xml_data += ' action="' + action + '" id="' + self.id + '"'
-        xml_data += ' group_id="' + self.group_id + '" ip="' + self.ip + '"'
-        xml_data += ' status="' + self.text_status + '"'
-        xml_data += ' version="' + self.version + '"'
-        xml_data += ' protocol_version="' + self.protocol_version + '"'
-        xml_data += ' client_string="' + self.client_string + '"'
-        xml_data += ' useCompression="' + str(self.useCompression) + '"'
-        if cmpBZ2 and (self.compressionType == 'Undefined' or self.compressionType == bz2):
-            xml_data += ' cmpType="bz2"'
-        elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
-            xml_data += ' cmpType="zlib"'
-        else: xml_data += ' cmpType="None"'
-        xml_data += ' />'
-        return xml_data
+        return tostring(el)
 
     def log_msg(self,msg):
         if self.log_console:
@@ -374,15 +341,6 @@ class client_base:
     def my_role(self):
         #Leaving this for testing.
         return self.role
-        """
-        if self.role == "GM":
-            return self.ROLE_GM
-        elif self.role == "Player":
-            return self.ROLE_PLAYER
-        elif self.role == "Lurker":
-            return self.ROLE_LURKER
-        return -1
-        """
 
     def set_status(self,status):
         self.statLock.acquire()
@@ -568,25 +526,28 @@ class mplay_client(client_base):
                 return (0,id,name)
         self.ignore_name.append(self.players[id][0])
         self.ignore_id.append(self.players[id][2])
-        return (1,self.players[id][2],self.players[id][0])
+        return (1, self.players[id][2], self.players[id][0])
 
     def boot_player(self,id,boot_pwd = ""):
-        #self.send(BOOT_MSG,id)
-        msg = '<boot boot_pwd="' + boot_pwd + '"/>'
-        self.send(msg,id)
+        el = Element('boot')
+        el.set('boot_pwd', boot_pwd)
+        self.send(tostring(el), id)
 
 #---------------------------------------------------------
 # [START] Snowdog Password/Room Name altering code 12/02
 #---------------------------------------------------------
 
-    def set_room_pass(self,npwd,pwd=""):
-        recycle_bin = "<alter key=\"pwd\" "
-        recycle_bin += "val=\"" +npwd+ "\" bpw=\"" + pwd + "\" "
-        recycle_bin += "plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+    def set_room_pass(self, npwd, pwd=""):
+        el = Element('alter')
+        el.set('key', 'pwd')
+        el.set('val', npwd)
+        el.set('bpw', pwd)
+        el.set('plr', self.id)
+        el.set('gid', self.group_id)
+        self.outbox.put(tostring(el))
         self.update()
 
-    def set_room_name(self,name,pwd=""):
+    def set_room_name(self, name, pwd=""):
         loc = name.find("&")
         oldloc=0
         while loc > -1:
@@ -614,10 +575,13 @@ class mplay_client(client_base):
                 e = name[loc+1:]
                 name = b + "&#39;" + e
                 oldloc = loc+1
-        recycle_bin = "<alter key=\"name\" "
-        recycle_bin += "val=\"" + name + "\" bpw=\"" + pwd + "\" "
-        recycle_bin += "plr=\"" + self.id +"\" gid=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+        el = Element('alter')
+        el.set('key', 'pwd')
+        el.set('val', npwd)
+        el.set('bpw', pwd)
+        el.set('plr', self.id)
+        el.set('gid', self.group_id)
+        self.outbox.put(tostring(el))
         self.update()
 
 #---------------------------------------------------------
@@ -625,19 +589,39 @@ class mplay_client(client_base):
 #---------------------------------------------------------
 
     def display_roles(self):
-        self.outbox.put("<role action=\"display\" player=\"" + self.id +"\" group_id=\""+self.group_id + "\" />")
+        el = Element('role')
+        el.set('action', 'display')
+        el.set('player', self.id)
+        el.set('group_id', self.group_id)
+        self.outbox.put(tostring(el))
 
     def get_role(self):
-        self.outbox.put("<role action=\"get\" player=\"" + self.id +"\" group_id=\""+self.group_id + "\" />")
+        el = Element('role')
+        el.set('action', 'get')
+        el.set('player', self.id)
+        el.set('group_id', self.group_id)
+        self.outbox.put(tostring(el))
 
-    def set_role(self,player,role,pwd=""):
-        recycle_bin = "<role action=\"set\" player=\"" + player + "\" "
-        recycle_bin += "role=\"" +role+ "\" boot_pwd=\"" + pwd + "\" group_id=\"" + self.group_id + "\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easer to read. --TaS
+    def set_role(self, player, role, pwd=""):
+        el = Element('role')
+        el.set('action', 'set')
+        el.set('player', player)
+        el.set('role', role)
+        el.set('boot_pwd', pwd)
+        el.set('group_id', self.group_id)
+        self.outbox.put(tostring(el))
         self.update()
 
-    def send(self,msg,player="all"):
+    def send(self, msg, player="all"):
         if self.status == MPLAY_CONNECTED and player != self.id:
+            ### Pre Alpha ###
+            #el = Element('msg')
+            #el.set('to', player)
+            #el.set('from', self.id)
+            #el.set('group_id', self.group_id)
+            #el.append(fromstring(msg))
+            #self.outbox.put(tostring(el))
+            ### Current chat is not ready for Element Tree ###
             self.outbox.put("<msg to='"+player+"' from='"+self.id+"' group_id='"+self.group_id+"' />"+msg)
         self.check_my_status()
 
@@ -646,19 +630,26 @@ class mplay_client(client_base):
             self.outbox.put(snd_xml)
         self.check_my_status()
 
-    def send_create_group(self,name,pwd,boot_pwd,minversion):
-        recycle_bin = "<create_group from=\""+self.id+"\" "
-        recycle_bin += "pwd=\""+pwd+"\" name=\""+ name+"\" boot_pwd=\""+boot_pwd+"\" "
-        recycle_bin += "min_version=\"" + minversion +"\" />"
-        self.outbox.put(recycle_bin); del recycle_bin #makes line easier to read. --TaS
+    def send_create_group(self, name, pwd, boot_pwd, min_version):
+        el = Element('create_group')
+        el.set('from', self.id)
+        el.set('pwd', pwd)
+        el.set('name', name)
+        el.set('boot_pwd', boot_pwd)
+        el.set('min_version', min_version)
+        self.outbox.put(tostring(el))
 
-    def send_join_group(self,group_id,pwd):
+    def send_join_group(self, group_id, pwd):
         if (group_id != 0): self.update_role("Lurker")
-        self.outbox.put("<join_group from=\""+self.id+"\" pwd=\""+pwd+"\" group_id=\""+str(group_id)+"\" />")
+        el = Element('join_group')
+        el.set('from', self.id)
+        el.set('pwd', pwd)
+        el.set('group_id', str(group_id))
+        print 'send join group ', str(group_id)
+        self.outbox.put(tostring(el))
 
     def poll(self, evt=None):
-        try:
-            msg = self.inbox.get_nowait()
+        try: msg = self.inbox.get_nowait()
         except:
             if self.get_status() != MPLAY_CONNECTED:
                 self.check_my_status()
@@ -689,29 +680,26 @@ class mplay_client(client_base):
         self.add_msg_handler('password', self.on_password, True)
         self.add_msg_handler('sound', self.on_sound, True)
 
-    def pretranslate(self,data):
+    def pretranslate(self, data):
         # Pre-qualify our data.  If we don't have atleast 5-bytes, then there is
         # no way we even have a valid message!
         if len(data) < 5: return
-        end = data.find(">")
-        head = data[:end+1]
-        msg = data[end+1:]
-        xml_dom = self.xml.parseXml(head)
-        xml_dom = xml_dom._get_documentElement()
-        tag_name = xml_dom._get_tagName()
-        id = xml_dom.getAttribute("from")
-        if id == '': id = xml_dom.getAttribute("id")
-        if self.msg_handlers.has_key(tag_name): self.msg_handlers[tag_name](id, data, xml_dom)
-        else:
-            #Unknown messages recived ignoring
-            #using pass insted or printing an error message
-            #because plugins should now be able to send and proccess messages
-            #if someone is using a plugin to send messages and this user does not
-            #have the plugin they would be getting errors
-            pass
-        if xml_dom: xml_dom.unlink()
+        try: el = fromstring(data)
+        except ExpatError:
+            end = data.find(">")
+            head = data[:end+1]
+            msg = data[end+1:]
+            el = fromstring(head)
+            try:
+                el1 = fromstring(msg)
+                el.append(el1)
+            except ExpatError:
+                el.text = msg
+                #logger.general("Bad Message: \n" + data)
+        id = el.get('from') or el.get('id')
+        if el.tag in self.msg_handlers: self.msg_handlers[el.tag](id, data, el)
 
-    def on_sound(self, id, data, xml_dom):
+    def on_sound(self, id, data, etreeEl):
         (ignore_id,ignore_name) = self.get_ignore_list()
         for m in ignore_id:
             if m == id:
@@ -719,96 +707,79 @@ class mplay_client(client_base):
                 print "ignoring sound from player:"
                 return
         chat = self.get_chat()
-        snd = xml_dom.getAttribute("url")
-        loop_sound = xml_dom.getAttribute("loop")
-        chat.sound_player.play(snd, "remote", loop_sound)
+        chat.sound_player.play(etreeEl.get('url'), 'remote', etreeEl.get('loop'))
 
-    def on_msg(self, id, data, xml_dom):
+    def on_msg(self, id, data, etreeEl):
         end = data.find(">")
         head = data[:end+1]
         msg = data[end+1:]
-        if id == "0":
-            self.on_receive(msg,None)      #  None get's interpreted in on_receive as the sys admin.
-                                           #  Doing it this way makes it harder to impersonate the admin
-        else:
-            if self.is_valid_id(id): self.on_receive(msg,self.players[id])
-        if xml_dom: xml_dom.unlink()
+        if msg[-6:] == '</msg>': msg = msg[:-6]
+        if id == "0": self.on_receive(msg, None)
+        #  None get's interpreted in on_receive as the sys admin.
+        #  Doing it this way makes it harder to impersonate the admin
+        elif self.is_valid_id(id): self.on_receive(msg, self.players[id])
 
-    def on_ping(self, id, msg, xml_dom):
+    def on_ping(self, id, msg, etreeEl):
         #a REAL ping time implementation by Snowdog 8/03
         # recieves special server <ping time="###" /> command
         # where ### is a returning time from the clients ping command
         #get current time, pull old time from object and compare them
         # the difference is the latency between server and client * 2
         ct = time.clock()
-        ot = xml_dom.getAttribute("time")
+        ot = etreeEl.get("time")
         latency = float(float(ct) - float(ot))
-        latency = int( latency * 10000.0 )
-        latency = float( latency) / 10.0
+        latency = int(latency * 10000.0)
+        latency = float(latency) / 10.0
         ping_msg = "Ping Results: " + str(latency) + " ms (parsed message, round trip)"
-        self.on_receive(ping_msg,None)
-        if xml_dom: xml_dom.unlink()
+        self.on_receive(ping_msg, None)
 
-    def on_group(self, id, msg, xml_dom):
-        name = xml_dom.getAttribute("name")
-        players = xml_dom.getAttribute("players")
-        act = xml_dom.getAttribute("action")
-        pwd = xml_dom.getAttribute("pwd")
-        group_data = (id, name, pwd, players)
-
-        if act == 'new':
+    def on_group(self, id, msg, etreeEl):
+        act = etreeEl.get("action")
+        group_data = (id, etreeEl.get("name"), etreeEl.get("pwd"), etreeEl.get("players"))
+        if act == 'new' or 'update':
             self.groups[id] = group_data
-            self.on_group_event(mplay_event(GROUP_NEW, group_data))
+            if act == 'update': self.on_group_event(mplay_event(GROUP_UPDATE, group_data))
+            elif act == 'new': self.on_group_event(mplay_event(GROUP_NEW, group_data))
         elif act == 'del':
             del self.groups[id]
             self.on_group_event(mplay_event(GROUP_DEL, group_data))
-        elif act == 'update':
-            self.groups[id] = group_data
-            self.on_group_event(mplay_event(GROUP_UPDATE, group_data))
-        if xml_dom: xml_dom.unlink()
 
-    def on_role(self, id, msg, xml_dom):
-        act = xml_dom.getAttribute("action")
-        role = xml_dom.getAttribute("role")
+    def on_role(self, id, msg, etreeEl):
+        act = etreeEl.get("action")
         if (act == "set") or (act == "update"):
             try:
                 (a,b,c,d,e,f,g,h) = self.players[id]
                 if id == self.id:
-                    self.players[id] = (a,b,c,d,e,f,g,role)
-                    self.update_role(role)
-                else: self.players[id] = (a,b,c,d,e,f,g,role)
-                self.on_player_event(mplay_event(PLAYER_UPDATE,self.players[id]))
+                    self.players[id] = (a,b,c,d,e,f,g,etreeEl.get("role"))
+                    self.update_role(etreeEl.get("role"))
+                else: self.players[id] = (a,b,c,d,e,f,g,etreeEl.get("role"))
+                self.on_player_event(mplay_event(PLAYER_UPDATE, self.players[id]))
             except: pass
-        if xml_dom: xml_dom.unlink()
 
-    def on_player(self, id, msg, xml_dom):
-        act = xml_dom.getAttribute("action")
-        ip = xml_dom.getAttribute("ip")
-        name = xml_dom.getAttribute("name")
-        status = xml_dom.getAttribute("status")
-        version = xml_dom.getAttribute("version")
-        protocol_version = xml_dom.getAttribute("protocol_version")
-        client_string = xml_dom.getAttribute("client_string")
-        try: player = (name, ip, id, status, 
-                        version, protocol_version, 
-                        client_string, self.players[id][7])
+    def on_player(self, id, msg, etreeEl):
+        act = etreeEl.get("action")
+        try: player = (etreeEl.get("name"), etreeEl.get("ip"), id, etreeEl.get("status"), 
+                        etreeEl.get("version"), etreeEl.get("protocol_version"), 
+                        etreeEl.get("client_string"), self.players[id][7])
         except Exception, e:
-            player = (name, ip, id, status, 
-                        version, protocol_version, 
-                        client_string, "Player")
+            player = (etreeEl.get("name"), etreeEl.get("ip"), id, etreeEl.get("status"), 
+                        etreeEl.get("version"), etreeEl.get("protocol_version"), 
+                        etreeEl.get("client_string"), "Player")
+            print e
         if act == "new":
             self.players[id] = player
             self.on_player_event(mplay_event(PLAYER_NEW, self.players[id]))
         elif act == "group":
-            self.group_id = xml_dom.getAttribute("group_id")
+            self.group_id = etreeEl.get('group_id')
             self.clear_players()
             self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE, self.groups[self.group_id]))
-            self.players[self.id] = self.get_my_info() #(self.name,self.ip,self.id,self.text_status)
+            self.players[self.id] = self.get_my_info() 
+            #(self.name,self.ip,self.id,self.text_status)
             self.on_player_event(mplay_event(PLAYER_NEW, self.players[self.id]))
         elif act == "failed":
             self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE_F))
         elif act == "del":
-            self.on_player_event(mplay_event(PLAYER_DEL,self.players[id]))
+            self.on_player_event(mplay_event(PLAYER_DEL, self.players[id]))
             if self.players.has_key(id): del self.players[id]
             if id == self.id: self.do_disconnect()
         #  the next two cases handle the events that are used to let you know when others are typing
@@ -818,20 +789,13 @@ class mplay_client(client_base):
                 self.update_self_from_player(player)
             else: self.players[id] = player
             dont_send = 0
-            for m in self.ignore_id:
+            for m in self.ignore_id: 
                 if m == id: dont_send=1
-            if dont_send != 1: self.on_player_event(mplay_event(PLAYER_UPDATE,self.players[id]))
-        if xml_dom: xml_dom.unlink()
+            if dont_send != 1: self.on_player_event(mplay_event(PLAYER_UPDATE, self.players[id]))
 
-    def on_password(self, id, msg, xml_dom):
-        signal = type = id = data = None
-        id = xml_dom.getAttribute("id")
-        type = xml_dom.getAttribute("type")
-        signal = xml_dom.getAttribute("signal")
-        data = xml_dom.getAttribute("data")
-        self.on_password_signal( signal,type,id,data )
-        if xml_dom:
-            xml_dom.unlink()
+    def on_password(self, id, msg, etreeEl):
+        self.on_password_signal(etreeEl.get("signal"), etreeEl.get("type"), 
+                                etreeEl.get("id"), etreeEl.get("data"))
 
     def check_my_status(self):
         status = self.get_status()
@@ -843,7 +807,6 @@ class mplay_client(client_base):
         if self.is_connected():
             self.log_msg( "Client is already connected to a server?!?  Need to disconnect first." )
             return 0
-        xml_dom = None
         self.inbox = Queue.Queue(0)
         self.outbox = Queue.Queue(0)
         addressport_ar = addressport.split(":")
@@ -858,29 +821,29 @@ class mplay_client(client_base):
         try:
             self.sock.connect((address,port))
             # send client into with id=0
-            self.sendMsg( self.sock, self.toxml("new") )
-            data = self.recvMsg( self.sock )
+            outgoing = self.toxml('new')
+            if iselement(outgoing): outgoing = tostring(outgoing)
+            self.sendMsg(self.sock, outgoing)
+            data = self.recvMsg(self.sock)
             # get new id and group_id
-            xml_dom = self.xml.parseXml(data)
-            xml_dom = xml_dom._get_documentElement()
-            self.id = xml_dom.getAttribute("id")
-            self.group_id = xml_dom.getAttribute("group_id")
-            if xml_dom.hasAttribute('useCompression') and xml_dom.getAttribute('useCompression') == 'True':
+            el = fromstring(data)
+            self.id = el.get('id')
+            self.group_id = el.get('group_id')
+            if el.get('useCompression') == 'True':
                 self.useCompression = True
-                if xml_dom.hasAttribute('cmpType'):
-                    if cmpBZ2 and xml_dom.getAttribute('cmpType') == 'bz2':
-                        self.compressionType = bz2
-                    elif cmpZLIB and xml_dom.getAttribute('cmpType') == 'zlib':
-                        self.compressionType = zlib
-                    else: self.compressionType = None
-                else: self.compressionType = bz2
+                if cmpBZ2 and el.get('cmpType') == 'bz2':
+                    self.compressionType = bz2
+                elif cmpZLIB and el.get('cmpType') == 'zlib':
+                    self.compressionType = zlib
+                else: self.compressionType = None
             #send confirmation
-            self.sendMsg( self.sock, self.toxml("new") )
+            outgoing = self.toxml('new')
+            if iselement(outgoing): outgoing = tostring(outgoing)
+            self.sendMsg(self.sock, outgoing)
         except Exception, e:
+            print e
             self.log_msg(e)
-            if xml_dom: xml_dom.unlink()
             return 0
-
         # Start things rollings along
         self.initialize_threads()
         self.on_mplay_event(mplay_event(MPLAY_CONNECTED))
@@ -888,12 +851,13 @@ class mplay_client(client_base):
                                 self.text_status, self.version, 
                                 self.protocol_version, self.client_string, self.role)
         self.on_player_event(mplay_event(PLAYER_NEW,self.players[self.id]))
-        if xml_dom: xml_dom.unlink()
         return 1
 
     def start_disconnect(self):
         self.on_mplay_event(mplay_event(MPLAY_DISCONNECTING))
-        self.outbox.put( self.toxml("del") )
+        outgoing = self.toxml('del')
+        if iselement(outgoing): outgoing = tostring(outgoing)
+        self.outbox.put(outgoing)
         ## Client Side Disconect Forced -- Snowdog 10-09-2003
         #pause to allow GUI events time to sync.
         time.sleep(1)
