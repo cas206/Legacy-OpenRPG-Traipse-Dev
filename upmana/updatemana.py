@@ -1,7 +1,5 @@
-import wx
-import sys
-import os #just .sep maybe
-import manifest
+import wx, sys, os #just .sep maybe
+from manifest import manifest
 import shutil
 
 from orpg.orpgCore import component
@@ -12,22 +10,32 @@ from upmana.validate import validate
 from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 
+class Term2Win(object):
+    # A stdout redirector.  Allows the messages from Mercurial to be seen in the Install Window
+    def write(self, text):
+        statbar.SetStatusText(text)
+        wx.Yield()
+        sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
     @debugging
-    def __init__(self, parent, component, manifest):
+    def __init__(self, parent, component):
         wx.Panel.__init__(self, parent)
+        ### Status Bar ###
+        #statbar.SetStatusText('Select a Package and Update')
+        statbar.SetStatusText('New Status Bar')
 
         ### Update Manager
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-        self.manifest = manifest
         self.parent = parent
         self.SetBackgroundColour(wx.WHITE)
         self.sizer = wx.GridBagSizer(hgap=1, vgap=1)
-        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(300, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self.filelist = wx.TextCtrl(self, wx.ID_ANY, size=(275, 300), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.changelog = wx.TextCtrl(self, wx.ID_ANY, size=(300, -1), 
+                                    style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.filelist = wx.TextCtrl(self, wx.ID_ANY, size=(275, 300), 
+                                    style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.buttons = {}
         self.buttons['progress_bar'] = wx.Gauge(self, wx.ID_ANY, 100)
         self.buttons['auto_text'] = wx.StaticText(self, wx.ID_ANY, "Auto Update")
@@ -59,9 +67,9 @@ class Updater(wx.Panel):
         self.current = self.repo.dirstate.branch()
         self.BranchInfo(self.current)
 
-        if self.manifest.GetString("updatemana", "no_update", "") == 'on': self.buttons['no_check'].SetValue(True)
+        if manifest.GetString("updatemana", "no_update", "") == 'on': self.buttons['no_check'].SetValue(True)
         else: self.buttons['no_check'].SetValue(False)
-        if self.manifest.GetString("updatemana", "auto_update", "") == 'on': self.buttons['auto_check'].SetValue(True)
+        if manifest.GetString("updatemana", "auto_update", "") == 'on': self.buttons['auto_check'].SetValue(True)
         else: self.buttons['auto_check'].SetValue(False)
 
         ## Event Handlers
@@ -75,17 +83,17 @@ class Updater(wx.Panel):
         if self.buttons['auto_check'].GetValue() == True:
             if self.buttons['no_check'].GetValue() == True: 
                 self.buttons['no_check'].SetValue(False)
-                self.manifest.SetString("updatemana", "no_update", "off")
-            self.manifest.SetString("updatemana", "auto_update", "on")
-        else: self.manifest.SetString("updatemana", "auto_update", "off")
+                manifest.SetString("updatemana", "no_update", "off")
+            manifest.SetString("updatemana", "auto_update", "on")
+        else: manifest.SetString("updatemana", "auto_update", "off")
 
     def ToggleNoUpdate(self, event):
         if self.buttons['no_check'].GetValue() == True:
             if self.buttons['auto_check'].GetValue() == True: 
                 self.buttons['auto_check'].SetValue(False)
-                self.manifest.SetString("updatemana", "auto_update", "off")
-            self.manifest.SetString("updatemana", "no_update", "on")
-        else: self.manifest.SetString("updatemana", "no_update", "off")
+                manifest.SetString("updatemana", "auto_update", "off")
+            manifest.SetString("updatemana", "no_update", "on")
+        else: manifest.SetString("updatemana", "no_update", "off")
 
     def Update(self, evt=None):
         self.ui = ui.ui()
@@ -198,9 +206,11 @@ class Updater(wx.Panel):
         return None
 
 class Repos(wx.Panel):
-    def __init__(self, parent, openrpg, manifest):
+    def __init__(self, parent, openrpg):
         wx.Panel.__init__(self, parent)
-
+        ### Status Bar ###
+        #statbar.SetStatusText('Add, Delete, or Refresh your source Tracs')
+        statbar.SetStatusText('New Status Bar')
         ### Update Manager
         self.ui = ui.ui()
         self.r = hg.repository(self.ui, ".")
@@ -208,7 +218,6 @@ class Repos(wx.Panel):
 
         #mainpanel = self
         self.openrpg = openrpg
-        self.manifest = manifest
         self.buttons = {}
         self.texts = {}
 
@@ -245,7 +254,6 @@ class Repos(wx.Panel):
         self.sizers["repolist"] = wx.StaticBoxSizer(self.box_sizers["repolist"], wx.VERTICAL)
         self.sizers["repo"] = wx.GridBagSizer(hgap=2, vgap=2)
         self.sizers["repolist_layout"] = wx.FlexGridSizer(rows=1, cols=1, hgap=2, vgap=5)
-        self.manifest = manifest
 
         self.NewRepoList(None)
         self.BuildRepoList(None)
@@ -271,19 +279,22 @@ class Repos(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.AddRepo, self.buttons['addrepo'])
 
     def NewRepoList(self, event):
-        self.id = -1; self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
+        self.id = -1
+        self.box = {}; self.box_name= {}; self.main = {}; self.container = {}; self.layout = {}
         self.name = {}; self.url = {}; self.url_list = {}; self.pull = {}; self.uri = {}; self.delete = {}
         self.defaultcheck = {}; self.default = {}; self.repotrac = {}
-        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}
+        self.pull_list = {}; self.delete_list = {}; self.defchecklist = {}; self.repolist = []
 
     def BuildRepoList(self, event):
-        self.repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
-        try: self.repolist = self.repo
-        except: pass
+        repolist = manifest.PluginChildren('updaterepo')
+        appendlist = []
+        for repo in repolist:
+            if repo not in self.repolist: appendlist.append(repo)
+        self.repolist = repolist
 
         #wx.Yeild()  For future refrence.
 
-        for repo in self.repolist:
+        for repo in appendlist:
             self.id += 1
             #Build Constructs
             self.box[self.id] = wx.StaticBox(self.repopanel, -1, str(repo))
@@ -291,7 +302,7 @@ class Repos(wx.Panel):
             self.container[self.id] = wx.StaticBoxSizer(self.box[self.id], wx.VERTICAL)
             self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
             self.name[self.id] = wx.StaticText(self.repopanel, -1, 'URL')
-            self.uri[self.id] = self.manifest.GetString('updaterepo', repo, '')
+            self.uri[self.id] = manifest.GetString('updaterepo', repo, '')
             self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
             self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
             self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
@@ -303,11 +314,15 @@ class Repos(wx.Panel):
             self.pull_list[self.pull[self.id]] = self.id
             self.defchecklist[self.defaultcheck[self.id]] = self.id
             #Build Layout
-            self.layout[self.id].Add(self.name[self.id], -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
-            self.layout[self.id].Add(self.url[self.id], -1, wx.EXPAND)
-            self.layout[self.id].Add(self.pull[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.name[self.id], 
+                                    -1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.url[self.id], 
+                                    -1, wx.EXPAND)
+            self.layout[self.id].Add(self.pull[self.id], 
+                                    -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
             self.layout[self.id].Add(self.delete[self.id], -1, wx.EXPAND)
-            self.layout[self.id].Add(self.defaultcheck[self.id], -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
+            self.layout[self.id].Add(self.defaultcheck[self.id], 
+                                    -1, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
             self.layout[self.id].Add(self.default[self.id], -1, wx.EXPAND)
             self.layout[self.id].AddGrowableCol(1)
             self.container[self.id].Add(self.layout[self.id], -1, wx.EXPAND)
@@ -317,9 +332,10 @@ class Repos(wx.Panel):
             self.Bind(wx.EVT_CHECKBOX, self.SetDefault, self.defaultcheck[self.id])
             self.sizers["repolist_layout"].Insert(0, self.container[self.id], -1, wx.EXPAND)
             self.sizers['repolist_layout'].Layout()
+        self.Layout()
 
         #Set Default Repo Button
-        capture = self.manifest.GetString('updaterepo', 'default', '')
+        capture = manifest.GetString('default', 'repo', '')
         if capture != '':
             for caught in self.uri:
                 if capture == self.uri[caught]: self.id = caught; pass
@@ -328,30 +344,27 @@ class Repos(wx.Panel):
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
-        self.manifest.SetString('updaterepo', repo, ''); self.repo = repo.split(',')
-        repolist = self.manifest.GetList('UpdateManifest', 'repolist', '')
-        if repolist == '': pass
-        else: repolist = repolist + self.repo
-        self.manifest.SetList('UpdateManifest', 'repolist', repolist)
+        manifest.SetString('updaterepo', repo, '') #; self.repo = repo.split(',')
         self.BuildRepoList(None)
 
     def DelRepo(self, event):
         self.id = self.delete_list[event.GetEventObject()]
         self.sizers["repolist_layout"].Hide(self.container[self.id])
+        manifest.DelString('updaterepo', self.box_name[self.id])
         try: del self.box_name[self.id]
         except: pass
-        self.manifest.SetList('UpdateManifest', 'repolist', list(self.box_name.values()))
         self.sizers['repolist_layout'].Layout()
+        self.repolist = manifest.PluginChildren('updaterepo')
 
     def RefreshRepo(self, event):
         self.id = self.pull_list[event.GetEventObject()]
-        self.manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
+        manifest.SetString('updaterepo', str(self.box_name[self.id]), self.url[self.id].GetValue())
         try: commands.pull(self.ui, self.r, self.url[self.id].GetValue(), rev='', update=False, force=True)
         except: pass
 
     def SetDefault(self, event):
         self.id = self.defchecklist[event.GetEventObject()]
-        self.manifest.SetString('updaterepo', 'default', self.uri[self.id])
+        manifest.SetString('default', 'repo', self.uri[self.id])
         for all in self.defaultcheck:
             self.defaultcheck[all].SetValue(False)
         self.defaultcheck[self.id].SetValue(True)
@@ -359,6 +372,9 @@ class Repos(wx.Panel):
 class Manifest(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+        ### Status Bar ###
+        #statbar.SetStatusText('Create an Ignore List')
+        statbar.SetStatusText('New Status Bar')
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
@@ -407,12 +423,13 @@ class Manifest(wx.Panel):
 class Control(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-
+        ### Status Bar ###
+        #statbar.SetStatusText('Advanced Controls & Rollback')
+        statbar.SetStatusText('New Status Bar')
         ### Control Panel
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')
-        self.manifest = manifest
         self.parent = parent
         #logger.debug("Enter updaterFrame") #Need to set logging level
 
@@ -584,20 +601,23 @@ class Control(wx.Panel):
 class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
 
-        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(600,480), style=wx.DEFAULT_FRAME_STYLE)
+        wx.Frame.__init__(self, None, wx.ID_ANY, title, size=(600,500), style=wx.DEFAULT_FRAME_STYLE)
         if wx.Platform == '__WXMSW__': icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
         else: icon = wx.Icon(dir_struct["icon"]+"d20.xpm", wx.BITMAP_TYPE_XPM )
 
         self.SetIcon(icon)
-        self.CenterOnScreen()
         self.main = main
         ####### Panel Stuff ######
         p = wx.Panel(self)
         nb = wx.Notebook(p)
 
+        global statbar
+        statbar = self.CreateStatusBar()
+        self.Centre()
+
         # create the page windows as children of the notebook
-        page1 = Updater(nb, openrpg, manifest)
-        page2 = Repos(nb, openrpg, manifest)
+        page1 = Updater(nb, openrpg)
+        page2 = Repos(nb, openrpg)
         page3 = Manifest(nb)
         page4 = Control(nb)
 
@@ -621,16 +641,16 @@ class updaterFrame(wx.Frame):
 class updateApp(wx.App):
     def OnInit(self):
         self.main = False
+        sys.stdout = Term2Win()
         logger._set_log_to_console(False)
         logger.note("Updater Start")
-        self.manifest = manifest.ManifestChanges()
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 0.8 (open beta)", 
-                                component, self.manifest, self.main)
-        if self.manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
+                                component, manifest, self.main)
+        if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass
-        if self.manifest.GetString('updatemana', 'no_update', '') == 'on' and self.main == False: 
+        if manifest.GetString('updatemana', 'no_update', '') == 'on' and self.main == False: 
             self.OnExit()
         else: pass
         try:
@@ -645,7 +665,7 @@ class updateApp(wx.App):
         self.c = self.repo.changectx('tip')
         self.current = self.repo.dirstate.branch()
 
-        capture = self.manifest.GetString('updaterepo', 'default', '')
+        capture = manifest.GetString('updaterepo', 'default', '')
         if capture != '':
             commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
             filename = 'ignorelist.txt'

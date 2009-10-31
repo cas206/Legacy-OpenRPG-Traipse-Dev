@@ -1,185 +1,214 @@
-import xmltramp
+from __future__ import with_statement
+
 from orpg.dirpath import dir_struct
-import upmana.validate
-from os import sep
+from upmana.validate import validate
+from orpg.tools.orpg_log import logger
+from os import sep, getcwd
 from types import *
 
-class ManifestChanges:
-    def __init__(self, filename="updatemana.xml"):
-        self.filename = dir_struct["home"] + 'upmana' + sep + filename
-        upmana.validate.Validate(dir_struct["home"] + 'upmana' + sep).config_file(filename,"default_manifest.xml")
-        self.xml_dom = self.LoadDoc()
+from xml.etree.ElementTree import ElementTree, Element, parse, fromstring
+from xml.etree.ElementPath import find
 
-    def GetString(self, plugname, strname, defaultval, verbose=0):
+class ManifestChanges(object):
+    etree = ElementTree()
+    filename = dir_struct['home'] + 'upmana' + sep + 'updatemana.xml'
+
+    def __new__(cls, *args, **kwargs):
+        it = cls.__dict__.get("__it__")
+        if it is not None:
+            return it
+        cls.__it__ = it = object.__new__(cls)
+        it._init()
+        return it
+
+    def _init(self):
+        validate.config_file('updatemana.xml', "default_manifest.xml")
+        self.LoadDoc()
+
+    def PluginChildren(self, plugname):
+        plugin = self.etree.find(plugname)
+        children = plugin.getchildren()
+        nodes = []
+        for child in children:
+            nodes.append(child.tag)
+        return nodes
+
+    def GetString(self, plugname, strname, defaultval="", verbose=False):
         strname = self.safe(strname)
-        for plugin in self.xml_dom:
-            if plugname == plugin._name:
-                for child in plugin._dir:
-                    if child._name == strname:
-                        #str() on this to make sure it's ASCII, not unicode, since orpg can't handle unicode.
-                        if verbose: print "successfully found the value"
-                        if len(child): return str( self.normal(child[0]) )
-                        else: return ""
-        else:
-            if verbose:
-                print "manifest: no value has been stored for " + strname + " in " + plugname + " so the default has been returned"
+        plugin = self.etree.find(plugname)
+        if plugin is None or plugin.find(strname) is None:
+            msg = ["plugindb: no value has been stored for", strname, "in",
+                   plugname, "so the default has been returned"]
             return defaultval
+        return self.normal(plugin.find(strname).text)
+
+    def DelString(self, plugname, strname):
+        strname = self.safe(strname)
+        plugin = self.etree.find(plugname)
+        plugin.remove(plugin.find(strname))
+        self.SaveDoc()
 
     def SetString(self, plugname, strname, val):
-        #Set Node, <repo, name, description, value>
-        #Set Setting, <setting, value>
         val = self.safe(val)
         strname = self.safe(strname)
-        for plugin in self.xml_dom:
-        ##this isn't absolutely necessary, but it saves the trouble of sending a parsed object instead of a simple string.
-            if plugname == plugin._name:
-                plugin[strname] = val
-                plugin[strname]._attrs["type"] = "string"
-                self.SaveDoc()
-                return "found plugin"
-        else:
-            self.xml_dom[plugname] = xmltramp.parse("<" + strname + " type=\"string\">" + val + "</" + strname + ">")
-            self.SaveDoc()
-            return "added plugin"
-
+        plugin = self.etree.find(plugname)
+        if plugin is None:
+            plugin = Element(plugname)
+            self.etree.getroot().append(plugin)
+        str_el = plugin.find(strname)
+        if str_el is None:
+            str_el = Element(strname)
+            str_el.set('type', 'str')
+            plugin.append(str_el)
+        str_el.text = val
+        self.SaveDoc()
 
     def FetchList(self, parent):
         retlist = []
-        if not len(parent): return []
-        for litem in parent[0]._dir:
-            if len(litem):
-                if litem._attrs["type"] == "int": retlist += [int(litem[0])]
-                elif litem._attrs["type"] == "long": retlist += [long(litem[0])]
-                elif litem._attrs["type"] == "float": retlist += [float(litem[0])]
-                elif litem._attrs["type"] == "list": retlist += [self.FetchList(litem)]
-                elif litem._attrs["type"] == "dict": retlist += [self.FetchDict(litem)]
-                else: retlist += [str( self.normal(litem[0]) )]
-            else: retlist += [""]
+        for litem in parent.findall('lobject'):
+            if litem.get('type') == 'int': retlist.append(int(litem.text))
+            if litem.get('type') == 'bool': retlist.append(litem.text == 'True')
+            elif litem.get('type') == 'float': retlist.append(float(litem.text))
+            elif litem.get('type') == 'list': retlist.append(self.FetchList(litem))
+            elif litem.get('type') == 'dict': retlist.append(self.FetchDict(litem))
+            else: retlist.append(str(self.normal(litem.text)))
         return retlist
 
-    def GetList(self, plugname, listname, defaultval, verbose=0):
+    def GetList(self, plugname, listname, defaultval=list(), verbose=False):
         listname = self.safe(listname)
-        for plugin in self.xml_dom:
-            if plugname == plugin._name:
-                for child in plugin._dir:
-                    if child._name == listname and child._attrs["type"] == "list":
-                        retlist = self.FetchList(child)
-                        if verbose: print "successfully found the value"
-                        return retlist
-        else:
-            if verbose:
-                print "plugindb: no value has been stored for " + listname + " in " + plugname + " so the default has been returned"
+        plugin = self.etree.find(plugname)
+        if plugin is None or plugin.find(listname) is None:
+            msg = ["plugindb: no value has been stored for", listname, "in",
+                   plugname, "so the default has been returned"]
             return defaultval
+        retlist = self.FetchList(plugin.find(listname))
+        return retlist
 
     def BuildList(self, val):
-        listerine = "<list>"
+        list_el = Element('list')
         for item in val:
-            if isinstance(item, basestring):#it's a string
-                listerine += "<lobject type=\"str\">" + self.safe(item) + "</lobject>"
-            elif isinstance(item, IntType):#it's an int
-                listerine += "<lobject type=\"int\">" + str(item) + "</lobject>"
-            elif isinstance(item, FloatType):#it's a float
-                listerine += "<lobject type=\"float\">" + str(item) + "</lobject>"
-            elif isinstance(item, LongType):#it's a long
-                listerine += "<lobject type=\"long\">" + str(item) + "</lobject>"
-            elif isinstance(item, ListType):#it's a list
-                listerine += "<lobject type=\"list\">" + self.BuildList(item) + "</lobject>"
-            elif isinstance(item, DictType):#it's a dictionary
-                listerine += "<lobject type=\"dict\">" + self.BuildDict(item) + "</lobject>"
-            else: return "type unknown"
-        listerine += "</list>"
-        return listerine
+            i = Element('lobject')
+            if isinstance(item, bool):
+                i.set('type', 'bool')
+                i.text = str(item)
+            elif isinstance(item, int):#it's an int
+                i.set('type', 'int')
+                i.text = str(item)
+            elif isinstance(item, float):#it's a float
+                i.set('type', 'float')
+                i.text = str(item)
+            elif isinstance(item, (list, tuple)):#it's a list
+                i.set('type', 'list')
+                i.append(self.BuildList(item))
+            elif isinstance(item, dict):#it's a dictionary
+                i.set('type', 'dict')
+                i.append(self.BuildDict(item))
+            else:
+                i.set('type', 'str')
+                i.text = self.safe(item)
+            list_el.append(i)
+        return list_el
 
     def SetList(self, plugname, listname, val):
         listname = self.safe(listname)
-        list = xmltramp.parse(self.BuildList(val))
-        for plugin in self.xml_dom:
-            if plugname == plugin._name:
-                plugin[listname] = list
-                plugin[listname]._attrs["type"] = "list"
-                self.SaveDoc()
-                return "found plugin"
+        plugin = self.etree.find(plugname)
+        if plugin is None:
+            plugin = Element(plugname)
+            self.etree.getroot().append(plugin)
+        list_el = plugin.find(listname)
+        if list_el is None:
+            list_el = Element(listname)
+            list_el.set('type', 'list')
+            plugin.append(list_el)
         else:
-            self.xml_dom[plugname] = xmltramp.parse("<" + listname + "></" + listname + ">")
-            self.xml_dom[plugname][listname] = list
-            self.xml_dom[plugname][listname]._attrs["type"] = "list"
-            self.SaveDoc()
-            return "added plugin"
+            list_el.remove(list_el.find('list'))
+        list_el.append(self.BuildList(val))
+        self.SaveDoc()
 
     def BuildDict(self, val):
-        dictator = "<dict>"
-        for item in val.keys():
-            if isinstance(val[item], basestring):
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"str\">" + self.safe(val[item]) + "</dobject>"
-            elif isinstance(val[item], IntType):#it's an int
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"int\">" + str(val[item]) + "</dobject>"
-            elif isinstance(val[item], FloatType):#it's a float
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"float\">" + str(val[item]) + "</dobject>"
-            elif isinstance(val[item], LongType):#it's a long
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"long\">" + str(val[item]) + "</dobject>"
-            elif isinstance(val[item], DictType):#it's a dictionary
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"dict\">" + self.BuildDict(val[item]) + "</dobject>"
-            elif isinstance(val[item], ListType):#it's a list
-                dictator += "<dobject name=\"" + self.safe(item) + "\" type=\"list\">" + self.BuildList(val[item]) + "</dobject>"
-            else: return str(val[item]) + ": type unknown"
-        dictator += "</dict>"
-        return dictator
+        dict_el = Element('dict')
+        for key, item in val.items():
+            i = Element('dobject')
+            if isinstance(item, bool):
+                i.set('type', 'bool')
+                i.set('name', self.safe(key))
+                i.text = str(item)
+            elif isinstance(item, int):#it's an int
+                i.set('type', 'int')
+                i.set('name', self.safe(key))
+                i.text = str(item)
+            elif isinstance(item, float):#it's a float
+                i.set('type', 'float')
+                i.set('name', self.safe(key))
+                i.text = str(item)
+            elif isinstance(item, (list, tuple)):#it's a list
+                i.set('type', 'list')
+                i.set('name', self.safe(key))
+                i.append(self.BuildList(item))
+            elif isinstance(item, dict):#it's a dictionary
+                i.set('type', 'dict')
+                i.set('name', self.safe(key))
+                i.append(self.BuildDict(item))
+            else:
+                i.set('type', 'str')
+                i.set('name', self.safe(key))
+                i.text = self.safe(item)
+            dict_el.append(i)
+        return dict_el
 
-    def SetDict(self, plugname, dictname, val, file="plugindb.xml"):
+    def SetDict(self, plugname, dictname, val):
         dictname = self.safe(dictname)
-        dict = xmltramp.parse(self.BuildDict(val))
-        for plugin in self.xml_dom:
-            if plugname == plugin._name:
-                plugin[dictname] = dict
-                plugin[dictname]._attrs["type"] = "dict"
-                self.SaveDoc()
-                return "found plugin"
+        plugin = self.etree.find(plugname)
+        if plugin is None:
+            plugin = Element(plugname)
+            self.etree.getroot().append(plugin)
+        dict_el = plugin.find(dictname)
+        if dict_el is None:
+            dict_el = Element(dictname)
+            dict_el.set('type', 'dict')
+            plugin.append(dict_el)
         else:
-            self.xml_dom[plugname] = xmltramp.parse("<" + dictname + "></" + dictname + ">")
-            self.xml_dom[plugname][dictname] = dict
-            self.xml_dom[plugname][dictname]._attrs["type"] = "dict"
-            self.SaveDoc()
-            return "added plugin"
+            dict_el.remove(list_el.find('dict'))
+        dict_el.append(self.BuildDict(val))
+        self.SaveDoc()
 
     def FetchDict(self, parent):
         retdict = {}
-        if not len(parent): return {}
-        for ditem in parent[0]._dir:
-            if len(ditem):
-                ditem._attrs["name"] = self.normal(ditem._attrs["name"])
-                if ditem._attrs["type"] == "int": retdict[ditem._attrs["name"]] = int(ditem[0])
-                elif ditem._attrs["type"] == "long": retdict[ditem._attrs["name"]] = long(ditem[0])
-                elif ditem._attrs["type"] == "float": retdict[ditem._attrs["name"]] = float(ditem[0])
-                elif ditem._attrs["type"] == "list": retdict[ditem._attrs["name"]] = self.FetchList(ditem)
-                elif ditem._attrs["type"] == "dict": retdict[ditem._attrs["name"]] = self.FetchDict(ditem)
-                else: retdict[ditem._attrs["name"]] = str( self.normal(ditem[0]) )
-            else: retdict[ditem._attrs["name"]] = ""
+        for ditem in parent.findall('dobject'):
+            key = self.normal(ditem.get('name'))
+            if ditem.get('type') == 'int': value = int(ditem.text)
+            elif ditem.get('type') == 'bool': value = ditem.text == 'True'
+            elif ditem.get('type') == 'float': value = float(ditem.text)
+            elif ditem.get('type') == 'list': value = self.FetchList(ditem)
+            elif ditem.get('type') == 'dict': value = self.FetchDict(ditem)
+            else: value = str(self.normal(ditem[0]))
+            retdict[key] = value
         return retdict
 
-    def GetDict(self, plugname, dictname, defaultval, verbose=0):
+    def GetDict(self, plugname, dictname, defaultval=dict(), verbose=False):
         dictname = self.safe(dictname)
-        for plugin in self.xml_dom:
-            if plugname == plugin._name:
-                for child in plugin._dir:
-                    if child._name == dictname and child._attrs["type"] == "dict": return self.FetchDict(child)
-        else:
-            if verbose:
-                print "plugindb: no value has been stored for " + dictname + " in " + plugname + " so the default has been returned"
+        plugin = self.etree.find(plugname)
+        if plugin is None or plugin.find(dictname) is None:
+            msg = ["plugindb: no value has been stored for", dictname, "in",
+                   plugname, "so the default has been returned"]
             return defaultval
+        retdict = self.FetchDict(plugin.find(dictname))
+        return retdict
 
     def safe(self, string):
-        return string.replace("<", "$$lt$$").replace(">", "$$gt$$").replace("&","$$amp$$").replace('"',"$$quote$$")
+        return string.replace("<", "$$lt$$").replace(">", "$$gt$$")\
+               .replace("&","$$amp$$").replace('"',"$$quote$$")
 
     def normal(self, string):
-        return string.replace("$$lt$$", "<").replace("$$gt$$", ">").replace("$$amp$$","&").replace("$$quote$$",'"')
+        return string.replace("$$lt$$", "<").replace("$$gt$$", ">")\
+               .replace("$$amp$$","&").replace("$$quote$$",'"')
 
     def SaveDoc(self):
-        f = open(self.filename, "w")
-        f.write(self.xml_dom.__repr__(1, 1))
-        f.close()
+        with open(self.filename, "w") as f:
+            self.etree.write(f)
 
     def LoadDoc(self):
-        xml_file = open(self.filename)
-        manifest = xml_file.read()
-        xml_file.close()
-        return xmltramp.parse(manifest)
+        with open(self.filename) as f:
+            self.etree.parse(f)
+
+manifest = ManifestChanges()
