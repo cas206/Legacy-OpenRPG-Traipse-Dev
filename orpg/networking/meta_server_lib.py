@@ -37,22 +37,22 @@ from orpg.orpg_version import PROTOCOL_VERSION
 from orpg.orpgCore import component
 from orpg.tools.validate import validate
 from orpg.dirpath import dir_struct
-import urllib
-import orpg.minidom
+
+import urllib, time, sys, traceback, re
+#import orpg.minidom
+
 from threading import *
-import time
-import sys
-import random
-import traceback
-import re
+from random import uniform
+from urllib import urlopen, urlencode
+from orpg.tools.orpg_log import debug
 
 from xml.etree.ElementTree import Element, fromstring
 
 metacache_lock = RLock()
 
-def get_server_dom(data=None,path=None):
+def get_server_dom(data=None,path=None, string=False):
     # post data at server and get the resulting DOM
-
+    #debug()
     if path == None:
         # get meta server URI
         path = getMetaServerBaseURL()
@@ -64,7 +64,7 @@ def get_server_dom(data=None,path=None):
         print "=========================================="
         print data
         print
-    file = urllib.urlopen(path, data)
+    file = urlopen(path, data)
     data = file.read()
     file.close()
 
@@ -81,15 +81,17 @@ def get_server_dom(data=None,path=None):
         print
     # build dom
     etreeEl = data
-    return etreeEl
+    if not string: return fromstring(etreeEl)
+    else: return etreeEl
 
 def post_server_data(name, realHostName=None):
-    if realHostName: data = urllib.urlencode({"server_data[name]":name,
+    #debug()
+    if realHostName: data = urlencode({"server_data[name]":name,
                                   "server_data[version]":PROTOCOL_VERSION,
                                   "act":"new",
                                   "REMOTE_ADDR": realHostName })
     # print "Letting meta server decide the hostname to list..."
-    else: data = urllib.urlencode({"server_data[name]":name,
+    else: data = urlencode({"server_data[name]":name,
                                   "server_data[version]":PROTOCOL_VERSION,
                                   "act":"new"})
     path = component.get('settings').get('MetaServerBaseURL') #getMetaServerBaseURL()
@@ -97,16 +99,18 @@ def post_server_data(name, realHostName=None):
     return int(etreeEl.get('id'))
 
 def post_failed_connection(id,meta=None,address=None,port=None):
+    #debug((meta, address, port))
     #  For now, turning this off.  This needs to be re-vamped for
     #  handling multiple Metas.
     return 0
-    #data = urllib.urlencode({"id":id,"act":"failed"});
+    #data = urlencode({"id":id,"act":"failed"});
     #xml_dom = get_server_dom(data)
     #ret_val = int(xml_dom.getAttribute("return"))
     #return ret_val
 
 def remove_server(id):
-    data = urllib.urlencode({"id":id,"act":"del"});
+    #debug(id)
+    data = urlencode({"id":id,"act":"del"});
     etreeEl = get_server_dom(data)
     return int(etreeEl.get("return"))
 
@@ -132,7 +136,7 @@ def byNameAttribute(first, second):
 
 
 def get_server_list(versions = None, sort_by="start"):
-    data = urllib.urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
+    data = urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
     all_metas = getMetaServers(versions, 1)  # get the list of metas
     base_meta = getMetaServerBaseURL()
 
@@ -148,7 +152,7 @@ def get_server_list(versions = None, sort_by="start"):
         except: bad_meta = 1 #print "Trouble getting servers from " + meta + "..."
         if bad_meta: continue
         if base_meta == meta: updateMetaCache(xml_dom) #print "This is our base meta: " + meta
-        node_list = fromstring(xml_dom).findall('server')
+        node_list = xml_dom.findall('server')
         if len(node_list):  # if there are entries in the node list
                             #  otherwise, just loop to next meta
 
@@ -223,7 +227,7 @@ def getRawMetaList(path=None):
     """This code will allow for a list of metas to be created.  Future developement  will more integrate the list of metas"""
     if path != None: 
         metas = []
-        data = urllib.urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
+        data = urlencode({"version":PROTOCOL_VERSION,"ports":"%"})
         xml_dom = get_server_dom(data, path)
         node_list = fromstring(xml_dom).findall('meta_server')
         if len(node_list):
@@ -294,7 +298,7 @@ def getMetaServers(versions = None, pick_random=0):
             # if we have more than one and want a random one
             elif pick_random:
                 if META_DEBUG: print "choosing random meta from: " + str(meta_names)
-                i = int(random.uniform(0,len(meta_names)))
+                i = int(uniform(0,len(meta_names)))
                 #meta = meta_names[i]
                 meta_names = [meta_names[i]]
                 if META_DEBUG: print "using: " + str(meta_names)
@@ -470,7 +474,7 @@ class registerThread(Thread):
             if not self.isAlive():      #  check to see if this thread is dead
                 return 1                #  If so, return an error result
             #  Do the actual unregistering here
-            data = urllib.urlencode( {"server_data[id]":self.id,
+            data = urlencode( {"server_data[id]":self.id,
                                         "server_data[cookie]":self.cookie,
                                         "server_data[version]":PROTOCOL_VERSION,
                                         "act":"unregister"} )
@@ -493,6 +497,7 @@ class registerThread(Thread):
         finally: self.rlock.release()
 
     def register(self, name=None, realHostName=None, num_users=None):
+        #debug((name, realHostName, num_users))
         """
           Designed to handle the registration, both new and
           repeated.
@@ -514,7 +519,7 @@ class registerThread(Thread):
             if realHostName: self.realHostName = realHostName
             # build POST data
             if self.realHostName:
-                data = urllib.urlencode( {"server_data[id]":self.id,
+                data = urlencode( {"server_data[id]":self.id,
                                         "server_data[cookie]":self.cookie,
                                         "server_data[name]":self.name,
                                         "server_data[port]":self.port,
@@ -524,7 +529,7 @@ class registerThread(Thread):
                                         "server_data[address]": self.realHostName } )
             else:
                 if META_DEBUG:  print "Letting meta server decide the hostname to list..."
-                data = urllib.urlencode( {"server_data[id]":self.id,
+                data = urlencode( {"server_data[id]":self.id,
                                         "server_data[cookie]":self.cookie,
                                         "server_data[name]":self.name,
                                         "server_data[port]":self.port,
@@ -532,7 +537,8 @@ class registerThread(Thread):
                                         "server_data[num_users]":self.num_users,
                                         "act":"register"} )
             try: # this POSTS the request and returns the result
-                etreeEl = get_server_dom(data=data, path=self.path)  
+                etreeEl = get_server_dom(data=data, path=self.path)
+                #debug(etreeEl) 
             except:
                 if META_DEBUG: print "Problem talking to server.  Setting interval for retry ..."
                 if META_DEBUG: print data
@@ -554,6 +560,7 @@ class registerThread(Thread):
 
             #  If there is a DOM returned ....
             if etreeEl:
+                #debug(etreeEl)
                 #  If there's an error, echo it to the console
                 if etreeEl.get("errmsg"):
                     print "Error durring registration:  " + etreeEl.get("errmsg")

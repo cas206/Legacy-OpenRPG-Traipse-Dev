@@ -29,15 +29,17 @@
 from __future__ import with_statement
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
 
+import meta_server_lib
+#import orpg.tools.orpg_settings
+import orpg.tools.rgbhex
+import traceback
+
 from orpg.dirpath import dir_struct
 from orpg.orpg_windows import *
-import meta_server_lib
-import orpg.tools.orpg_settings
-from orpg.tools.orpg_settings import settings
-import orpg.tools.rgbhex
-from orpg.orpgCore import component
-import traceback
 from orpg.tools.validate import validate
+from orpg.orpgCore import component
+from orpg.tools.orpg_settings import settings
+from orpg.tools.orpg_log import debug
 
 from xml.etree.ElementTree import ElementTree, Element
 from xml.etree.ElementTree import fromstring, tostring
@@ -82,13 +84,13 @@ def roomCmp(room1, room2):
     return 0
 
 class game_server_panel(wx.Panel):
+    ##debug()
     def __init__(self,parent):
         wx.Panel.__init__(self, parent, -1)
         self.parent = parent
         self.password_manager = component.get('password_manager')
         self.frame = component.get('frame')
         self.session = component.get('session')
-        #self.xml = component.get('xml') #Not used??
         self.serverNameSet = 0
         self.last_motd = ""
         self.buttons = {}
@@ -97,7 +99,7 @@ class game_server_panel(wx.Panel):
         self.build_ctrls()
         self.bookmarks()
         self.refresh_server_list()
-	self.refresh_room_list()
+        self.refresh_room_list()
         self.build_bookmark_menu() 
 
     def build_ctrls(self):
@@ -353,7 +355,8 @@ class game_server_panel(wx.Panel):
             self.cur_server_index = -1
         evt.Skip()
 
-    def add_room(self,data):
+    def add_room(self, data):
+        #debug()
         i = self.room_list.GetItemCount()
         if (data[2]=="1") or (data[2]=="True"): pwd="yes"
         else: pwd="no"
@@ -364,11 +367,12 @@ class game_server_panel(wx.Panel):
         self.refresh_room_list()
 
     def del_room(self, data):
+        #debug(data)
         i = self.room_list.FindItemData(-1, int(data[0]))
         self.room_list.DeleteItem(i)
         self.refresh_room_list()
 
-    def update_room(self,data):
+    def update_room(self, data):
         i = self.room_list.FindItemData(-1,int(data[0]))
         if data[2]=="1" : pwd="yes"
         else: pwd="no"
@@ -377,15 +381,15 @@ class game_server_panel(wx.Panel):
         self.room_list.SetStringItem(i,2,pwd)
         self.refresh_room_list()
 
-    def set_cur_room_text(self,name):
+    def set_cur_room_text(self, name):
         pass
         #self.texts["cur_room"].SetLabel(name)
         #self.sizers["room"].Layout()
 
-    def set_lobbybutton(self,allow):
+    def set_lobbybutton(self, allow):
         self.buttons['gs_join_lobby'].Enable(allow)
 
-    def set_connected(self,connected):
+    def set_connected(self, connected):
         self.buttons['gs_connect'].Enable(not connected)
         self.buttons['gs_disconnect'].Enable(connected)
         self.buttons['gs_join_room'].Enable(connected)
@@ -435,7 +439,6 @@ class game_server_panel(wx.Panel):
     def gs_close(self, evt):
         self.parent.OnMB_GameServerBrowseServers()
         
-
     def refresh_room_list(self):
         self.room_list.DeleteAllItems()
         address = self.texts["address"].GetValue()
@@ -483,7 +486,7 @@ class game_server_panel(wx.Panel):
                 part = 0
                 partLength = 1.0/length
                 for n in node_list:
-                    #if n.hasAttribute('id') and n.hasAttribute('name') and n.hasAttribute('num_users') and n.hasAttribute('address') and n.hasAttribute('port'):
+                    #if n.get('id') and n.get('name') and n.get('num_users') and n.get('address') and n.get('port'):
                     self.svrList.append(server_instance(n.get('id'), n.get('name'), 
                                         n.get('num_users'), n.get('address'), 
                                         n.get('port')))
@@ -626,7 +629,7 @@ class game_server_panel(wx.Panel):
 # [START] Snowdog: Updated Game Server Window 12/02
 #---------------------------------------------------------
 
-    def on_size(self,evt):
+    def on_size(self, evt):
         # set column widths for room list
         # set column widths for server list
         pass

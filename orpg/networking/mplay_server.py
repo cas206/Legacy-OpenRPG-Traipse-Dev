@@ -75,7 +75,6 @@ def id_compare(a,b):
 
 
 class game_group(object):
-    debug()
     def __init__(self, id, name, pwd, desc="", boot_pwd="", 
                     minVersion="", mapFile=None, messageFile=None, persist=0):
         self.id = id
@@ -104,40 +103,34 @@ class game_group(object):
         self.game_map.init_from_xml(fromstring(tree))
 
     def save_map(self):
-        debug()
+        #debug(log=False)
         if self.mapFile is not None and self.persistant == 1 and self.mapFile.find("default_map.xml") == -1:
             f = open(self.mapFile, "w")
             f.write(self.game_map.get_all_xml())
             f.close()
 
     def add_player(self,id):
-        debug()
         self.players.append(id)
 
     def remove_player(self,id):
-        debug()
         if self.voice.has_key(id): del self.voice[id]
         self.players.remove(id)
 
     def get_num_players(self):
-        debug()
         num =  len(self.players)
         return num
 
     def get_player_ids(self):
-        debug()
         tmp = self.players
         return tmp
 
     def check_pwd(self,pwd):
-        debug()
         return (pwd==self.pwd)
 
     def check_boot_pwd(self,pwd):
         return (pwd==self.boot_pwd)
 
     def check_version(self,ver):
-        debug()
         if (self.minVersion == ""): return 1
         minVersion=self.minVersion.split('.')
         version=ver.split('.')
@@ -153,7 +146,6 @@ class game_group(object):
 
     #depreciated - see send_group_list()
     def toxml(self, act="new"):
-        debug(self.name)
         #  Please don't add the boot_pwd to the xml, as this will give it away to players watching their console
         el = Element('group')
         el.set('id', self.id)
@@ -164,7 +156,6 @@ class game_group(object):
         return tostring(el)
 
 class client_stub(client_base):
-    debug()
     def __init__(self,inbox,sock,props,log):
         client_base.__init__(self)
         self.ip = props['ip']
@@ -196,7 +187,6 @@ class client_stub(client_base):
         else: return 0
 
     def send(self, msg, player, group):
-        debug()
         if self.get_status() == MPLAY_CONNECTED:
             #el = Element('msg')
             #el.set('to', player)
@@ -206,7 +196,6 @@ class client_stub(client_base):
             self.outbox.put("<msg to='" + player + "' from='0' group_id='" + group + "' />" + msg)
 
     def change_group(self, group_id, groups):
-        debug()
         old_group_id = str(self.group_id)
         groups[group_id].add_player(self.id)
         groups[old_group_id].remove_player(self.id)
@@ -236,7 +225,7 @@ class client_stub(client_base):
 """
 
 class mplay_server:
-    debug()
+    #debug(log=False)
     def __init__(self, log_console=None, name=None):
         logger._set_log_level = 16
         logger._set_log_to_console(True)
@@ -274,8 +263,8 @@ class mplay_server:
         self.sendLobbySound = False
         self.lobbySound = 'http://www.digitalxero.net/music/mus_tavern1.bmu' ##used?
 
-    @debugging
     def initServer(self, **kwargs):
+        #debug(log=False)
         for atter, value in kwargs.iteritems(): setattr(self, atter, value)
         validate.config_file( self.lobbyMapFile, "default_Lobby_map.xml" )
         validate.config_file( self.lobbyMessageFile, "default_LobbyMessage.html" )
@@ -367,7 +356,9 @@ class mplay_server:
 
     # This method reads in the server's configuration file and reconfigs the server
     # as needed, over-riding any default values as requested.
+
     def initServerConfig(self):
+        #debug(log=False)
         self.log_msg("Processing Server Configuration File... " + self.userPath)
         # make sure the server_ini.xml exists!
         validate.config_file( "server_ini.xml", "default_server_ini.xml" )
@@ -666,20 +657,24 @@ class mplay_server:
         return name
 
     def registerRooms(self, args=None):
+        #debug()
         rooms = ''
         id = '0'
         time.sleep(500)
+        #debug(self.groups)
         for rnum in self.groups.keys():
             rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][name]":self.groups[rnum].name,
                                         "room_data[rooms][" + str(rnum) + "][pwd]":str(self.groups[rnum].pwd != "")})+'&'
             for pid in self.groups[rnum].players:
                 rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][players]["+str(pid)+"]":self.players[pid].name,})+'&'
+        #debug(rooms)
         for meta in self.metas.keys():
             while id == '0':
                 id, cookie = self.metas[meta].getIdAndCookie()
                 data = urllib.urlencode( {"room_data[server_id]":id,
                                         "act":'registerrooms'})
-            get_server_dom(data+'&'+rooms, self.metas[meta].path)
+            #debug((data, rooms))
+            get_server_dom(data+'&'+rooms, self.metas[meta].path, string=True)
 
     def register(self,name_given=None):
         if name_given == None: name = self.name
@@ -912,7 +907,7 @@ class mplay_server:
         print
 
     def broadcast(self,msg):
-        self.send_to_all("0","<msg to='all' from='0' group_id='1'><font color='#FF0000'>" + msg + "</font>")
+        self.send_to_all("0","<msg to='all' from='0' group_id='1'><font color='#FF0000'>" + msg + "</font></msg>")
 
     def console_log(self):
         if self.log_to_console == 1:
@@ -971,6 +966,10 @@ class mplay_server:
                 elif self.players[id].version.find(patern)>-1: self.print_player_info(self.players[id])
                 elif self.players[id].protocol_version.find(patern)>-1: self.print_player_info(self.players[id])
                 elif self.players[id].client_string.find(patern)>-1: self.print_player_info(self.players[id])
+
+    def obtain_by_id(self, id, objects):
+        ### Alpha ### Basic way to obtain information for the Server GUI, currently reports the Client String only
+        return self.players[id].client_string
 
     def print_player_info(self,player):
         print player.id, player.name, player.ip, player.group_id, player.role, player.version, player.protocol_version, player.client_string
@@ -1257,7 +1256,7 @@ class mplay_server:
         return 1
 
     def SendLobbyMessage(self, socket, player_id):
-        debug()
+        #debug(log=False)
         """
         #  Display the lobby message
         #  prepend this server's version string to the the lobby message
@@ -1329,7 +1328,7 @@ class mplay_server:
         self.listen_event.set()
 
     def acceptedNewConnectionThread( self, newsock, addr ):
-        debug()
+        #debug(log=False)
         """Once a new connection comes in and is accepted, this thread starts up to handle it."""
         # Initialize xml_dom
         xml_dom = None
@@ -1390,12 +1389,12 @@ class mplay_server:
             return #returning causes connection thread instance to terminate
 
         #  Again attempt to clean out DOM stuff
-        try:
-            if xml_dom: xml_dom.unlink()
+        """
+        try: if xml_dom: xml_dom.unlink()
         except:
             print "The following exception caught unlinking xml_dom:"
             traceback.print_exc()
-            return #returning causes connection thread instance to terminate
+            return #returning causes connection thread instance to terminate"""
 
     """
     #========================================================
@@ -1410,7 +1409,7 @@ class mplay_server:
     """
 
     def message_handler(self, arg):
-        debug()
+        #debug(log=False)
         xml_dom = None
         self.log_msg( "message handler thread running..." )
         while self.alive:
@@ -1436,7 +1435,6 @@ class mplay_server:
         self.incoming_event.set()
 
     def parse_incoming_dom(self,data):
-        debug(data)
         end = data.find(">") #locate end of first element of message
         head = data[:end+1]
         #self.log_msg(head)
@@ -1452,15 +1450,13 @@ class mplay_server:
             print "Exception=" + str(e)
         
     def message_action(self, xml_dom, data):
-        debug()
-        tag_name = xml_dom.tag; print 'message_action tag_name', tag_name
+        tag_name = xml_dom.tag
         if self.svrcmds.has_key(tag_name): self.svrcmds[tag_name]['function'](xml_dom, data)
         else: raise Exception, "Not a valid header!"
         #Message Action thread expires and closes here.
         return
 
     def do_alter(self, xml_dom, data):
-        debug()
         target = xml_dom.get("key")
         value = xml_dom.get("val")
         player = xml_dom.get("plr")
@@ -1492,7 +1488,6 @@ class mplay_server:
             self.players[player].outbox.put(msg)
 
     def do_role(self, xml_dom, data):
-        debug()
         role = ""
         boot_pwd = ""
         act = xml_dom.get("action")
@@ -1507,7 +1502,6 @@ class mplay_server:
             self.log_msg(("role", (player, role)))
 
     def do_ping(self, xml_dom, data):
-        debug()
         player = xml_dom.get("player")
         group_id = xml_dom.get("group_id")
         sent_time = ""
@@ -1522,7 +1516,6 @@ class mplay_server:
         #xml_dom.unlink()
 
     def do_system(self, xml_dom, data):
-        debug()
         pass
 
     def moderate_group(self,xml_dom,data):
@@ -1664,7 +1657,6 @@ class mplay_server:
     def return_room_roles(self, from_id, group_id):
         for m in self.players.keys():
             if self.players[m].group_id == group_id:
-                print 'return_room_roles', self.players[m].id, self.players[m].role, self.players[m]
                 try: msg = "<role action='update' id='" + self.players[m].id  + "' role='" + self.players[m].role + "' />"
                 except: exit()
                 self.players[from_id].outbox.put(msg)
@@ -1729,7 +1721,6 @@ class mplay_server:
         thread.start_new_thread(self.registerRooms,(0,))
 
     def create_group(self, xml_dom, data):
-        debug((tostring(xml_dom), data))
         #try:
         from_id = xml_dom.get("from")
         pwd = xml_dom.get("pwd")
@@ -1840,7 +1831,6 @@ class mplay_server:
         self.log_msg("Explicit garbage collection shows %s undeletable items." % str(gc.collect()))
 
     def incoming_player_handler(self, xml_dom, data):
-        debug()
         id = xml_dom.get("id")
         act = xml_dom.get("action")
         #group_id = xml_dom.get("group_id")
@@ -1858,8 +1848,6 @@ class mplay_server:
             self.del_player(id,group_id)
             self.check_group(id, group_id)
         elif act=="update":
-            debug(xml_dom)
-            print xml_dom.get('name')
             self.players[id].take_dom(xml_dom)
             self.log_msg(("update", {"id": id,
                                      "name": xml_dom.get("name"),
@@ -1892,7 +1880,6 @@ class mplay_server:
         return False
 
     def incoming_msg_handler(self,xml_dom,data):
-        debug()
         xml_dom, data = ServerPlugins.preParseIncoming(xml_dom, data)
         ###########################################################
         to_id = xml_dom.get("to")
@@ -1942,7 +1929,6 @@ class mplay_server:
         return
 
     def sound_msg_handler(self, xml_dom, data):
-        debug()
         from_id = xml_dom.get("from")
         group_id = xml_dom.get("group_id")
         if group_id != 0: self.send_to_group(from_id, group_id, data)
@@ -2209,7 +2195,6 @@ class mplay_server:
 
     def send_to_all(self,from_id,data):
         try:
-            print data
             self.p_lock.acquire()
             keys = self.players.keys()
             self.p_lock.release()

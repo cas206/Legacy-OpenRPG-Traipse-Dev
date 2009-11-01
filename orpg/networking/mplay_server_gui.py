@@ -22,6 +22,7 @@ from mplay_server import mplay_server, server
 from xml.dom import minidom
 from orpg.orpgCore import component
 from orpg.tools.orpg_log import debug
+from orpg.tools.orpg_settings import settings
 
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring, parse
@@ -47,6 +48,7 @@ MENU_PLAYER_BOOT = wx.NewId()
 MENU_ADMIN_BAN = wx.NewId()
 MENU_BAN_LIST = wx.NewId()
 MENU_ADMIN_UNBAN = wx.NewId()
+PLAYER_SHOW_VERSION = wx.NewId()
 #############
 MENU_PLAYER_CREATE_ROOM = wx.NewId()
 MENU_PLAYER_SEND_MESSAGE = wx.NewId()
@@ -93,13 +95,15 @@ class MessageFunctionEvent(wx.PyEvent):
 
 # ServerConfig Object ############################
 class ServerConfig:
-    debug()
+    debug(log=False)
     """ This class contains configuration
         setting used to control the server."""
 
     def __init__(self, owner ): 
         """ Loads default configuration settings."""
-        validate.config_file("server_ini.xml", "default_server_ini.xml" ) 
+        validate.config_file("server_ini.xml", "default_server_ini.xml")
+        config_xml = parse(dir_struct['user'] + 'server_ini.xml')
+        debug(config_xml, log=False)
         configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
         port = configDom.childNodes[0].childNodes[1].getAttribute('port')
         OPENRPG_PORT = 6774 if port == '' else int(port) #Pretty ugly, but I couldn't find the tag any other way.
@@ -118,7 +122,7 @@ class ServerConfig:
 # Server Monitor #################################
 
 class ServerMonitor(Thread):
-    debug()
+    debug(log=False)
     """ Monitor thread for GameServer. """
     def __init__(self, cb, conf, name, pwd):
         """ Setup the server. """
@@ -129,7 +133,7 @@ class ServerMonitor(Thread):
         self.bootPwd = pwd
 
     def log(self, mesg):
-        debug()
+        debug(log=False)
         if type(mesg) == types.TupleType:
             func, msg = mesg
             event = MessageFunctionEvent( func, msg )
@@ -138,7 +142,7 @@ class ServerMonitor(Thread):
         del event
 
     def run(self):
-        debug()
+        debug(log=False)
         """ Start the server. """
         self.server = mplay_server(self.log, self.serverName )
         self.server.initServer(bootPassword=self.bootPwd, reg="No")
@@ -146,7 +150,7 @@ class ServerMonitor(Thread):
         while self.alive: time.sleep(3)
 
     def stop(self):
-        debug()
+        debug(log=False)
         """ Stop the server. """
         self.server.kill_server()
         self.alive = 0
@@ -192,6 +196,7 @@ class Connections(wx.ListCtrl):
         self.menu.SetTitle( "Player Menu" )
         self.menu.Append( MENU_PLAYER_BOOT, "Boot Player" )
         self.menu.Append( MENU_ADMIN_BAN, 'Ban Player' )
+        self.menu.Append( PLAYER_SHOW_VERSION, "Player Version" )
         self.menu.AppendSeparator()
         self.menu.Append( MENU_PLAYER_SEND_MESSAGE, "Send Player Message" )
         self.menu.Append( MENU_PLAYER_SEND_ROOM_MESSAGE, "Send Room Message" ) 
@@ -204,6 +209,7 @@ class Connections(wx.ListCtrl):
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_MESSAGE)
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_ROOM_MESSAGE)
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_SERVER_MESSAGE)
+        self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=PLAYER_SHOW_VERSION)
 
     def add(self, player):
         i = self.InsertImageStringItem( 0, player["id"], 0 )
@@ -211,11 +217,11 @@ class Connections(wx.ListCtrl):
         self.SetStringItem(i, 2, "NEW")
         self.SetStringItem(i, 3, self.roomList[0])
         self.SetStringItem(i, 4, self.stripHtml(player["version"]))
-        print self.stripHtml(player["role"])
-        self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
+        self.SetStringItem(i, 5, 'Lurker' if player["role"] == None else self.stripHtml(player["role"]))
         self.SetStringItem(i, 6, self.stripHtml(player["ip"]))
         self.SetStringItem(i, 7, "PING")
         self.SetItemData(i, int(player["id"]))
+        self.colorize_player_list(player)
         self.AutoAjust()
 
     def remove(self, id):
@@ -234,13 +240,35 @@ class Connections(wx.ListCtrl):
         self.SetColumnWidth(7, -1)
         self.Refresh()
 
+    def colorize_player_list(self, player):
+        debug(player, log=False)
+        if player == 0: return
+        for m in player.keys():
+            id = player['id']
+            item_list_location = self.FindItemData(-1, int(id))
+            if item_list_location == -1: continue
+            item = self.GetItem(item_list_location)
+            debug(item_list_location, log=False)
+            role = player['role']
+            debug(role, log=False)
+            try: #Players that turn up Blue are not passing the correct arguments.
+                try: 
+                    if player['group_id'] != "0": item.SetTextColour(settings.get_setting(role + "RoleColor"))
+                except KeyError: # Needed because group_id turns into group somewhere.
+                    if player['group'] != "0": item.SetTextColour(settings.get_setting(role + "RoleColor"))
+            except:
+                item.SetTextColour('BLUE')
+            self.SetItem(item)
+
     def update(self, player):
+        debug(player, log=False)
+        #try: int(player); i = self.FindItemData( -1, int(player) )
         i = self.FindItemData( -1, int(player["id"]) )
         if i > -1:
             self.SetStringItem(i, 1, self.stripHtml(player["name"]))
             self.SetStringItem(i, 2, self.stripHtml(player["status"]))
-            print self.stripHtml(player["role"])
-            self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
+            self.SetStringItem(i, 5, 'Lurker' if player["role"] == None else self.stripHtml(player["role"]))
+            self.colorize_player_list(player)
             self.AutoAjust()
         else: self.add(player)
 
@@ -249,11 +277,12 @@ class Connections(wx.ListCtrl):
         i = self.FindItemData( -1, int(player) )
         if player > 0: self.SetStringItem( i, 3, room )
         self.AutoAjust()
+        #self.update(player) # player object doesn't send role object.
 
     def setPlayerRole( self, id, role ):
         i = self.FindItemData( -1, int(id) )
         self.SetStringItem( i, 5, role )
-        self.AutoAjust
+        self.AutoAjust()
 
     def stripHtml( self, name ):
         ret_string = ""
@@ -319,6 +348,10 @@ class Connections(wx.ListCtrl):
                 msg = self.GetMessageInput( "Broadcast Server Message" )
                 # If we got a message back, send it
                 if len(msg): self.main.server.server.broadcast( msg )
+            elif menuItem == PLAYER_SHOW_VERSION:
+                version_string = self.main.server.server.obtain_by_id(playerID, 'client_string')
+                if version_string: wx.MessageBox("Running client version " + version_string,"Version")
+                else: wx.MessageBox("No client version available for this player", "Version")
 
     def GetMessageInput( self, title ):
         prompt = "Please enter the message you wish to send:"
@@ -430,8 +463,8 @@ class ServerGUI(wx.Frame):
 
         #Not sure why this is Remarked TaS - Sirebral
         #nb.AddPage( self.conns, "Rooms" )
-        #self.msgWindow = HTMLMessageWindow( nb )
-        #nb.AddPage( self.msgWindow, "Messages" )
+        self.msgWindow = HTMLMessageWindow( nb )
+        nb.AddPage( self.msgWindow, "Messages" )
 
         log = wx.TextCtrl(splitter, -1, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
         wx.Log.SetActiveTarget( wx.LogTextCtrl(log) )
@@ -468,7 +501,7 @@ class ServerGUI(wx.Frame):
 
     # Event handler for out logging event
     def OnFunctionMessage(self, event):
-        debug()
+        debug(log=False)
         self.callbacks[event.func]( event.message )
 
     ### Server Callbacks #####################################

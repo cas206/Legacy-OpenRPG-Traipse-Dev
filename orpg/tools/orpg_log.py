@@ -62,12 +62,13 @@ class Term2Win(object):
     def write(self, text):
         #logger.stdout(text)
         wx.Yield()
-        #sys.__stdout__.write(text)
+        sys.__stdout__.write(text)
 
 class TrueDebug(object):
     ### Alpha ###
-    """A simple debugger. Add debug() to a function and it prints the function name and any objects included. 
+    """A simple debugger. Add debug() to a function and it prints the function name and any objects included. Add an object or a group of objects in ()'s.
     Adding True to locale prints the file name where the function is. Adding False to log turns the log off.
+    Adding True to parents will print out the parent functions, starting from TrueDebug.
     This feature can be modified to trace deeper and find the bugs faster, ending the puzzle box."""
     def __init__(self, objects=None, locale=False, log=True, parents=False):
         if log == False: return

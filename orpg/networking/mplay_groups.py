@@ -1,4 +1,5 @@
 from orpg.mapper.map_msg import *
+from orpg.tools.orpg_log import debug
 
 class game_group:
     def __init__( self, id, name, pwd, desc="", 

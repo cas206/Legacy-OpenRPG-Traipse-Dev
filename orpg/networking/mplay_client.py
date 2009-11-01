@@ -31,25 +31,21 @@ __version__ = "$Id: mplay_client.py,v 1.71 2007/05/12 20:41:54 digitalxero Exp $
 
 ### Alpha ### 
 ##import orpg.minidom ## Deprecated. xml.parseXml calls minidom.parseString so it was superfluous and wasteful.
-import socket
-import Queue
-import thread
-import traceback
+import socket, Queue, thread, traceback, errno, os, time
+
 from threading import Event, Lock
 from xml.sax.saxutils import escape
 from struct import pack, unpack, calcsize
 from string import *
 from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
-import errno
-import os
-import time
+
 from orpg.orpgCore import component
 from orpg.orpg_xml import xml
+from orpg.tools.orpg_log import debug
 
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring
 from xml.parsers.expat import ExpatError
-
 
 try:
     import bz2
@@ -61,8 +57,7 @@ try:
     cmpZLIB = True
 except: cmpZLIB = False
 
-
-# This should be configurable
+# Default, is configurable
 OPENRPG_PORT = 9557
 
 # We should be sending a length for each packet
@@ -97,7 +92,7 @@ def myescape(data):
     return escape(data,{"\"":""})
 
 class mplay_event:
-    def __init__(self,id,data=None):
+    def __init__(self, id, data=None):
         self.id = id
         self.data = data
 
@@ -110,7 +105,6 @@ class mplay_event:
 BOOT_MSG = "YoU ArE ThE WeAkEsT LiNk. GoOdByE."
 
 class client_base:
-
     # Player role definitions
     def __init__(self):
         self.outbox = Queue.Queue(0)
@@ -171,7 +165,6 @@ class client_base:
 
     def recvThread( self, arg ):
         "Receiving thread.  This thread reads from the socket and writes to the data queue."
-
         # Wait to be told it's okay to start running
         self.startedEvent.wait()
 
@@ -201,7 +194,7 @@ class client_base:
     def sendMsg( self, sock, msg ):
         """Very simple function that will properly encode and send a message to te
         remote on the specified socket."""
-
+        #debug(log=False)
         if self.useCompression and self.compressionType != None:
             mpacket = self.compressionType.compress(msg)
             lpacket = pack('!i', len(mpacket))
@@ -225,6 +218,7 @@ class client_base:
         return sentm
 
     def recvData( self, sock, readSize ):
+        #debug(log=False)
         """Simple socket receive method.  This method will only return when the exact
         byte count has been read from the connection, if remote terminates our
         connection or we get some other socket exception."""
@@ -248,6 +242,7 @@ class client_base:
         return data
 
     def recvMsg(self, sock):
+        #debug()
         """This method now expects to receive a message having a 4-byte prefix length.  It will ONLY read completed messages.  In the event that the remote's connection is terminated, it will throw an exception which should allow for the caller to more gracefully handle this exception event.
 
         Because we use strictly reading ONLY based on the length that is told to use, we no longer have to worry about partially adjusting for fragmented buffers starting somewhere within a buffer that we've read.  Rather, it will get ONLY a whole message and nothing more.  Everything else will remain buffered with the OS until we attempt to read the next complete message."""
@@ -265,6 +260,7 @@ class client_base:
         return msgData
 
     def initialize_threads(self):
+        #debug()
         "Starts up our threads (2) and waits for them to make sure they are running!"
         self.status = MPLAY_CONNECTED
         self.sock.setblocking(1)
@@ -274,6 +270,7 @@ class client_base:
         self.startedEvent.set()
 
     def disconnect(self):
+        #debug()
         self.set_status(MPLAY_DISCONNECTING)
         self.log_msg("client stub " + self.ip +" disconnecting...")
         self.log_msg("closing sockets...")
@@ -285,19 +282,20 @@ class client_base:
         self.set_status(MPLAY_DISCONNECTED)
 
     def reset(self,sock):
+        #debug()
         self.disconnect()
         self.sock = sock
         self.initialize_threads()
 
     def update_role(self,role):
+        #debug()
         self.useroles = 1
         self.role = role
 
     def use_roles(self):
-        if self.useroles:
-            return 1
-        else:
-            return 0
+        #debug()
+        if self.useroles: return 1
+        else: return 0
     def update_self_from_player(self, player):
         try: (self.name, self.ip, self.id, 
                 self.text_status, self.version, 
@@ -309,9 +307,11 @@ class client_base:
      client provided IP address to have much value.  As such, we now label it as deprecated.
     """
     def toxml(self, action):
+        #debug((myescape(self.name), self.name, self.role))
         el = Element('player')
-        el.set('name', myescape(self.name))
+        el.set('name', self.name)
         el.set('action', action)
+        el.set('role', self.role)
         el.set('id', self.id)
         el.set('group_id', self.group_id)
         el.set('ip', self.ip)
@@ -329,20 +329,22 @@ class client_base:
         return tostring(el)
 
     def log_msg(self,msg):
-        if self.log_console:
-            self.log_console(msg)
+        #debug(msg, log=False)
+        if self.log_console: self.log_console(msg)
 
     def get_status(self):
+        #debug(log=False)
         self.statLock.acquire()
         status = self.status
         self.statLock.release()
         return status
 
     def my_role(self):
-        #Leaving this for testing.
+        #debug(self.role, log=False)
         return self.role
 
     def set_status(self,status):
+        #debug(status, log=False)
         self.statLock.acquire()
         self.status = status
         self.statLock.release()
@@ -396,8 +398,10 @@ class client_base:
 #
 #========================================================================
 class mplay_client(client_base):
+    #debug()
     "mplay client"
     def __init__(self,name,callbacks):
+        #debug(name)
         client_base.__init__(self)
         component.add('mp_client', self)
         self.xml = component.get('xml')
@@ -427,13 +431,16 @@ class mplay_client(client_base):
         return 0
 
     def get_chat(self):
+        #debug()
         return self.orpgFrame_callback.chat
 
     def set_name(self,name):
+        #debug(name)
         self.name =  name
         self.update()
 
     def set_text_status(self, status):
+        #debug()
         if self.text_status != status:
             self.text_status = status
             self.update()
@@ -596,6 +603,7 @@ class mplay_client(client_base):
         self.outbox.put(tostring(el))
 
     def get_role(self):
+        #debug((self.group_id, self.id, self.role))
         el = Element('role')
         el.set('action', 'get')
         el.set('player', self.id)
@@ -603,7 +611,7 @@ class mplay_client(client_base):
         self.outbox.put(tostring(el))
 
     def set_role(self, player, role, pwd=""):
-        print role; exit()
+        #debug(role)
         el = Element('role')
         el.set('action', 'set')
         el.set('player', player)
@@ -646,7 +654,7 @@ class mplay_client(client_base):
         el.set('from', self.id)
         el.set('pwd', pwd)
         el.set('group_id', str(group_id))
-        print 'send join group ', str(group_id)
+
         self.outbox.put(tostring(el))
 
     def poll(self, evt=None):
@@ -737,7 +745,7 @@ class mplay_client(client_base):
     def on_group(self, id, msg, etreeEl):
         act = etreeEl.get("action")
         group_data = (id, etreeEl.get("name"), etreeEl.get("pwd"), etreeEl.get("players"))
-        if act == 'new' or 'update':
+        if act == ('new' or 'update'):
             self.groups[id] = group_data
             if act == 'update': self.on_group_event(mplay_event(GROUP_UPDATE, group_data))
             elif act == 'new': self.on_group_event(mplay_event(GROUP_NEW, group_data))

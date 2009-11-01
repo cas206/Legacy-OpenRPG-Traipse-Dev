@@ -32,6 +32,7 @@ from core import *
 import re
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring, parse, XML
+from orpg.tools.orpg_log import debug
 
 D20_EXPORT = wx.NewId()
 ############################
@@ -49,7 +50,7 @@ class container_handler(node_handler):
         self.load_children()
 
     def load_children(self):
-        children = self.xml._get_childNodes()
+        children = self.xml.getchildren()
         for c in children:
             self.tree.load_xml(c,self.mytree_node)
 
@@ -63,7 +64,7 @@ class container_handler(node_handler):
         opt = wx.MessageBox("Add node as child?","Container Node",wx.YES_NO|wx.CANCEL)
         if opt == wx.YES:
             xml = self.tree.drag_obj.delete()
-            xml = self.xml.insertBefore(xml,None)
+            xml = self.xml.append(xml,None)
             self.tree.load_xml(xml, self.mytree_node)
             self.tree.Expand(self.mytree_node)
         elif opt == wx.NO:
