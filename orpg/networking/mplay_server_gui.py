@@ -9,10 +9,8 @@ __version__='$Revision: 1.26 $'[11:-2]
 __cvsinfo__='$Id: mplay_server_gui.py,v 1.26 2007/11/06 00:32:39 digitalxero Exp $'[5:-2]
 __doc__="""OpenRPG Server Graphical Interface"""
 
-import os
-import sys
-import time
-import types
+import os, sys, time, types
+
 from orpg.dirpath import dir_struct
 #import orpg.systempath looks old
 from orpg.tools.validate import validate
@@ -23,6 +21,10 @@ from meta_server_lib import post_server_data, remove_server
 from mplay_server import mplay_server, server
 from xml.dom import minidom
 from orpg.orpgCore import component
+from orpg.tools.orpg_log import debug
+
+from xml.etree.ElementTree import ElementTree, Element, iselement
+from xml.etree.ElementTree import fromstring, tostring, parse
 
 # Constants ######################################
 SERVER_RUNNING = 1
@@ -91,6 +93,7 @@ class MessageFunctionEvent(wx.PyEvent):
 
 # ServerConfig Object ############################
 class ServerConfig:
+    debug()
     """ This class contains configuration
         setting used to control the server."""
 
@@ -115,6 +118,7 @@ class ServerConfig:
 # Server Monitor #################################
 
 class ServerMonitor(Thread):
+    debug()
     """ Monitor thread for GameServer. """
     def __init__(self, cb, conf, name, pwd):
         """ Setup the server. """
@@ -125,6 +129,7 @@ class ServerMonitor(Thread):
         self.bootPwd = pwd
 
     def log(self, mesg):
+        debug()
         if type(mesg) == types.TupleType:
             func, msg = mesg
             event = MessageFunctionEvent( func, msg )
@@ -133,6 +138,7 @@ class ServerMonitor(Thread):
         del event
 
     def run(self):
+        debug()
         """ Start the server. """
         self.server = mplay_server(self.log, self.serverName )
         self.server.initServer(bootPassword=self.bootPwd, reg="No")
@@ -140,6 +146,7 @@ class ServerMonitor(Thread):
         while self.alive: time.sleep(3)
 
     def stop(self):
+        debug()
         """ Stop the server. """
         self.server.kill_server()
         self.alive = 0
@@ -204,6 +211,7 @@ class Connections(wx.ListCtrl):
         self.SetStringItem(i, 2, "NEW")
         self.SetStringItem(i, 3, self.roomList[0])
         self.SetStringItem(i, 4, self.stripHtml(player["version"]))
+        print self.stripHtml(player["role"])
         self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
         self.SetStringItem(i, 6, self.stripHtml(player["ip"]))
         self.SetStringItem(i, 7, "PING")
@@ -231,6 +239,7 @@ class Connections(wx.ListCtrl):
         if i > -1:
             self.SetStringItem(i, 1, self.stripHtml(player["name"]))
             self.SetStringItem(i, 2, self.stripHtml(player["status"]))
+            print self.stripHtml(player["role"])
             self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
             self.AutoAjust()
         else: self.add(player)
@@ -458,7 +467,8 @@ class ServerGUI(wx.Frame):
         self.Log( event.message )
 
     # Event handler for out logging event
-    def OnFunctionMessage( self, event ):
+    def OnFunctionMessage(self, event):
+        debug()
         self.callbacks[event.func]( event.message )
 
     ### Server Callbacks #####################################

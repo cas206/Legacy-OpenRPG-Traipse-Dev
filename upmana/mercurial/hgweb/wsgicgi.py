@@ -9,7 +9,7 @@
 # http://www.python.org/dev/peps/pep-0333/#the-server-gateway-side
 
 import os, sys
-from mercurial import util
+from upmana.mercurial import util
 
 def launch(application):
     util.set_binary(sys.stdin)

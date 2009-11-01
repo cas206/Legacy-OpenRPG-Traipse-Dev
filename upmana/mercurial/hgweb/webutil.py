@@ -7,8 +7,8 @@
 # GNU General Public License version 2, incorporated herein by reference.
 
 import os, copy
-from mercurial import match, patch, util, error
-from mercurial.node import hex, nullid
+from upmana.mercurial import match, patch, util, error
+from upmana.mercurial.node import hex, nullid
 
 def up(p):
     if p[0] != "/":

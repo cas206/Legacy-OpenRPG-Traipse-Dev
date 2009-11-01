@@ -46,8 +46,7 @@ import random
 import traceback
 import re
 
-from xml.etree.ElementTree import ElementTree, Element, iselement
-from xml.etree.ElementTree import fromstring, tostring
+from xml.etree.ElementTree import Element, fromstring
 
 metacache_lock = RLock()
 
@@ -157,13 +156,13 @@ def get_server_list(versions = None, sort_by="start"):
             #  metas in the list.  If a match is found, then use the new values.
             for n in node_list:
                 # set them from current node
-                if n.find('name') == None: n.set('name','NO_NAME_GIVEN')
+                if not n.get('name'): n.set('name','NO_NAME_GIVEN')
                 name = n.get('name')
-                if n.find('num_users') == None: n.set('num_users','N/A')
+                if not n.get('num_users'): n.set('num_users','N/A')
                 num_users = n.get('num_users')
-                if n.find('address') == None: n.set('address','NO_ADDRESS_GIVEN')
+                if not n.get('address'): n.set('address','NO_ADDRESS_GIVEN')
                 address = n.get('address')
-                if n.find('port') == None: n.set('port','6774')
+                if not n.get('port'): n.set('port','6774')
                 port = n.get('port')
                 n.set('meta',meta)
                 end_point = str(address) + ":" + str(port)
@@ -477,7 +476,7 @@ class registerThread(Thread):
                                         "act":"unregister"} )
             try: # this POSTS the request and returns the result
                 xml_dom = get_server_dom(data=data, path=self.path)  
-                if xml_dom.hasAttribute("errmsg"):
+                if xml_dom.get("errmsg"):
                     print "Error durring unregistration:  " + xml_dom.get("errmsg")
             except:
                 if META_DEBUG: print "Problem talking to Meta.  Will go ahead and die, letting Meta remove us."
@@ -556,7 +555,7 @@ class registerThread(Thread):
             #  If there is a DOM returned ....
             if etreeEl:
                 #  If there's an error, echo it to the console
-                if etreeEl.hasAttribute("errmsg"):
+                if etreeEl.get("errmsg"):
                     print "Error durring registration:  " + etreeEl.get("errmsg")
                     if META_DEBUG: print data
                     if META_DEBUG: print
@@ -582,7 +581,7 @@ class registerThread(Thread):
                     self.interval = int(etreeEl.get("interval"))
                     self.id = etreeEl.get("id")
                     self.cookie = etreeEl.get("cookie")
-                    if not etreeEl.hasAttribute("errmsg"): updateMetaCache(xml_dom)
+                    if not etreeEl.get("errmsg"): updateMetaCache(xml_dom)
                 except:
                     if META_DEBUG: print
                     if META_DEBUG: print "OOPS!  Is the Meta okay?  It should be returning an id, cookie, and interval."

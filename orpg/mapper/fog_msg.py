@@ -27,13 +27,14 @@ __version__ = "$Id: fog_msg.py,v 1.16 2006/11/04 21:24:21 digitalxero Exp $"
 
 from base_msg import *
 from region import *
-from orpg.minidom import Element
+#from orpg.minidom import Element
 import string
+from xml.etree.ElementTree import ElementTree
 
 class fog_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
-        self.tagname = "fog"
+        self.tag = "fog"
         map_element_msg_base.__init__(self,reentrant_lock_object)
         self.use_fog = 0
         self.fogregion=IRegion()
@@ -41,16 +42,16 @@ class fog_msg(map_element_msg_base):
 
     def get_line(self,outline,action,output_act):
         elem = Element( "poly" )
-        if ( output_act ): elem.setAttribute( "action", action )
-        if ( outline == 'all' ) or ( outline == 'none' ): elem.setAttribute( "outline", outline )
+        if ( output_act ): elem.set( "action", action )
+        if ( outline == 'all' ) or ( outline == 'none' ): elem.set( "outline", outline )
         else:
-            elem.setAttribute( "outline", "points" )
+            elem.set( "outline", "points" )
             for pair in string.split( outline, ";" ):
                 p = string.split( pair, "," )
                 point = Element( "point" )
-                point.setAttribute( "x", p[ 0 ] )
-                point.setAttribute( "y", p[ 1 ] )
-                elem.appendChild( point )
+                point.set( "x", p[ 0 ] )
+                point.set( "y", p[ 1 ] )
+                elem.append( point )
         str = elem.toxml()
         elem.unlink()
         return str
@@ -94,11 +95,11 @@ class fog_msg(map_element_msg_base):
     def interpret_dom(self,xml_dom):
         self.use_fog=1
         #print 'fog_msg.interpret_dom called'
-        children = xml_dom._get_childNodes()
+        children = xml_dom.getchildren()
         #print "children",children
         for l in children:
-            action = l.getAttribute("action")
-            outline = l.getAttribute("outline")
+            action = l.get("action")
+            outline = l.get("outline")
             #print "action/outline",action, outline
             if (outline=="all"):
                 polyline=[]
@@ -109,9 +110,9 @@ class fog_msg(map_element_msg_base):
                 self.fogregion.Clear()
             else:
                 polyline=[]
-                list = l._get_childNodes()
+                list = l.getchildren()
                 for node in list:
-                    polyline.append( IPoint().make( int(node.getAttribute("x")), int(node.getAttribute("y")) ) )
+                    polyline.append( IPoint().make( int(node.get("x")), int(node.get("y")) ) )
                     # pointarray = outline.split(";")
                     # for m in range(len(pointarray)):
                     #     pt=pointarray[m].split(",")

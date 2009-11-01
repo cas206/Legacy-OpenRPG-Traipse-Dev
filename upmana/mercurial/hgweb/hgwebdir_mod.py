@@ -7,9 +7,9 @@
 # GNU General Public License version 2, incorporated herein by reference.
 
 import os, re, time
-from mercurial.i18n import _
-from mercurial import ui, hg, util, templater
-from mercurial import error, encoding
+from upmana.mercurial.i18n import _
+from upmana.mercurial import ui, hg, util, templater
+from upmana.mercurial import error, encoding
 from common import ErrorResponse, get_mtime, staticfile, paritygen,\
                    get_contact, HTTP_OK, HTTP_NOT_FOUND, HTTP_SERVER_ERROR
 from hgweb_mod import hgweb

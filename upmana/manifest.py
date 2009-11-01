@@ -11,7 +11,7 @@ from xml.etree.ElementPath import find
 
 class ManifestChanges(object):
     etree = ElementTree()
-    filename = dir_struct['home'] + 'upmana' + sep + 'updatemana.xml'
+    filename = dir_struct['home'] + 'upmana' + sep + 'upmana.xml'
 
     def __new__(cls, *args, **kwargs):
         it = cls.__dict__.get("__it__")
@@ -22,7 +22,7 @@ class ManifestChanges(object):
         return it
 
     def _init(self):
-        validate.config_file('updatemana.xml', "default_manifest.xml")
+        validate.config_file('upmana.xml', "default_upmana.xml")
         self.LoadDoc()
 
     def PluginChildren(self, plugname):

@@ -30,8 +30,10 @@ __version__ = "$Id: grid_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $"
 from base_msg import map_element_msg_base
 #from base_msg import * ## ?? import all? Deprecated!?
 
+from xml.etree.ElementTree import ElementTree
+
 class grid_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
         self.tagname = "grid"
-        map_element_msg_base.__init__(self,reentrant_lock_object)
+        map_element_msg_base.__init__(self, reentrant_lock_object)

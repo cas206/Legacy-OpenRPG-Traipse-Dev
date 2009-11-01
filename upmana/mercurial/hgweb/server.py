@@ -7,10 +7,10 @@
 # GNU General Public License version 2, incorporated herein by reference.
 
 import os, sys, errno, urllib, BaseHTTPServer, socket, SocketServer, traceback
-from mercurial import hg, util, error
+from upmana.mercurial import hg, util, error
 from hgweb_mod import hgweb
 from hgwebdir_mod import hgwebdir
-from mercurial.i18n import _
+from upmana.mercurial.i18n import _
 
 def _splitURI(uri):
     """ Return path and query splited from uri

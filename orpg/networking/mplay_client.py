@@ -603,6 +603,7 @@ class mplay_client(client_base):
         self.outbox.put(tostring(el))
 
     def set_role(self, player, role, pwd=""):
+        print role; exit()
         el = Element('role')
         el.set('action', 'set')
         el.set('player', player)

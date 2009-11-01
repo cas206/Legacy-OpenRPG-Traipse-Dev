@@ -6,9 +6,9 @@
 # GNU General Public License version 2, incorporated herein by reference.
 
 import cStringIO, zlib, tempfile, errno, os, sys, urllib
-from mercurial import util, streamclone
-from mercurial.node import bin, hex
-from mercurial import changegroup as changegroupmod
+from upmana.mercurial import util, streamclone
+from upmana.mercurial.node import bin, hex
+from upmana.mercurial import changegroup as changegroupmod
 from common import ErrorResponse, HTTP_OK, HTTP_NOT_FOUND, HTTP_SERVER_ERROR
 
 # __all__ is populated with the allowed commands. Be sure to add to it if

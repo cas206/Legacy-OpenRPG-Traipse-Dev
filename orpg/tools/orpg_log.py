@@ -27,7 +27,7 @@
 #
 
 from __future__ import with_statement
-import sys, os, os.path, wx, time, traceback
+import sys, os, os.path, wx, time, traceback, inspect
 
 from orpg.orpgCore import component
 from orpg.external.terminalwriter import TerminalWriter
@@ -64,6 +64,24 @@ class Term2Win(object):
         wx.Yield()
         #sys.__stdout__.write(text)
 
+class TrueDebug(object):
+    ### Alpha ###
+    """A simple debugger. Add debug() to a function and it prints the function name and any objects included. 
+    Adding True to locale prints the file name where the function is. Adding False to log turns the log off.
+    This feature can be modified to trace deeper and find the bugs faster, ending the puzzle box."""
+    def __init__(self, objects=None, locale=False, log=True):
+        if log == False: return
+        current = inspect.currentframe()
+        self.true_debug(current, objects)
+
+    def true_debug(self, current, objects):
+        if objects != None:
+            if locale == True: print inspect.getouterframes(current)[1][3], objects, inspect.getouterframes(current)[1][1]
+            else: print inspect.getouterframes(current)[1][3], objects
+        else:
+            if locale == True: print inspect.getouterframes(current)[1][3], inspect.getouterframes(current)[1][1]
+            else: print inspect.getouterframes(current)[1][3]
+    
 class DebugConsole(wx.Frame):
     def __init__(self, parent):
         super(DebugConsole, self).__init__(parent, -1, "Debug Console")
@@ -215,3 +233,4 @@ class orpgLog(object):
 
 logger = orpgLog(dir_struct.get("user") + "runlogs/")
 crash = sys.excepthook = Crash
+debug = TrueDebug
