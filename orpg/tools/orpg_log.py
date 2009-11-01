@@ -69,18 +69,27 @@ class TrueDebug(object):
     """A simple debugger. Add debug() to a function and it prints the function name and any objects included. 
     Adding True to locale prints the file name where the function is. Adding False to log turns the log off.
     This feature can be modified to trace deeper and find the bugs faster, ending the puzzle box."""
-    def __init__(self, objects=None, locale=False, log=True):
+    def __init__(self, objects=None, locale=False, log=True, parents=False):
         if log == False: return
         current = inspect.currentframe()
-        self.true_debug(current, objects)
+        if parents: self.get_parents(current)
+        self.true_debug(current, objects, locale)
 
-    def true_debug(self, current, objects):
-        if objects != None:
-            if locale == True: print inspect.getouterframes(current)[1][3], objects, inspect.getouterframes(current)[1][1]
-            else: print inspect.getouterframes(current)[1][3], objects
-        else:
-            if locale == True: print inspect.getouterframes(current)[1][3], inspect.getouterframes(current)[1][1]
-            else: print inspect.getouterframes(current)[1][3]
+    def true_debug(self, current, objects, locale):
+        debug_string = 'Function: ' + str(inspect.getouterframes(current)[1][3])
+        #if locale == 'all': print inspect.getouterframes(current)[4]; return
+        if objects != None: debug_string += ' Objects: ' + str(objects)
+        if locale: debug_string += ' File: ' + str(inspect.getouterframes(current)[1][1])
+        print debug_string
+        return
+
+    def get_parents(self, current):
+        debug_string = 'Function: ' + str(inspect.getouterframes(current)[1][3]) + ' Parents:'
+        family = list(inspect.getouterframes(current))
+        for parent in family:
+            debug_string += ' ' + str(parent[4])
+        print debug_string
+        return
     
 class DebugConsole(wx.Frame):
     def __init__(self, parent):
@@ -103,7 +112,7 @@ class DebugConsole(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.clear, self.bt_clear)
         self.Bind(wx.EVT_BUTTON, self.bug_report, self.report)
         self.Min(None)
-        sys.stdout = Term2Win()
+        #sys.stdout = Term2Win()
         component.add('debugger', self.console)
 
     def Min(self, evt):
