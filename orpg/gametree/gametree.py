@@ -222,7 +222,7 @@ class game_tree(wx.TreeCtrl):
 
     @debugging
     def load_tree(self, filename=dir_struct["user"]+'tree.xml', error=0):
-        self.settings.set_setting("gametree", filename)
+        self.settings.change("gametree", filename)
         #check file exists
         if not os.path.exists(filename):
             emsg = "Gametree Missing!\n"+filename+" cannot be found.\n\n"\
@@ -263,9 +263,9 @@ class game_tree(wx.TreeCtrl):
             # see if we should load the gametree
             loadfeatures = int(settings.get_setting("LoadGameTreeFeatures"))
             if loadfeatures:
-                features_tree = ET.parse(orpg.dirpath.dir_struct["template"]+"feature.xml")
+                features_tree = parse(orpg.dirpath.dir_struct["template"]+"feature.xml")
                 self.xml_root.append(features_tree.getroot())
-                settings.set("LoadGameTreeFeatures","0")
+                settings.change("LoadGameTreeFeatures","0")
 
             ## load tree
             logger.debug("Features loaded (if required)")
@@ -539,7 +539,7 @@ class game_tree(wx.TreeCtrl):
     @debugging
     def save_tree(self, filename=dir_struct["user"]+'tree.xml'):
         self.xml_root.set("version",GAMETREE_VERSION)
-        settings.set_setting("gametree",filename)
+        settings.change("gametree",filename)
         ElementTree(self.xml_root).write(filename)
 
     @debugging
@@ -920,10 +920,10 @@ class gametree_prop_dlg(wx.Dialog):
 
     @debugging
     def on_ok(self,evt):
-        self.settings.set_setting("gametree",self.ctrls[CTRL_TREE_FILE].GetValue())
-        self.settings.set_setting("SaveGameTreeOnExit",str(self.ctrls[CTRL_YES].GetValue()))
-        if self.ctrls[CTRL_USE].GetValue(): self.settings.set_setting("treedclick","use")
-        elif self.ctrls[CTRL_DESIGN].GetValue(): self.settings.set_setting("treedclick","design")
-        elif self.ctrls[CTRL_PRINT].GetValue(): self.settings.set_setting("treedclick","print")
-        elif self.ctrls[CTRL_CHAT].GetValue(): self.settings.set_setting("treedclick","chat")
+        self.settings.change("gametree",self.ctrls[CTRL_TREE_FILE].GetValue())
+        self.settings.change("SaveGameTreeOnExit",str(self.ctrls[CTRL_YES].GetValue()))
+        if self.ctrls[CTRL_USE].GetValue(): self.settings.change("treedclick","use")
+        elif self.ctrls[CTRL_DESIGN].GetValue(): self.settings.change("treedclick","design")
+        elif self.ctrls[CTRL_PRINT].GetValue(): self.settings.change("treedclick","print")
+        elif self.ctrls[CTRL_CHAT].GetValue(): self.settings.change("treedclick","chat")
         self.EndModal(wx.ID_OK)
