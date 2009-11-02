@@ -35,7 +35,7 @@ from orpg_version import *
 from orpg.orpg_windows import *
 
 import wx.py
-from orpg import minidom
+#from orpg import minidom
 import orpg.player_list
 import orpg.tools.pluginui as pluginUI
 import orpg.tools.aliaslib
@@ -865,6 +865,7 @@ class orpgFrame(wx.Frame):
 
     
     def saveLayout(self):
+        filename = dir_struct["user"] + "layout.xml"
         layout = parse(dir_struct["user"] + "layout.xml")
         xml_dom = layout.getroot()
         (x_size,y_size) = self.GetClientSize()
@@ -878,16 +879,14 @@ class orpgFrame(wx.Frame):
         xml_dom.set("maximized", str(max))
         layout = xml_dom.findall("DockLayout")
         try:
-            textnode = xml.safe_get_text_node(layout[0])
-            textnode._set_nodeValue(str(self._mgr.SavePerspective()))
+            layout[0].text = str(self._mgr.SavePerspective())
         except:
-            elem = minidom.Element('DockLayout')
+            elem = Element('DockLayout')
             elem.set("DO_NO_EDIT","True")
-            textnode = xml.safe_get_text_node(elem)
-            textnode._set_nodeValue(str(self._mgr.SavePerspective()))
+            elem.text = str(self._mgr.SavePerspective())
             xml_dom.append(elem)
         temp_file = open(filename, "w")
-        temp_file.write(xml_dom.toxml(1))
+        temp_file.write(tostring(xml_dom))
         temp_file.close()
 
     
@@ -1184,7 +1183,7 @@ class orpgApp(wx.App):
         component.add('validate', validate)
         component.add("tabbedWindows", [])
 
-	#Update Manager
+	    #Update Manager
         self.manifest = manifest.ManifestChanges()
 
         self.called = False
