@@ -264,7 +264,7 @@ class text_panel(wx.Panel):
 
     def on_text(self,evt):
         txt = self.text.GetValue()
-        txt = strip_text(txt)
+        #txt = strip_text(txt) ##Does not seem to exist.
         self.handler.text_elem.text = txt
 
     def on_send(self,evt):
@@ -343,7 +343,7 @@ class textctrl_edit_panel(wx.Panel):
             self.handler.rename(txt)
         if id == F_TEXT:
             txt = self.text.GetValue()
-            txt = strip_text(txt)
+            #txt = strip_text(txt) ##Does not seem to exist. 
             self.handler.text_elem.text = txt
 
     def on_button(self,evt):

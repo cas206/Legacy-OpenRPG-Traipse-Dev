@@ -42,8 +42,7 @@ import os
 
 from orpg.orpg_xml import xml
 from orpg.tools.validate import validate
-from orpg.tools.orpg_log import logger
-from orpg.tools.decorators import debugging
+from orpg.tools.orpg_log import logger, debug
 from orpg.tools.orpg_settings import settings
 from orpg.gametree.nodehandlers import containers, forms, dnd3e, dnd35, chatmacro
 from orpg.gametree.nodehandlers import map_miniature_nodehandler
@@ -84,7 +83,7 @@ TOP_TREE_PROP = wx.NewId()
 TOP_FEATURES = wx.NewId()
 
 class game_tree(wx.TreeCtrl):
-    @debugging
+    
     def __init__(self, parent, id):
         wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, 
                 wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
@@ -121,18 +120,18 @@ class game_tree(wx.TreeCtrl):
         self.image_cache = {}
         logger.debug("Exit game_tree")
 
-    @debugging
+    
     def add_nodehandler(self, nodehandler, nodeclass):
         if not self.nodehandlers.has_key(nodehandler): self.nodehandlers[nodehandler] = nodeclass
         else: logger.debug("Nodehandler for " + nodehandler + " already exists!")
 
-    @debugging
+    
     def remove_nodehandler(self, nodehandler):
         if self.nodehandlers.has_key(nodehandler):
             del self.nodehandlers[nodehandler]
         else: logger.debug("No nodehandler for " + nodehandler + " exists!")
 
-    @debugging
+    
     def init_nodehandlers(self):
         self.add_nodehandler('group_handler', containers.group_handler)
         self.add_nodehandler('tabber_handler', containers.tabber_handler)
@@ -159,7 +158,7 @@ class game_tree(wx.TreeCtrl):
 
     #   event = wxKeyEvent
     #   set to be called by wxWindows by EVT_CHAR macro in __init__
-    @debugging
+    
     def on_key_up(self, evt):
         key_code = evt.GetKeyCode()
         if self.dragging and (key_code == wx.WXK_SHIFT):
@@ -174,7 +173,7 @@ class game_tree(wx.TreeCtrl):
                 self.drag_obj = None
         evt.Skip()
 
-    @debugging
+    
     def on_char(self, evt):
         key_code = evt.GetKeyCode()
         curSelection = self.GetSelection()  #  Get the current selection
@@ -200,7 +199,7 @@ class game_tree(wx.TreeCtrl):
             self.EditLabel(curSelection)
         evt.Skip()
    
-    @debugging
+    
     def locate_valid_tree(self, error, msg): ## --Snowdog 3/05
         """prompts the user to locate a new tree file or create a new one"""
         response = wx.MessageDialog(self, msg, error, wx.YES|wx.NO|wx.ICON_ERROR)
@@ -220,7 +219,7 @@ class game_tree(wx.TreeCtrl):
             self.load_tree(error=1)
             return
 
-    @debugging
+    
     def load_tree(self, filename=dir_struct["user"]+'tree.xml', error=0):
         self.settings.change("gametree", filename)
         #check file exists
@@ -291,7 +290,7 @@ class game_tree(wx.TreeCtrl):
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
 
-    @debugging
+    
     def build_std_menu(self, obj=None):
         # build useful menu
         useful_menu = wx.Menu()
@@ -353,14 +352,14 @@ class game_tree(wx.TreeCtrl):
         self.Bind(wx.EVT_MENU, self.on_tree_prop, id=TOP_TREE_PROP)
         self.Bind(wx.EVT_MENU, self.on_insert_features, id=TOP_FEATURES)
 
-    @debugging
+    
     def do_std_menu(self, evt, obj):
         try: self.std_menu.Enable(STD_MENU_MAP, obj.checkToMapMenu())
         except: self.std_menu.Enable(STD_MENU_MAP, obj.map_aware())
         self.std_menu.Enable(STD_MENU_CLONE, obj.can_clone())
         self.PopupMenu(self.std_menu)
 
-    @debugging
+    
     def strip_html(self, player):
         ret_string = ""
         x = 0
@@ -374,7 +373,7 @@ class game_tree(wx.TreeCtrl):
         logger.debug(ret_string)
         return ret_string
 
-    @debugging
+    
     def on_receive_data(self, data, player):
         if iselement(data):
             tostring(data)
@@ -383,13 +382,13 @@ class game_tree(wx.TreeCtrl):
         data = data[6:end]
         self.insert_xml(data)
 
-    @debugging
+    
     def on_send_to_chat(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_send_to_chat(evt)
 
-    @debugging
+    
     def on_whisper_to(self, evt):
         players = self.session.get_players()
         opts = []
@@ -412,7 +411,7 @@ class game_tree(wx.TreeCtrl):
                         player_ids.append(players[s][2])
                     self.chat.whisper_to_players(obj.tohtml(),player_ids)
 
-    @debugging
+    
     def on_export_html(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","HTML (*.html)|*.html",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
@@ -429,29 +428,29 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    @debugging
+    
     def indifferent(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("indifferent")
 
-    @debugging
+    
     def useful(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useful")
 
-    @debugging
+    
     def useless(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useless")
 
-    @debugging
+    
     def on_email(self,evt):
         pass
 
-    @debugging
+    
     def on_send_to(self, evt):
         players = self.session.get_players()
         opts = []
@@ -473,7 +472,7 @@ class game_tree(wx.TreeCtrl):
                     for s in selections: self.session.send(xmldata,players[s][2])
             dlg.Destroy()
 
-    @debugging
+    
     def on_icon(self, evt):
         icons = self.icons.keys()
         icons.sort()
@@ -485,19 +484,20 @@ class game_tree(wx.TreeCtrl):
             obj.change_icon(key)
         dlg.Destroy()
 
-    @debugging
+    
     def on_wizard(self, evt):
         item = self.GetSelection()
+        debug((item))
         obj = self.GetPyData(item)
-        name = "New " + obj.master_dom.getAttribute("name")
-        icon = obj.master_dom.getAttribute("icon")
+        name = "New " + obj.xml_root.get("name")
+        icon = obj.xml_root.get("icon")
         xml_data = "<nodehandler name=\""+name+"\" icon=\"" + icon + "\" module=\"core\" class=\"node_loader\" >"
         xml_data += xml.toxml(obj)
         xml_data += "</nodehandler>"
         self.insert_xml(xml_data)
         logger.debug(xml_data)
 
-    @debugging
+    
     def on_clone(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -514,7 +514,7 @@ class game_tree(wx.TreeCtrl):
                     break
             self.load_xml(clone_xml, parent_node, prev_sib)
 
-    @debugging
+    
     def on_save(self, evt):
         """save node to a xml file"""
         item = self.GetSelection()
@@ -522,7 +522,7 @@ class game_tree(wx.TreeCtrl):
         obj.on_save(evt)
         os.chdir(dir_struct["home"])
 
-    @debugging
+    
     def on_save_tree_as(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
@@ -531,18 +531,18 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    @debugging
+    
     def on_save_tree(self, evt=None):
         filename = self.settings.get_setting("gametree")
         self.save_tree(filename)
 
-    @debugging
+    
     def save_tree(self, filename=dir_struct["user"]+'tree.xml'):
         self.xml_root.set("version",GAMETREE_VERSION)
         settings.change("gametree",filename)
         ElementTree(self.xml_root).write(filename)
 
-    @debugging
+    
     def on_load_new_tree(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.OPEN)
         if f.ShowModal() == wx.ID_OK:
@@ -551,7 +551,7 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    @debugging
+    
     def on_insert_file(self, evt):
         """loads xml file into the tree"""
         if self.last_save_dir == ".":
@@ -563,7 +563,7 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    @debugging
+    
     def on_insert_url(self, evt):
         """loads xml url into the tree"""
         dlg = wx.TextEntryDialog(self,"URL?","Insert URL", "http://")
@@ -573,35 +573,35 @@ class game_tree(wx.TreeCtrl):
             self.insert_xml(file.read())
         dlg.Destroy()
 
-    @debugging
+    
     def on_insert_features(self, evt):
         self.insert_xml(open(dir_struct["template"]+"feature.xml","r").read())
 
-    @debugging
+    
     def on_tree_prop(self, evt):
         dlg = gametree_prop_dlg(self, self.settings)
         if dlg.ShowModal() == wx.ID_OK: pass
         dlg.Destroy()
 
-    @debugging
+    
     def on_node_design(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_design(evt)
 
-    @debugging
+    
     def on_node_use(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_use(evt)
 
-    @debugging
+    
     def on_node_pp(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_html_view(evt)
 
-    @debugging
+    
     def on_del(self, evt):
         status_value = "none"
         try:
@@ -634,7 +634,7 @@ class game_tree(wx.TreeCtrl):
             msg.ShowModal()
             msg.Destroy()
 
-    @debugging
+    
     def on_about(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -642,13 +642,13 @@ class game_tree(wx.TreeCtrl):
         about.ShowModal()
         about.Destroy()
 
-    @debugging
+    
     def on_send_to_map(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         if hasattr(obj,"on_send_to_map"): obj.on_send_to_map(evt)
 
-    @debugging
+    
     def insert_xml(self, txt):
         #Updated to allow safe merging of gametree files
         #without leaving an unusable and undeletable node.
@@ -673,7 +673,7 @@ class game_tree(wx.TreeCtrl):
         self.xml_root.append(new_xml)
         self.load_xml(new_xml,self.root,self.root)
 
-    @debugging
+    
     def build_img_list(self):
         """make image list"""
         helper = img_helper()
@@ -687,7 +687,7 @@ class game_tree(wx.TreeCtrl):
             self.icons[key] = self._imageList.Add(img)
         self.SetImageList(self._imageList)
 
-    @debugging
+    
     def load_xml(self, xml_element, parent_node, prev_node=None):
         #add the first tree node
         i = 0
@@ -725,7 +725,7 @@ class game_tree(wx.TreeCtrl):
 
         return new_tree_node
 
-    @debugging
+    
     def cached_load_of_image(self, bmp_in, new_tree_node):
         image_list = self.GetImageList()
         img = wx.ImageFromBitmap(bmp_in)
@@ -743,7 +743,7 @@ class game_tree(wx.TreeCtrl):
         self.SetItemImage(new_tree_node,image_index, wx.TreeItemIcon_Selected)
         return image_index
 
-    @debugging
+    
     def on_rclick(self, evt):
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)
@@ -754,7 +754,7 @@ class game_tree(wx.TreeCtrl):
             else: self.PopupMenu(self.top_menu)
         else: self.PopupMenu(self.top_menu,pt)
 
-    @debugging
+    
     def on_ldclick(self, evt):
         self.rename_flag = 0
         pt = evt.GetPosition()
@@ -770,7 +770,7 @@ class game_tree(wx.TreeCtrl):
                     elif action == "print": obj.on_html_view(evt)
                     elif action == "chat": self.on_send_to_chat(evt)
 
-    @debugging
+    
     def on_left_down(self, evt):
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)
@@ -784,7 +784,7 @@ class game_tree(wx.TreeCtrl):
         else: self.SelectItem(item)
         evt.Skip()
 
-    @debugging
+    
     def on_left_up(self, evt):
         if self.dragging:
             cur = wx.StockCursor(wx.CURSOR_ARROW)
@@ -807,7 +807,7 @@ class game_tree(wx.TreeCtrl):
                 self.traverse(child, function, data)
             child, cookie = self.GetNextChild(root, cookie)
 
-    @debugging
+    
     def on_label_change(self, evt):
         item = evt.GetItem()
         txt = evt.GetLabel()
@@ -815,10 +815,10 @@ class game_tree(wx.TreeCtrl):
         self.rename_flag = 0
         if txt != "":
             obj = self.GetPyData(item)
-            obj.master_dom.setAttribute('name',txt)
+            obj.xml_root.setAttribute('name',txt)
         else: evt.Veto()
 
-    @debugging
+    
     def on_label_begin(self, evt):
         if not self.rename_flag: evt.Veto()
         else:
@@ -827,7 +827,7 @@ class game_tree(wx.TreeCtrl):
             if item == self.GetRootItem():
                 evt.Veto()
 
-    @debugging
+    
     def on_drag(self, evt):
         self.rename_flag = 0
         item = self.GetSelection()
@@ -839,7 +839,7 @@ class game_tree(wx.TreeCtrl):
             self.SetCursor(cur)
             self.drag_obj = obj
 
-    @debugging
+    
     def is_parent_node(self, node, compare_node):
         parent_node = self.GetItemParent(node)
         if compare_node == parent_node:
@@ -859,7 +859,7 @@ CTRL_CHAT = wx.NewId()
 CTRL_PRINT = wx.NewId()
 
 class gametree_prop_dlg(wx.Dialog):
-    @debugging
+    
     def __init__(self, parent, settings):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, "Game Tree Properties")
         self.settings  = settings
@@ -918,7 +918,7 @@ class gametree_prop_dlg(wx.Dialog):
         self.Fit()
         self.Bind(wx.EVT_BUTTON, self.on_ok, id=wx.ID_OK)
 
-    @debugging
+    
     def on_ok(self,evt):
         self.settings.change("gametree",self.ctrls[CTRL_TREE_FILE].GetValue())
         self.settings.change("SaveGameTreeOnExit",str(self.ctrls[CTRL_YES].GetValue()))
