@@ -711,10 +711,7 @@ class chat_commands:
                 self.session.outbox.put(msg)
 
             else: self.chat.InfoPost("Unknown administrator command"  )
-            command_function = {
-            'banip': self.admin.r_admin_banip,
-            'createroom': self.r_admin_createroom,
-                                }
+            #command_function = {'banip': self.admin.r_admin_banip, 'createroom': self.r_admin_createroom,}
         except:
             self.chat.InfoPost("An error has occured while processing a Remote Administrator command!")
             traceback.print_exc()

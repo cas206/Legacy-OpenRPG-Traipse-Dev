@@ -103,7 +103,6 @@ class game_group(object):
         self.game_map.init_from_xml(fromstring(tree))
 
     def save_map(self):
-        #debug(log=False)
         if self.mapFile is not None and self.persistant == 1 and self.mapFile.find("default_map.xml") == -1:
             f = open(self.mapFile, "w")
             f.write(self.game_map.get_all_xml())
@@ -156,7 +155,7 @@ class game_group(object):
         return tostring(el)
 
 class client_stub(client_base):
-    def __init__(self,inbox,sock,props,log):
+    def __init__(self, inbox, sock, props, log):
         client_base.__init__(self)
         self.ip = props['ip']
         self.role = props['role']
@@ -225,7 +224,6 @@ class client_stub(client_base):
 """
 
 class mplay_server:
-    #debug(log=False)
     def __init__(self, log_console=None, name=None):
         logger._set_log_level = 16
         logger._set_log_to_console(True)
@@ -264,7 +262,6 @@ class mplay_server:
         self.lobbySound = 'http://www.digitalxero.net/music/mus_tavern1.bmu' ##used?
 
     def initServer(self, **kwargs):
-        #debug(log=False)
         for atter, value in kwargs.iteritems(): setattr(self, atter, value)
         validate.config_file( self.lobbyMapFile, "default_Lobby_map.xml" )
         validate.config_file( self.lobbyMessageFile, "default_LobbyMessage.html" )
@@ -358,7 +355,7 @@ class mplay_server:
     # as needed, over-riding any default values as requested.
 
     def initServerConfig(self):
-        #debug(log=False)
+        debug(log=False)
         self.log_msg("Processing Server Configuration File... " + self.userPath)
         # make sure the server_ini.xml exists!
         validate.config_file( "server_ini.xml", "default_server_ini.xml" )
@@ -657,23 +654,19 @@ class mplay_server:
         return name
 
     def registerRooms(self, args=None):
-        #debug()
         rooms = ''
         id = '0'
         time.sleep(500)
-        #debug(self.groups)
         for rnum in self.groups.keys():
             rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][name]":self.groups[rnum].name,
                                         "room_data[rooms][" + str(rnum) + "][pwd]":str(self.groups[rnum].pwd != "")})+'&'
             for pid in self.groups[rnum].players:
                 rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][players]["+str(pid)+"]":self.players[pid].name,})+'&'
-        #debug(rooms)
         for meta in self.metas.keys():
             while id == '0':
                 id, cookie = self.metas[meta].getIdAndCookie()
                 data = urllib.urlencode( {"room_data[server_id]":id,
                                         "act":'registerrooms'})
-            #debug((data, rooms))
             get_server_dom(data+'&'+rooms, self.metas[meta].path, string=True)
 
     def register(self,name_given=None):
@@ -867,6 +860,7 @@ class mplay_server:
         self.log_msg("Server stopped!")
 
     def log_msg(self,msg):
+        debug(parents=True)
         if self.log_to_console:
             if self.log_console: self.log_console(msg)
             else: print str(msg)
@@ -1256,7 +1250,6 @@ class mplay_server:
         return 1
 
     def SendLobbyMessage(self, socket, player_id):
-        #debug(log=False)
         """
         #  Display the lobby message
         #  prepend this server's version string to the the lobby message
@@ -1328,7 +1321,6 @@ class mplay_server:
         self.listen_event.set()
 
     def acceptedNewConnectionThread( self, newsock, addr ):
-        #debug(log=False)
         """Once a new connection comes in and is accepted, this thread starts up to handle it."""
         # Initialize xml_dom
         xml_dom = None
@@ -1409,7 +1401,6 @@ class mplay_server:
     """
 
     def message_handler(self, arg):
-        #debug(log=False)
         xml_dom = None
         self.log_msg( "message handler thread running..." )
         while self.alive:
@@ -1434,7 +1425,8 @@ class mplay_server:
         self.log_msg("message handler thread exiting...")
         self.incoming_event.set()
 
-    def parse_incoming_dom(self,data):
+    def parse_incoming_dom(self, data):
+        #debug((data, tostring(data) if iselement(data) else 'None element'))  Sometimes I catch an error.
         end = data.find(">") #locate end of first element of message
         head = data[:end+1]
         #self.log_msg(head)
@@ -1457,11 +1449,11 @@ class mplay_server:
         return
 
     def do_alter(self, xml_dom, data):
-        target = xml_dom.get("key")
-        value = xml_dom.get("val")
-        player = xml_dom.get("plr")
-        group_id = xml_dom.get("gid")
-        boot_pwd = xml_dom.get("bpw")
+        target = xml_dom.get("key") or 'None'
+        value = xml_dom.get("val") or 'None'
+        player = xml_dom.get("plr") or 'None'
+        group_id = xml_dom.get("gid") or 'None'
+        boot_pwd = xml_dom.get("bpw") or 'None'
         actual_boot_pwd = self.groups[group_id].boot_pwd
 
         if self.allow_room_passwords == 0:
@@ -1480,7 +1472,7 @@ class mplay_server:
             elif target == "name":
                 # Check for & in name.  We want to allow this because of its common
                 # use in d&d games
-                result = self.change_group_name(group_id,value,player)
+                result = self.change_group_name(group_id, value, player)
                 msg ="<msg to='" + player + "' from='0' group_id='0' />" + result
                 self.players[player].outbox.put(msg)
         else:
@@ -1573,7 +1565,6 @@ class mplay_server:
 
             if not self.groups[group_id].check_pwd(pwd):
                 allowed = 0
-
                 #tell the clients password manager the password failed -- SD 8/03
                 pm = "<password signal='fail' type='room' id='" +  group_id  + "' data=''/>"
                 self.players[from_id].outbox.put(pm)
@@ -1611,9 +1602,9 @@ class mplay_server:
                 print "exception in move_player() "
                 traceback.print_exc()
 
-            old_group_id = self.players[from_id].change_group(group_id,self.groups)
-            self.send_to_group(from_id,old_group_id,self.players[from_id].toxml('del'))
-            self.send_to_group(from_id,group_id,self.players[from_id].toxml('new'))
+            old_group_id = self.players[from_id].change_group(group_id, self.groups)
+            self.send_to_group(from_id, old_group_id, self.players[from_id].toxml('del'))
+            self.send_to_group(from_id, group_id, self.players[from_id].toxml('new'))
             self.check_group(from_id, old_group_id)
 
             """
@@ -1669,7 +1660,7 @@ class mplay_server:
     # conditions written all over them.  Ack! Ack!
     """
     def new_group( self, name, pwd, boot, minVersion, mapFile, messageFile, persist = 0, moderated=0 ):
-        group_id = str( self.next_group_id )
+        group_id = str(self.next_group_id)
         self.next_group_id += 1
         self.groups[group_id] = game_group( group_id, name, pwd, "", boot, minVersion, mapFile, messageFile, persist )
         self.groups[group_id].moderated = moderated
@@ -1677,9 +1668,9 @@ class mplay_server:
         if persist !=0: ins="Persistant "
         lmsg = "Creating " + ins + "Group... (" + str(group_id) + ") " + str(name)
         self.log_msg( lmsg )
-        self.log_msg(("create_group", (str(name), int(group_id), 0) )) ##-99 works, could be better.
+        self.log_msg(("create_group", (str(name), int(group_id), pwd, 0) ))
 
-    def change_group_name(self,gid,name,pid):
+    def change_group_name(self, gid, name, pid):
         "Change the name of a group"
         # Check for & in name.  We want to allow this because of its common
         # use in d&d games.
@@ -1715,6 +1706,8 @@ class mplay_server:
             self.groups[gid].name = str(name)
             lmessage = "Room name changed to from \"" + oldroomname + "\" to \"" + name + "\""
             self.log_msg(lmessage  + " by " + str(pid) )
+            self.log_msg(("update_group", (str(name), group_id, False)))
+
             self.send_to_all('0',self.groups[gid].toxml('update'))
             return lmessage
         except: return "An error occured during rename of room!"
@@ -1765,20 +1758,21 @@ class mplay_server:
                 oldloc = loc+1
         group_id = str(self.next_group_id)
         self.next_group_id += 1
+
         self.groups[group_id] = game_group(group_id, name, pwd, "", boot_pwd, minVersion, None, messageFile)
         self.groups[group_id].voice[from_id]=1
         self.players[from_id].outbox.put(self.groups[group_id].toxml('new'))
-        old_group_id = self.players[from_id].change_group(group_id,self.groups)
-        self.send_to_group(from_id,old_group_id,self.players[from_id].toxml('del'))
+        old_group_id = self.players[from_id].change_group(group_id, self.groups)
+        self.send_to_group(from_id, old_group_id, self.players[from_id].toxml('del'))
         self.check_group(from_id, old_group_id)
         self.send_to_all(from_id,self.groups[group_id].toxml('new'))
         self.send_to_all('0',self.groups[group_id].toxml('update'))
-        self.handle_role("set",from_id,"GM",boot_pwd, group_id)
+        self.handle_role("set",from_id,"GM", boot_pwd, group_id)
         lmsg = "Creating Group... (" + str(group_id) + ") " + str(name)
         self.log_msg( lmsg )
         jmsg = "moving to room " + str(group_id) + "."
         self.log_msg( jmsg )
-        self.log_msg(("create_group", (str(name), group_id, from_id)))
+        self.log_msg(("create_group", (str(name), group_id, from_id, 'No' if pwd == '' else 'Yes')))
         #even creators of the room should see the HTML --akoman
         #edit: jan10/03 - was placed in the except statement. Silly me.
         if self.defaultMessageFile != None:
@@ -1805,10 +1799,8 @@ class mplay_server:
                 del self.groups[group_id]
                 self.log_msg(("delete_group", (group_id, from_id)))
             else: self.send_to_all("0",self.groups[group_id].toxml('update'))
-
             #The register Rooms thread
             thread.start_new_thread(self.registerRooms,(0,))
-
         except Exception, e: self.log_msg(str(e))
 
     def del_player(self, id, group_id):
@@ -2546,30 +2538,32 @@ class mplay_server:
     #  in chat window on remote client
     """
     def player_list_remote(self):
-        COLOR1 = "\"#004080\""  #header/footer background color
-        COLOR2 = "\"#DDDDDD\""  #group line background color
-        COLOR3 = "\"#FFFFFF\""  #player line background color
-        COLOR4 = "\"#FFFFFF\""  #header/footer text color
-        PCOLOR = "\"#000000\""  #Player text color
-        LCOLOR = "\"#404040\""  #Lurker text color
-        GCOLOR = "\"#FF0000\""  #GM text color
-        SIZE   = "size=\"-1\""  #player info text size
+        """Does not work!!!""" # TaS.
+        COLOR1 = "'#004080'"  #header/footer background color
+        COLOR2 = "'#DDDDDD'"  #group line background color
+        COLOR3 = "'#FFFFFF'"  #player line background color
+        COLOR4 = "'#FFFFFF'"  #header/footer text color
+        PCOLOR = "'#000000'"  #Player text color
+        LCOLOR = "'#404040'"  #Lurker text color
+        GCOLOR = "'#FF0000'"  #GM text color
+        SIZE   = "size='-1'"  #player info text size
         FG = PCOLOR
 
         "display a condensed list of players on the server"
         self.p_lock.acquire()
-        pl = "<br /><table border=\"0\" cellpadding=\"1\" cellspacing=\"2\">"
-        pl += "<tr><td colspan='4' bgcolor=" + COLOR1 + "><font color=" + COLOR4 + ">"
-        pl += "<b>GROUP &amp; PLAYER LIST</b></font></td></tr>"
+        pl = "<br /><table border='0' cellpadding='1' cellspacing='2'>"
+        pl += "<tr><td colspan='4' bgcolor=" + COLOR1 + "><font color='" + COLOR4 + "'>"
+        pl += "<b>GROUP &amp; '' PLAYER LIST</b></font></td></tr>"
         try:
             keys = self.groups.keys()
             keys.sort(id_compare)
             for k in keys:
-                groupstring = "<tr><td bgcolor=" + COLOR2 + " colspan='2'>"
+                debug((self.groups, self.groups[k], self.groups[k].name))
+                groupstring = "<tr><td bgcolor='" + COLOR2 + "' colspan='2'>"
                 groutstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
-                groupstring += "</td><td bgcolor=" + COLOR2 + " > <i>Password: \"" + self.groups[k].pwd + "\"</td>"
-                groupstring += "<td bgcolor=" + COLOR2 + " > Boot: \"" + self.groups[k].boot_pwd + "\"</i></td></tr>"
-                pl += groupstring
+                groupstring += "</td><td bgcolor=" + COLOR2 + " > <i>Password: " + self.groups[k].pwd + "</td>"
+                groupstring += "<td bgcolor=" + COLOR2 + " > Boot: " + self.groups[k].boot_pwd + "</i></td></tr>"
+                pl += groupstring; debug(groupstring)
                 ids = self.groups[k].get_player_ids()
                 ids.sort(id_compare)
                 for id in ids:

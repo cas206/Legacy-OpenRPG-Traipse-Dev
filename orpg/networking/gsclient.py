@@ -84,7 +84,6 @@ def roomCmp(room1, room2):
     return 0
 
 class game_server_panel(wx.Panel):
-    ##debug()
     def __init__(self,parent):
         wx.Panel.__init__(self, parent, -1)
         self.parent = parent

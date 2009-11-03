@@ -194,7 +194,6 @@ class client_base:
     def sendMsg( self, sock, msg ):
         """Very simple function that will properly encode and send a message to te
         remote on the specified socket."""
-        #debug(log=False)
         if self.useCompression and self.compressionType != None:
             mpacket = self.compressionType.compress(msg)
             lpacket = pack('!i', len(mpacket))
@@ -218,7 +217,6 @@ class client_base:
         return sentm
 
     def recvData( self, sock, readSize ):
-        #debug(log=False)
         """Simple socket receive method.  This method will only return when the exact
         byte count has been read from the connection, if remote terminates our
         connection or we get some other socket exception."""
@@ -242,7 +240,6 @@ class client_base:
         return data
 
     def recvMsg(self, sock):
-        #debug()
         """This method now expects to receive a message having a 4-byte prefix length.  It will ONLY read completed messages.  In the event that the remote's connection is terminated, it will throw an exception which should allow for the caller to more gracefully handle this exception event.
 
         Because we use strictly reading ONLY based on the length that is told to use, we no longer have to worry about partially adjusting for fragmented buffers starting somewhere within a buffer that we've read.  Rather, it will get ONLY a whole message and nothing more.  Everything else will remain buffered with the OS until we attempt to read the next complete message."""
@@ -260,7 +257,6 @@ class client_base:
         return msgData
 
     def initialize_threads(self):
-        #debug()
         "Starts up our threads (2) and waits for them to make sure they are running!"
         self.status = MPLAY_CONNECTED
         self.sock.setblocking(1)
@@ -270,7 +266,7 @@ class client_base:
         self.startedEvent.set()
 
     def disconnect(self):
-        #debug()
+        debug()
         self.set_status(MPLAY_DISCONNECTING)
         self.log_msg("client stub " + self.ip +" disconnecting...")
         self.log_msg("closing sockets...")
@@ -282,18 +278,15 @@ class client_base:
         self.set_status(MPLAY_DISCONNECTED)
 
     def reset(self,sock):
-        #debug()
         self.disconnect()
         self.sock = sock
         self.initialize_threads()
 
     def update_role(self,role):
-        #debug()
         self.useroles = 1
         self.role = role
 
     def use_roles(self):
-        #debug()
         if self.useroles: return 1
         else: return 0
     def update_self_from_player(self, player):
@@ -307,7 +300,6 @@ class client_base:
      client provided IP address to have much value.  As such, we now label it as deprecated.
     """
     def toxml(self, action):
-        #debug((myescape(self.name), self.name, self.role))
         el = Element('player')
         el.set('name', self.name)
         el.set('action', action)
@@ -329,22 +321,19 @@ class client_base:
         return tostring(el)
 
     def log_msg(self,msg):
-        #debug(msg, log=False)
+        debug(msg, log=False)
         if self.log_console: self.log_console(msg)
 
     def get_status(self):
-        #debug(log=False)
         self.statLock.acquire()
         status = self.status
         self.statLock.release()
         return status
 
     def my_role(self):
-        #debug(self.role, log=False)
         return self.role
 
     def set_status(self,status):
-        #debug(status, log=False)
         self.statLock.acquire()
         self.status = status
         self.statLock.release()
@@ -398,10 +387,8 @@ class client_base:
 #
 #========================================================================
 class mplay_client(client_base):
-    #debug()
     "mplay client"
     def __init__(self,name,callbacks):
-        #debug(name)
         client_base.__init__(self)
         component.add('mp_client', self)
         self.xml = component.get('xml')
@@ -431,16 +418,13 @@ class mplay_client(client_base):
         return 0
 
     def get_chat(self):
-        #debug()
         return self.orpgFrame_callback.chat
 
     def set_name(self,name):
-        #debug(name)
         self.name =  name
         self.update()
 
     def set_text_status(self, status):
-        #debug()
         if self.text_status != status:
             self.text_status = status
             self.update()
@@ -584,8 +568,8 @@ class mplay_client(client_base):
                 oldloc = loc+1
         el = Element('alter')
         el.set('key', 'pwd')
-        el.set('val', npwd)
-        el.set('bpw', pwd)
+        #el.set('val', npwd)
+        el.set('bpw', str(pwd))
         el.set('plr', self.id)
         el.set('gid', self.group_id)
         self.outbox.put(tostring(el))
@@ -603,7 +587,6 @@ class mplay_client(client_base):
         self.outbox.put(tostring(el))
 
     def get_role(self):
-        #debug((self.group_id, self.id, self.role))
         el = Element('role')
         el.set('action', 'get')
         el.set('player', self.id)
@@ -611,7 +594,6 @@ class mplay_client(client_base):
         self.outbox.put(tostring(el))
 
     def set_role(self, player, role, pwd=""):
-        #debug(role)
         el = Element('role')
         el.set('action', 'set')
         el.set('player', player)
@@ -698,7 +680,13 @@ class mplay_client(client_base):
             end = data.find(">")
             head = data[:end+1]
             msg = data[end+1:]
-            el = fromstring(head)
+            ### Alpha ###
+            if head[end:] != '/':
+                if head[end:] != '>': head = head[:end] + '/>' 
+            ### This if statement should help close invalid messages.  Since it needs fixing, use the try except message for now.
+            try: el = fromstring(head)
+            except: el = fromstring(head[:end] +'/>')
+
             try:
                 el1 = fromstring(msg)
                 el.append(el1)
