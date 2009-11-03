@@ -33,8 +33,9 @@
 
 import string
 from orpg.orpg_windows import *
+import wx #wx.SystemSettings.GetMetric(wx.SYS_VSCROLL_X)
 from wx.lib.expando import ExpandoTextCtrl
-from orpg.tools.orpg_log import logger
+from orpg.tools.orpg_log import logger, debug
 
 #  This line added to test CVS commit
 
@@ -122,32 +123,21 @@ class LetterTreeClass(object):
     #
     # Purpose:  Sets or increments the priority of a word, adding the word if necessary
     def setWord(self,wordText,priority = 1,sumFlag = 0):
-
         cur = self.rootNode                     # start from the root
-
         for ch in wordText:                     # for each character in the word
             if cur.children.has_key(ch):        # check to see if we've found a new word
-
                 cur = cur.children[ch]            # if we haven't found a new word, move to the next letter and try again
-
             else:                               # in this clause, we're creating a new branch, as the word is new
                 newLetter = Letter(ch,cur)        # create a new class Letter using this ascii code and the current letter as a parent
-
                 if cur is self.rootNode:          # special case:  Others expect the top level letters to point to None, not self.rootNode
                     newLetter.parentNode = None
-
                 cur.children[ch] = newLetter      #  add the new letter to the list of children of the current letter
                 cur = newLetter                   #  make the new letter the current one for the next time through
 
         #  at this point, cur is pointing to the last letter of either a new or existing word.
-
-        if sumFlag:                             #  if the caller wants to add to the existing (0 if new)
-            cur.priority += priority
-        else:                                   #  else, the set the priority directly
-            cur.priority = priority
-
+        if sumFlag: cur.priority += priority    #  if the caller wants to add to the existing (0 if new)
+        else: cur.priority = priority           #  else, the set the priority directly
         self.updateMostCommon(cur)              # this will run back through the tree to fix up the mostCommon members
-
 
     # addWord subroutine.
     #
@@ -160,7 +150,6 @@ class LetterTreeClass(object):
     def addWord(self,wordText):
         self.setWord(wordText,priority = 1)
 
-
     # incWord subroutine.
     #
     # self : instance of self
@@ -170,9 +159,9 @@ class LetterTreeClass(object):
     #
     # Purpose:  Convenience method that wraps setWord.  Used to increment the priority of existing words and add new words.
     # Note:     Generally, this method can be used instead of addWord.
+
     def incWord(self,wordText):
         self.setWord(wordText,priority = 1, sumFlag = 1)
-
 
     # setWordPriority subroutine.
     #
@@ -183,6 +172,7 @@ class LetterTreeClass(object):
     # Returns:  None
     #
     # Purpose:  Convenience method that wraps setWord.  Sets existing words to priority or adds new words with priority = priority
+
     def setWordPriority(self,wordText,priority):
         self.setWord(wordText,priority = priority)
 
@@ -196,16 +186,13 @@ class LetterTreeClass(object):
     #
     # Purpose:  Given a word, it returns the class Letter node that corresponds to the word.  Used mostly in prep for a call to
     #           getPrediction()
+
     def findWordNode(self,wordText):         #returns class Letter that represents the last letter in the word
-
         cur = self.rootNode                  # start at the root
-
         for ch in wordText:                  # move through each letter in the word
             if cur.children.has_key(ch):     # if the next letter exists, make cur equal that letter and loop
                 cur = cur.children[ch]
-            else:
-                return None                  # return None if letter not found
-
+            else: return None                # return None if letter not found
         return cur                           # return cur, as this points to the last letter if we got this far
 
 
@@ -217,29 +204,23 @@ class LetterTreeClass(object):
     # Returns:  Int representing the word's priority or 0 if not found.
     #
     # Purpose:  Returns the priority of the given word
+
     def findWordPriority(self,wordText):
 
         cur = self.findWordNode(wordText)    #  find the class Letter node that corresponds to this word
-        if cur:
-            return cur.priority              #  if it was found, return it's priority
-        else:
-            return 0                         #  else, return 0, meaning word not found
-
+        if cur: return cur.priority          #  if it was found, return it's priority
+        else: return 0                       #  else, return 0, meaning word not found
 
     def printTree(self, current=None):
         letters = []
         if current is None:
             current = self.rootNode
-
         for l, letter in current.children.iteritems():
             letters.append(str(letter))
             if letter.children != {}:
                 m = self.printTree(letter)
                 letters.append(m)
-
         return letters
-
-
 
     # getPrediction subroutine.
     #
@@ -340,16 +321,10 @@ class predTextCtrl(ExpandoTextCtrl):
 
         self.tree = LetterTree      #  Instantiate a new LetterTree.
         #  TODO:  make name of word file an argument.
-
-
-
-
-        self.parent = parent                               #  Save parent for later use in passing KeyEvents
-
-        self.cur = self.tree.rootNode                      # self.cur is a short cut placeholder for typing consecutive chars
-                                                           # It may be vestigal
-
-        self.keyHook = keyHook                             #  Save the keyHook passed in
+        self.parent = parent           #  Save parent for later use in passing KeyEvents
+        self.cur = self.tree.rootNode  # self.cur is a short cut placeholder for typing consecutive chars
+                                       # It may be vestigal
+        self.keyHook = keyHook         #  Save the keyHook passed in
         ExpandoTextCtrl._wrapLine = self._wrapLine
         
 
@@ -357,7 +332,6 @@ class predTextCtrl(ExpandoTextCtrl):
         # Estimate where the control will wrap the lines and
         # return the count of extra lines needed.
         # Re writes ExpandoTextCtrl _wrapLine function
-        print 'New _wrapLine Function'
         pte = dc.GetPartialTextExtents(line)
         width -= wx.SystemSettings.GetMetric(wx.SYS_VSCROLL_X)
         idx = 0
@@ -365,17 +339,17 @@ class predTextCtrl(ExpandoTextCtrl):
         count = 0
         spc = -1
         while idx < len(pte):
-            if line[idx] == ' ': spc = idx
+            if line[idx] == ' ': debug((line)); spc = idx
             if pte[idx] - start > width:
                 # we've reached the max width, add a new line
                 count += 1
-            # did we see a space? if so restart the count at that pos
-            if spc != -1:
-                idx = spc + 1
-                spc = -1
-            start = pte[idx]
-        else:
-            idx += 1
+                # did we see a space? if so restart the count at that pos
+                if spc != -1:
+                    idx = spc + 1
+                    spc = -1
+                start = pte[idx]
+            else:
+                idx += 1
         return count
 
     # findWord subroutine.
@@ -394,7 +368,7 @@ class predTextCtrl(ExpandoTextCtrl):
     #
     # Purpose:  This function is generally used to figure out the beginning of the
     #           current word being typed, for later use in a LetterTree.getPrediction()
-    def findWord(self,insert,st):
+    def findWord(self, insert, st):
 
     #  Good luck reading this one.  Basically, I started out with an idea, and fiddled with the
     #  constants as best I could until it worked.  It's not a piece of work of which I'm too
@@ -430,29 +404,21 @@ class predTextCtrl(ExpandoTextCtrl):
                 self.parent.OnChar(event)
                 return
 
-
-
         #  This bit converts the GetKeyCode() return (int) to a char if it's in a certain range
         asciiKey = ""
         if (event.GetKeyCode() < 256) and (event.GetKeyCode() > 19):
             asciiKey = chr(event.GetKeyCode())
 
-
-        if asciiKey == "":                                 #  If we didn't convert it to a char, then process based on the int GetKeyCodes
-
-            if  event.GetKeyCode() == wx.WXK_TAB:                #  We want to hook tabs to allow the user to signify acceptance of a
-                                                           #  predicted word.
+        if asciiKey == "":                              #  If we didn't convert it to a char, then process based on the int GetKeyCodes
+            if  event.GetKeyCode() == wx.WXK_TAB:       #  We want to hook tabs to allow the user to signify acceptance of a
+                                                        #  predicted word.
                 #  Handle Tab key
-
-                fromPos = toPos = 0                        # get the current selection range
+                fromPos = toPos = 0                     # get the current selection range
                 (fromPos,toPos) = self.GetSelection()
-
-                if (toPos - fromPos) == 0:                 # if there is no selection, pass tab on
+                if (toPos - fromPos) == 0:              # if there is no selection, pass tab on
                     self.parent.OnChar(event)
                     return
-
                 else:                                      #  This means at least one char is selected
-
                     self.SetInsertionPoint(toPos)          #  move the insertion point to the end of the selection
                     self.SetSelection(toPos,toPos)         #  and set the selection to no chars
                                                            #  The prediction, if any, had been inserted into the text earlier, so
@@ -467,12 +433,9 @@ class predTextCtrl(ExpandoTextCtrl):
                 st += '<br />'
                 return
 
-
             elif event.GetKeyCode() == wx.WXK_RETURN:            #  We want to hook returns, so that we can update the word list
-
                 st = self.GetValue()                       #  Grab the text from the control
                 newSt = ""                                 #  Init a buffer
-
                 #  This block of code, by popular demand, changes the behavior of the control to ignore any prediction that
                 #    hasn't been "accepted" when the enter key is struck.
                 (startSel,endSel) = self.GetSelection()                 #  get the curren selection
@@ -501,7 +464,6 @@ class predTextCtrl(ExpandoTextCtrl):
                         newSt += " "
                     else:
                         newSt += ch
-
                 #  Now that we've got a string of just letter sequences (words) and spaces
                 #  split it and to a LetterTree.incWord on the lowercase version of it.
                 #  Reminder:  incWord will increment the priority of existing words and add
@@ -528,23 +490,17 @@ class predTextCtrl(ExpandoTextCtrl):
                 self.SetInsertionPoint(startSel)
                 self.parent.OnChar(event)
                 return
-
-
             else:
                 #   Handle any other non-ascii events by calling parent's OnChar()
                 self.parent.OnChar(event)     #Call super.OnChar to get default behavior
                 return
-
-
         elif asciiKey in string.letters:
            #  This is the real meat and potatoes of predTextCtrl.  This is where most of the
            #  wx.TextCtrl logic is changed.
-
             (startSel,endSel) = self.GetSelection()                 #  get the curren selection
             st = self.GetValue()                                    #  and the text in the control
             front = st[:startSel]                                   #  Slice off the text to the front of where we are
             back = st[endSel:]                                      #  Slice off the text to the end from where we are
-
             st = front + asciiKey + back                            #  This expression creates a string that will insert the
                                                                     #  typed character (asciiKey is generated at the
                                                                     #  beginning of OnChar()) into the text.  If there
@@ -554,9 +510,7 @@ class predTextCtrl(ExpandoTextCtrl):
 
             insert = startSel + 1                                   #  creates an int that denotes where the new InsertionPoint
                                                                     #  should be.
-
             curWord = ""                                            #  Assume there's a problem with finding the curWord
-
             if (len(back) == 0) or (back[0] not in string.letters): #  We should only insert a prediction if we are typing
                                                                     #  at the end of a word, not in the middle.  There are
                                                                     #  three cases: we are typing at the end of the string or
@@ -637,11 +591,8 @@ class predTextCtrl(ExpandoTextCtrl):
                                                                 #  reach.
 
             return                                              #  Done!  Do NOT pass the event on at this point, because it's all done.
-
-
         else:
             #   Handle every other non-letter ascii (e.g. semicolon) by passing the event on.
             self.parent.OnChar(event)     #Call super.OnChar to get default behavior
             return
-
 #  End of class predTextCtrl!

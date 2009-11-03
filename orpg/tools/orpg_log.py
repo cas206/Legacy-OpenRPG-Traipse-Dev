@@ -74,14 +74,14 @@ class TrueDebug(object):
         if log == False: return
         current = inspect.currentframe()
         if parents: self.get_parents(current)
-        self.true_debug(current, objects, locale)
+        else: self.true_debug(current, objects, locale)
 
     def true_debug(self, current, objects, locale):
         debug_string = 'Function: ' + str(inspect.getouterframes(current)[1][3])
         #if locale == 'all': print inspect.getouterframes(current)[4]; return
         if objects != None: debug_string += ' Objects: ' + str(objects)
         if locale: debug_string += ' File: ' + str(inspect.getouterframes(current)[1][1])
-        print debug_string
+        logger.debug(debug_string)
         return
 
     def get_parents(self, current):
@@ -89,7 +89,7 @@ class TrueDebug(object):
         family = list(inspect.getouterframes(current))
         for parent in family:
             debug_string += ' ' + str(parent[4])
-        print debug_string
+        logger(debug_string)
         return
     
 class DebugConsole(wx.Frame):
