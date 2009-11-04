@@ -200,12 +200,12 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc.SetDimensions(rect.x+1, rect.y+1, rect.width+2, rect.height+2)
 
 
-    def Show(self, show, attr):
-        """
-        Show or hide the edit control.  You can use the attr (if not None)
-        to set colours or fonts for the control.
-        """
-        self.base_Show(show, attr)
+    #def Show(self, show, attr): #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
+    #    """
+    #    Show or hide the edit control.  You can use the attr (if not None)
+    #    to set colours or fonts for the control.
+    #    """
+    #    self.base_Show(show, attr) # Removed to prevent recursive error type.
 
 
     def BeginEdit(self, row, col, grid):
@@ -368,9 +368,9 @@ class rpg_grid(wx.grid.Grid):
 
     def add_row(self,evt=None):
         cols = self.GetNumberCols()
-        row = ET.Element('row')
+        row = Element('row')
         for i in range(0,cols):
-            cell = ET.Element('cell')
+            cell = Element('cell')
             cell.text = ''
             row.append(cell)
         self.handler.grid.append(row)
@@ -380,7 +380,7 @@ class rpg_grid(wx.grid.Grid):
 
     def add_col(self,evt=None):
         for r in self.rows:
-            cell = ET.Element('cell')
+            cell = Element('cell')
             cell.text = ''
             r.append(cell)
         self.AppendCols(1)

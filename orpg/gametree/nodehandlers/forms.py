@@ -29,7 +29,9 @@
 __version__ = "$Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $"
 
 from containers import *
-import wx.lib.scrolledpanel
+import orpg.minidom as minidom
+from orpg.orpg_xml import xml
+from wx.lib.scrolledpanel import ScrolledPanel
 
 def bool2int(b):
     #in wxPython 2.5+, evt.Checked() returns True or False instead of 1.0 or 0.
@@ -37,10 +39,8 @@ def bool2int(b):
     #if it was an int already, nothing changes. The difference between 1.0
     #and 1, i.e. between ints and floats, is potentially dangerous when we
     #use str() on it, but it seems to work fine right now.
-    if b:
-        return 1
-    else:
-        return 0
+    if b: return 1
+    else: return 0
 
 #################################
 ## form container
@@ -52,22 +52,16 @@ class form_handler(container_handler):
             <form width='100' height='100' />
             </nodehandler>
     """
-
     def __init__(self,xml,tree_node):
-        container_handler.__init__(self,xml,tree_node)
+        container_handler.__init__(self, xml, tree_node)
 
     def load_children(self):
         self.atts = None
         for child_xml in self.xml:
-            if child_xml.tag == "form":
-                self.atts = child_xml
-            else:
-                self.tree.load_xml(child_xml,self.mytree_node)
-        if not self.atts:
-            self.atts = ET.Element('form')
-            self.atts.set("width","400")
-            self.atts.set("height","600")
-            self.xml.append(self.atts)
+            if child_xml.tag == "form": self.xml.remove(child_xml)
+            elif child_xml: self.tree.load_xml(child_xml, self.mytree_node)
+        if not self.xml.get('width'): self.xml.set('width', '400')
+        if not self.xml.get('height'): self.xml.set('height', '600')
 
     def get_design_panel(self,parent):
         return form_edit_panel(parent,self)
@@ -79,28 +73,21 @@ class form_handler(container_handler):
         # make sure its a contorl node
         container_handler.on_drop(self,evt)
 
-
-class form_panel(wx.lib.scrolledpanel.ScrolledPanel):
+class form_panel(ScrolledPanel):
     def __init__(self, parent, handler):
-        wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
-        self.height = int(handler.atts.get("height"))
-        self.width = int(handler.atts.get("width"))
-
-
+        ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
+        self.height = int(handler.xml.get("height"))
+        self.width = int(handler.xml.get("width"))
         self.SetSize((0,0))
         self.handler = handler
         self.parent = parent
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         handler.tree.traverse(handler.mytree_node, self.create_child_wnd, None, False)
-
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-
         self.SetupScrolling()
-
         parent.SetSize(self.GetSize())
         self.Fit()
-
 
     def SetSize(self, xy):
         (x, y) = self.GetSize()
@@ -108,8 +95,7 @@ class form_panel(wx.lib.scrolledpanel.ScrolledPanel):
         if x < nx:
             x = nx+10
         y += ny+11
-        wx.lib.scrolledpanel.ScrolledPanel.SetSize(self, (x, y))
-
+        ScrolledPanel.SetSize(self, (x, y))
 
     def create_child_wnd(self, treenode, evt):
         node = self.handler.tree.GetPyData(treenode)
@@ -118,8 +104,6 @@ class form_panel(wx.lib.scrolledpanel.ScrolledPanel):
         if panel:
             self.main_sizer.Add(panel, size, wx.EXPAND)
             self.main_sizer.Add(wx.Size(10,10))
-
-
 
 F_HEIGHT = wx.NewId()
 F_WIDTH = wx.NewId()
@@ -130,8 +114,8 @@ class form_edit_panel(wx.Panel):
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Form Properties"), wx.VERTICAL)
         wh_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')),
-                        F_HEIGHT : wx.TextCtrl(self, F_HEIGHT, handler.atts.get('height')),
-                        F_WIDTH : wx.TextCtrl(self, F_WIDTH, handler.atts.get('width'))
+                        F_HEIGHT : wx.TextCtrl(self, F_HEIGHT, handler.xml.get('height')),
+                        F_WIDTH : wx.TextCtrl(self, F_WIDTH, handler.xml.get('width'))
                       }
 
         wh_sizer.Add(wx.StaticText(self, -1, "Width:"), 0, wx.ALIGN_CENTER)
@@ -164,18 +148,10 @@ class form_edit_panel(wx.Panel):
             self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == F_HEIGHT or id == F_WIDTH:
-            try:
-                int(txt)
-            except:
-                return 0
-            if id == F_HEIGHT:
-                self.handler.atts.set("height",txt)
-            elif id == F_WIDTH:
-                self.handler.atts.set("width",txt)
-
-
-
-
+            try: int(txt)
+            except: return 0
+            if id == F_HEIGHT: self.handler.xml.set("height",txt)
+            elif id == F_WIDTH: self.handler.xml.set("width",txt)
 
 ##########################
 ## control handler
@@ -184,12 +160,11 @@ class control_handler(node_handler):
     """ A nodehandler for form controls.
         <nodehandler name='?' module='forms' class='control_handler' />
     """
-    def __init__(self,xml,tree_node):
-        node_handler.__init__(self,xml,tree_node)
+    def __init__(self, xml, tree_node):
+        node_handler.__init__(self, xml, tree_node)
 
     def get_size_constraint(self):
         return 0
-
 
 ##########################
 ## textctrl handler
@@ -244,12 +219,10 @@ class textctrl_handler(node_handler):
         return txt
 
     def get_value(self):
-        return getText(self.text_elem)
+        return self.text_elem.text
 
     def set_value(self, new_value):
         self.text_elem.text = str(new_value)
-        
-
 
 FORM_TEXT_CTRL = wx.NewId()
 FORM_SEND_BUTTON = wx.NewId()
@@ -269,10 +242,7 @@ class text_panel(wx.Panel):
             sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         txt = handler.get_value()
-##        if self.handler.tree.ContainsReference(txt):
-##            txt = self.handler.tree.ReplaceReferences(txt, False)
-##            text_style |= wx.TE_READONLY
-        
+        if txt == None: txt = ''
         self.text = wx.TextCtrl(self, FORM_TEXT_CTRL, txt, style=text_style)
         sizer.Add(wx.StaticText(self, -1, handler.xml.get('name')+": "), 0, sizer_style)
         sizer.Add(wx.Size(5,0))
@@ -291,7 +261,7 @@ class text_panel(wx.Panel):
 
     def on_text(self,evt):
         txt = self.text.GetValue()
-        txt = strip_text(txt)
+        #txt = strip_text(txt) ##Does not seem to exist.
         self.handler.text_elem.text = txt
 
     def on_send(self,evt):
@@ -370,7 +340,7 @@ class textctrl_edit_panel(wx.Panel):
             self.handler.rename(txt)
         if id == F_TEXT:
             txt = self.text.GetValue()
-            txt = strip_text(txt)
+            #txt = strip_text(txt) ##Does not seem to exist. 
             self.handler.text_elem.text = txt
 
     def on_button(self,evt):
@@ -431,7 +401,7 @@ class listbox_handler(node_handler):
         self.list.set("type",str(type))
 
     def is_hide_title(self):
-        return int(self.list.get("hide_title",0))
+        return int(self.list.get("hide_title", 0))
 
     # single selection methods
     def get_selected_node(self):
@@ -450,7 +420,7 @@ class listbox_handler(node_handler):
     def get_selected_text(self):
         node = self.get_selected_node()
         if node:
-            return getText(node)
+            return node.text
         else:
             return ""
 
@@ -468,7 +438,7 @@ class listbox_handler(node_handler):
         opts = []
         for opt in self.options:
             if opt.get("selected") == "1":
-                opts.append(getText(opt))
+                opts.append(opt.text)
         return opts
 
     def get_selections_index(self):
@@ -496,14 +466,14 @@ class listbox_handler(node_handler):
     def get_options(self):
         opts = []
         for opt in self.options:
-            opts.append(getText(opt))
+            opts.append(opt.text)
         return opts
 
     def get_option(self,index):
-        return getText(self.options[index])
+        return self.options[index].text
 
     def add_option(self,opt):
-        elem = ET.Element('option')
+        elem = Element('option')
         elem.set("value","0")
         elem.set("selected","0")
         elem.text = opt
@@ -540,6 +510,7 @@ class listbox_handler(node_handler):
 
     def get_value(self):
         return "\n".join(self.get_selections_text())
+
 
 F_LIST = wx.NewId()
 F_SEND = wx.NewId()
@@ -823,309 +794,3 @@ class webimg_handler(node_handler):
         href = self.link.get("href")
         title = self.xml.get("name")
         return "<img src=\""+href+"\" alt="+title+" >"
-
-
-
-#######################
-## resource handler
-#######################
-
-class resource_handler(node_handler):
-    """
-    <nodehandler class="resource_handler" module="forms" name="">
-        <resource base="5" current="4" checks="1">Multi-line macro</resource>
-    </nodehandler>
-    """
-    def __init__(self,xml,tree_node):
-        node_handler.__init__(self,xml,tree_node)
-        self.resource = self.xml.find('resource')
-        if self.resource.get("checks") == "":
-            self.resource.set("checks","1")
-        if self.resource.get("base") == "":
-            self.resource.set("base","1")
-        if self.resource.get("current") == "":
-            self.resource.set("current", self.resource.get("base"))
-
-    def get_design_panel(self,parent):
-        return resource_edit_panel(parent,self)
-
-    def get_use_panel(self,parent):
-        return resource_panel(parent,self)
-
-    def tohtml(self):
-        # decrement the current value or post a "nothing left" message
-        # print the multi-line macro
-        return "resource"
-
-    def use_checks(self):
-        if self.resource.get("checks") == "1":
-            return True
-        return False
-
-    def get_base(self):
-        return int(self.resource.get("base",0))
-
-    def get_current(self):
-        return int(self.resource.get("current",0))
-
-    def get_macro(self):
-        return getText(self.resource)
-
-    def get_value(self):
-        return self.resource.get("current")
-
-    def set_value(self, new_value):
-        self.resource.set("current", new_value)
-
-
-RESOURCE_RESET  = wx.NewId()
-RESOURCE_CHECKS = wx.NewId()
-RESOURCE_NUMBER = wx.NewId()
-RESOURCE_DONE   = wx.NewId()
-
-
-class resource_panel(wx.Panel):
-    def __init__(self, parent, handler):
-        wx.Panel.__init__(self, parent, -1)
-        self.handler = handler
-        self.chat = handler.chat
-
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
- #       sizer.Add(wx.Button(self, RESOURCE_RESET, "Reset"))
-        sizer.Add(wx.StaticText(self, -1, handler.xml.get('name')+": "), 1, wx.ALIGN_RIGHT)
-        if self.handler.use_checks():
-            grid = wx.GridSizer(1, 11, 0, 0)
-            sizer.Add(grid, 0, wx.ALIGN_RIGHT)
-            self.checks = []
-            used = self.handler.get_base() - self.handler.get_current()
-            for i in range(self.handler.get_base()):
-                self.checks.append(wx.CheckBox(self, RESOURCE_CHECKS, ""))
-                checked = False
-                if i < used:
-                    checked = True
-                self.checks[i].SetValue(checked)
-                grid.Add(self.checks[i])
-                if i-int(i/10)*10==4:
-                    grid.Add(wx.Size(1,1))
-        else:
-            self.number = wx.TextCtrl(self, RESOURCE_NUMBER, self.handler.resource.get("current"))
-            sizer.Add(self.number, 0, wx.ALIGN_RIGHT)
-        sizer.Add(wx.Size(10,10), 0, wx.ALIGN_RIGHT)
-        sizer.Add(wx.Button(self, RESOURCE_DONE,  "Apply"), 0, wx.ALIGN_RIGHT)
-  #      self.chat.InfoPost("res 10")
-        sizer.SetMinSize(wx.Size(380,10))
-        self.sizer = sizer
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        self.Fit()
-   #     self.chat.InfoPost("res 20")
-        self.Bind(wx.EVT_BUTTON, self.on_reset, id=RESOURCE_RESET)
-        self.Bind(wx.EVT_BUTTON, self.on_done,   id=RESOURCE_DONE)
-
-
-    def on_reset(self,evt):
-        # uncheck all the check boxes or set the text to max
-        if self.handler.use_checks():
-            for c in self.checks:
-                c.SetValue(False)
-        else:
-            self.number.SetValue(self.handler.resource.get("base"))
-        self.handler.resource.set("current", self.handler.resource.get("base"))
-
-    def on_done(self,evt):
-        # save the changes back to the handler
-        current = 0
-        if self.handler.use_checks():
-            for c in self.checks:
-                if not c.GetValue():
-                    current += 1
-        else:
-            # validate text
-            current = int(self.number.GetValue())
-        change = self.handler.get_current()-current
-        if change > 0:
-            macro_text = self.handler.get_macro()
-            macro_text = macro_text.replace("_NAME_",self.handler.xml.get("name"))
-            macro_text = macro_text.replace("_CHANGE_", str(change))
-            macro_text = macro_text.replace("_CURRENT_", str(current))
-            self.handler.chat.ParsePost(macro_text, True, True)
-            self.handler.resource.set("current",str(current))
-
-
-RES_EDIT_TITLE    = wx.NewId()
-RES_EDIT_BASE     = wx.NewId()
-RES_EDIT_CURRENT  = wx.NewId()
-RES_EDIT_CHECKS   = wx.NewId()
-RES_EDIT_MACRO    = wx.NewId()
-
-
-class resource_edit_panel(wx.Panel):
-    def __init__(self, parent, handler):
-        wx.Panel.__init__(self, parent, -1)
-        self.handler = handler
-
-        sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Resource Properties"), wx.VERTICAL)
-        sizer.Add(wx.StaticText(self, -1, "Name of resource:"), 0, wx.EXPAND)
-        self.title = wx.TextCtrl(self, RES_EDIT_TITLE, self.handler.xml.get('name'))
-        sizer.Add(self.title, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Base amount of resource:"), 0, wx.EXPAND)
-        self.base = wx.TextCtrl(self, RES_EDIT_BASE, self.handler.resource.get("base"))
-        sizer.Add(self.base, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Current amount of resource:"), 0, wx.EXPAND)
-        self.current = wx.TextCtrl(self, RES_EDIT_CURRENT, self.handler.resource.get("current"))
-        sizer.Add(self.current, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        opts = ['Text Number', 'Check Boxes']
-        self.radio = wx.RadioBox(self, RES_EDIT_CHECKS, "Amount of resource is represented by:", choices=opts)
-        if self.handler.use_checks():
-            self.radio.SetSelection(1)
-        else:
-            self.radio.SetSelection(0)
-        sizer.Add(self.radio, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Send the following macro:"), 0, wx.EXPAND)
-        self.macro = wx.TextCtrl(self, RES_EDIT_MACRO, self.handler.get_macro(), style=wx.TE_MULTILINE)
-        sizer.Add(self.macro, 1,  wx.EXPAND)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        self.Fit()
-        parent.SetSize(self.GetBestSize())
-
-        self.Bind(wx.EVT_TEXT, self.on_title, id=RES_EDIT_TITLE)
-        self.Bind(wx.EVT_TEXT, self.on_base, id=RES_EDIT_BASE)
-        self.Bind(wx.EVT_TEXT, self.on_current, id=RES_EDIT_CURRENT)
-        self.Bind(wx.EVT_RADIOBOX, self.on_type, id=RES_EDIT_CHECKS)
-        self.Bind(wx.EVT_TEXT, self.on_macro, id=RES_EDIT_MACRO)
-
-
-    def on_title(self, evt):
-        if len(self.title.GetValue()):
-            self.handler.xml.set('name', self.title.GetValue())
-            self.handler.rename(self.title.GetValue())
-
-    def on_base(self, evt):
-        try:
-            b = int(self.base.GetValue())
-            self.handler.resource.set("base",str(b))
-        except:
-            pass
-
-    def on_current(self, evt):
-        try:
-            c = int(self.current.GetValue())
-            self.handler.resource.set("current",str(c))
-        except:
-            pass
-
-    def on_type(self,evt):
-        self.handler.resource.set("checks",str(self.radio.GetSelection()))
-
-    def on_macro(self,evt):
-        self.handler.resource.text = self.macro.GetValue()
-
-
-#######################
-## bonus handler
-#######################
-
-class bonus_handler(node_handler):
-    """
-    <nodehandler class="bonus_handler" module="forms" name="">
-        <bonus value="2" type="optional">Multi-line list of node references</bonus>
-    </nodehandler>
-    """
-    def __init__(self,xml,tree_node):
-        node_handler.__init__(self,xml,tree_node)
-        self.bonus_xml = self.xml.find('bonus')
-        self.add_to_bonus_map()
-
-    def get_design_panel(self,parent):
-        return bonus_edit_panel(parent,self)
-
-    def get_use_panel(self,parent):# there is no 'use' for a bonus
-        return bonus_edit_panel(parent,self)
-
-    def tohtml(self):
-        return "bonus"# there is no 'send to chat' or 'pretty print'
-
-    def get_value(self):
-        return self.bonus_xml.get('value', '')
-
-    def delete(self):
-        self.remove_from_bonus_map()
-        return node_handler.delete(self)
-
-    def add_to_bonus_map(self):
-        for target in getText(self.bonus_xml).split('\n'):
-            self.tree.AddBonus(target, self)
-
-    def remove_from_bonus_map(self):
-        for target in getText(self.bonus_xml).split('\n'):
-            self.tree.RemoveBonus(target, self)
-        
-
-
-BONUS_EDIT_TITLE = wx.NewId()
-BONUS_EDIT_VALUE = wx.NewId()
-BONUS_EDIT_TYPE = wx.NewId()
-BONUS_EDIT_REF = wx.NewId()
-
-
-class bonus_edit_panel(wx.Panel):
-    def __init__(self, parent, handler):
-        wx.Panel.__init__(self, parent, -1)
-        self.handler = handler
-
-        sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Bonus Properties"), wx.VERTICAL)
-        sizer.Add(wx.StaticText(self, -1, "Name of bonus:"), 0, wx.EXPAND)
-        self.title = wx.TextCtrl(self, BONUS_EDIT_TITLE, self.handler.xml.get('name'))
-        sizer.Add(self.title, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Size of bonus:"), 0, wx.EXPAND)
-        self.value = wx.TextCtrl(self, BONUS_EDIT_VALUE, self.handler.bonus_xml.get('value', ''))
-        sizer.Add(self.value, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Type of bonus:"), 0, wx.EXPAND)
-        self.type = wx.TextCtrl(self, BONUS_EDIT_TYPE, self.handler.bonus_xml.get("type"))
-        sizer.Add(self.type, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-
-        sizer.Add(wx.StaticText(self, -1, "Add to the following nodes:"), 0, wx.EXPAND)
-        self.ref = wx.TextCtrl(self, BONUS_EDIT_REF, getText(self.handler.bonus_xml), style=wx.TE_MULTILINE)
-        sizer.Add(self.ref, 1,  wx.EXPAND)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        self.Fit()
-        parent.SetSize(self.GetBestSize())
-
-        self.Bind(wx.EVT_TEXT, self.on_title, id=BONUS_EDIT_TITLE)# too many calls - should call only upon close
-        self.Bind(wx.EVT_TEXT, self.on_value, id=BONUS_EDIT_VALUE)
-        self.Bind(wx.EVT_TEXT, self.on_type, id=BONUS_EDIT_TYPE)
-        self.Bind(wx.EVT_TEXT, self.on_ref, id=BONUS_EDIT_REF)
-
-
-    def on_title(self, evt):
-        if len(self.title.GetValue()):
-            self.handler.xml.set('name', self.title.GetValue())
-            self.handler.rename(self.title.GetValue())
-
-    def on_value(self, evt):
-        self.handler.bonus_xml.set('value', self.value.GetValue())
-
-    def on_type(self, evt):
-        self.handler.bonus_xml.set('type', self.type.GetValue())
-
-    def on_ref(self, evt):
-        self.handler.remove_from_bonus_map()
-        self.handler.bonus_xml.text = self.ref.GetValue()
-        self.handler.add_to_bonus_map()
