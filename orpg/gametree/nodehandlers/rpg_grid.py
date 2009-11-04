@@ -200,12 +200,12 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc.SetDimensions(rect.x+1, rect.y+1, rect.width+2, rect.height+2)
 
 
-    #def Show(self, show, attr): #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
-    #    """
-    #    Show or hide the edit control.  You can use the attr (if not None)
-    #    to set colours or fonts for the control.
-    #    """
-    #    self.base_Show(show, attr) # Removed to prevent recursive error type.
+    def Show(self, show, attr):
+        """
+        Show or hide the edit control.  You can use the attr (if not None)
+        to set colours or fonts for the control.
+        """
+        self.base_Show(show, attr)
 
 
     def BeginEdit(self, row, col, grid):

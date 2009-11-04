@@ -113,8 +113,9 @@ class game_tree(wx.TreeCtrl):
         #Create tree from default if it does not exist
         validate.config_file("tree.xml","default_tree.xml")
         component.add("tree", self)
+
         #build tree
-        self.root = self.AddRoot("Game Tree",self.icons['gear'])
+        self.root = self.AddRoot("Game Tree", self.icons['gear'])
         self.was_labeling = 0
         self.rename_flag = 0
         self.image_cache = {}
@@ -289,7 +290,6 @@ class game_tree(wx.TreeCtrl):
             os.rename(filename,filename+".corrupt")
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
-
     
     def build_std_menu(self, obj=None):
         # build useful menu

@@ -28,7 +28,7 @@
 
 
 from core import *
-from wx.lib.splitter import MultiSplitterWindow
+import wx.lib.splitter
 
 
 ##########################
@@ -39,8 +39,8 @@ class container_handler(node_handler):
     """ should not be used! only a base class!
     <nodehandler name='?'  module='core' class='container_handler'  />
     """
-    def __init__(self, xml, tree_node):
-        node_handler.__init__(self, xml, tree_node)
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
         self.load_children()
 
     def load_children(self):
@@ -53,7 +53,7 @@ class container_handler(node_handler):
             node.on_send_to_map(evt)
 
     def on_send_to_map(self, evt):
-        self.tree.traverse(self.mytree_node, self.check_map_aware, evt) 
+        self.tree.traverse(self.mytree_node, self.check_map_aware, evt)
 
     def checkChildToMap(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
@@ -81,7 +81,7 @@ class container_handler(node_handler):
     def gen_html(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
         self.html_str += "<p>" + node.tohtml()
-        
+
     def tohtml(self):
         self.html_str = "<table border=\"1\" ><tr><td>"
         self.html_str += "<b>"+self.xml.get("name") + "</b>"
@@ -97,6 +97,8 @@ class container_handler(node_handler):
         return 2
 
 
+
+
 ##########################
 ## group node handler
 ##########################
@@ -105,8 +107,8 @@ class group_handler(container_handler):
         This handler will continue parsing child xml data.
         <nodehandler name='?'  module='core' class='group_handler'  />
     """
-    def __init__(self, xml, tree_node):
-        container_handler.__init__(self, xml, tree_node)
+    def __init__(self,xml,tree_node):
+        container_handler.__init__(self,xml,tree_node)
 
     def load_children(self):
         self.atts = None
@@ -116,7 +118,7 @@ class group_handler(container_handler):
             else:
                 self.tree.load_xml(child_xml,self.mytree_node)
         if not self.atts:
-            self.atts = Element('group_atts')
+            self.atts = ET.Element('group_atts')
             self.atts.set("cols","1")
             self.atts.set("border","1")
             self.xml.append(self.atts)
@@ -142,10 +144,13 @@ class group_handler(container_handler):
         self.html_str = "<table border=\""+border+"\" ><tr><td colspan=\""+cols+"\">"
         self.html_str += "<font size=4>"+self.xml.get("name") + "</font>"
         self.html_str += "</td></tr>\n<tr>"
+
         self.cols = int(cols)
         self.i = 0
         self.tdatas = {}
+
         self.tree.traverse(self.mytree_node, self.gen_html, recurse=False)
+
         for td in self.tdatas:
             self.html_str += "<td valign=\"top\" >" + self.tdatas[td] + "</td>\n";
         self.html_str += "</tr></table>"
@@ -213,8 +218,8 @@ class group_edit_panel(wx.Panel):
 class tabber_handler(container_handler):
     """ <nodehandler name='?'  module='containers' class='tabber_handler'  />"""
 
-    def __init__(self, xml, tree_node):
-        container_handler.__init__(self, xml, tree_node)
+    def __init__(self,xml,tree_node):
+        container_handler.__init__(self,xml,tree_node)
 
     def get_design_panel(self,parent):
         return tabbed_panel(parent,self,1)
@@ -234,10 +239,15 @@ class tabbed_panel(orpgTabberWnd):
 
     def pick_panel(self, treenode, mode):
         node = self.handler.tree.GetPyData(treenode)
-        if mode == 1: panel = node.get_design_panel(self)
-        else: panel = node.get_use_panel(self)
+        if mode == 1:
+            panel = node.get_design_panel(self)
+        else:
+            panel = node.get_use_panel(self)
+
         name = node.xml.get("name")
-        if panel: self.AddPage(panel, name, False)
+
+        if panel:
+            self.AddPage(panel, name, False)
 
 #################################
 ## Splitter container
@@ -252,10 +262,12 @@ class splitter_handler(container_handler):
     def load_children(self):
         self.atts = None
         for child_xml in self.xml:
-            if child_xml.tag == "splitter_atts": self.atts = child_xml
-            else: self.tree.load_xml(child_xml,self.mytree_node)
+            if child_xml.tag == "splitter_atts":
+                self.atts = child_xml
+            else:
+                self.tree.load_xml(child_xml,self.mytree_node)
         if not self.atts:
-            self.atts = Element('splitter_atts')
+            self.atts = ET.Element('splitter_atts')
             self.atts.set("horizontal","0")
             self.xml.append(self.atts)
 
@@ -274,7 +286,7 @@ class splitter_handler(container_handler):
 
         self.pane = splitter_panel(parent, self)
 
-        self.splitter = MultiSplitterWindow(self.pane, -1, style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
+        self.splitter = wx.lib.splitter.MultiSplitterWindow(self.pane, -1, style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
 
         if self.split == '1':
             self.splitter.SetOrientation(wx.VERTICAL)
@@ -284,7 +296,7 @@ class splitter_handler(container_handler):
         self.bestSizex = -1
         self.bestSizey = -1
 
-        self.tree.traverse(self.mytree_node, self.doSplit, mode, False) 
+        self.tree.traverse(self.mytree_node, self.doSplit, mode, False)
 
         self.pane.sizer.Add(self.splitter, 1, wx.EXPAND)
 
@@ -299,8 +311,10 @@ class splitter_handler(container_handler):
 
     def doSplit(self, treenode, mode):
         node = self.tree.GetPyData(treenode)
-        if mode == 1: tmp = node.get_design_panel(self.splitter)
-        else: tmp = node.get_use_panel(self.splitter)
+        if mode == 1:
+            tmp = node.get_design_panel(self.splitter)
+        else:
+            tmp = node.get_use_panel(self.splitter)
 
         if self.split == '1':
             sash = tmp.GetBestSize()[1]+1

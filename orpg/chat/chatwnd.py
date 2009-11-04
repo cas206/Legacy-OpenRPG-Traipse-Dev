@@ -1950,7 +1950,7 @@ class chat_panel(wx.Panel):
                     self.resolve_loop(node, path, step, depth)
 
     def resolution(self, node):
-        debug(node)
+        debug((node))
         if self.passed == False:
             self.passed = True
             if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
@@ -1965,8 +1965,8 @@ class chat_panel(wx.Panel):
         value = ""
         path = s.split('::')
         depth = len(path)
-        gametree = component.get('tree')
-        dom = gametree.xml_root.getchildren()
+        self.gametree = component.get('tree')
+        dom = self.gametree.xml_root.getchildren()
         for node in dom:
             debug((node.get('name'), path[0]))
             if node.get('name') == path[0]:
