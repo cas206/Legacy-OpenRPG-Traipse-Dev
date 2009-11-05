@@ -42,6 +42,7 @@ except:
     import wx
 
 from xml.etree.ElementTree import ElementTree, Element, tostring, XML
+from orpg.tools.orpg_log import debug
 
 #html defaults
 TH_BG = "#E9E9E9"
@@ -106,10 +107,8 @@ class node_handler:
             if self.create_designframe():
                 self.myeditor.Show()
                 self.myeditor.Raise()
-            else:
-                return
+            else: return
         wx.CallAfter(self.myeditor.Layout)
-
 
     def create_designframe(self):
         title = self.xml.get('name') + " Editor"
@@ -131,15 +130,12 @@ class node_handler:
         self.myeditor.SetAutoLayout(True)
 
         (x, y) = self.myeditor.GetSize()
-        if x < 400:
-            x = 400
-        if y < 400:
-            y = 400
+        if x < 400: x = 400
+        if y < 400: y = 400
 
         self.myeditor.SetSize((x, y))
         self.myeditor.Layout()
         self.myeditor.Thaw()
-
         return True
 
     def on_use(self,evt):
@@ -157,7 +153,6 @@ class node_handler:
             else:
                 return
         wx.CallAfter(self.mywindow.Layout)
-
 
     def create_useframe(self):
         caption = self.xml.get('name', '')
@@ -180,16 +175,12 @@ class node_handler:
 
         if self.frame_size is None:
             self.frame_size = self.mywindow.GetSize()
-            if self.frame_size.x < 400:
-                self.frame_size.x = 400
-            if self.frame_size.y < 400:
-                self.frame_size.y = 400
+            if self.frame_size.x < 400: self.frame_size.x = 400
+            if self.frame_size.y < 400: self.frame_size.y = 400
 
         self.mywindow.Layout()
         self.mywindow.Thaw()
-
         self.mywindow.Bind(wx.EVT_CLOSE, self.close_useframe)
-
         return True
 
     def close_useframe(self, evt):
@@ -201,8 +192,7 @@ class node_handler:
 
 
     def on_html_view(self,evt):
-        try:
-            self.myviewer.Raise()
+        try: self.myviewer.Raise()
         except:
             caption = self.xml.get('name')
             self.myviewer = wx.Frame(None, -1, caption)
@@ -234,19 +224,15 @@ class node_handler:
     def on_send_to_chat(self,evt):
         self.chat.ParsePost(self.tohtml(),True,True)
 
-    def on_drop(self,evt):
+    def on_drop(self, evt):
         drag_obj = self.tree.drag_obj
-        if drag_obj == self or self.tree.is_parent_node(self.mytree_node,drag_obj.mytree_node):
+        if drag_obj == self or self.tree.is_parent_node(self.mytree_node, drag_obj.mytree_node):
             return
-        #if self.is_my_child(self.mytree_node,drag_obj.mytree_node):
-        #    return
         drop_xml = self.tree.drag_obj.delete()
         parent_node = self.tree.GetItemParent(self.mytree_node)
         prev_sib = self.tree.GetPrevSibling(self.mytree_node)
-        if parent_node == self.tree.root:
-            parent_xml = self.tree.GetPyData(parent_node)
-        else:
-            parent_xml = self.tree.GetPyData(parent_node).xml
+        if parent_node == self.tree.root: parent_xml = self.tree.GetPyData(parent_node)
+        else: parent_xml = self.tree.GetPyData(parent_node).xml
         for i in range(len(parent_xml)):
             if parent_xml[i] is self.xml:
                 parent_xml.insert(i, drop_xml)
@@ -254,6 +240,15 @@ class node_handler:
         if not prev_sib.IsOk():
             prev_sib = parent_node
         self.tree.load_xml(drop_xml, parent_node, prev_sib)
+
+    def get_tree(self):
+        family = []
+        test = treenode
+        while test != self.tree.root:
+            test = self.tree.GetItemParent(test)
+            parent = self.tree.GetItemText(test)
+            family.append(parent)
+        return family
 
     def toxml(self,pretty=0):
         return tostring(self.xml) #toxml(self.master_dom,pretty)
@@ -310,31 +305,8 @@ class node_handler:
         html_str += " Applet</b><br />by Chris Davis<br />chris@rpgarchive.com"
         return html_str
 
-    def set_referenceable(self, value):
-        if value:
-            self.xml.set('referenceable', '1')
-        else:
-            self.xml.set('referenceable', '0')
-
-    def get_referenceable(self):
-        if 'referenceable' in self.xml.attrib and self.xml.get('referenceable')=="0":
-            return False
-        return True
-
-    def set_namespace(self, value):
-        if value:
-            self.xml.set('namespace', '1')
-        else:
-            self.xml.set('namespace', '0')
-
-    def get_namespace(self):
-        if 'namespace' in self.xml.attrib and self.xml.get('namespace')=="1":
-            return True
-        return False
-
     def get_value(self):
         return None
-        
 
 
 P_TITLE = 10
@@ -347,8 +319,6 @@ class text_edit_panel(wx.Panel):
         self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')),
                         P_BODY : html_text_edit(self,P_BODY,handler.text,self.on_text)
                       }
-        #P_BODY : wx.TextCtrl(self, P_BODY,handler.text, style=wx.TE_MULTILINE)
-
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
         sizer.Add(wx.StaticText(self, -1, "Text Body:"), 0, wx.EXPAND)

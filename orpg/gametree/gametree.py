@@ -109,6 +109,7 @@ class game_tree(wx.TreeCtrl):
         self.id = 1
         self.dragging = False
         self.last_save_dir = dir_struct["user"]
+        self.tree_map = []
 
         #Create tree from default if it does not exist
         validate.config_file("tree.xml","default_tree.xml")
@@ -120,19 +121,16 @@ class game_tree(wx.TreeCtrl):
         self.rename_flag = 0
         self.image_cache = {}
         logger.debug("Exit game_tree")
-
     
     def add_nodehandler(self, nodehandler, nodeclass):
         if not self.nodehandlers.has_key(nodehandler): self.nodehandlers[nodehandler] = nodeclass
         else: logger.debug("Nodehandler for " + nodehandler + " already exists!")
-
     
     def remove_nodehandler(self, nodehandler):
         if self.nodehandlers.has_key(nodehandler):
             del self.nodehandlers[nodehandler]
         else: logger.debug("No nodehandler for " + nodehandler + " exists!")
 
-    
     def init_nodehandlers(self):
         self.add_nodehandler('group_handler', containers.group_handler)
         self.add_nodehandler('tabber_handler', containers.tabber_handler)
@@ -173,7 +171,6 @@ class game_tree(wx.TreeCtrl):
                 obj.on_drop(evt)
                 self.drag_obj = None
         evt.Skip()
-
     
     def on_char(self, evt):
         key_code = evt.GetKeyCode()
@@ -200,7 +197,6 @@ class game_tree(wx.TreeCtrl):
             self.EditLabel(curSelection)
         evt.Skip()
    
-    
     def locate_valid_tree(self, error, msg): ## --Snowdog 3/05
         """prompts the user to locate a new tree file or create a new one"""
         response = wx.MessageDialog(self, msg, error, wx.YES|wx.NO|wx.ICON_ERROR)
@@ -381,13 +377,11 @@ class game_tree(wx.TreeCtrl):
         end = string.rfind(data,"</tree>")
         data = data[6:end]
         self.insert_xml(data)
-
     
     def on_send_to_chat(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_send_to_chat(evt)
-
     
     def on_whisper_to(self, evt):
         players = self.session.get_players()
@@ -487,7 +481,6 @@ class game_tree(wx.TreeCtrl):
     
     def on_wizard(self, evt):
         item = self.GetSelection()
-        debug((item))
         obj = self.GetPyData(item)
         name = "New " + obj.xml_root.get("name")
         icon = obj.xml_root.get("icon")
@@ -657,9 +650,7 @@ class game_tree(wx.TreeCtrl):
             wx.MessageBox("Import Failed: Invalid or missing node data")
             logger.general("Import Failed: Invalid or missing node data")
             return
-
-        try:
-            new_xml = XML(txt)
+        try: new_xml = XML(txt)
         except ExpatError:
             wx.MessageBox("Error Importing Node or Tree")
             logger.general("Error Importing Node or Tree")
@@ -671,7 +662,7 @@ class game_tree(wx.TreeCtrl):
             return
 
         self.xml_root.append(new_xml)
-        self.load_xml(new_xml,self.root,self.root)
+        self.load_xml(new_xml, self.root, self.root)
 
     
     def build_img_list(self):
@@ -687,8 +678,27 @@ class game_tree(wx.TreeCtrl):
             self.icons[key] = self._imageList.Add(img)
         self.SetImageList(self._imageList)
 
+    def get_tree_map(self, parent):
+        ## Could be a little cleaner ##
+        family_tree = []
+        test = parent
+        while test != self.root:
+            parent = self.GetItemText(test)
+            test = self.GetItemParent(test)
+            family_tree.append(parent)
+        return family_tree
     
     def load_xml(self, xml_element, parent_node, prev_node=None):
+        if parent_node != self.root:
+            ## Loading XML seems to lag on Grids ##
+            family_tree = self.get_tree_map(parent_node)
+            family_tree.reverse()
+            map_str = '' #'!@'
+            for member in family_tree:
+                map_str += member +'::'
+            map_str = map_str[:len(map_str)-2] #+'@!'
+            xml_element.set('map', map_str)
+
         #add the first tree node
         i = 0
         name = xml_element.get("name")
@@ -697,7 +707,7 @@ class game_tree(wx.TreeCtrl):
 
         if prev_node:
             if prev_node == parent_node: new_tree_node = self.PrependItem(parent_node, name, i, i)
-            else: new_tree_node = self.InsertItem(parent_node,prev_node, name, i, i)
+            else: new_tree_node = self.InsertItem(parent_node, prev_node, name, i, i)
         else: new_tree_node = self.AppendItem(parent_node, name, i, i)
 
         logger.debug("Node Added to tree")
@@ -724,7 +734,6 @@ class game_tree(wx.TreeCtrl):
                 #parent.removeChild(xml_dom)
 
         return new_tree_node
-
     
     def cached_load_of_image(self, bmp_in, new_tree_node):
         image_list = self.GetImageList()
@@ -735,7 +744,6 @@ class game_tree(wx.TreeCtrl):
             if self.image_cache[key] == str(img_data):
                 image_index = key
                 break
-
         if image_index is None:
             image_index = image_list.Add(bmp_in)
             self.image_cache[image_index] = img_data
@@ -743,7 +751,6 @@ class game_tree(wx.TreeCtrl):
         self.SetItemImage(new_tree_node,image_index, wx.TreeItemIcon_Selected)
         return image_index
 
-    
     def on_rclick(self, evt):
         pt = evt.GetPosition()
         (item, flag) = self.HitTest(pt)

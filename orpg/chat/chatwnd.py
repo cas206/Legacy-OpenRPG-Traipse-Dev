@@ -1836,7 +1836,6 @@ class chat_panel(wx.Panel):
     def ParseFilter(self, s):
         s = self.GetFilteredText(s)
         return s
-
     
     def ParseNode(self, s):
         """Parses player input for embedded nodes rolls"""
@@ -1958,6 +1957,19 @@ class chat_panel(wx.Panel):
         else:
             self.data = ''
             pass
+        self.data = self.ParseMap(self.data, node)
+
+    def ParseMap(self, s, node):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!!(.*?)!!)")
+        matches = reg.findall(s)
+        print matches
+        for i in xrange(0,len(matches)):
+            newstr = txt = '!@' + node.get('map') + '::' + matches[i][1] + '@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            s = self.ParseNode(s)
+        return s
 
     def resolve_nodes(self, s):
         self.passed = False

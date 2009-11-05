@@ -183,12 +183,9 @@ class textctrl_handler(node_handler):
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.text_elem = self.xml.find('text')
-        if self.text_elem.get("send_button") == "":
-            self.text_elem.set("send_button","0")
-        if self.text_elem.get("raw_mode") == "":
-            self.text_elem.set("raw_mode","0")
-        if self.text_elem.get("hide_title") == "":
-            self.text_elem.set("hide_title","0")
+        if self.text_elem.get("send_button") == "": self.text_elem.set("send_button","0")
+        if self.text_elem.get("raw_mode") == "": self.text_elem.set("raw_mode","0")
+        if self.text_elem.get("hide_title") == "": self.text_elem.set("hide_title","0")
 
     def get_design_panel(self,parent):
         return textctrl_edit_panel(parent,self)
@@ -259,22 +256,23 @@ class text_panel(wx.Panel):
         self.Bind(wx.EVT_TEXT, self.on_text, id=FORM_TEXT_CTRL)
         self.Bind(wx.EVT_BUTTON, self.on_send, id=FORM_SEND_BUTTON)
 
-    def on_text(self,evt):
+    def on_text(self, evt):
+        debug()
         txt = self.text.GetValue()
         #txt = strip_text(txt) ##Does not seem to exist.
         self.handler.text_elem.text = txt
 
-    def on_send(self,evt):
+    def on_send(self, evt):
         txt = self.text.GetValue()
+        txt = self.chat.ParseMap(txt, self.handler.xml)
         if not self.handler.is_raw_send():
-            #self.chat.ParsePost(self.tohtml(),True,True)
-            self.chat.ParsePost(self.handler.tohtml(),True,True)
+            self.chat.ParsePost(self.handler.tohtml(), True, True)
             return 1
         actionlist = txt.split("\n")
         for line in actionlist:
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    self.chat.ParsePost(line,True,True)
+                    self.chat.ParsePost(line, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
@@ -426,7 +424,6 @@ class listbox_handler(node_handler):
 
 
     # mult selection methods
-
     def get_selections(self):
         opts = []
         for opt in self.options:
@@ -451,7 +448,6 @@ class listbox_handler(node_handler):
         return opts
 
     # setting selection method
-
     def set_selected_node(self,index,selected=1):
         if self.get_type() != L_CHECK:
             self.clear_selections()
@@ -462,11 +458,9 @@ class listbox_handler(node_handler):
             opt.set("selected","0")
 
     # misc methods
-
     def get_options(self):
         opts = []
-        for opt in self.options:
-            opts.append(opt.text)
+        for opt in self.options: opts.append(opt.text)
         return opts
 
     def get_option(self,index):
@@ -488,22 +482,17 @@ class listbox_handler(node_handler):
         self.options[index].text = value
 
     def has_send_button(self):
-        if self.list.get("send_button") == '0':
-            return False
-        else:
-            return True
+        if self.list.get("send_button") == '0': return False
+        else: return True
 
     def get_size_constraint(self):
-        if self.get_type() == L_DROP:
-            return 0
-        else:
-            return 1
+        if self.get_type() == L_DROP: return 0
+        else: return 1
 
     def tohtml(self):
         opts = self.get_selections_text()
         text = ""
-        if not self.is_hide_title():
-            text = "<b>"+self.xml.get("name")+":</b> "
+        if not self.is_hide_title(): text = "<b>"+self.xml.get("name")+":</b> "
         comma = ", "
         text += comma.join(opts)
         return text
