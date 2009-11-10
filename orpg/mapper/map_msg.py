@@ -27,7 +27,7 @@
 #
 __version__ = "$Id: map_msg.py,v 1.16 2007/03/09 14:11:55 digitalxero Exp $"
 
-from base import *
+#from base import *
 from base_msg import *
 from background_msg import *
 from grid_msg import *

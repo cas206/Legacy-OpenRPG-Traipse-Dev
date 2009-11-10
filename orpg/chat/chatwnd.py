@@ -43,38 +43,29 @@ __version__ = "$Id: chatwnd.py,v 1.177 2007/12/07 20:39:48 digitalxero Exp $"
 ##
 ## Module Loading
 ##
+import os, time, re, sys, traceback, webbrowser, commands, chat_msg, chat_util
+
+from orpg.orpg_version import VERSION
 from orpg.orpg_windows import *
 from orpg.player_list import WG_LIST
 from orpg.dirpath import dir_struct
-import orpg.tools.rgbhex
-import orpg.tools.inputValidator
 #from orpg.tools.metamenus import MenuEx #Needed?
-
-import webbrowser
 from string import *
-from orpg.orpg_version import VERSION
-import commands
-import chat_msg
-import time
-import orpg.tools.predTextCtrl
-from orpg.networking.mplay_client import MPLAY_CONNECTED  # needed to only send typing/not_typing messages while connected
-import os
-import time
-import re
-import sys
+
 import cStringIO # for reading inline imagedata as a stream
 from HTMLParser import HTMLParser
-import chat_util
-import traceback
 from wx.lib.expando import EVT_ETC_LAYOUT_NEEDED 
 
+import orpg.tools.rgbhex
+import orpg.tools.inputValidator
 from orpg.tools.validate import validate
 from orpg.tools.orpg_settings import settings
-from orpg.orpgCore import component
+import orpg.tools.predTextCtrl
 from orpg.tools.orpg_log import logger, debug
-from orpg.tools.decorators import debugging
-
+from orpg.orpgCore import component
 from xml.etree.ElementTree import tostring
+
+from orpg.networking.mplay_client import MPLAY_CONNECTED  # needed to only send typing/not_typing messages while connected
 
 NEWCHAT = False
 try:
@@ -894,8 +885,8 @@ class chat_panel(wx.Panel):
             self.build_dice()
             self.build_scroll()
             self.build_text()
-            self.toolbar_sizer.Add( self.textpop_lock, 0, wx.EXPAND )
-            self.toolbar_sizer.Add(self.scroll_lock,0,wx.EXPAND)
+            self.toolbar_sizer.Add(self.textpop_lock, 0, wx.EXPAND)
+            self.toolbar_sizer.Add(self.scroll_lock, 0, wx.EXPAND)
             self.build_formating()
             self.build_colorbutton()
 
@@ -905,6 +896,7 @@ class chat_panel(wx.Panel):
 
     
     def build_alias(self):
+        self.aliasSizer = wx.BoxSizer(wx.HORIZONTAL) ## Future ## Add these to a sizer, then turn the toolbar_sizer into a grid so these can adjust to the frame.
         self.aliasList = wx.Choice(self, wx.ID_ANY, size=(100, 25), choices=[self.defaultAliasName])
         self.aliasButton = createMaskedButton( self, dir_struct["icon"] + 'player.gif', 
                                             'Refresh list of aliases from Game Tree', wx.ID_ANY, '#bdbdbd' )
@@ -913,28 +905,22 @@ class chat_panel(wx.Panel):
         self.filterButton = createMaskedButton( self, dir_struct["icon"] + 'add_filter.gif', 
                                              'Refresh list of filters from Game Tree', wx.ID_ANY, '#bdbdbd' )
         self.filterList.SetSelection(0)
-        self.toolbar_sizer.Add( self.aliasButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.aliasList,0,wx.EXPAND)
-        self.toolbar_sizer.Add( self.filterButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.filterList,0,wx.EXPAND)
+
+        self.aliasSizer.Add( self.aliasButton, 0, wx.EXPAND )
+        self.aliasSizer.Add( self.aliasList,0,wx.EXPAND)
+        self.aliasSizer.Add( self.filterButton, 0, wx.EXPAND )
+        self.aliasSizer.Add( self.filterList,0,wx.EXPAND)
+
+        self.toolbar_sizer.Add(self.aliasSizer, 0, wx.EXPAND)
+
         if self.settings.get_setting('AliasTool_On') == '0': self.toggle_alias('0')
         else: self.toggle_alias('1')
 
     
     def toggle_alias(self, act):
-        if act == '0':
-            self.toolbar_sizer.Show(self.aliasList, False)
-            self.toolbar_sizer.Show(self.filterList, False)
-            self.toolbar_sizer.Show(self.aliasButton, False)
-            self.toolbar_sizer.Show(self.filterButton, False)
-            self.toolbar_sizer.Layout()
-        else:
-            self.toolbar_sizer.Show(self.aliasList, True)
-            self.toolbar_sizer.Show(self.filterList, True)
-            self.toolbar_sizer.Show(self.aliasButton, True)
-            self.toolbar_sizer.Show(self.filterButton, True)
-            self.toolbar_sizer.Layout()
-
+        if act == '0': self.toolbar_sizer.Show(self.aliasSizer, False)
+        else: self.toolbar_sizer.Show(self.aliasSizer, True)
+        self.toolbar_sizer.Layout()
     
     def build_text(self):
         self.textpop_lock = createMaskedButton(self, dir_struct["icon"]+'note.gif', 'Open Text View Of Chat Session', wx.ID_ANY, '#bdbdbd')
@@ -1184,7 +1170,7 @@ class chat_panel(wx.Panel):
                     wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
 
         bin_event = event.GetKeyCode()
-	if recycle_bin.has_key(bin_event):
+        if recycle_bin.has_key(bin_event):
 	    logger.debug(lambda bin_event: recycle_bin[bin_event])
 	    macroText = self.settings.get_setting(recycle_bin[bin_event][29:])
 	    recycle_bin = {}; del bin_event
@@ -1841,7 +1827,6 @@ class chat_panel(wx.Panel):
         """Parses player input for embedded nodes rolls"""
         cur_loc = 0
         #[a-zA-Z0-9 _\-\.]
-        debug(s)
         reg = re.compile("(!@(.*?)@!)")
         matches = reg.findall(s)
         for i in xrange(0,len(matches)):
@@ -1934,22 +1919,18 @@ class chat_panel(wx.Panel):
         return rs
 
     def resolve_loop(self, node, path, step, depth):
-        debug((node.get('name'), step, depth))
         if step == depth:
             self.resolution(node)
         else:
             child_list = node.findall('nodehandler')
-            debug(child_list)
             for child in child_list:
                 if step == depth: break
                 if child.get('name') == path[step]:
-                    debug(('Step', child.get('name'), step, path, path[step]))
                     node = child
                     step += 1
                     self.resolve_loop(node, path, step, depth)
 
     def resolution(self, node):
-        debug((node))
         if self.passed == False:
             self.passed = True
             if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
@@ -1980,7 +1961,6 @@ class chat_panel(wx.Panel):
         self.gametree = component.get('tree')
         dom = self.gametree.xml_root.getchildren()
         for node in dom:
-            debug((node.get('name'), path[0]))
             if node.get('name') == path[0]:
                 self.resolve_loop(node, path, 1, len(path))
         return self.data

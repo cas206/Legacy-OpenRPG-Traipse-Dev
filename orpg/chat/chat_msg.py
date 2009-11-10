@@ -31,8 +31,8 @@ __version__ = "$Id: chat_msg.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
 
 from orpg.orpgCore import *
 from chat_version import CHAT_VERSION
-from orpg.tools.orpg_log import logger
-from orpg.tools.decorators import debugging
+from orpg.tools.orpg_log import logger, debug
+from xml.etree.ElementTree import tostring, fromstring
 
 CHAT_MESSAGE = 1
 WHISPER_MESSAGE = 2
@@ -42,64 +42,43 @@ SYSTEM_MESSAGE = 5
 WHISPER_EMOTE_MESSAGE = 6
 
 class chat_msg:
-    @debugging
-    def __init__(self,xml_text="<chat type=\"1\" version=\""+CHAT_VERSION+"\" alias=\"\" ></chat>"):
+    
+    def __init__(self, xml_text="<chat type='1' version='"+CHAT_VERSION+"' alias='' ></chat>"):
         self.chat_dom = None
         self.takexml(xml_text)
 
-    @debugging
     def __del__(self):
         if self.chat_dom:
             self.chat_dom.unlink()
 
-    @debugging
     def toxml(self):
-        return component.get('xml').toxml(self.chat_dom)
+        return tostring(self.chat_dom)
 
-    @debugging
     def takexml(self,xml_text):
-        xml_dom = component.get('xml').parseXml(xml_text)
-        node_list = xml_dom.getElementsByTagName("chat")
-        if len(node_list) < 1:
-            print "Warning: no <chat/> elements found in DOM."
-        else:
-            if len(node_list) > 1:
-                print "Found more than one instance of <" + self.tagname + "/>.  Taking first one"
-            self.takedom(node_list[0])
+        xml_dom = fromstring(xml_text)
+        self.takedom(xml_dom)
 
-    @debugging
-    def takedom(self,xml_dom):
-        if self.chat_dom:
-            self.text_node = None
-            self.chat_dom.unlink()
+    def takedom(self, xml_dom):
         self.chat_dom = xml_dom
-        self.text_node = component.get('xml').safe_get_text_node(self.chat_dom)
-
-    @debugging
-    def set_text(self,text):
-        text = component.get('xml').strip_text(text)
-        self.text_node._set_nodeValue(text)
-
-    @debugging
+        self.text_node = xml_dom.text
+    
+    def set_text(self, text):
+        self.chat_dom.text = text
+    
     def set_type(self,type):
-        self.chat_dom.setAttribute("type",str(type))
-
-    @debugging
+        self.chat_dom.set("type", str(type))
+    
     def get_type(self):
-        return int(self.chat_dom.getAttribute("type"))
+        return int(self.chat_dom.get("type"))
 
-    @debugging
     def set_alias(self,alias):
-        self.chat_dom.setAttribute("alias",alias)
+        self.chat_dom.set("alias",alias)
 
-    @debugging
     def get_alias(self):
-        return self.chat_dom.getAttribute("alias")
+        return self.chat_dom.get("alias")
 
-    @debugging
     def get_text(self):
-        return self.text_node._get_nodeValue()
+        return self.text_node
 
-    @debugging
     def get_version(self):
-        return self.chat_dom.getAttribute("version")
+        return self.chat_dom.get("version")

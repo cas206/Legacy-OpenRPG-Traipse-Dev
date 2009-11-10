@@ -370,12 +370,7 @@ class game_tree(wx.TreeCtrl):
         return ret_string
 
     
-    def on_receive_data(self, data, player):
-        if iselement(data):
-            tostring(data)
-        beg = string.find(data,"<tree>")
-        end = string.rfind(data,"</tree>")
-        data = data[6:end]
+    def on_receive_data(self, data):
         self.insert_xml(data)
     
     def on_send_to_chat(self, evt):
@@ -531,8 +526,8 @@ class game_tree(wx.TreeCtrl):
 
     
     def save_tree(self, filename=dir_struct["user"]+'tree.xml'):
-        self.xml_root.set("version",GAMETREE_VERSION)
-        settings.change("gametree",filename)
+        self.xml_root.set("version", GAMETREE_VERSION)
+        settings.change("gametree", filename)
         ElementTree(self.xml_root).write(filename)
 
     
@@ -634,13 +629,11 @@ class game_tree(wx.TreeCtrl):
         about = MyAboutBox(self,obj.about())
         about.ShowModal()
         about.Destroy()
-
     
     def on_send_to_map(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         if hasattr(obj,"on_send_to_map"): obj.on_send_to_map(evt)
-
     
     def insert_xml(self, txt):
         #Updated to allow safe merging of gametree files
@@ -661,9 +654,14 @@ class game_tree(wx.TreeCtrl):
                 self.load_xml(xml_child, self.root)
             return
 
+        if new_xml.tag == "tree":
+            self.xml_root.append(new_xml.find('nodehandler'))
+            for xml_child in new_xml:
+                self.load_xml(xml_child, self.root)
+            return
+
         self.xml_root.append(new_xml)
         self.load_xml(new_xml, self.root, self.root)
-
     
     def build_img_list(self):
         """make image list"""
@@ -690,7 +688,7 @@ class game_tree(wx.TreeCtrl):
     
     def load_xml(self, xml_element, parent_node, prev_node=None):
         if parent_node != self.root:
-            ## Loading XML seems to lag on Grids ##
+            ## Loading XML seems to lag on Grids and Images need a cache for load speed ##
             family_tree = self.get_tree_map(parent_node)
             family_tree.reverse()
             map_str = '' #'!@'
@@ -727,12 +725,10 @@ class game_tree(wx.TreeCtrl):
                 self.id = self.id + 1
             except Exception, er:
                 logger.exception(traceback.format_exc())
-
                 # was deleted -- should we delete non-nodehandler nodes then?
                 #self.Delete(new_tree_node)
                 #parent = xml_dom._get_parentNode()
                 #parent.removeChild(xml_dom)
-
         return new_tree_node
     
     def cached_load_of_image(self, bmp_in, new_tree_node):
@@ -760,7 +756,6 @@ class game_tree(wx.TreeCtrl):
             if(isinstance(obj,core.node_handler)): obj.on_rclick(evt)
             else: self.PopupMenu(self.top_menu)
         else: self.PopupMenu(self.top_menu,pt)
-
     
     def on_ldclick(self, evt):
         self.rename_flag = 0
@@ -776,7 +771,6 @@ class game_tree(wx.TreeCtrl):
                     elif action == "design": obj.on_design(evt)
                     elif action == "print": obj.on_html_view(evt)
                     elif action == "chat": self.on_send_to_chat(evt)
-
     
     def on_left_down(self, evt):
         pt = evt.GetPosition()
@@ -790,7 +784,6 @@ class game_tree(wx.TreeCtrl):
             self.rename_flag = 1
         else: self.SelectItem(item)
         evt.Skip()
-
     
     def on_left_up(self, evt):
         if self.dragging:
@@ -813,7 +806,6 @@ class game_tree(wx.TreeCtrl):
             if recurse:
                 self.traverse(child, function, data)
             child, cookie = self.GetNextChild(root, cookie)
-
     
     def on_label_change(self, evt):
         item = evt.GetItem()
@@ -824,7 +816,6 @@ class game_tree(wx.TreeCtrl):
             obj = self.GetPyData(item)
             obj.xml_root.setAttribute('name',txt)
         else: evt.Veto()
-
     
     def on_label_begin(self, evt):
         if not self.rename_flag: evt.Veto()
@@ -833,7 +824,6 @@ class game_tree(wx.TreeCtrl):
             item = evt.GetItem()
             if item == self.GetRootItem():
                 evt.Veto()
-
     
     def on_drag(self, evt):
         self.rename_flag = 0
@@ -845,7 +835,6 @@ class game_tree(wx.TreeCtrl):
             cur = wx.StockCursor(wx.CURSOR_HAND)
             self.SetCursor(cur)
             self.drag_obj = obj
-
     
     def is_parent_node(self, node, compare_node):
         parent_node = self.GetItemParent(node)

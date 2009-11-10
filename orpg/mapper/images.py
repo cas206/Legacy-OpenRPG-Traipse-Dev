@@ -27,17 +27,14 @@
 #
 from __future__ import with_statement
 
-import urllib
-import Queue
-import thread
+import urllib, Queue, thread, time
 from threading import Lock
-import time
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
 
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger
-from orpg.tools.orpg_settings import settings
+from orpg.tools.settings import settings
 
 class ImageHandlerClass(object):
     __cache = {}

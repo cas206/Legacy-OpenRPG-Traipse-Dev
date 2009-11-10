@@ -27,7 +27,7 @@
 #
 
 from __future__ import with_statement
-import sys, os, os.path, wx, time, traceback, inspect
+import sys, os, os.path, time, traceback, inspect, wx
 
 from orpg.orpgCore import component
 from orpg.external.terminalwriter import TerminalWriter
@@ -178,7 +178,7 @@ class orpgLog(object):
             try: component.get('debugger').AppendText(".. " + str(msg) +'\n')
             except: pass
 
-        if log_type & self.log_level or to_console:
+        if log_type and (self.log_level or to_console):
             atr = {'msg': msg, 'level': self._lvl_args[log_type]['log_string']}
             atr['time'] = time.strftime('[%x %X]', time.localtime(time.time()))
             logMsg = '%(time)s (%(level)s) - %(msg)s\n' % (atr)

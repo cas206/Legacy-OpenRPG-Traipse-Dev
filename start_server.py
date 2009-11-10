@@ -26,7 +26,8 @@ def usage( retValue ):
 import orpg.networking.mplay_server
 import orpg.networking.meta_server_lib
 
-if __name__ == '__main__':
+print __name__
+if __name__ == '__main__' or __name__ == 'start_server':
     gc.set_debug(gc.DEBUG_UNCOLLECTABLE)
     gc.enable()
 

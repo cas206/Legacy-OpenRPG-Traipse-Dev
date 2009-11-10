@@ -35,7 +35,7 @@ from orpg_version import *
 from orpg.orpg_windows import *
 
 import wx.py
-#from orpg import minidom
+
 import orpg.player_list
 import orpg.tools.pluginui as pluginUI
 import orpg.tools.aliaslib
@@ -55,7 +55,7 @@ import upmana.manifest as manifest
 
 from orpg.dirpath import dir_struct
 from orpg.dieroller.utils import DiceManager
-from orpg.tools.orpg_settings import settings
+from orpg.tools.settings import settings
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
 from orpg.tools.orpg_log import logger, crash, debug
@@ -63,6 +63,9 @@ from orpg.tools.metamenus import MenuBarEx
 
 from xml.etree.ElementTree import ElementTree, Element, parse
 from xml.etree.ElementTree import fromstring, tostring
+## Element Tree usage will require users to convert to and from string data quite often until users of older versions update.
+## This is a problem that users of older versions will need to cross as it is both Core and Traipse that will make the change.
+## Older versions have a problem with correct XML.
 from orpg.orpg_xml import xml #to be replaced by etree
 
 
@@ -237,6 +240,7 @@ class orpgFrame(wx.Frame):
         if settings.get('Heartbeat') == '1':
             self.mainmenu.SetMenuState("GameServerServerHeartbeat", True)
 
+        self.mainmenu.SetMenuState('ToolsPasswordManager', True if settings.get('PWMannager') == 'On' else False)
         tabtheme = settings.get('TabTheme')  #This change is stable. TaS.
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", tabtheme == 'slanted&colorful')
         self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", tabtheme == 'slanted&bw')
@@ -264,7 +268,7 @@ class orpgFrame(wx.Frame):
         self.traipseSuite = wx.Menu()
         self.mainmenu.Insert(5, self.traipseSuite, "&Traipse Suite")
 
-	#Update Manager
+        #Update Manager
         mana = wx.MenuItem(self.traipseSuite, wx.ID_ANY, "Update Manager", "Update Manager")
         self.Bind(wx.EVT_MENU, self.OnMB_UpdateManagerPanel, mana)
         self.traipseSuite.AppendItem(mana)
@@ -742,10 +746,9 @@ class orpgFrame(wx.Frame):
         logger.debug("AUI Bindings Done")
 
         #Load the layout if one exists
-        layout = xml_dom.findall("DockLayout")
+        layout = xml_dom.find("DockLayout")
         try:
-            textnode = xml.safe_get_text_node(layout[0])
-            self._mgr.LoadPerspective(textnode.text)
+            self._mgr.LoadPerspective(layout.text)
         except: pass
         logger.debug("Perspective Loaded")
         self._mgr.GetPane("Browse Server Window").Hide()
@@ -866,7 +869,7 @@ class orpgFrame(wx.Frame):
     
     def saveLayout(self):
         filename = dir_struct["user"] + "layout.xml"
-        layout = parse(dir_struct["user"] + "layout.xml")
+        layout = parse(filename)
         xml_dom = layout.getroot()
         (x_size,y_size) = self.GetClientSize()
         (x_pos,y_pos) = self.GetPositionTuple()
@@ -877,17 +880,19 @@ class orpgFrame(wx.Frame):
         xml_dom.set("posx", str(x_pos))
         xml_dom.set("posy", str(y_pos))
         xml_dom.set("maximized", str(max))
-        layout = xml_dom.findall("DockLayout")
         try:
-            layout[0].text = str(self._mgr.SavePerspective())
+            xml_dom.find("DockLayout").text = str(self._mgr.SavePerspective())
         except:
             elem = Element('DockLayout')
             elem.set("DO_NO_EDIT","True")
             elem.text = str(self._mgr.SavePerspective())
             xml_dom.append(elem)
+
+        layout.write(filename)
+        """
         temp_file = open(filename, "w")
         temp_file.write(tostring(xml_dom))
-        temp_file.close()
+        temp_file.close()"""
 
     
     def build_hotkeys(self):
@@ -956,47 +961,33 @@ class orpgFrame(wx.Frame):
 
         # ok we are not ignoring this message
         #recvSound = "RecvSound"     #  this will be the default sound.  Whisper will change this below
+
         ### Alpha  ###
         etreeEl = Element('msg')
         try: etreeEl.append(fromstring(data))
         except: etreeEl.text = data
         ### Remove after Element Tree is integrated further ###
-        if player:
-            display_name = self.chat.chat_display_name(player)
-        else:
-            display_name = "Server Administrator"
+        if player: display_name = self.chat.chat_display_name(player)
+        else: display_name = "Server Administrator"
 
-        if etreeEl.text:
-            self.chat.Post(etreeEl.text)
+        if etreeEl.text: self.chat.Post(etreeEl.text)
 
         for child in etreeEl.getchildren():
             if child.tag == 'tree':
                 ### Alpha ### Allows users to decide if they want the node or not.
-                dlg = wx.MessageDialog(None, display_name + 'is trying to send you a tree node. Accept?', 'Question', 
+                dlg = wx.MessageDialog(None, display_name + ' is trying to send you a tree node. Accept?', 'Question', 
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if dlg.ShowModal() == wx.ID_YES:
                   dlg.Destroy()
-                  self.tree.on_receive_data(data, player)
+                  debug(child)
+                  self.tree.on_receive_data(tostring(child))       #Removed player object because it was unused.
                   self.chat.InfoPost(display_name + " has sent you a tree node...")
-                ### Core ### to be milked in later.
-                #TODO: Fix game tree to accepts elements
-                #self.tree.on_receive_data(child, player)
-                #self.chat.InfoPost(display_name + " has sent you a tree node...")
-
             elif child.tag == 'map':
-                ### Core ### Adapted from, remove tostring later
                 #TODO: Fix map to accepts elements
                 self.map.new_data(tostring(child))
-
             elif child.tag == 'chat':
-                msg = orpg.chat.chat_msg.chat_msg(data)
+                msg = orpg.chat.chat_msg.chat_msg(tostring(child))
                 self.chat.post_incoming_msg(msg, player)
-                ### Core ### to be milked in later
-                #msg = orpg.chat.chat_msg.chat_msg()
-                #msg.takedom(child)
-                #self.chat.post_incoming_msg(msg, player)
-
-
     
     def on_mplay_event(self, evt):
         id = evt.get_id()

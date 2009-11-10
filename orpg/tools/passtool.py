@@ -29,7 +29,7 @@
 import orpg.orpg_windows
 from orpg.orpgCore import component
 import traceback
-#from orpg.tools.settings import settings
+from orpg.tools.settings import settings
 
 #####################
 ## Password Assistant
