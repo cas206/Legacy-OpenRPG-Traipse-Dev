@@ -280,7 +280,9 @@ class orpgFrame(wx.Frame):
     def TraipseSuiteWarn(self, menuitem):
         ### Beta ### Allows for the reuse of the 'Attention' menu.
         ### component.get('frame').TraipseSuiteWarn('item') ### Portable
-        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
+        self.mainmenu.Remove(8)
+        self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite!")
+        #self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
         if menuitem == 'debug':
             if self.debugger.IsShown() == True:
                 self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
@@ -292,7 +294,9 @@ class orpgFrame(wx.Frame):
     def TraipseSuiteWarnCleanup(self, menuitem):
         ### Beta ### Allows for portable cleanup of the 'Attention' menu.
         ### component.get('frame').TraipseSuiteWarnCleanup('item') ### Portable
-        self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+        self.mainmenu.Remove(8)
+        self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite")        
+        #self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
         if menuitem == 'debug':
             self.traipseSuite.RemoveItem(self.debugConsole)
             self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))

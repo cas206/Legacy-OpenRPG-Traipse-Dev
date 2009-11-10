@@ -303,6 +303,7 @@ class Repos(wx.Panel):
             self.layout[self.id] = wx.FlexGridSizer(rows=1, cols=4, hgap=2, vgap=5)
             self.name[self.id] = wx.StaticText(self.repopanel, -1, 'URL')
             self.uri[self.id] = manifest.GetString('updaterepo', repo, '')
+            #except: self.uri[self.id] = ''
             self.url[self.id] = wx.TextCtrl(self.repopanel, -1, self.uri[self.id])
             self.pull[self.id] = wx.Button(self.repopanel, wx.ID_REFRESH)
             self.delete[self.id] = wx.Button(self.repopanel, wx.ID_DELETE)
@@ -632,6 +633,8 @@ class updaterFrame(wx.Frame):
         sizer = wx.BoxSizer()
         sizer.Add(nb, 1, wx.EXPAND)
         p.SetSizer(sizer)
+        p.Layout()
+        self.Refresh()
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def OnClose(self, event):

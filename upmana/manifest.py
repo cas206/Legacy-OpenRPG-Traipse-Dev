@@ -40,7 +40,7 @@ class ManifestChanges(object):
             msg = ["plugindb: no value has been stored for", strname, "in",
                    plugname, "so the default has been returned"]
             return defaultval
-        return self.normal(plugin.find(strname).text)
+        return self.normal(plugin.find(strname).text or '')
 
     def DelString(self, plugname, strname):
         strname = self.safe(strname)
