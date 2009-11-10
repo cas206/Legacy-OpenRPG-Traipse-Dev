@@ -9,20 +9,25 @@ __version__='$Revision: 1.26 $'[11:-2]
 __cvsinfo__='$Id: mplay_server_gui.py,v 1.26 2007/11/06 00:32:39 digitalxero Exp $'[5:-2]
 __doc__="""OpenRPG Server Graphical Interface"""
 
-import os
-import sys
-import time
-import types
+import os, sys, time, types
+
 from orpg.dirpath import dir_struct
-#import orpg.systempath looks old
 from orpg.tools.validate import validate
 from orpg.orpg_wx import *
-import webbrowser
 from threading import Thread
+
+import webbrowser
+
 from meta_server_lib import post_server_data, remove_server
 from mplay_server import mplay_server, server
+
 from xml.dom import minidom
 from orpg.orpgCore import component
+from orpg.tools.orpg_log import debug
+from orpg.tools.orpg_settings import settings
+
+from xml.etree.ElementTree import ElementTree, Element, iselement
+from xml.etree.ElementTree import fromstring, tostring, parse
 
 # Constants ######################################
 SERVER_RUNNING = 1
@@ -45,6 +50,7 @@ MENU_PLAYER_BOOT = wx.NewId()
 MENU_ADMIN_BAN = wx.NewId()
 MENU_BAN_LIST = wx.NewId()
 MENU_ADMIN_UNBAN = wx.NewId()
+PLAYER_SHOW_VERSION = wx.NewId()
 #############
 MENU_PLAYER_CREATE_ROOM = wx.NewId()
 MENU_PLAYER_SEND_MESSAGE = wx.NewId()
@@ -91,12 +97,15 @@ class MessageFunctionEvent(wx.PyEvent):
 
 # ServerConfig Object ############################
 class ServerConfig:
+    #debug(log=False)
     """ This class contains configuration
         setting used to control the server."""
 
     def __init__(self, owner ): 
         """ Loads default configuration settings."""
-        validate.config_file("server_ini.xml", "default_server_ini.xml" ) 
+        validate.config_file("server_ini.xml", "default_server_ini.xml")
+        config_xml = parse(dir_struct['user'] + 'server_ini.xml')
+        #debug(config_xml, log=False)
         configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
         port = configDom.childNodes[0].childNodes[1].getAttribute('port')
         OPENRPG_PORT = 6774 if port == '' else int(port) #Pretty ugly, but I couldn't find the tag any other way.
@@ -125,6 +134,7 @@ class ServerMonitor(Thread):
         self.bootPwd = pwd
 
     def log(self, mesg):
+        #debug(log=False)
         if type(mesg) == types.TupleType:
             func, msg = mesg
             event = MessageFunctionEvent( func, msg )
@@ -133,6 +143,7 @@ class ServerMonitor(Thread):
         del event
 
     def run(self):
+        #debug(log=False)
         """ Start the server. """
         self.server = mplay_server(self.log, self.serverName )
         self.server.initServer(bootPassword=self.bootPwd, reg="No")
@@ -140,6 +151,7 @@ class ServerMonitor(Thread):
         while self.alive: time.sleep(3)
 
     def stop(self):
+        #debug(log=False)
         """ Stop the server. """
         self.server.kill_server()
         self.alive = 0
@@ -147,6 +159,45 @@ class ServerMonitor(Thread):
 # GUI Server #####################################
 # Parent = notebook
 # Main = GUI
+class Groups(wx.ListCtrl):
+    def __init__(self, parent, main):
+        wx.ListCtrl.__init__(self, parent, -1, wx.DefaultPosition,
+                            wx.DefaultSize, wx.LC_REPORT|wx.SUNKEN_BORDER|wx.EXPAND|wx.LC_HRULES)
+        self.main = main
+
+        """Not completed.  Creates room, delets rooms.  Does not track players.  Nor does gsclient, ftm."""
+
+        ### Alpha ### Get Lobby Name # Moving to etree.
+        validate.config_file("server_ini.xml", "default_server_ini.xml" ) 
+        configDom = minidom.parse(dir_struct["user"] + 'server_ini.xml') 
+        lobbyname = configDom.childNodes[0].getAttribute('lobbyname')
+        #############
+        self.roomList = { 0 : lobbyname }
+
+        self.InsertColumn(0, 'Group ID')
+        self.InsertColumn(1, 'Game')
+        self.InsertColumn(2, 'Players')
+        self.InsertColumn(3, 'Passworded')
+        self.AddGroup((self.roomList[0], '0', 'Need to Find', 'No'))
+
+    def AddGroup(self, data):
+        (room, room_id, players, passworded) = data
+        i = self.InsertStringItem(0, str(room_id))
+        self.SetStringItem(i, 1, room)
+        self.SetStringItem(i, 2, players)
+        self.SetStringItem(i, 3, str(passworded))
+
+    def DeleteGroup(self, data):
+        i = self.FindItem(-1, str(data))
+        self.DeleteItem(i)        
+
+    def UpdateRoom(self, data):
+        (room, room_id, players) = data
+        i = self.FindItem( -1, str(room_id))
+        self.SetStringItem( i, 1, room )
+        if players: self.SetStringItem(i, 2, players)
+        ### Need to add room for Password Updates ###
+
 class Connections(wx.ListCtrl):
     def __init__( self, parent, main ):
         wx.ListCtrl.__init__( self, parent, -1, wx.DefaultPosition, 
@@ -185,6 +236,7 @@ class Connections(wx.ListCtrl):
         self.menu.SetTitle( "Player Menu" )
         self.menu.Append( MENU_PLAYER_BOOT, "Boot Player" )
         self.menu.Append( MENU_ADMIN_BAN, 'Ban Player' )
+        self.menu.Append( PLAYER_SHOW_VERSION, "Player Version" )
         self.menu.AppendSeparator()
         self.menu.Append( MENU_PLAYER_SEND_MESSAGE, "Send Player Message" )
         self.menu.Append( MENU_PLAYER_SEND_ROOM_MESSAGE, "Send Room Message" ) 
@@ -197,22 +249,24 @@ class Connections(wx.ListCtrl):
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_MESSAGE)
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_ROOM_MESSAGE)
         self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=MENU_PLAYER_SEND_SERVER_MESSAGE)
+        self.Bind(wx.EVT_MENU, self.OnPopupMenuItem, id=PLAYER_SHOW_VERSION)
 
     def add(self, player):
         i = self.InsertImageStringItem( 0, player["id"], 0 )
-        self.SetStringItem( i, 1, self.stripHtml( player["name"] ) )
-        self.SetStringItem( i, 2, "NEW" )
-        self.SetStringItem( i, 3, self.roomList[0] )
-        self.SetStringItem( i, 4, self.stripHtml( player["version"] ) )
-        self.SetStringItem( i, 5, 'Lurker' if self.stripHtml( player["role"] ) == '' else self.stripHtml( player["role"] ))
-        self.SetStringItem( i, 6, self.stripHtml( player["ip"] ) )
-        self.SetStringItem (i, 7, "PING" )
-        self.SetItemData( i, int(player["id"]) )
+        self.SetStringItem(i, 1, self.stripHtml(player["name"]))
+        self.SetStringItem(i, 2, "NEW")
+        self.SetStringItem(i, 3, self.roomList[0])
+        self.SetStringItem(i, 4, self.stripHtml(player["version"]))
+        self.SetStringItem(i, 5, 'Lurker' if player["role"] == None else self.stripHtml(player["role"]))
+        self.SetStringItem(i, 6, self.stripHtml(player["ip"]))
+        self.SetStringItem(i, 7, "PING")
+        self.SetItemData(i, int(player["id"]))
+        self.colorize_player_list(player)
         self.AutoAjust()
 
     def remove(self, id):
-        i = self.FindItemData( -1, int(id) )
-        self.DeleteItem( i )
+        i = self.FindItemData( -1, int(id))
+        self.DeleteItem(i)
         self.AutoAjust()
 
     def AutoAjust(self):
@@ -226,12 +280,31 @@ class Connections(wx.ListCtrl):
         self.SetColumnWidth(7, -1)
         self.Refresh()
 
+    def colorize_player_list(self, player):
+        if player == 0: return
+        for m in player.keys():
+            id = player['id']
+            item_list_location = self.FindItemData(-1, int(id))
+            if item_list_location == -1: continue
+            item = self.GetItem(item_list_location)
+            role = player['role']
+            try: #Players that turn up Blue are not passing the correct arguments.
+                try: 
+                    if player['group_id'] != "0": item.SetTextColour(settings.get_setting(role + "RoleColor"))
+                except KeyError: # Needed because group_id turns into group somewhere.
+                    if player['group'] != "0": item.SetTextColour(settings.get_setting(role + "RoleColor"))
+            except:
+                item.SetTextColour('BLUE')
+            self.SetItem(item)
+
     def update(self, player):
+        #try: int(player); i = self.FindItemData( -1, int(player) )
         i = self.FindItemData( -1, int(player["id"]) )
         if i > -1:
             self.SetStringItem(i, 1, self.stripHtml(player["name"]))
             self.SetStringItem(i, 2, self.stripHtml(player["status"]))
-            self.SetStringItem(i, 5, 'Lurker' if self.stripHtml(player["role"]) == '' else self.stripHtml(player["role"]))
+            self.SetStringItem(i, 5, 'Lurker' if player["role"] == None else self.stripHtml(player["role"]))
+            self.colorize_player_list(player)
             self.AutoAjust()
         else: self.add(player)
 
@@ -240,11 +313,12 @@ class Connections(wx.ListCtrl):
         i = self.FindItemData( -1, int(player) )
         if player > 0: self.SetStringItem( i, 3, room )
         self.AutoAjust()
+        #self.update(player) # player object doesn't send role object.
 
     def setPlayerRole( self, id, role ):
         i = self.FindItemData( -1, int(id) )
         self.SetStringItem( i, 5, role )
-        self.AutoAjust
+        self.AutoAjust()
 
     def stripHtml( self, name ):
         ret_string = ""
@@ -310,6 +384,10 @@ class Connections(wx.ListCtrl):
                 msg = self.GetMessageInput( "Broadcast Server Message" )
                 # If we got a message back, send it
                 if len(msg): self.main.server.server.broadcast( msg )
+            elif menuItem == PLAYER_SHOW_VERSION:
+                version_string = self.main.server.server.obtain_by_id(playerID, 'client_string')
+                if version_string: wx.MessageBox("Running client version " + version_string,"Version")
+                else: wx.MessageBox("No client version available for this player", "Version")
 
     def GetMessageInput( self, title ):
         prompt = "Please enter the message you wish to send:"
@@ -354,6 +432,7 @@ class ServerGUI(wx.Frame):
         cb["create_group"] = self.OnCreateGroup
         cb["delete_group"] = self.OnDeleteGroup
         cb["join_group"] = self.OnJoinGroup
+        cb['update_group'] = self.OnUpdateGroup
         cb["role"] = self.OnSetRole
         self.callbacks = cb
 
@@ -416,13 +495,15 @@ class ServerGUI(wx.Frame):
         """ Create the ViewNotebook and logger. """
         splitter = wx.SplitterWindow(self, -1, style=wx.NO_3D | wx.SP_3D)
         nb = wx.Notebook( splitter, -1 )
-        self.conns = Connections( nb, self )
-        nb.AddPage( self.conns, "Players" )
+        self.conns = Connections(nb, self)
+        self.groups = Groups(nb, self)
+        nb.AddPage(self.conns, "Players")
+        nb.AddPage(self.groups, 'Rooms')
 
         #Not sure why this is Remarked TaS - Sirebral
         #nb.AddPage( self.conns, "Rooms" )
-        #self.msgWindow = HTMLMessageWindow( nb )
-        #nb.AddPage( self.msgWindow, "Messages" )
+        self.msgWindow = HTMLMessageWindow( nb )
+        nb.AddPage( self.msgWindow, "Messages" )
 
         log = wx.TextCtrl(splitter, -1, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
         wx.Log.SetActiveTarget( wx.LogTextCtrl(log) )
@@ -458,7 +539,7 @@ class ServerGUI(wx.Frame):
         self.Log( event.message )
 
     # Event handler for out logging event
-    def OnFunctionMessage( self, event ):
+    def OnFunctionMessage(self, event):
         self.callbacks[event.func]( event.message )
 
     ### Server Callbacks #####################################
@@ -485,22 +566,28 @@ class ServerGUI(wx.Frame):
         self.sb.SetStatusText("Recv: %s (%d)" % (format_bytes(self.total_data_received), self.total_messages_received), 2)
 
     def OnCreateGroup( self, data ):
-        room_id = data[1]
-        name = data[0]
+        (room, room_id, player, pwd) = data
+        self.groups.AddGroup(data)
         self.conns.roomList[room_id] = name
-        (room, room_id, player) = data
+        data = (room, room_id, player)
         self.conns.updateRoom(data)
 
-    def OnDeleteGroup( self, data ):
+    def OnDeleteGroup(self, data):
         (room_id, player) = data
+        self.groups.DeleteGroup(room_id)
         del self.conns.roomList[room_id]
 
-    def OnJoinGroup( self, data ):
-        self.conns.updateRoom( data )
+    def OnJoinGroup(self, data):
+        #debug(data)
+        self.conns.updateRoom(data)
+
+    def OnUpdateGroup(self, data):
+        (room, room_id, players) = data
+        self.groups.UpdateGroup(data)
 
     def OnSetRole( self, data ):
         (id, role) = data
-        self.conns.setPlayerRole( id, role )
+        self.conns.setPlayerRole(id, role)
 
     ### Misc. ################################################
     def OnStart(self, event = None):
@@ -516,7 +603,7 @@ class ServerGUI(wx.Frame):
             except: pass 
             if self.serverName == '':
                 self.serverName = 'Server Name'
-                serverNameEntry = wx.TextEntryDialog( self, "Please Enter The Server Name You Wish To Use:",
+                serverNameEntry = wx.TextEntryDialog(self, "Please Enter The Server Name You Wish To Use:",
                                                  "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             # see if we already have password specified 
@@ -608,7 +695,13 @@ class ServerGUI(wx.Frame):
     def ConfigPingInterval( self, event = None ):
         "Configure the player ping interval.  Note that all players are pinged on a single timer."
 
-    def OnExit(self, event = None):
+    def OnExit(self, event):
+        dlg = wx.MessageDialog(self, "Exit the Server?", "OpenRPG- Server", wx.YES_NO)
+        if dlg.ShowModal() == wx.ID_YES:
+            dlg.Destroy()
+            self.ExitConfirmed()
+
+    def ExitConfirmed(self, event=None):
         """ Quit the program. """
         self.OnStop()
         self.BanListDialog.Destroy() ### Alpha ###

@@ -34,6 +34,11 @@ from grid_msg import *
 from miniatures_msg import *
 from whiteboard_msg import *
 from fog_msg import *
+import traceback
+from orpg.dirpath import dir_struct
+
+from xml.etree.ElementTree import ElementTree, Element, iselement
+from xml.etree.ElementTree import fromstring, tostring, parse
 
 """
 <map name=? id=? >
@@ -46,25 +51,37 @@ from fog_msg import *
 
 """
 
+def Crash(type, value, crash):
+    crash_report = open(dir_struct["home"] + 'crash-report.txt', "w")
+    traceback.print_exception(type, value, crash, file=crash_report)
+    crash_report.close()
+    msg = ''
+    crash_report = open(dir_struct["home"] + 'crash-report.txt', "r")
+    for line in crash_report: msg += line
+    print msg
+    crash_report.close()
+
 class map_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
+        print 'class map_msg'
         self.tagname = "map"
-        map_element_msg_base.__init__(self,reentrant_lock_object)
+        map_element_msg_base.__init__(self, reentrant_lock_object)
 
-    def init_from_dom(self,xml_dom):
+    def init_from_dom(self, xml_dom):
+        print 'init_from_dom', self.tagname
         self.p_lock.acquire()
-        if xml_dom.tagName == self.tagname:
+        if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"
             # Notice we only do this when the root is a map tag
-            if self.tagname == "map" and xml_dom.hasAttribute("action") and xml_dom.getAttribute("action") == "new":
+            if self.tagname == "map" and xml_dom.get("action") == "new":
                 self.clear()
             # Process all of the properties in each tag
-            if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.init_prop(k,xml_dom.getAttribute(k))
-            for c in xml_dom._get_childNodes():
-                name = c._get_nodeName()
+            if xml_dom.keys():
+                for k in xml_dom.keys():
+                    self.init_prop(k, xml_dom.get(k))
+            for c in xml_dom.getchildren():
+                name = c.tag
                 if not self.children.has_key(name):
                     if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
                     elif name == "grid": self.children[name] = grid_msg(self.p_lock)
@@ -84,18 +101,19 @@ class map_msg(map_element_msg_base):
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
+        print 'set_from_dom'
         self.p_lock.acquire()
-        if xml_dom.tagName == self.tagname:
+        if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"
             # Notice we only do this when the root is a map tag
-            if self.tagname == "map" and xml_dom.hasAttribute("action") and xml_dom.getAttribute("action") == "new":
+            if self.tagname == "map" and xml_dom.get("action") == "new":
                 self.clear()
             # Process all of the properties in each tag
-            if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.set_prop(k,xml_dom.getAttribute(k))
-            for c in xml_dom._get_childNodes():
-                name = c._get_nodeName()
+            if xml_dom.keys():
+                for k in xml_dom.keys():
+                    self.set_prop(k,xml_dom.get(k))
+            for c in xml_dom.getchildren():
+                name = c.tag
                 if not self.children.has_key(name):
                     if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
                     elif name == "grid": self.children[name] = grid_msg(self.p_lock)
@@ -119,3 +137,4 @@ class map_msg(map_element_msg_base):
 
     def get_changed_xml(self, action="update", output_action=1):
         return map_element_msg_base.get_changed_xml(self, action, output_action)
+crash = sys.excepthook = Crash

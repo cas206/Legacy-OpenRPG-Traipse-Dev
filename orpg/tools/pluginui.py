@@ -1,17 +1,16 @@
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
-import orpg.plugindb as plugindb
+from orpg.plugindb import plugindb
 from orpg.dirpath import dir_struct
 
-sys.path.append(dir_struct["plugins"])
+#sys.path.append(dir_struct["plugins"])
 
 class PluginFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, wx.ID_ANY, "Plugin Control Panel")
         self.panel = wx.Panel(self, wx.ID_ANY)
-        self.plugindb = plugindb.PluginDB()
         self.parent = parent
-        self.startplugs = self.plugindb.GetList("plugincontroller", "startup_plugins", [])
+        self.startplugs = plugindb.GetList("plugincontroller", "startup_plugins", [])
         self.available_plugins = {}
         self.enabled_plugins  = {}
         self.pluginNames = []
@@ -44,16 +43,15 @@ class PluginFrame(wx.Frame):
         self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         self.head_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        #pnl = wx.Panel(self.panel, wx.ID_ANY)
         self.err_sizer = wx.BoxSizer(wx.VERTICAL)
         self.err_sizer.Add(self.head_sizer, 0, wx.EXPAND)
         self.errorMessage = wx.StaticText(self.panel, wx.ID_ANY, "")
         self.err_sizer.Add(self.errorMessage, 0, wx.EXPAND)
         self.main_sizer.Add(self.err_sizer, 0, wx.EXPAND)
-        self.pluginList = wx.ListCtrl(self.panel, wx.ID_ANY, style=wx.LC_SINGLE_SEL|wx.LC_REPORT|wx.LC_HRULES|wx.LC_SORT_ASCENDING)
-        self.pluginList.InsertColumn(1, "Name")
-        self.pluginList.InsertColumn(2, "Autostart")
-        self.pluginList.InsertColumn(3, "Author")
+        self.pluginList = wx.ListCtrl(self.panel, wx.ID_ANY, 
+                              style=wx.LC_SINGLE_SEL|wx.LC_REPORT|wx.LC_HRULES|wx.LC_SORT_ASCENDING)
+        self.pluginList.InsertColumn(0, "Name")
+        self.pluginList.InsertColumn(1, "Author")
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._selectPlugin, self.pluginList)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self._deselectPlugin, self.pluginList)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._togglePlugin, self.pluginList)
@@ -90,6 +88,22 @@ class PluginFrame(wx.Frame):
         self.main_sizer.Add(self.btn_sizer, 0, wx.EXPAND)
         self.main_sizer.Add(self.btn_sizer2, 0, wx.EXPAND)
 
+        # Create Book Mark Image List
+        self.pluginList.Bind(wx.EVT_LEFT_DOWN, self.on_hit)
+        self._imageList = wx.ImageList( 16, 16, False )
+        img = wx.Image(dir_struct["icon"]+"add_button.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        self._imageList.Add( img )
+        img = wx.Image(dir_struct["icon"]+"check_button.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        self._imageList.Add( img )
+        self.pluginList.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
+
+    def on_hit(self, evt):
+        pos = wx.Point( evt.GetX(), evt.GetY() )
+        (item, flag, sub) = self.pluginList.HitTestSubItem( pos )
+        ## Item == list[server], flag == (32 = 0 colum, 128 = else) ##
+        if flag == 32: self._autostart(item)
+        evt.Skip()
+
     def __disablePluginBtns(self):
         self.enableBtn.Disable()
         self.disableBtn.Disable()
@@ -112,12 +126,12 @@ class PluginFrame(wx.Frame):
         self.__doLayout()
 
     def __checkIdx(self, evt):
-        if isinstance(evt, int):
-            return evt
-        elif self._selectedPlugin is not None:
-            return self._selectedPlugin
+        if isinstance(evt, int): return evt
+        elif self._selectedPlugin is not None: return self._selectedPlugin
         else:
-            dlg = wx.MessageDialog(None, "You need to select a plugin before you can use this!", 'ERROR', wx.OK)
+            dlg = wx.MessageDialog(None, 
+                                   "You need to select a plugin before you can use this!", 
+                                   'ERROR', wx.OK)
             dlg.ShowModal()
             dlg.Destroy()
             return None
@@ -125,10 +139,12 @@ class PluginFrame(wx.Frame):
     def __impPlugin(self, pname):
         try:
             if "plugins." + pname in sys.modules:
-                del sys.modules["plugins." + pname]#to ensure that the newly-imported one will be used correctly. No, reload() is not a better way to do this.
+                del sys.modules["plugins." + pname] 
+                #to ensure that the newly-imported one will be used correctly. 
+                #No, reload() is not a better way to do this.
             mod = __import__("plugins." + pname)
             plugin = getattr(mod, pname)
-            pdata = plugin.Plugin(self.plugindb, self.parent)
+            pdata = plugin.Plugin(plugindb, self.parent)
             self.available_plugins[pdata.name] = [pname, pdata, pdata.author, pdata.help]
             return plugin
 
@@ -157,11 +173,13 @@ class PluginFrame(wx.Frame):
             self.enableBtn.Disable()
         else:
             self.disableBtn.Disable()
-        if self.pluginList.GetItem(self._selectedPlugin, 1).GetText() == "X":
+        if pname in self.startplugs:
             self.autostartBtn.Label = "Disable Autostart"
 
         self.__doLayout()
-        self.pluginList.SetItemState(self._selectedPlugin, wx.LIST_STATE_SELECTED, wx.LIST_STATE_SELECTED)
+        self.pluginList.SetItemState(self._selectedPlugin, 
+                                     wx.LIST_STATE_SELECTED, 
+                                     wx.LIST_STATE_SELECTED)
 
     def _deselectPlugin(self, evt):
         self.__disablePluginBtns()
@@ -171,12 +189,8 @@ class PluginFrame(wx.Frame):
         idx = evt.GetIndex()
         pname = self.pluginList.GetItem(idx, 0).GetText()
         info = self.available_plugins[pname]
-
-        if info[0] in self.enabled_plugins:
-            self._disable(idx)
-        else:
-            self._enable(idx)
-
+        if info[0] in self.enabled_plugins: self._disable(idx)
+        else: self._enable(idx)
         self.pluginList.SetItemState(self._selectedPlugin, 0, wx.LIST_STATE_SELECTED)
 
     def _enableAll(self, evt):
@@ -236,36 +250,44 @@ class PluginFrame(wx.Frame):
 
     def _autostart(self, evt):
         idx = self.__checkIdx(evt)
-        if idx is None:
-            return
-        if self.pluginList.GetItem(idx, 1).GetText() == "X":
+        if idx is None: return
+        pname = self.pluginList.GetItem(idx, 0).GetText()
+        info = self.available_plugins[pname]
+        if self.pluginList.GetItem(idx, 0).GetText() in self.startplugs:
             self.startplugs.remove(self.pluginList.GetItem(idx, 0).GetText())
-            self.pluginList.SetStringItem(idx, 1, "")
+            self.pluginList.SetItemImage(idx, 0, 0)
             self.autostartBtn.Label = "Autostart"
+            if info[0] in self.enabled_plugins:
+                dlg = wx.MessageDialog(None, 'Disable Plugin Now?', 'Plugin Enabled', 
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+                dlg.ShowModal()
+                if dlg.ShowModal() == wx.ID_YES: self._disable(evt)
         else:
             self.startplugs.append(self.pluginList.GetItem(idx, 0).GetText())
-            self.pluginList.SetStringItem(idx, 1, "X")
+            self.pluginList.SetItemImage(idx, 1, 0)
             self.autostartBtn.Label = "Disable Autostart"
+            if info[0] not in self.enabled_plugins:
+                dlg = wx.MessageDialog(None, 'Enable Plugin Now?', 'Plugin Disabled', 
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+                if dlg.ShowModal() == wx.ID_YES: self._enable(evt)
 
-        self.plugindb.SetList("plugincontroller", "startup_plugins", self.startplugs)
+        plugindb.SetList("plugincontroller", "startup_plugins", self.startplugs)
         self.__doLayout()
 
     def _help(self, evt):
-        if isinstance(evt, int):
-            idx = evt
-        elif self._selectedPlugin is not None:
-            idx = self._selectedPlugin
+        if isinstance(evt, int): idx = evt
+        elif self._selectedPlugin is not None: idx = self._selectedPlugin
         else:
-            dlg = wx.MessageDialog(None, "You need to select a plugin before you can use this!", 'ERROR', wx.OK)
+            dlg = wx.MessageDialog(None, 
+                                   "You need to select a plugin before you can use this!", 
+                                   'ERROR', wx.OK)
             dlg.ShowModal()
             dlg.Destroy()
             return
 
         pname = self.pluginList.GetItem(idx, 0).GetText()
         info = self.available_plugins[pname]
-
         msg = "Author(s):\t" + info[2] + "\n\n" + info[3]
-
         dlg = wx.MessageDialog(None, msg, 'Plugin Information: ' + pname, wx.OK)
         dlg.ShowModal()
         dlg.Destroy()
@@ -280,7 +302,6 @@ class PluginFrame(wx.Frame):
 
         list_of_plugin_dir = os.listdir(dir_struct["plugins"])
         for p in list_of_plugin_dir:
-            #print p[:2]; print p[-4:]
             if p[:2].lower()=="xx" and p[-3:]==".py":
                 self.__impPlugin(p[:-3])
             elif p[:2].lower()=="xx" and p[-4:]==".pyc":
@@ -290,13 +311,15 @@ class PluginFrame(wx.Frame):
         for plugname, info in self.available_plugins.iteritems():
             self.pluginNames.append(plugname)
             idx = self.pluginList.InsertStringItem(self.pluginList.GetItemCount(), plugname)
-            self.pluginList.SetStringItem(idx, 2, info[2])
+            self.pluginList.SetStringItem(idx, 1, info[2])
+            self.pluginList.SetItemImage(idx, 0, 0)
             if plugname in self.startplugs:
-                self.pluginList.SetStringItem(idx, 1, "X")
+                self.pluginList.SetItemImage(idx, 1, 0)
                 self._enable(idx)
             self.pluginList.SetItemData(idx, i)
             i += 1
         self.pluginList.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        self.pluginList.SetColumnWidth(1, wx.LIST_AUTOSIZE)
         self.__doLayout()
         self.__disablePluginBtns()
 

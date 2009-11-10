@@ -134,6 +134,12 @@ class layer_back_ground(layer_base):
         if self.bg_bmp == None or not self.bg_bmp.Ok() or ((self.type != BG_TEXTURE) and (self.type != BG_IMAGE)):
             return False
         dc2 = wx.MemoryDC()
+        
+        ### Temporary ###
+        try: self.bg_bmp = self.bg_bmp.ConvertToBitmap()
+        except: pass
+        #################
+        
         dc2.SelectObject(self.bg_bmp)
         topLeft = [int(topleft[0]/scale), int(topleft[1]/scale)]
         topRight = [int((topleft[0]+size[0]+1)/scale)+1, int((topleft[1]+size[1]+1)/scale)+1]

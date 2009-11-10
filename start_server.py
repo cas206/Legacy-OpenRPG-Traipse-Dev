@@ -7,6 +7,7 @@ import gc
 import getopt
 import traceback
 
+
 # Simple usuage text for request via help or command line errors
 def usage( retValue ):
     print "\nUsage: \n[-d --directory directory] - Directory of where to load config files\n" + \
@@ -21,26 +22,20 @@ def usage( retValue ):
     "will be prompted for information.\n\n"
     sys.exit( retValue )
 
-HG = os.environ["HG"]
-
-import pyver
-pyver.checkPyVersion()
-
-os.system(HG + ' pull "http://hg.assembla.com/traipse"')
-os.system(HG + ' update')
 
 import orpg.networking.mplay_server
 import orpg.networking.meta_server_lib
 
-if __name__ == '__main__':
+print __name__
+if __name__ == '__main__' or __name__ == 'start_server':
     gc.set_debug(gc.DEBUG_UNCOLLECTABLE)
     gc.enable()
 
     orpg_server = orpg.networking.mplay_server.mplay_server()
     lobby_boot_pwd = orpg_server.boot_pwd
     server_directory = orpg_server.userPath
-    server_reg = orpg_server.reg
-    server_name = orpg_server.name
+    server_reg = orpg_server.be_registered
+    server_name = orpg_server.serverName
     manualStart = False
 
     # See if we have command line arguments in need of processing
@@ -75,8 +70,8 @@ if __name__ == '__main__':
 
 
     # start server!
-    orpg_server.name = server_name
-    orpg_server.reg = server_reg
+    orpg_server.serverName = server_name
+    orpg_server.be_registered = server_reg
     orpg_server.boot_pwd = lobby_boot_pwd
     orpg_server.userPath = server_directory
     orpg_server.remoteadmin = 1

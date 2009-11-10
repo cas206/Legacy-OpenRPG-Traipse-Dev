@@ -27,7 +27,7 @@
 #
 
 from __future__ import with_statement
-import sys, os, os.path, wx, time, traceback
+import sys, os, os.path, time, traceback, inspect, wx
 
 from orpg.orpgCore import component
 from orpg.external.terminalwriter import TerminalWriter
@@ -37,11 +37,13 @@ from orpg.dirpath import dir_struct
 #########################
 ## Error Types
 #########################
+ORPG_PRINT          = 0
 ORPG_CRITICAL       = 1
 ORPG_GENERAL        = 2
 ORPG_INFO           = 4
 ORPG_NOTE           = 8
 ORPG_DEBUG          = 16
+
 
 def Crash(type, value, crash):
     crash_report = open(dir_struct["home"] + 'crash-report.txt', "w")
@@ -55,24 +57,73 @@ def Crash(type, value, crash):
     logger.exception("Crash Report Created!!")
     logger.info("Printed out crash-report.txt in your System folder", True)
 
+class Term2Win(object):
+    # A stdout redirector.  Allows the messages from Mercurial to be seen in the Install Window
+    def write(self, text):
+        #logger.stdout(text)
+        wx.Yield()
+        sys.__stdout__.write(text)
+
+class TrueDebug(object):
+    ### Alpha ###
+    """A simple debugger. Add debug() to a function and it prints the function name and any objects included. Add an object or a group of objects in ()'s.
+    Adding True to locale prints the file name where the function is. Adding False to log turns the log off.
+    Adding True to parents will print out the parent functions, starting from TrueDebug.
+    This feature can be modified to trace deeper and find the bugs faster, ending the puzzle box."""
+    def __init__(self, objects=None, locale=False, log=True, parents=False):
+        if log == False: return
+        current = inspect.currentframe()
+        if parents: self.get_parents(current)
+        else: self.true_debug(current, objects, locale)
+
+    def true_debug(self, current, objects, locale):
+        debug_string = 'Function: ' + str(inspect.getouterframes(current)[1][3])
+        #if locale == 'all': print inspect.getouterframes(current)[4]; return
+        if objects != None: debug_string += ' Objects: ' + str(objects)
+        if locale: debug_string += ' File: ' + str(inspect.getouterframes(current)[1][1])
+        logger.debug(debug_string, True)
+        return
+
+    def get_parents(self, current):
+        debug_string = 'Function: ' + str(inspect.getouterframes(current)[1][3]) + ' Parents:'
+        family = list(inspect.getouterframes(current))
+        for parent in family:
+            debug_string += ' ' + str(parent[4])
+        logger.debug(debug_string, True)
+        return
+    
 class DebugConsole(wx.Frame):
     def __init__(self, parent):
         super(DebugConsole, self).__init__(parent, -1, "Debug Console")
-        icon = None
         icon = wx.Icon(dir_struct["icon"]+'note.ico', wx.BITMAP_TYPE_ICO)
-        self.SetIcon( icon )
+        self.SetIcon(icon)
         self.console = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.console, 1, wx.EXPAND)
+        self.bt_clear = wx.Button(self, wx.ID_CLEAR)
+        self.report = wx.Button(self, wx.ID_ANY, 'Bug Report')
+        sizer = wx.GridBagSizer(hgap=1, vgap=1)
+        sizer.Add(self.console, (0,0), span=(1,2), flag=wx.EXPAND)
+        sizer.Add(self.bt_clear, (1,0), flag=wx.ALIGN_LEFT)
+        sizer.Add(self.report, (1,1), flag=wx.ALIGN_LEFT)
+        sizer.AddGrowableCol(0)
+        sizer.AddGrowableRow(0)
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
-        self.SetSize((300, 175))
+        self.SetSize((450, 175))
         self.Bind(wx.EVT_CLOSE, self.Min) 
+        self.Bind(wx.EVT_BUTTON, self.clear, self.bt_clear)
+        self.Bind(wx.EVT_BUTTON, self.bug_report, self.report)
         self.Min(None)
+        #sys.stdout = Term2Win()
         component.add('debugger', self.console)
 
     def Min(self, evt):
         self.Hide()
+
+    def clear(self, evt):
+        self.console.SetValue('')
+
+    def bug_report(self, evt):
+        pass
 
 class orpgLog(object):
     _log_level = 7
@@ -127,7 +178,7 @@ class orpgLog(object):
             try: component.get('debugger').AppendText(".. " + str(msg) +'\n')
             except: pass
 
-        if log_type & self.log_level or to_console:
+        if log_type and (self.log_level or to_console):
             atr = {'msg': msg, 'level': self._lvl_args[log_type]['log_string']}
             atr['time'] = time.strftime('[%x %X]', time.localtime(time.time()))
             logMsg = '%(time)s (%(level)s) - %(msg)s\n' % (atr)
@@ -192,3 +243,4 @@ class orpgLog(object):
 
 logger = orpgLog(dir_struct.get("user") + "runlogs/")
 crash = sys.excepthook = Crash
+debug = TrueDebug

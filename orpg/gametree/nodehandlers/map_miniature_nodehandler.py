@@ -42,17 +42,15 @@ class map_miniature_handler(node_handler):
     """
 
 
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
         self.mapper = component.get("map")
         self.session = component.get("session")
-        self.miniature_dom = self.master_dom.getElementsByTagName("miniature")
-        if self.miniature_dom:
-            self.miniature_dom = self.miniature_dom[0]   # convert to scalar
-
+        self.miniature_xml = self.xml.find("miniature")
+        
     def get_scaled_bitmap(self,x,y):
         my_mini_msg = mini_msg()
-        my_mini_msg.init_from_dom(self.miniature_dom)
+        my_mini_msg.init_from_dom(self.miniature_xml)
         bmp = None
         path = my_mini_msg.get_prop("path")
 
@@ -89,9 +87,9 @@ class map_miniature_handler(node_handler):
 
     def get_miniature_XML(self):
         my_mini_msg = mini_msg()
-        my_mini_msg.init_from_dom(self.miniature_dom)
+        my_mini_msg.init_from_dom(self.miniature_xml)
         my_mini_msg.init_prop("id",self.session.get_next_id())
-        label = self.master_dom.getAttribute("name")
+        label = self.xml.get("name")
         my_mini_msg.init_prop("label",label)
         new_xml = my_mini_msg.get_all_xml()
         return new_xml
@@ -109,14 +107,14 @@ class map_miniature_handler(node_handler):
             dc.SetUserScale(grid.mapscale, grid.mapscale)
             pos = evt.GetLogicalPosition(dc)
             try:
-                align = int(self.miniature_dom.getAttribute("align"))
-                width = int(self.miniature_dom.getAttribute("width"))
-                height = int(self.miniature_dom.getAttribute("height"))
+                align = int(self.xml.get("align"))
+                width = int(self.xml.get("width"))
+                height = int(self.xml.get("height"))
                 pos = grid.get_snapped_to_pos(pos, align, width, height)
             except:
                 pass
-            self.miniature_dom.setAttribute("posx", str(pos.x))
-            self.miniature_dom.setAttribute("posy", str(pos.y))
+            self.miniature_xml.set("posx", str(pos.x))
+            self.miniature_xml.set("posy", str(pos.y))
         new_xml = self.get_to_map_XML()
         if (self.session.my_role() != self.session.ROLE_GM) and (self.session.my_role() != self.session.ROLE_PLAYER):
             component.get("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
@@ -133,7 +131,7 @@ class map_miniature_handler(node_handler):
 
     def tohtml(self):
         html_str = "<table><tr><td>"
-        html_str += "<center><img src='" + self.miniature_dom.getAttribute("path") + "'>"
+        html_str += "<center><img src='" + self.xml.get("path") + "'>"
         html_str += "</center></td></tr>\n"
-        html_str += "<tr><td><center>" + self.master_dom.getAttribute("name") + "</center></td></tr></table>"
+        html_str += "<tr><td><center>" + self.xml.get("name") + "</center></td></tr></table>"
         return html_str

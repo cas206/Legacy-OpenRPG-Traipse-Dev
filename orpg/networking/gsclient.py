@@ -26,33 +26,27 @@
 # Description: The file contains code for the game server browser
 #
 
+from __future__ import with_statement
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
+
+import meta_server_lib
+#import orpg.tools.orpg_settings
+import orpg.tools.rgbhex
+import traceback
 
 from orpg.dirpath import dir_struct
 from orpg.orpg_windows import *
-import meta_server_lib
-import orpg.tools.orpg_settings
-from orpg.tools.orpg_settings import settings
-import orpg.tools.rgbhex
+from orpg.tools.validate import validate
 from orpg.orpgCore import component
-import traceback
+from orpg.tools.orpg_settings import settings
+from orpg.tools.orpg_log import debug
+
+from xml.etree.ElementTree import ElementTree, Element
+from xml.etree.ElementTree import fromstring, tostring
 
 gs_host = 1
 gs_join = 2
 # constants
-
-LIST_SERVER = wx.NewId()
-LIST_ROOM = wx.NewId()
-ADDRESS = wx.NewId()
-GS_CONNECT = wx.NewId()
-GS_DISCONNECT = wx.NewId()
-GS_SERVER_REFRESH = wx.NewId()
-GS_JOIN = wx.NewId()
-GS_JOINLOBBY = wx.NewId()
-GS_CREATE_ROOM = wx.NewId()
-GS_PWD = wx.NewId()
-GS_CLOSE = wx.NewId()
-OR_CLOSE = wx.NewId()
 
 class server_instance:
     def __init__(self, id, name="[Unknown]", users="0", address="127.0.0.1", port="9557"):
@@ -64,57 +58,49 @@ class server_instance:
 
 def server_instance_compare(x,y):
     """compares server insances for list sort"""
+    ### Alpha ### makes changes from core.
     DEV_SERVER = "OpenRPG DEV"
-    xuser = 0
-    yuser = 0
-    try: xuser = int(x.user)
-    except: pass
-    try: yuser = int(y.user)
-    except: pass
+    xname = x.name
+    xuser = int(x.user)
+    yname = y.name
+    yuser = int(y.user)
+
+    who_name = cmp(yname, xname)
+    who_user = cmp(yuser, xuser)
+
     if x.name.startswith(DEV_SERVER):
         if y.name.startswith(DEV_SERVER):
-            if x.name > y.name: return 1
-            elif x.name == y.name:
-                if xuser < yuser: return 1
-                elif xuser > yuser: return -1
-                else: return 0
-            else: return -1
+            if not who_name: return who_user
+            else: return who_name
         else: return -1
+
     elif y.name.startswith(DEV_SERVER): return 1
-    elif xuser < yuser: return 1
-    elif xuser == yuser:
-        if x.name > y.name: return 1
-        elif x.name == y.name: return 0
-        else: return -1
-    else: return -1
+    elif not who_user: return who_name
+    else: return who_user
 
 def roomCmp(room1, room2):
-    if int(room1) > int(room2):
-        return 1
-    elif int(room1) < int(room2):
-        return -1
+    if int(room1) > int(room2): return 1
+    elif int(room1) < int(room2): return -1
     return 0
 
 class game_server_panel(wx.Panel):
     def __init__(self,parent):
         wx.Panel.__init__(self, parent, -1)
         self.parent = parent
-        self.password_manager = component.get('password_manager') # passtool --SD 8/03
+        self.password_manager = component.get('password_manager')
         self.frame = component.get('frame')
         self.session = component.get('session')
-        self.xml = component.get('xml') #Not used??
         self.serverNameSet = 0
         self.last_motd = ""
         self.buttons = {}
         self.texts = {}
         self.svrList = []
         self.build_ctrls()
+        self.bookmarks()
         self.refresh_server_list()
         self.refresh_room_list()
+        self.build_bookmark_menu() 
 
-#---------------------------------------------------------
-# [START] Snowdog: Updated Game Server Window 12/02
-#---------------------------------------------------------
     def build_ctrls(self):
         ## Section Sizers (with frame edges and text captions)
         self.box_sizers = {}
@@ -133,18 +119,19 @@ class game_server_panel(wx.Panel):
 
         #Build Server Sizer
         adder = wx.StaticText(self, -1, "Address:")
-        self.texts["address"] = wx.TextCtrl(self, ADDRESS)
+        self.texts["address"] = wx.TextCtrl(self, wx.ID_ANY)
         servers = wx.StaticText(self, -1, "Servers:")
-        self.server_list = wx.ListCtrl(self, LIST_SERVER, style=wx.LC_REPORT | wx.SUNKEN_BORDER )
-        self.server_list.InsertColumn(0, "Players", wx.LIST_FORMAT_LEFT, 0)
-        self.server_list.InsertColumn(1, "Name", wx.LIST_FORMAT_LEFT, 0)
-        self.buttons[GS_CONNECT] = wx.Button(self, GS_CONNECT, "Connect")
-        self.buttons[GS_SERVER_REFRESH] = wx.Button(self, GS_SERVER_REFRESH, "Refresh")
-        self.buttons[GS_DISCONNECT] = wx.Button(self, GS_DISCONNECT, "Disconnect")
+        self.server_list = wx.ListCtrl(self, wx.ID_ANY, style=wx.LC_REPORT | wx.SUNKEN_BORDER )
+        self.server_list.InsertColumn(0, '', wx.LIST_FORMAT_LEFT, 0)
+        self.server_list.InsertColumn(1, "Players", wx.LIST_FORMAT_LEFT, 0)
+        self.server_list.InsertColumn(2, "Name", wx.LIST_FORMAT_LEFT, 0)
+        self.buttons['gs_connect'] = wx.Button(self, wx.ID_ANY, "Connect")
+        self.buttons['gs_refresh'] = wx.Button(self, wx.ID_ANY, "Refresh")
+        self.buttons['gs_disconnect'] = wx.Button(self, wx.ID_ANY, "Disconnect")
         self.sizers["svrbtns"] = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizers["svrbtns"].Add(self.buttons[GS_CONNECT], 0, wx.EXPAND)
-        self.sizers["svrbtns"].Add(self.buttons[GS_SERVER_REFRESH], 0, wx.EXPAND)
-        self.sizers["svrbtns"].Add(self.buttons[GS_DISCONNECT], 0, wx.EXPAND)
+        self.sizers["svrbtns"].Add(self.buttons['gs_connect'], 0, wx.EXPAND)
+        self.sizers["svrbtns"].Add(self.buttons['gs_refresh'], 0, wx.EXPAND)
+        self.sizers["svrbtns"].Add(self.buttons['gs_disconnect'], 0, wx.EXPAND)
         self.sizers["server"].Add(adder, 0, wx.EXPAND)
         self.sizers["server"].Add(self.texts["address"], 0, wx.EXPAND)
         self.sizers["server"].Add(servers, 0, wx.EXPAND)
@@ -152,33 +139,33 @@ class game_server_panel(wx.Panel):
         self.sizers["server"].Add(self.sizers["svrbtns"], 0, wx.EXPAND)
 
         #Build Rooms Sizer
-        self.room_list = wx.ListCtrl(self, LIST_ROOM, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
+        self.room_list = wx.ListCtrl(self, wx.ID_ANY, style=wx.LC_REPORT | wx.SUNKEN_BORDER)
         self.room_list.InsertColumn(0,"Game", wx.LIST_FORMAT_LEFT,-1)
         self.room_list.InsertColumn(1,"Players", wx.LIST_FORMAT_LEFT,-1)
         self.room_list.InsertColumn(2,"PW", wx.LIST_FORMAT_LEFT,-1)
-        self.buttons[GS_JOIN] = wx.Button(self, GS_JOIN, "Join Room")
-        self.buttons[GS_JOINLOBBY] = wx.Button(self, GS_JOINLOBBY, "Lobby")
+        self.buttons['gs_join_room'] = wx.Button(self, wx.ID_ANY, "Join Room")
+        self.buttons['gs_join_lobby'] = wx.Button(self, wx.ID_ANY, "Lobby")
         self.sizers["roombtns"] = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizers["roombtns"].Add(self.buttons[GS_JOIN], 0, wx.EXPAND)
-        self.sizers["roombtns"].Add(self.buttons[GS_JOINLOBBY], 0, wx.EXPAND)
+        self.sizers["roombtns"].Add(self.buttons['gs_join_room'], 0, wx.EXPAND)
+        self.sizers["roombtns"].Add(self.buttons['gs_join_lobby'], 0, wx.EXPAND)
         self.sizers["rooms"].Add(self.room_list, 1, wx.EXPAND)
         self.sizers["rooms"].Add(self.sizers["roombtns"], 0, wx.EXPAND)
 
         #Build Close Sizer
-        self.buttons[OR_CLOSE] = wx.Button(self, OR_CLOSE,"Exit OpenRPG")
-        self.buttons[GS_CLOSE] = wx.Button(self, GS_CLOSE,"Close Window")
-        self.sizers["close"].Add(self.buttons[OR_CLOSE], 1, wx.ALIGN_CENTER_VERTICAL)
-        self.sizers["close"].Add(self.buttons[GS_CLOSE], 1, wx.ALIGN_CENTER_VERTICAL)
+        self.buttons['close_orpg'] = wx.Button(self, wx.ID_ANY,"Exit OpenRPG")
+        self.buttons['gs_close'] = wx.Button(self, wx.ID_ANY,"Close Window")
+        self.sizers["close"].Add(self.buttons['close_orpg'], 1, wx.ALIGN_CENTER_VERTICAL)
+        self.sizers["close"].Add(self.buttons['gs_close'], 1, wx.ALIGN_CENTER_VERTICAL)
 
         #Build Create Room Sizer
         rname = wx.StaticText(self,-1, "Room Name:")
         self.texts["room_name"] = wx.TextCtrl(self, -1)
         rpass = wx.StaticText(self,-1, "Password:")
-        self.buttons[GS_PWD] = wx.CheckBox(self, GS_PWD, "")
+        self.buttons['gs_pwd'] = wx.CheckBox(self, wx.ID_ANY, "")
         self.texts["room_pwd"] = wx.TextCtrl(self, -1)
         self.texts["room_pwd"].Enable(0)
         pwsizer = wx.BoxSizer(wx.HORIZONTAL)
-        pwsizer.Add(self.buttons[GS_PWD],0,0)
+        pwsizer.Add(self.buttons['gs_pwd'],0,0)
         pwsizer.Add(self.texts["room_pwd"], 1, wx.EXPAND)
         apass = wx.StaticText(self,-1, "Admin Password:")
         self.texts["room_boot_pwd"] = wx.TextCtrl(self, -1)
@@ -194,9 +181,9 @@ class game_server_panel(wx.Panel):
         self.sizers["c_room_layout"].Add(minver, 0, wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALL)
         self.sizers["c_room_layout"].Add(self.texts["room_min_version"], 0, wx.EXPAND)
         self.sizers["c_room_layout"].AddGrowableCol(1)
-        self.buttons[GS_CREATE_ROOM] = wx.Button(self, GS_CREATE_ROOM, "Create Room")
+        self.buttons['gs_create_room'] = wx.Button(self, wx.ID_ANY, "Create Room")
         self.sizers["c_room"].Add(self.sizers["c_room_layout"], 1, wx.EXPAND)
-        self.sizers["c_room"].Add(self.buttons[GS_CREATE_ROOM], 0, wx.EXPAND)
+        self.sizers["c_room"].Add(self.buttons['gs_create_room'], 0, wx.EXPAND)
 
         #Build Main Sizer
         self.sizers["main"].Add(self.sizers["server"], (0,0), span=(2,1), flag=wx.EXPAND)
@@ -211,42 +198,105 @@ class game_server_panel(wx.Panel):
         self.Fit()
 
         ## Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_CONNECT)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_DISCONNECT)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_CREATE_ROOM)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_JOIN)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_JOINLOBBY)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_SERVER_REFRESH)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=GS_CLOSE)
-        self.Bind(wx.EVT_BUTTON, self.on_button, id=OR_CLOSE)
-        self.Bind(wx.EVT_CHECKBOX, self.on_button, id=GS_PWD)
+        self.Bind(wx.EVT_BUTTON, self.gs_connect, self.buttons['gs_connect'])
+        self.Bind(wx.EVT_BUTTON, self.gs_disconnect, self.buttons['gs_disconnect'])
+        self.Bind(wx.EVT_BUTTON, self.gs_create_room, self.buttons['gs_create_room'])
+        self.Bind(wx.EVT_BUTTON, self.gs_join, self.buttons['gs_join_room'])
+        self.Bind(wx.EVT_BUTTON, self.gs_join_lobby, self.buttons['gs_join_lobby'])
+        self.Bind(wx.EVT_BUTTON, self.gs_server_refresh, self.buttons['gs_refresh'])
+        self.Bind(wx.EVT_BUTTON, self.gs_close, self.buttons['gs_close'])
+        self.Bind(wx.EVT_BUTTON, self.close_orpg, self.buttons['close_orpg'])
+        self.Bind(wx.EVT_CHECKBOX, self.gs_pwd, self.buttons['gs_pwd'])
 
         # Added double click handlers 5/05 -- Snowdog
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_server_dbclick, id=LIST_SERVER)
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_room_dbclick, id=LIST_ROOM)
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select, id=LIST_ROOM)
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select, id=LIST_SERVER)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_server_dbclick, self.server_list)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_room_dbclick, self.room_list)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_room_select, self.room_list)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_server_select, self.server_list)
         self.texts['address'].Bind(wx.EVT_SET_FOCUS, self.on_text)
         self.set_connected(self.session.is_connected())
         self.cur_room_index = -1
         self.cur_server_index = -1
         self.rmList = {}
+        
+        # Create Book Mark Image List
+        self.server_list.Bind(wx.EVT_LEFT_DOWN, self.on_hit)
+        self._imageList = wx.ImageList( 16, 16, False )
+        img = wx.Image(dir_struct["icon"]+"add.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        self._imageList.Add( img )
+        img = wx.Image(dir_struct["icon"]+"star.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        self._imageList.Add( img )
+        self.server_list.SetImageList( self._imageList, wx.IMAGE_LIST_SMALL )
+        
+    def bookmarks(self):
+        validate.config_file('server_bookmarks.xml',
+                             'default_server_bookmarks.xml')
+        self.bookmarks = ElementTree()
+        self.bookmarks.parse(dir_struct['user'] + 'server_bookmarks.xml')
 
-#---------------------------------------------------------
-# [END] Snowdog: Updated Game Server Window 12/02
-#---------------------------------------------------------
+    def build_bookmark_menu(self):
+        gsm = self.frame.mainmenu.GetMenu(
+            self.frame.mainmenu.FindMenu('Game Server'))
+        self.bookmarks_menu = wx.Menu()
+        x = 0
+        for server in self.bookmarks.findall('server'):
+            for svr in self.svrList:
+                address = svr.addy
+                if server.get('address') == address: self.server_list.SetItemImage(x, 1)
+                x += 1
+            item = wx.MenuItem(self.bookmarks_menu, wx.ID_ANY,
+                               server.get('name'), server.get('name'))
+            open_rpg.get_component('frame').Bind(wx.EVT_MENU,
+                                                 self.on_bookmarks_menu, item)
+            self.bookmarks_menu.AppendItem(item)
+        gsm.AppendSubMenu(self.bookmarks_menu, "Bookmarks")
 
-    #-----------------------------------------------------
-    # on_server_dbclick()
-    # support for double click selection of server.
-    # 5/16/05 -- Snowdog
-    #-----------------------------------------------------
+    def on_bookmarks_menu(self, evt):
+        id = evt.GetId()
+        menu = self.bookmarks_menu.FindItemById(id)
+        for server in self.bookmarks.findall('server'):
+            if server.get('name') == menu.GetLabel():
+                address = server.get('address')
+                self.cur_server_index = 999
+                self.name = server.get('name')
+                if self.session.is_connected():
+                    if self.session.host_server == address : return
+                    else: self.frame.kill_mplay_session()
+                self.do_connect(address)
+                break
+        
+    def bookmark(self, item, flag):
+        name = self.svrList[item].name
+        address = self.svrList[item].addy
+        port = self.svrList[item].port
+        self.server_list.SetItemImage(item, 1)
+
+        for server in self.bookmarks.findall('server'):
+            if server.get('name') == name:
+                self.bookmarks_menu.Remove(
+                    self.bookmarks_menu.FindItem(server.get('name')))
+                self.bookmarks.getroot().remove(server)
+                self.server_list.SetItemImage(item, 0)
+                break
+        else:
+            server = Element('server')
+            server.set('name', name)
+            server.set('address', address + ':' + port)
+            self.bookmarks.getroot().append(server)
+            item = wx.MenuItem(self.bookmarks_menu, wx.ID_ANY, name, name)
+            open_rpg.get_component('frame').Bind(wx.EVT_MENU,
+                                                 self.on_bookmarks_menu, item)
+            self.bookmarks_menu.AppendItem(item)
+        self.save_bookmarks()
+
+    def save_bookmarks(self):
+        with open(dir_struct['user'] + 'server_bookmarks.xml', 'w') as f:
+            self.bookmarks.write(f)
+
     def on_server_dbclick(self, evt=None):
         #make sure address is updated just in case list select wasn't done
-        try:
-            self.on_select(evt)
-        except:
-            pass
+        try: self.on_select(evt)
+        except: pass
         address = self.texts["address"].GetValue()
         if self.session.is_connected():
             if self.session.host_server == address :
@@ -257,19 +307,10 @@ class game_server_panel(wx.Panel):
                 self.frame.kill_mplay_session()
         self.do_connect(address)
 
-
-    #-----------------------------------------------------
-    # on_room_dbclick()
-    # support for double click selection of server.
-    # 5/16/05 -- Snowdog
-    #-----------------------------------------------------
-
     def on_room_dbclick(self, evt=None):
         #make sure address is updated just in case list select wasn't done
-        try:
-            self.on_select(evt)
-        except:
-            pass
+        try: self.on_select(evt)
+        except: pass
         group_id = str(self.room_list.GetItemData(self.cur_room_index))
 
         if self.NoGroups:
@@ -279,39 +320,42 @@ class game_server_panel(wx.Panel):
             return
 
         if self.cur_room_index >= 0:
-            if self.cur_room_index != 0:
-                self.set_lobbybutton(1);
-            else:
-                self.set_lobbybutton(0);
+            if self.cur_room_index != 0: self.set_lobbybutton(1);
+            else: self.set_lobbybutton(0);
             group = self.session.get_group_info(group_id)
             pwd = ""
             if (group[2] == "True") or (group[2] == "1"):
                 pwd = self.password_manager.GetPassword("room", group_id)
-            else:
-                pwd = ""
+            else: pwd = ""
             self.session.send_join_group(group_id, pwd)
 
+    def on_room_select(self,evt):
+        self.cur_room_index = evt.m_itemIndex
 
-    def on_select(self,evt):
-        id = evt.GetId()
-        if id == LIST_ROOM:
-            self.cur_room_index = evt.m_itemIndex
-        elif id==LIST_SERVER:
-            self.cur_server_index = evt.m_itemIndex
-            self.name = self.svrList[self.cur_server_index].name
-            address = self.svrList[self.cur_server_index].addy
-            port = self.svrList[self.cur_server_index].port
-            self.texts["address"].SetValue(address+":"+str(port))
-            self.refresh_room_list()
+    def on_hit(self, evt):
+        pos = wx.Point( evt.GetX(), evt.GetY() )
+        (item, flag) = self.server_list.HitTest( pos )
+        ## Item == list[server], flag == (32 = 0 colum, 128 = else) ##
+        if flag == 32: self.bookmark(item, flag)
+        evt.Skip()
+        
+    def on_server_select(self,evt):
+        self.cur_server_index = evt.m_itemIndex
+        self.name = self.svrList[self.cur_server_index].name
+        address = self.svrList[self.cur_server_index].addy
+        port = self.svrList[self.cur_server_index].port
+        self.texts["address"].SetValue(address + ":" + str(port))
+        self.refresh_room_list()
 
-    def on_text(self,evt):
+    def on_text(self, evt):
         id = evt.GetId()
-        if (id == ADDRESS) and (self.cur_server_index >= 0):
+        if (id == self.texts["address"].GetValue()) and (self.cur_server_index >= 0):
             #print "ADDRESS id = ", id, "index = ", self.cur_server_index
             self.cur_server_index = -1
         evt.Skip()
 
-    def add_room(self,data):
+    def add_room(self, data):
+        #debug()
         i = self.room_list.GetItemCount()
         if (data[2]=="1") or (data[2]=="True"): pwd="yes"
         else: pwd="no"
@@ -322,20 +366,12 @@ class game_server_panel(wx.Panel):
         self.refresh_room_list()
 
     def del_room(self, data):
+        #debug(data)
         i = self.room_list.FindItemData(-1, int(data[0]))
         self.room_list.DeleteItem(i)
         self.refresh_room_list()
 
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
-
-    def update_room(self,data):
-
-        #-------------------------------------------------------
-        # Udated 12/02 by Snowdog
-        # allows refresh of all room data not just player counts
-        #-------------------------------------------------------
+    def update_room(self, data):
         i = self.room_list.FindItemData(-1,int(data[0]))
         if data[2]=="1" : pwd="yes"
         else: pwd="no"
@@ -344,25 +380,21 @@ class game_server_panel(wx.Panel):
         self.room_list.SetStringItem(i,2,pwd)
         self.refresh_room_list()
 
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
-
-    def set_cur_room_text(self,name):
+    def set_cur_room_text(self, name):
         pass
         #self.texts["cur_room"].SetLabel(name)
         #self.sizers["room"].Layout()
 
-    def set_lobbybutton(self,allow):
-        self.buttons[GS_JOINLOBBY].Enable(allow)
+    def set_lobbybutton(self, allow):
+        self.buttons['gs_join_lobby'].Enable(allow)
 
-    def set_connected(self,connected):
-        self.buttons[GS_CONNECT].Enable(not connected)
-        self.buttons[GS_DISCONNECT].Enable(connected)
-        self.buttons[GS_JOIN].Enable(connected)
-        self.buttons[GS_CREATE_ROOM].Enable(connected)
+    def set_connected(self, connected):
+        self.buttons['gs_connect'].Enable(not connected)
+        self.buttons['gs_disconnect'].Enable(connected)
+        self.buttons['gs_join_room'].Enable(connected)
+        self.buttons['gs_create_room'].Enable(connected)
         if not connected:
-            self.buttons[GS_JOINLOBBY].Enable(connected)
+            self.buttons['gs_join_lobby'].Enable(connected)
             self.room_list.DeleteAllItems()
             self.set_cur_room_text("Not Connected!")
             self.cur_room_index = -1
@@ -372,38 +404,45 @@ class game_server_panel(wx.Panel):
             self.frame.status.set_connect_status(self.name)
             self.set_cur_room_text("Lobby")
 
-    def on_button(self,evt):
-        id = evt.GetId()
-        if id == GS_CONNECT:
-            address = self.texts["address"].GetValue()
-            ### check to see if this is a manual entry vs. list entry.
-            try:
-                dummy = self.name
-            except:
-                self.name = `address`
-            self.do_connect(address)
-        elif id == GS_DISCONNECT: self.frame.kill_mplay_session()
-        elif id == GS_CREATE_ROOM: self.do_create_group()
-        elif id == GS_JOIN: self.do_join_group()
-        elif id == GS_JOINLOBBY: self.do_join_lobby()
-        elif id == GS_SERVER_REFRESH: self.refresh_server_list()
-        elif id == GS_PWD: self.texts["room_pwd"].Enable(evt.Checked())
-        elif id == OR_CLOSE:
-            dlg = wx.MessageDialog(self,"Quit OpenRPG?","OpenRPG",wx.YES_NO)
-            if dlg.ShowModal() == wx.ID_YES:
-                dlg.Destroy()
-                self.frame.kill_mplay_session()
-                self.frame.closed_confirmed()
-        elif id == GS_CLOSE:
-            self.parent.OnMB_GameServerBrowseServers()
-
+    def gs_connect(self, evt):
+        address = self.texts['address'].GetValue()
+        try: dummy = self.name
+        except: self.name = `address`
+        self.do_connect(address)
+        
+    def gs_disconnect(self, evt):
+        self.frame.kill_mplay_session()
+        
+    def gs_create_room(self, evt):
+        self.do_create_group()
+    
+    def gs_join(self, evt):
+        self.do_join_group()
+        
+    def gs_join_lobby(self, evt):
+        self.do_join_lobby()
+        
+    def gs_server_refresh(self, evt):
+        self.refresh_server_list()
+        
+    def gs_pwd(self, evt):
+        self.texts['room_pwd'].Enable(evt.Checked())
+        
+    def close_orpg(self, evt):
+        dlg = wx.MessageDialog(self, 'Quit OpenRPG?', "OpenRPG", wx.YES_NO)
+        if dlg.ShowModal() == wx.ID_YES:
+            dlg.Destroy()
+            self.frame.kill_mplay_session()
+            self.frame.closed_confirmed()
+    
+    def gs_close(self, evt):
+        self.parent.OnMB_GameServerBrowseServers()
+        
     def refresh_room_list(self):
         self.room_list.DeleteAllItems()
         address = self.texts["address"].GetValue()
-        try:
-            cadder = self.session.host_server
-        except:
-            cadder = ''
+        try: cadder = self.session.host_server
+        except: cadder = ''
         if self.rmList.has_key(address) and len(self.rmList[address]) > 0 and cadder != address:
             groups = self.rmList[address]
             self.NoGroups = True
@@ -433,41 +472,41 @@ class game_server_panel(wx.Panel):
         try:
             self.svrList = []
             self.server_list.DeleteAllItems()
-            xml_dom = meta_server_lib.get_server_list(["2"]);
-            node_list = xml_dom.getElementsByTagName('server')
+            etreeEl = meta_server_lib.get_server_list(["2"]);
+            node_list = etreeEl.findall('server')
             hex = orpg.tools.rgbhex.RGBHex()
-            color1 = settings.get_setting("RoomColor_Active")
-            color2 = settings.get_setting("RoomColor_Locked")
-            color3 = settings.get_setting("RoomColor_Empty")
-            color4 = settings.get_setting("RoomColor_Lobby")
+            color1 = settings.get("RoomColor_Active")
+            color2 = settings.get("RoomColor_Locked")
+            color3 = settings.get("RoomColor_Empty")
+            color4 = settings.get("RoomColor_Lobby")
 
             if len(node_list):
                 length = len(node_list)
                 part = 0
                 partLength = 1.0/length
                 for n in node_list:
-                    if n.hasAttribute('id') and n.hasAttribute('name') and n.hasAttribute('num_users') and n.hasAttribute('address') and n.hasAttribute('port'):
-                        self.svrList.append(server_instance(n.getAttribute('id'), n.getAttribute('name'), 
-                                            n.getAttribute('num_users'), n.getAttribute('address'), 
-                                            n.getAttribute('port')))
-                        address = n.getAttribute('address') + ':' + n.getAttribute('port')
-                        self.rmList[address] = []
-                        rooms = n.getElementsByTagName('room')
+                    #if n.get('id') and n.get('name') and n.get('num_users') and n.get('address') and n.get('port'):
+                    self.svrList.append(server_instance(n.get('id'), n.get('name'), 
+                                        n.get('num_users'), n.get('address'), 
+                                        n.get('port')))
+                    address = n.get('address') + ':' + n.get('port')
+                    self.rmList[address] = []
+                    rooms = n.findall('room')
 
-                        for room in rooms:
-                            pwd = room.getAttribute("pwd")
-                            id = room.getAttribute("id")
-                            name = room.getAttribute("name")
-                            nump = room.getAttribute("num_users")
-                            self.rmList[address].append((id, name, pwd, nump))
+                    for room in rooms:
+                        self.rmList[address].append((room.get("id"), room.get("name"), 
+                                                    room.get("pwd"), room.get("num_users")))
                 self.svrList.sort(server_instance_compare)
 
                 for n in self.svrList:
                     i = self.server_list.GetItemCount()
                     name = n.name
                     players = n.user
-                    self.server_list.InsertStringItem(i,players)
-                    self.server_list.SetStringItem(i,1,name)
+                    self.server_list.InsertImageStringItem(i, '', 0)
+                    for server in self.bookmarks.findall('server'):
+                        if server.get('name') == name: self.server_list.SetItemImage(i, 1)
+                    self.server_list.SetStringItem(i,1,players)
+                    self.server_list.SetStringItem(i,2,name)
                     r,g,b = hex.rgb_tuple(color1)
                     svrcolor = wx.Colour(red=r,green=g,blue=b)
 
@@ -488,62 +527,47 @@ class game_server_panel(wx.Panel):
             # No server is currently selected!!!  Versus the broken and random 0!
             self.cur_server_index = -1
             self.server_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-            if self.server_list.GetColumnWidth(0) < 70: self.server_list.SetColumnWidth(0, 70)
             self.server_list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+            if self.server_list.GetColumnWidth(1) < 70: self.server_list.SetColumnWidth(1, 70)
+            self.server_list.SetColumnWidth(2, wx.LIST_AUTOSIZE)
 
             if self.serverNameSet == 0:
-                # Pointless to constantly set the address field to random
-                # server.  This way, at least, if someone has their own local
-                # server it can now easily be connected with.  Nor do we want
-                # to reset this every time as it would wipe any previously
-                # entered data or even the previously selected server data!
-                # Localhost should probably be used but some systems are ultra/lame
-                # broken about localhost use.
                 self.texts["address"].SetValue("127.0.0.1:6774")
                 self.serverNameSet = 1
-            else:
-                pass
-
+            else: pass
             #  Allow xml_dom to be collected
-            try:
-                xml_dom.unlink()
-            except:
-                pass
         except Exception, e:
             print "Server List not available."
             traceback.print_exc()
 
+                
     def failed_connection(self):
         if(self.cur_server_index >= 0):
-            id = self.servers[self.cur_server_index].getAttribute('id')
-            meta = self.servers[self.cur_server_index].getAttribute('meta')
-            address = self.servers[self.cur_server_index].getAttribute('address')
-            port = self.servers[self.cur_server_index].getAttribute('port')
+            server_index = self.servers[self.cur_server_index]
             #  post_failed_connection will return a non-zero if the server
             #  was removed.  If it was, refresh the display
-            if(meta_server_lib.post_failed_connection(id,meta=meta,address=address,port=port)):
+            if(meta_server_lib.post_failed_connection(server_index.get('id'), 
+                meta=server_index.get('meta'), address=server_index.get('address'),
+                port=server_index.get('port'))):
                 self.refresh_server_list()
 
     def do_connect(self, address):
         chat = component.get('chat')
         chat.InfoPost("Locating server at " + address + "...")
-        if self.session.connect(address):
-            self.frame.start_timer()
+        if self.session.connect(address): self.frame.start_timer()
         else:
             chat.SystemPost("Failed to connect to game server...")
             self.failed_connection()
 
     def do_join_lobby(self):
         self.cur_room_index = 0
-        self.session.send_join_group("0","")
+        self.session.send_join_group("0", "")
         self.set_lobbybutton(0);
 
     def do_join_group(self):
         if self.cur_room_index >= 0:
-            if self.cur_room_index != 0:
-                self.set_lobbybutton(1);
-            else:
-                self.set_lobbybutton(0);
+            if self.cur_room_index != 0: self.set_lobbybutton(1);
+            else: self.set_lobbybutton(0);
             group_id = str(self.room_list.GetItemData(self.cur_room_index))
             group = self.session.get_group_info(group_id)
             pwd = ""
@@ -553,10 +577,9 @@ class game_server_panel(wx.Panel):
                 #if dlg.ShowModal() == wx.ID_OK:
                 #    pwd = dlg.GetValue()
                 #dlg.Destroy()
-            else:
-                pwd = ""
-            if pwd != None: #pwd==None means the user clicked "Cancel"
-                self.session.send_join_group(group_id,pwd)
+            else: pwd = ""
+            if pwd != None: #pwd == None means the user clicked "Cancel"
+                self.session.send_join_group(group_id, pwd)
 
     def do_create_group(self):
         name = self.texts["room_name"].GetValue()
@@ -592,63 +615,42 @@ class game_server_panel(wx.Panel):
                 e = name[loc+1:]
                 name = b + "&#39;" + e
                 oldloc = loc+1
-        if self.buttons[GS_PWD].GetValue():
-            pwd = self.texts["room_pwd"].GetValue()
-        else:
-            pwd = ""
-        if name == "":
-            wx.MessageBox("Invalid Name","Error");
+        if self.buttons['gs_pwd'].GetValue(): pwd = self.texts["room_pwd"].GetValue()
+        else: pwd = ""
+        if name == "": wx.MessageBox("Invalid Name","Error");
         else:
             msg = "%s is creating room \'%s.\'" % (self.session.name, name)
-            self.session.send( msg )
-            self.session.send_create_group(name,pwd,boot_pwd,minversion)
+            self.session.send(msg)
+            self.session.send_create_group(name, pwd, boot_pwd, minversion)
             self.set_lobbybutton(1); #enable the Lobby quickbutton
-
 
 #---------------------------------------------------------
 # [START] Snowdog: Updated Game Server Window 12/02
 #---------------------------------------------------------
 
-    def on_size(self,evt):
+    def on_size(self, evt):
         # set column widths for room list
-
-
         # set column widths for server list
         pass
-
-
 
 #---------------------------------------------------------
 # [END] Snowdog: Updated Game Server Window 12/02
 #---------------------------------------------------------
 
-
     def colorize_group_list(self, groups):
         try:
             hex = orpg.tools.rgbhex.RGBHex()
-
             for gr in groups:
                 item_list_location = self.room_list.FindItemData(-1,int(gr[0]))
                 if item_list_location != -1:
                     item = self.room_list.GetItem(item_list_location)
-                    if gr[0] == "0":
-
-			r,g,b = hex.rgb_tuple(settings.get_setting("RoomColor_Lobby"))
+                    if gr[0] == "0": r,g,b = hex.rgb_tuple(settings.get("RoomColor_Lobby"))
                     elif gr[3] <> "0":
-
                         if gr[2] == "True" or gr[2] == "1":
-
-			   r,g,b = hex.rgb_tuple(settings.get_setting("RoomColor_Locked"))
-			else:
-
-			   r,g,b = hex.rgb_tuple(settings.get_setting("RoomColor_Active"))
-                    else:
-
-			r,g,b = hex.rgb_tuple(settings.get_setting("RoomColor_Empty"))
-                        
-
+			   r,g,b = hex.rgb_tuple(settings.get("RoomColor_Locked"))
+			else: r,g,b = hex.rgb_tuple(settings.get("RoomColor_Active"))
+                    else: r,g,b = hex.rgb_tuple(settings.get("RoomColor_Empty"))
 		    color = wx.Colour(red=r,green=g,blue=b)
                     item.SetTextColour(color)
                     self.room_list.SetItem(item)
-        except:
-            traceback.print_exc()
+        except: traceback.print_exc()

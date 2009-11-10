@@ -1,0 +1,8 @@
+<manifest>
+	<updaterepo>
+		<repo-Traipse type="string">http://hg.assembla.com/traipse</repo-Traipse>
+	</updaterepo>
+    <default>
+        <repo type="string">http://hg.assembla.com/traipse</repo>
+    </default>
+</manifest>

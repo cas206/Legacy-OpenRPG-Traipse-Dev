@@ -1,4 +1,5 @@
 from orpg.mapper.map_msg import *
+from orpg.tools.orpg_log import debug
 
 class game_group:
     def __init__( self, id, name, pwd, desc="", 
@@ -17,19 +18,16 @@ class game_group:
         self.moderated = 0
         self.voice = {}
         self.persistant = persist
-
+        ### Needs to use Element Tree closer
         if mapFile != None:
             f = open( mapFile )
             tree = f.read()
             f.close()
-
         else:
             f = open(orpg.dirpath.dir_struct["template"] + "default_map.xml")
             tree = f.read()
             f.close()
-
-        self.game_map.init_from_xml(tree)
-
+        self.game_map.init_from_xml(fromstring(tree))
 
     def add_player(self,id):
         self.players.append(id)
@@ -68,7 +66,7 @@ class game_group:
         return 1
 
     #depreciated - see send_group_list()
-    def toxml(self,act="new"):
+    def toxml(self, act="new"):
         #  Please don't add the boot_pwd to the xml, as this will give it away to players watching their console
         xml_data = "<group id=\"" + self.id
         xml_data += "\" name=\"" + self.name
