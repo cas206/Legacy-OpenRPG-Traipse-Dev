@@ -109,7 +109,7 @@ class game_tree(wx.TreeCtrl):
         self.id = 1
         self.dragging = False
         self.last_save_dir = dir_struct["user"]
-        self.tree_map = []
+        self.tree_map = {}
 
         #Create tree from default if it does not exist
         validate.config_file("tree.xml","default_tree.xml")
@@ -409,7 +409,7 @@ class game_tree(wx.TreeCtrl):
             type = f.GetFilterIndex()
             with open(f.GetPath(),"w") as f:
                 data = "<html><head><title>"+obj.xml.get("name")+"</title></head>"
-                data += "<body bgcolor=\"#FFFFFF\" >"+obj.tohtml()+"</body></html>"
+                data += "<body bgcolor='#FFFFFF' >"+obj.tohtml()+"</body></html>"
                 for tag in ("</tr>","</td>","</th>","</table>","</html>","</body>"):
                     data = data.replace(tag,tag+"\n")
                 f.write(data)
@@ -479,7 +479,7 @@ class game_tree(wx.TreeCtrl):
         obj = self.GetPyData(item)
         name = "New " + obj.xml_root.get("name")
         icon = obj.xml_root.get("icon")
-        xml_data = "<nodehandler name=\""+name+"\" icon=\"" + icon + "\" module=\"core\" class=\"node_loader\" >"
+        xml_data = "<nodehandler name='"+name+"' icon='" + icon + "' module='core' class='node_loader' >"
         xml_data += xml.toxml(obj)
         xml_data += "</nodehandler>"
         self.insert_xml(xml_data)
@@ -687,6 +687,9 @@ class game_tree(wx.TreeCtrl):
         return family_tree
     
     def load_xml(self, xml_element, parent_node, prev_node=None):
+        if parent_node == self.root:
+            self.tree_map[xml_element.get('name')] = {}
+            self.tree_map[xml_element.get('name')]['node'] = xml_element
         if parent_node != self.root:
             ## Loading XML seems to lag on Grids and Images need a cache for load speed ##
             family_tree = self.get_tree_map(parent_node)

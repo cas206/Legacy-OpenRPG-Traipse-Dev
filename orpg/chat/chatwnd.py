@@ -915,7 +915,6 @@ class chat_panel(wx.Panel):
 
         if self.settings.get_setting('AliasTool_On') == '0': self.toggle_alias('0')
         else: self.toggle_alias('1')
-
     
     def toggle_alias(self, act):
         if act == '0': self.toolbar_sizer.Show(self.aliasSizer, False)
@@ -927,8 +926,11 @@ class chat_panel(wx.Panel):
 
     
     def build_dice(self):
-        self.numDieText = wx.TextCtrl( self, wx.ID_ANY, "1", size= wx.Size(25, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
-        self.dieModText = wx.TextCtrl( self, wx.ID_ANY, "", size= wx.Size(50, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
+        self.diceSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.numDieText = wx.TextCtrl( self, wx.ID_ANY, "1", 
+                                    size= wx.Size(25, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
+        self.dieModText = wx.TextCtrl( self, wx.ID_ANY, "", 
+                                    size= wx.Size(50, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
         self.d4Button = createMaskedButton(self, dir_struct["icon"]+'b_d4.gif', 'Roll d4', wx.ID_ANY)
         self.d6Button = createMaskedButton(self, dir_struct["icon"]+'b_d6.gif', 'Roll d6', wx.ID_ANY)
         self.d8Button = createMaskedButton(self, dir_struct["icon"]+'b_d8.gif', 'Roll d8', wx.ID_ANY)
@@ -936,69 +938,49 @@ class chat_panel(wx.Panel):
         self.d12Button = createMaskedButton(self, dir_struct["icon"]+'b_d12.gif', 'Roll d12', wx.ID_ANY)
         self.d20Button = createMaskedButton(self, dir_struct["icon"]+'b_d20.gif', 'Roll d20', wx.ID_ANY)
         self.d100Button = createMaskedButton(self, dir_struct["icon"]+'b_d100.gif', 'Roll d100', wx.ID_ANY)
-        self.toolbar_sizer.Add( self.numDieText, 0, wx.ALIGN_CENTER | wx.EXPAND)
-        self.toolbar_sizer.Add( self.d4Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d6Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d8Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d10Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d12Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d20Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d100Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.dieModText, 0, wx.ALIGN_CENTER, 5 )
+
+        self.diceSizer.Add( self.numDieText, 0, wx.ALIGN_CENTER | wx.EXPAND)
+        self.diceSizer.Add( self.d4Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d6Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d8Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d10Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d12Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d20Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d100Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.dieModText, 0, wx.ALIGN_CENTER, 5 )
+
+        self.toolbar_sizer.Add( self.diceSizer, 0, wx.EXPAND)
         if self.settings.get_setting('DiceButtons_On') == '0': self.toggle_dice('0')
         else: self.toggle_dice('1')
 
     
     def toggle_dice(self, act):
-        if act == '0':
-            self.toolbar_sizer.Show(self.numDieText, False)
-            self.toolbar_sizer.Show(self.d4Button, False)
-            self.toolbar_sizer.Show(self.d6Button, False)
-            self.toolbar_sizer.Show(self.d8Button, False)
-            self.toolbar_sizer.Show(self.d10Button, False)
-            self.toolbar_sizer.Show(self.d12Button, False)
-            self.toolbar_sizer.Show(self.d20Button, False)
-            self.toolbar_sizer.Show(self.d100Button, False)
-            self.toolbar_sizer.Show(self.dieModText, False)
-            self.toolbar_sizer.Layout()
-        else:
-            self.toolbar_sizer.Show(self.numDieText, True)
-            self.toolbar_sizer.Show(self.d4Button, True)
-            self.toolbar_sizer.Show(self.d6Button, True)
-            self.toolbar_sizer.Show(self.d8Button, True)
-            self.toolbar_sizer.Show(self.d10Button, True)
-            self.toolbar_sizer.Show(self.d12Button, True)
-            self.toolbar_sizer.Show(self.d20Button, True)
-            self.toolbar_sizer.Show(self.d100Button, True)
-            self.toolbar_sizer.Show(self.dieModText, True)
-            self.toolbar_sizer.Layout()
+        if act == '0': self.toolbar_sizer.Show(self.diceSizer, False)
+        else: self.toolbar_sizer.Show(self.diceSizer, True)
+        self.toolbar_sizer.Layout()
 
     
     def build_formating(self):
+        self.formatSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.boldButton = createMaskedButton( self, dir_struct["icon"]+'bold.gif', 
                                                             'Make the selected text Bold', wx.ID_ANY, '#bdbdbd')
         self.italicButton = createMaskedButton( self, dir_struct["icon"]+'italic.gif', 
                                                             'Italicize the selected text', wx.ID_ANY, '#bdbdbd' )
         self.underlineButton = createMaskedButton( self, dir_struct["icon"]+'underlined.gif', 
                                                             'Underline the selected text', wx.ID_ANY, '#bdbdbd' )
-        self.toolbar_sizer.Add( self.boldButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.italicButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.underlineButton, 0, wx.EXPAND )
+
+        self.formatSizer.Add( self.boldButton, 0, wx.EXPAND )
+        self.formatSizer.Add( self.italicButton, 0, wx.EXPAND )
+        self.formatSizer.Add( self.underlineButton, 0, wx.EXPAND )
+        self.toolbar_sizer.Add( self.formatSizer, 0, wx.EXPAND )
         if self.settings.get_setting('FormattingButtons_On') == '0': self.toggle_formating('0')
         else: self.toggle_formating('1')
 
     
     def toggle_formating(self, act):
-        if act == '0':
-            self.toolbar_sizer.Show(self.boldButton, False)
-            self.toolbar_sizer.Show(self.italicButton, False)
-            self.toolbar_sizer.Show(self.underlineButton, False)
-            self.toolbar_sizer.Layout()
-        else:
-            self.toolbar_sizer.Show(self.boldButton, True)
-            self.toolbar_sizer.Show(self.italicButton, True)
-            self.toolbar_sizer.Show(self.underlineButton, True)
-            self.toolbar_sizer.Layout()
+        if act == '0': self.toolbar_sizer.Show(self.formatSizer, False)
+        else: self.toolbar_sizer.Show(self.formatSizer, True)
+        self.toolbar_sizer.Layout()
 
     # Heroman - Ideally, we would use static labels...
     
@@ -1075,7 +1057,7 @@ class chat_panel(wx.Panel):
         if self.lastSend:                          #  This will be zero when not typing, so equiv to if is_typing
             thisTime = time.time()                 #  thisTime is a local temp variable
             if (thisTime - self.lastPress) > 4:    #  Check to see if it's been 5 seconds since our last keystroke
-                                               #    If we're not already typing, then self.lastSend will be 0
+                                                   #  If we're not already typing, then self.lastSend will be 0
 
                 self.sendTyping(0)                 #  send a typing event here (0 for False)
     #  This subroutine actually takes care of sending the messages for typing/not_typing events
@@ -1928,13 +1910,98 @@ class chat_panel(wx.Panel):
                 if child.get('name') == path[step]:
                     node = child
                     step += 1
-                    self.resolve_loop(node, path, step, depth)
+                    if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
+                    else: self.resolve_loop(node, path, step, depth)
+
+    def resolve_cust_loop(self, node, path, step, depth):
+        node_class = node.get('class')
+        if step == depth:
+            self.resolution(node)
+
+        ##Build Abilities dictionary##
+        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('abilities')
+        else: ab = node.find('abilities')
+        ab_list = ab.findall('stat'); pc_stats = {}
+
+        for ability in ab_list:
+            pc_stats[ability.get('name')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
+            pc_stats[ability.get('abbr')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
+
+        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('saves')
+        else: ab = node.find('saves')
+        ab_list = ab.findall('save')
+
+        for save in ab_list:
+            pc_stats[save.get('name')] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+            if save.get('name') == 'Fortitude': abbr = 'Fort'
+            if save.get('name') == 'Reflex': abbr = 'Ref'
+            if save.get('name') == 'Will': abbr = 'Will'
+            pc_stats[abbr] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+
+        if path[step] == 'Skill':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
+            node = node.find('skills')
+            child_list = node.findall('skill')
+            for child in child_list:
+                if path[step+1] == child.get('name'):
+                    if step+2 == depth: self.data = child.get('rank')
+                    elif path[step+2] == 'Check':
+                        self.data = 'Skill Check: ' + child.get('name') + ' [1d20+'+str( int(child.get('rank')) + int(pc_stats[child.get('stat')][1]) )+']'
+            return
+
+        if path[step] == 'Feat':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
+            node = node.find('feats')
+            child_list = node.findall('feat')
+            for child in child_list:
+                if path[step+1] == child.get('name'):
+                    if step+2 == depth: self.data = child.get('name') + ': ' + child.get('desc')
+            return
+
+        if path[step] == 'Cast':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snp')
+            node = node.find('spells')
+            child_list = node.findall('spell')
+            for child in child_list:
+                if path[step+1] == child.get('name'):
+                    if step+2 == depth: self.data = child.get('name') + ': ' + child.get('desc')
+            return
+
+        if path[step] == 'Attack':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('combat')
+            if path[step+1] == 'Melee' or path[step+1] == 'M':
+                bonus = node.find('attacks')
+                bonus = bonus.find('melee')
+                bonus = bonus.attrib; d = 0
+            elif path[step+1] == 'Ranged' or path[step+1] == 'R':
+                bonus = node.find('attacks')
+                bonus = bonus.find('ranged')
+                bonus = bonus.attrib; d = 0
+            for b in bonus:
+                d += int(bonus[b])
+            bonus = str(d)
+            if path[step+2] == None:
+                self.data = bonus
+            else:
+                weapons = node.find('attacks')
+                weapons = weapons.findall('weapon')
+                for child in weapons:
+                    if path[step+2] == child.get('name'):
+                        self.data = 'Attack: '+child.get('name')+' [1d20+'+bonus+'] ' + 'Damage: ['+child.get('damage')+']'
+            return
+
+        elif pc_stats.has_key(path[step]):
+            if step+1 == depth: self.data = pc_stats[path[step]][0] + ' +('+pc_stats[path[step]][1]+')'
+            elif path[step+1] == 'Mod': self.data = pc_stats[path[step]][1]
+            elif path[step+1] == 'Check': self.data = path[step] + ' Check: [1d20+' + str(pc_stats[path[step]][1]) +']'
+            return
+
 
     def resolution(self, node):
         if self.passed == False:
             self.passed = True
             if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
-            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'No Data!'
+            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
         else:
             self.data = ''
             pass
@@ -1945,7 +2012,6 @@ class chat_panel(wx.Panel):
         cur_loc = 0
         reg = re.compile("(!!(.*?)!!)")
         matches = reg.findall(s)
-        print matches
         for i in xrange(0,len(matches)):
             newstr = txt = '!@' + node.get('map') + '::' + matches[i][1] + '@!'
             s = s.replace(matches[i][0], newstr, 1)
@@ -1954,13 +2020,12 @@ class chat_panel(wx.Panel):
 
     def resolve_nodes(self, s):
         self.passed = False
-        self.data = 'No Data!'
+        self.data = 'Invalid Reference!'
         value = ""
         path = s.split('::')
         depth = len(path)
         self.gametree = component.get('tree')
-        dom = self.gametree.xml_root.getchildren()
-        for node in dom:
-            if node.get('name') == path[0]:
-                self.resolve_loop(node, path, 1, len(path))
+        node = self.gametree.tree_map[path[0]]['node']
+        if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
+        else: self.resolve_loop(node, path, 1, depth)
         return self.data

@@ -122,7 +122,8 @@ class client_base:
         self.ROLE_PLAYER = "Player"
         self.ROLE_LURKER = "Lurker"
         ## --TaS
-        self.ip = socket.gethostbyname(socket.gethostname())
+        try: self.ip = socket.gethostbyname(socket.gethostname())
+	except: self.ip = socket.gethostbyname('localhost')
         self.remote_ip = None
         self.version = VERSION
         self.protocol_version = PROTOCOL_VERSION
@@ -733,7 +734,7 @@ class mplay_client(client_base):
     def on_group(self, id, msg, etreeEl):
         act = etreeEl.get("action")
         group_data = (id, etreeEl.get("name"), etreeEl.get("pwd"), etreeEl.get("players"))
-        if act == ('new' or 'update'):
+        if act == 'new' or act == 'update':
             self.groups[id] = group_data
             if act == 'update': self.on_group_event(mplay_event(GROUP_UPDATE, group_data))
             elif act == 'new': self.on_group_event(mplay_event(GROUP_NEW, group_data))

@@ -30,7 +30,6 @@ from __future__ import with_statement
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
 
 import meta_server_lib
-#import orpg.tools.orpg_settings
 import orpg.tools.rgbhex
 import traceback
 
