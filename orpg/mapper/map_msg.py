@@ -64,12 +64,10 @@ def Crash(type, value, crash):
 class map_msg(map_element_msg_base):
 
     def __init__(self,reentrant_lock_object = None):
-        print 'class map_msg'
         self.tagname = "map"
         map_element_msg_base.__init__(self, reentrant_lock_object)
 
     def init_from_dom(self, xml_dom):
-        print 'init_from_dom', self.tagname
         self.p_lock.acquire()
         if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"
@@ -101,7 +99,6 @@ class map_msg(map_element_msg_base):
         self.p_lock.release()
 
     def set_from_dom(self,xml_dom):
-        print 'set_from_dom'
         self.p_lock.acquire()
         if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"

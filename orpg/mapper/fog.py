@@ -209,8 +209,7 @@ class fog_layer(layer_base):
         if show == "Yes": self.canvas.frame.session.send(xml_str)
 
     def layerToXML(self, action="update"):
-        if not self.use_fog:
-            return ""
+        if not self.use_fog: return ""
         fog_string = ""
         ri = wx.RegionIterator(self.fogregion)
         if not (ri.HaveRects()): fog_string = FogArea("all", self.log).toxml("del")
@@ -245,11 +244,11 @@ class fog_layer(layer_base):
             if not self.use_fog:
                 self.use_fog = True
                 self.recompute_fog()
-            if xml_dom.hasAttribute('serial'): self.serial_number = int(xml_dom.getAttribute('serial'))
-            children = xml_dom._get_childNodes()
+            if xml_dom.get('serial'): self.serial_number = int(xml_dom.get('serial'))
+            children = xml_dom.getchildren()
             for l in children:
-                action = l.getAttribute("action")
-                outline = l.getAttribute("outline")
+                action = l.get("action")
+                outline = l.get("outline")
                 if (outline == "all"):
                     polyline = [IPoint().make(0,0), IPoint().make(self.width-1, 0),
                               IPoint().make(self.width-1, self.height-1),
@@ -262,10 +261,10 @@ class fog_layer(layer_base):
                     polyline = []
                     lastx = None
                     lasty = None
-                    list = l._get_childNodes()
+                    list = l.getchildren()
                     for point in list:
-                        x = point.getAttribute( "x" )
-                        y = point.getAttribute( "y" )
+                        x = point.get( "x" )
+                        y = point.get( "y" )
                         if (x != lastx or y != lasty):
                             polyline.append(IPoint().make(int(x), int(y)))
                         lastx = x

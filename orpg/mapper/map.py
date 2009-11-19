@@ -35,7 +35,6 @@ from map_prop_dialog import *
 import random
 import os
 import thread
-#import gc #Garbage Collecter Needed?
 import traceback
 
 from miniatures_handler import *
@@ -49,6 +48,7 @@ from orpg.dirpath import dir_struct
 from images import ImageHandler
 from orpg.orpgCore import component
 from orpg.tools.orpg_settings import settings
+from xml.etree.ElementTree import ElementTree, Element, tostring, parse
 
 # Various marker modes for player tools on the map
 MARKER_MODE_NONE = 0
@@ -113,7 +113,6 @@ class MapCanvas(wx.ScrolledWindow):
 
     def MouseWheel(self, evt):
         if evt.CmdDown():
-            print evt.GetWheelRotation()
             if evt.GetWheelRotation() > 0: self.on_zoom_in(None)
             elif evt.GetWheelRotation() < 0: self.on_zoom_out(None)
             else: pass
@@ -606,68 +605,54 @@ class MapCanvas(wx.ScrolledWindow):
             else: return ""
 
     def takexml(self, xml):
-        """
-          Added Process Dialog to display during long map parsings
-          as well as a try block with an exception traceback to try
-          and isolate some of the map related problems users have been
-          experiencing --Snowdog 5/15/03
-         
-          Apparently Process Dialog causes problems with linux.. commenting it out. sheez.
-           --Snowdog 5/27/03
-        """
         try:
-            #parse the map DOM
-            xml_dom = parseXml(xml)
+            xml_dom = fromstring(xml)
             if xml_dom == None: return
-            node_list = xml_dom.getElementsByTagName("map")
-            if len(node_list) < 1: pass
-            else:
-                # set map version to incoming data so layers can convert
-                self.map_version = node_list[0].getAttribute("version")
-                action = node_list[0].getAttribute("action")
-                if action == "new":
-                    self.layers = {}
-                    try: self.layers['bg'] = layer_back_ground(self)
-                    except: pass
-                    try: self.layers['grid'] = grid_layer(self)
-                    except: pass
-                    try: self.layers['miniatures'] = miniature_layer(self)
-                    except: pass
-                    try: self.layers['whiteboard'] = whiteboard_layer(self)
-                    except: pass
-                    try: self.layers['fog'] = fog_layer(self)
-                    except: pass
-                sizex = node_list[0].getAttribute("sizex")
-                if sizex != "":
-                    sizex = int(float(sizex))
-                    sizey = self.size[1]
-                    self.set_size((sizex,sizey))
-                    self.size_changed = 0
-                sizey = node_list[0].getAttribute("sizey")
-                if sizey != "":
-                    sizey = int(float(sizey))
-                    sizex = self.size[0]
-                    self.set_size((sizex,sizey))
-                    self.size_changed = 0
-                children = node_list[0]._get_childNodes()
-                #fog layer must be computed first, so that no data is inadvertently revealed
-                for c in children:
-                    name = c._get_nodeName()
-                    if name == "fog": self.layers[name].layerTakeDOM(c)
-                for c in children:
-                    name = c._get_nodeName()
-                    if name != "fog": self.layers[name].layerTakeDOM(c)
-                # all map data should be converted, set map version to current version
-                self.map_version = MAP_VERSION
-                self.Refresh(False)
-            xml_dom.unlink()  # eliminate circular refs
-        except: pass
+            if xml_dom.tag != 'map': node_list = xml_dom.find("map")
+            else: node_list = xml_dom
+            # set map version to incoming data so layers can convert
+            self.map_version = node_list.get("version")
+            action = node_list.get("action")
+            if action == "new":
+                self.layers = {}
+                try: self.layers['bg'] = layer_back_ground(self)
+                except: pass
+                try: self.layers['grid'] = grid_layer(self)
+                except: pass
+                try: self.layers['miniatures'] = miniature_layer(self)
+                except: pass
+                try: self.layers['whiteboard'] = whiteboard_layer(self)
+                except: pass
+                try: self.layers['fog'] = fog_layer(self)
+                except: pass
+            sizex = node_list.get("sizex") if node_list.get("sizex") != None else ''
+            if sizex != "":
+                sizex = int(float(sizex))
+                sizey = self.size[1]
+                self.set_size((sizex,sizey))
+                self.size_changed = 0
+            sizey = node_list.get("sizey") if node_list.get('sizey') != None else ''
+            if sizey != "":
+                sizey = int(float(sizey))
+                sizex = self.size[0]
+                self.set_size((sizex,sizey))
+                self.size_changed = 0
+            children = node_list.getchildren()
+            #fog layer must be computed first, so that no data is inadvertently revealed
+            for c in children:
+                if c.tag == "fog": self.layers[c.tag].layerTakeDOM(c)
+            for c in children:
+                if c.tag != "fog": self.layers[c.tag].layerTakeDOM(c)
+            # all map data should be converted, set map version to current version
+            self.map_version = MAP_VERSION
+            self.Refresh(False)
+        except Exception, e: print 'failed', e; pass
 
     def re_ids_in_xml(self, xml):
         new_xml = ""
         tmp_map = map_msg()
-        xml_dom = parseXml(str(xml))
-        node_list = xml_dom.getElementsByTagName("map")
+        xml_dom = fromstring(str(xml))
+        node_list = xml_dom.findall("map")
         if len(node_list) < 1: pass
         else:
             tmp_map.init_from_dom(node_list[0])
@@ -690,9 +675,9 @@ class MapCanvas(wx.ScrolledWindow):
                     if lines:
                         for line in lines:
                             l = whiteboard_layer.children[line]
-                            if l.tagname == 'line': id = 'line-' + self.frame.session.get_next_id()
-                            elif l.tagname == 'text': id = 'text-' + self.frame.session.get_next_id()
-                            elif l.tagname == 'circle': id = 'circle-' + self.frame.session.get_next_id()
+                            if l.tag == 'line': id = 'line-' + self.frame.session.get_next_id()
+                            elif l.tag == 'text': id = 'text-' + self.frame.session.get_next_id()
+                            elif l.tag == 'circle': id = 'circle-' + self.frame.session.get_next_id()
                             l.init_prop("id", id)
             new_xml = tmp_map.get_all_xml()
         if xml_dom: xml_dom.unlink()

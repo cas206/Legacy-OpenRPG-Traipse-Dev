@@ -420,7 +420,6 @@ class miniatures_handler(base_layer_handler):
             oldz = self.sel_rmin.zorder
             # Make sure the mini isn't sticky front or back
             if (oldz != MIN_STICKY_BACK) and (oldz != MIN_STICKY_FRONT):
-		##   print "old z-order = " + str(oldz)
                 self.sel_rmin.zorder -= 1
                 #  Re-collapse to normalize
                 #  Note:  only one update (with the final values) will be sent
@@ -434,7 +433,6 @@ class miniatures_handler(base_layer_handler):
             #     before getting the oldz to test
             #  Save the selected minis current z-order
             oldz = self.sel_rmin.zorder
-	    ##  print "old z-order = " + str(oldz)
             self.sel_rmin.zorder += 1
 
             #  Re-collapse to normalize
@@ -452,10 +450,8 @@ class miniatures_handler(base_layer_handler):
 
             # Make sure the mini isn't sticky front or back
             if (oldz != MIN_STICKY_BACK) and (oldz != MIN_STICKY_FRONT):
-	    ##  print "old z-order = " + str(oldz)
                 #  The new z-order will be one more than the last index
                 newz = len(self.canvas.layers['miniatures'].miniatures)
-	    ##  print "new z-order = " + str(newz)
                 self.sel_rmin.zorder = newz
                 #  Re-collapse to normalize
                 #  Note:  only one update (with the final values) will be sent
@@ -471,18 +467,15 @@ class miniatures_handler(base_layer_handler):
             oldz = self.sel_rmin.zorder
             # Make sure the mini isn't sticky front or back
             if (oldz != MIN_STICKY_BACK) and (oldz != MIN_STICKY_FRONT):
-	    ##  print "old z-order = " + str(oldz)
 
                 #  Since 0 is the lowest in a normalized order, be one less
                 newz = -1
-	    ##  print "new z-order = " + str(newz)
                 self.sel_rmin.zorder = newz
                 #  Re-collapse to normalize
                 #  Note:  only one update (with the final values) will be sent
                 self.canvas.layers['miniatures'].collapse_zorder()
 
         elif id == MIN_FRONTBACK_UNLOCK:
-            #print "Unlocked/ unstickified..."
             if self.sel_rmin.zorder == MIN_STICKY_BACK: self.sel_rmin.zorder = MIN_STICKY_BACK + 1
             elif self.sel_rmin.zorder == MIN_STICKY_FRONT: self.sel_rmin.zorder = MIN_STICKY_FRONT - 1
         elif id == MIN_LOCK_BACK: self.sel_rmin.zorder = MIN_STICKY_BACK
@@ -497,7 +490,6 @@ class miniatures_handler(base_layer_handler):
     def on_miniature(self, evt):
         session = self.canvas.frame.session
         if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER) and (session.use_roles()):
-            print session.my_role()
             self.infoPost("You must be either a player or GM to use the miniature Layer")
             return
         min_url = self.min_url.GetValue()
@@ -505,8 +497,6 @@ class miniatures_handler(base_layer_handler):
         if min_url == "" or min_url == "http://": return
         if min_url[:7] != "http://" : min_url = "http://" + min_url
         # make label
-        if self.auto_label: print 'auto-label'
-        if not self.auto_label: print 'False'
         if self.auto_label and min_url[-4:-3] == '.':
             start = min_url.rfind("/") + 1
             min_label = min_url[start:len(min_url)-4]
@@ -517,7 +507,6 @@ class miniatures_handler(base_layer_handler):
         try:
             id = 'mini-' + self.canvas.frame.session.get_next_id()
             # make the new mini appear in top left of current viewable map
-            print id
             dc = wx.ClientDC(self.canvas)
             self.canvas.PrepareDC(dc)
             dc.SetUserScale(self.canvas.layers['grid'].mapscale,self.canvas.layers['grid'].mapscale)
@@ -527,7 +516,6 @@ class miniatures_handler(base_layer_handler):
         except:
             # When there is an exception here, we should be decrementing the serial_number for reuse!!
             unablemsg= "Unable to load/resolve URL: " + min_url + " on resource \"" + min_label + "\"!!!\n\n"
-            #print unablemsg
             dlg = wx.MessageDialog(self,unablemsg, 'Url not found',wx.ICON_EXCLAMATION)
             dlg.ShowModal()
             dlg.Destroy()
@@ -771,9 +759,7 @@ class miniatures_handler(base_layer_handler):
 
     def role_is_gm_or_player(self):
         session = self.canvas.frame.session
-        print session.my_role(), session.ROLE_GM
         if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER) and (session.use_roles()):
-            print 'role is gm or player'
             self.infoPost("You must be either a player or GM to use the miniature Layer")
             return False
         return True

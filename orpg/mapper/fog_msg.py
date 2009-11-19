@@ -94,13 +94,10 @@ class fog_msg(map_element_msg_base):
 
     def interpret_dom(self,xml_dom):
         self.use_fog=1
-        #print 'fog_msg.interpret_dom called'
         children = xml_dom.getchildren()
-        #print "children",children
         for l in children:
             action = l.get("action")
             outline = l.get("outline")
-            #print "action/outline",action, outline
             if (outline=="all"):
                 polyline=[]
                 self.fogregion.Clear()
@@ -113,11 +110,6 @@ class fog_msg(map_element_msg_base):
                 list = l.getchildren()
                 for node in list:
                     polyline.append( IPoint().make( int(node.get("x")), int(node.get("y")) ) )
-                    # pointarray = outline.split(";")
-                    # for m in range(len(pointarray)):
-                    #     pt=pointarray[m].split(",")
-                    #     polyline.append(IPoint().make(int(pt[0]),int(pt[1])))
-                    #print "length of polyline", len(polyline)
             if (len(polyline)>2):
                 if action=="del": self.fogregion.FromPolygon(polyline,0)
                 else: self.fogregion.FromPolygon(polyline,1)

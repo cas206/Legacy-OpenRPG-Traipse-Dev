@@ -29,7 +29,7 @@
 __version__ = "$Id: whiteboard_msg.py,v 1.12 2007/03/09 14:11:56 digitalxero Exp $"
 
 from base_msg import *
-from xml.etree.ElementTree import ElementTree
+from xml.etree.ElementTree import ElementTree, Element, tostring
 
 class item_msg(map_element_msg_base):
 

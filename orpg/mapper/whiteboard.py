@@ -30,6 +30,8 @@ __version__ = "$Id: whiteboard.py,v 1.47 2007/03/09 14:11:55 digitalxero Exp $"
 
 from base import *
 from orpg.mapper.map_utils import *
+from orpg.tools.orpg_log import debug
+from xml.etree.ElementTree import ElementTree, Element, tostring
 
 def cmp_zorder(first,second):
     f = first.zorder
@@ -99,43 +101,38 @@ class WhiteboardText:
         dc.SetTextForeground(wx.Colour(0,0,0))
 
     def toxml(self, action="update"):
-        if action == "del":
-            xml_str = "<text action='del' id='" + str(self.id) + "'/>"
-            return xml_str
-        xml_str = "<text"
-        xml_str += " action='" + action + "'"
-        xml_str += " id='" + str(self.id) + "'"
-        if self.pointsize != None: xml_str += " pointsize='" + str(self.pointsize) + "'"
-        if self.style != None: xml_str += " style='" + str(self.style) + "'"
-        if self.weight != None: xml_str += " weight='" + str(self.weight) + "'"
-        if self.posx != None: xml_str+= " posx='" + str(self.posx) + "'"
-        if not (self.posy is None): xml_str += " posy='" + str(self.posy) + "'"
-        if self.text_string != None: xml_str+= " text_string='" + self.text_string + "'"
-        if self.textcolor != None: xml_str += " color='" + self.textcolor + "'"
-        xml_str += "/>"
+        xml = Element('text')
+        xml.set('action', action)
+        xml.set('id', str(self.id))
+        if action == 'del': return tostring(xml)
+        if self.pointsize != None: xml.set('pointsize', str(self.pointsize))
+        if self.style != None: xml.set('style', str(self.style))
+        if self.weight != None: xml.set('weight', str(self.weight))
+        if self.posx != None: xml.set('posx', str(self.posx))
+        if not (self.posy is None): xml.set('posy', str(self.posy))
+        if self.text_string != None: xml.set('text_string', self.text_string)
+        if self.textcolor != None: xml.set('color', self.textcolor)
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
-            return xml_str
+            return tostring(xml)
         else: return ''
 
     def takedom(self, xml_dom):
-        self.text_string = xml_dom.getAttribute("text_string")
-        self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("posy"):
-            self.posy = int(xml_dom.getAttribute("posy"))
-        if xml_dom.hasAttribute("posx"):
-            self.posx = int(xml_dom.getAttribute("posx"))
-        if xml_dom.hasAttribute("weight"):
-            self.weight = int(xml_dom.getAttribute("weight"))
+        self.text_string = xml_dom.get("text_string")
+        self.id = xml_dom.get("id")
+        if xml_dom.get("posy"): self.posy = int(xml_dom.get("posy"))
+        if xml_dom.get("posx"): self.posx = int(xml_dom.get("posx"))
+        if xml_dom.get("weight"):
+            self.weight = int(xml_dom.get("weight"))
             self.font.SetWeight(self.weight)
-        if xml_dom.hasAttribute("style"):
-            self.style = int(xml_dom.getAttribute("style"))
+        if xml_dom.get("style"):
+            self.style = int(xml_dom.get("style"))
             self.font.SetStyle(self.style)
-        if xml_dom.hasAttribute("pointsize"):
-            self.pointsize = int(xml_dom.getAttribute("pointsize"))
+        if xml_dom.get("pointsize"):
+            self.pointsize = int(xml_dom.get("pointsize"))
             self.font.SetPointSize(self.pointsize)
-        if xml_dom.hasAttribute("color") and xml_dom.getAttribute("color") != '':
-            self.textcolor = xml_dom.getAttribute("color")
+        if xml_dom.get("color") and xml_dom.get("color") != '':
+            self.textcolor = xml_dom.get("color")
             if self.textcolor == '#0000000': self.textcolor = '#000000'
 
 class WhiteboardLine:
@@ -212,45 +209,42 @@ class WhiteboardLine:
         #selected outline
 
     def toxml(self, action="update"):
-        if action == "del":
-            xml_str = "<line action='del' id='" + str(self.id) + "'/>"
-            return xml_str
+        xml = Element('line')
+        xml.set('action', action)
+        xml.set('id', str(self.id))
+        if action == "del": return tostring(xml)
         #  if there are any changes, make sure id is one of them
-        xml_str = "<line"
-        xml_str += " action='" + action + "'"
-        xml_str += " id='" + str(self.id) + "'"
-        xml_str+= " line_string='" + self.line_string + "'"
+        xml.set('line_string', self.line_string)
         if self.upperleft != None:
-            xml_str += " upperleftx='" + str(self.upperleft.x) + "'"
-            xml_str += " upperlefty='" + str(self.upperleft.y) + "'"
+            xml.set('upperleftx', str(self.upperleft.x))
+            xml.set('upperlefty', str(self.upperleft.y))
         if self.lowerright != None:
-            xml_str+= " lowerrightx='" + str(self.lowerright.x) + "'"
-            xml_str+= " lowerrighty='" + str(self.lowerright.y) + "'"
+            xml.set('lowerrightx', str(self.lowerright.x))
+            xml.set('lowerrighty', str(self.lowerright.y))
         if self.linecolor != None:
-            xml_str += " color='" + str(self.linecolor) + "'"
+            xml.set('color', str(self.linecolor))
         if self.linewidth != None:
-            xml_str += " width='" + str(self.linewidth) + "'"
-        xml_str += "/>"
-        if action == "new": return xml_str
+            xml.set('width', str(self.linewidth))
+        if action == "new": return tostring(xml)
         return ''
 
     def takedom(self, xml_dom):
-        self.line_string = xml_dom.getAttribute("line_string")
-        self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("upperleftx"):
-            self.upperleft.x = int(xml_dom.getAttribute("upperleftx"))
-        if xml_dom.hasAttribute("upperlefty"):
-            self.upperleft.y = int(xml_dom.getAttribute("upperlefty"))
-        if xml_dom.hasAttribute("lowerrightx"):
-            self.lowerright.x = int(xml_dom.getAttribute("lowerrightx"))
-        if xml_dom.hasAttribute("lowerrighty"):
-            self.lowerright.y = int(xml_dom.getAttribute("lowerrighty"))
-        if xml_dom.hasAttribute("color") and xml_dom.getAttribute("color") != '':
-            self.linecolor = xml_dom.getAttribute("color")
+        self.line_string = xml_dom.get("line_string")
+        self.id = xml_dom.get("id")
+        if xml_dom.get("upperleftx"):
+            self.upperleft.x = int(xml_dom.get("upperleftx"))
+        if xml_dom.get("upperlefty"):
+            self.upperleft.y = int(xml_dom.get("upperlefty"))
+        if xml_dom.get("lowerrightx"):
+            self.lowerright.x = int(xml_dom.get("lowerrightx"))
+        if xml_dom.get("lowerrighty"):
+            self.lowerright.y = int(xml_dom.get("lowerrighty"))
+        if xml_dom.get("color") and xml_dom.get("color") != '':
+            self.linecolor = xml_dom.get("color")
             if self.linecolor == '#0000000':
                 self.linecolor = '#000000'
-        if xml_dom.hasAttribute("width"):
-            self.linewidth = int(xml_dom.getAttribute("width"))
+        if xml_dom.get("width"):
+            self.linewidth = int(xml_dom.get("width"))
 
 ##-----------------------------
 ## whiteboard layer
@@ -329,7 +323,6 @@ class whiteboard_layer(layer_base):
     def del_all_lines(self):
         for i in xrange(len(self.lines)):
             self.del_line(self.lines[0])
-        print self.lines
 
     def del_text(self, text):
         xml_str = "<map><whiteboard>"
@@ -437,13 +430,14 @@ class whiteboard_layer(layer_base):
             return ""
 
     def layerTakeDOM(self, xml_dom):
-        serial_number = xml_dom.getAttribute('serial')
+        serial_number = xml_dom.get('serial')
         if serial_number != "": self.serial_number = int(serial_number)
-        children = xml_dom._get_childNodes()
+        children = xml_dom.getchildren()
         for l in children:
-            nodename = l._get_nodeName()
-            action = l.getAttribute("action")
-            id = l.getAttribute('id')
+            nodename = l.tag
+            action = l.get("action")
+            id = l.get('id')
+            if self.serial_number < int(id[5:]): self.serial_number = int(id[5:])
             if action == "del":
                 if nodename == 'line':
                     line = self.get_line_by_id(id)
@@ -454,17 +448,17 @@ class whiteboard_layer(layer_base):
             elif action == "new":
                 if nodename == "line":
                     try:
-                        line_string = l.getAttribute('line_string')
-                        upperleftx = l.getAttribute('upperleftx')
-                        upperlefty = l.getAttribute('upperlefty')
-                        lowerrightx = l.getAttribute('lowerrightx')
-                        lowerrighty = l.getAttribute('lowerrighty')
+                        line_string = l.get('line_string')
+                        upperleftx = l.get('upperleftx')
+                        upperlefty = l.get('upperlefty')
+                        lowerrightx = l.get('lowerrightx')
+                        lowerrighty = l.get('lowerrighty')
                         upperleft = wx.Point(int(upperleftx),int(upperlefty))
                         lowerright = wx.Point(int(lowerrightx),int(lowerrighty))
-                        color = l.getAttribute('color')
+                        color = l.get('color')
                         if color == '#0000000': color = '#000000'
-                        id = l.getAttribute('id')
-                        width = int(l.getAttribute('width'))
+                        id = l.get('id')
+                        width = int(l.get('width'))
                     except:
                         line_string = upperleftx = upperlefty = lowerrightx = lowerrighty = color = 0
                         continue
@@ -472,15 +466,15 @@ class whiteboard_layer(layer_base):
                     self.lines.append(line)
                 elif nodename == "text":
                     try:
-                        text_string = l.getAttribute('text_string')
-                        style = l.getAttribute('style')
-                        pointsize = l.getAttribute('pointsize')
-                        weight = l.getAttribute('weight')
-                        color = l.getAttribute('color')
+                        text_string = l.get('text_string')
+                        style = l.get('style')
+                        pointsize = l.get('pointsize')
+                        weight = l.get('weight')
+                        color = l.get('color')
                         if color == '#0000000': color = '#000000'
-                        id = l.getAttribute('id')
-                        posx = l.getAttribute('posx')
-                        posy = l.getAttribute('posy')
+                        id = l.get('id')
+                        posx = l.get('posx')
+                        posy = l.get('posy')
                         pos = wx.Point(0,0)
                         pos.x = int(posx)
                         pos.y = int(posy)
