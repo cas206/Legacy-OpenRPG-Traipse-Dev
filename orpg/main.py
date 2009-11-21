@@ -135,6 +135,13 @@ class orpgFrame(wx.Frame):
         logger.debug("plugins reloaded and startup plugins launched")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
+        tipotday_start = settings.get('tipotday_start')
+        try: tipotday_start = int(tipotday_start)
+        except TypeError: tipotday_start = 0
+
+
+        self.TipOfTheDay = wx.CreateFileTipProvider(dir_struct['data']+'tips.txt', tipotday_start)
+
         #Load Update Manager
         component.add('updatemana', self.updateMana)
         logger.debug("update manager reloaded")
@@ -145,23 +152,37 @@ class orpgFrame(wx.Frame):
         logger.debug("debugger window")
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
+    def ShowTipOfTheDay(self):
+        if wx.ShowTip(self, self.TipOfTheDay, settings.get('tipotday_enabled') != '0'):
+            settings.change('tipotday_enabled', '1')
+        else: settings.change('tipotday_enabled', '0')
+        settings.change('tipotday_start', str(self.TipOfTheDay.CurrentTip))
     
     def post_show_init(self):
-        """Some Actions need to be done after the main fram is drawn"""
+        """Some Actions need to be done after the main frame is drawn"""
         self.players.size_cols()
+        try:
+            if settings.get('tipotday_enabled').lower() != '0': self.ShowTipOfTheDay()
+        except: self.add_setting('Tip of the Day')
 
-    
+
+    def add_setting(self, setting):
+        if setting == 'Tip of the Day':
+            settings.add_tab('General', 'Tip of the Day', 'grid')
+            settings.add('Tip of the Day', 'tipotday_start', '0', 'int', 'Current Tip of the Day')
+            settings.add('Tip of the Day', 'tipotday_enabled', '1', '0|1', 'Show Tip of the Day on startup')
+            logger.info('New Settings added', True)
+            self.TraipseSuiteWarn('debug')
+
     def get_activeplugins(self):
         try: tmp = self.pluginsFrame.get_activeplugins()
         except: tmp = {}
         return tmp
-
     
     def get_startplugins(self):
         try: tmp = self.pluginsFrame.get_startplugins()
         except: tmp = {}
         return tmp
-
     
     def on_password_signal(self,signal,type,id,data):
         try:
@@ -233,7 +254,8 @@ class orpgFrame(wx.Frame):
                     ['  &About'],
                     ['  Online User Guide'],
                     ['  Change Log'],
-                    ['  Report a Bug']
+                    ['  Report a Bug'],
+                    ['  Tip of the Day']
                 ]]
 
         self.mainmenu = MenuBarEx(self, menu)
@@ -606,6 +628,9 @@ class orpgFrame(wx.Frame):
         wb = webbrowser.get()
         wb.open("http://www.assembla.com/spaces/tickets/index/traipse_dev?spaces_tool_id=Tickets")
 
+    def OnMB_HelpTipoftheDay(self):
+        self.ShowTipOfTheDay()
+
 
     #################################
     ##    Build the GUI
@@ -762,8 +787,7 @@ class orpgFrame(wx.Frame):
         self.Thaw()
 
     
-    def do_tab_window(self,xml_dom,parent_wnd):
-    #def do_tab_window(self, etreeEl, parent_wnd):
+    def do_tab_window(self, xml_dom, parent_wnd):
         # if container window loop through childern and do a recursive call
         temp_wnd = orpgTabberWnd(parent_wnd, style=FNB.FNB_ALLOW_FOREIGN_DND)
 
@@ -772,12 +796,6 @@ class orpgFrame(wx.Frame):
             wnd = self.build_window(c,temp_wnd)
             name = c.get("name")
             temp_wnd.AddPage(wnd, name, False)
-
-        """
-        for c in etreeEl.getchildren():
-            wnd = self.build_window(c, temp_wnd)
-            temp_wnd.AddPage(wnd, c.get('name'), False)
-        """
         return temp_wnd
 
     

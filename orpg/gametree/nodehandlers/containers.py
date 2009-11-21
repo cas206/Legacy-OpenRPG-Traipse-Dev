@@ -161,9 +161,10 @@ class group_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.outline = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Group"), wx.VERTICAL)
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
-                      }
+        self.text = {P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')) }
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
@@ -182,8 +183,8 @@ class group_edit_panel(wx.Panel):
         sizer.Add(wx.Size(10,10))
         sizer.Add(radio_b, 0, wx.EXPAND)
 
-        self.sizer = sizer
-        self.outline = wx.StaticBox(self,-1,"Group")
+        self.outline.Add(sizer, 0)
+        self.sizer = self.outline
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.Fit()
@@ -220,10 +221,10 @@ class tabber_handler(container_handler):
         container_handler.__init__(self, xml, tree_node)
 
     def get_design_panel(self,parent):
-        return tabbed_panel(parent,self,1)
+        return tabbed_edit_panel(parent, self)
 
     def get_use_panel(self,parent):
-        return tabbed_panel(parent,self,2)
+        return tabbed_panel(parent, self, 1)
 
 
 class tabbed_panel(orpgTabberWnd):
@@ -232,7 +233,6 @@ class tabbed_panel(orpgTabberWnd):
         self.handler = handler
         self.parent = parent
         handler.tree.traverse(handler.mytree_node, self.pick_panel, mode, False)
-
         parent.SetSize(self.GetBestSize())
 
     def pick_panel(self, treenode, mode):
@@ -241,6 +241,27 @@ class tabbed_panel(orpgTabberWnd):
         else: panel = node.get_use_panel(self)
         name = node.xml.get("name")
         if panel: self.AddPage(panel, name, False)
+
+class tabbed_edit_panel(orpgTabberWnd):
+    def __init__(self, parent, handler):
+        orpgTabberWnd.__init__(self, parent, style=FNB.FNB_NO_X_BUTTON)
+        self.handler = handler
+        self.parent = parent
+        main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Tabber"), wx.VERTICAL)
+        self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
+        main_sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
+        main_sizer.Add(self.title, 0, wx.EXPAND)
+        self.SetSizer(main_sizer)
+        self.SetAutoLayout(True)
+        self.Fit()
+        self.Bind(wx.EVT_TEXT, self.on_text, id=1)
+
+    def on_text(self,evt):
+        txt = self.title.GetValue()
+        if txt != "":
+            self.handler.xml.set('name',txt)
+            self.handler.rename(txt)
+
 
 #################################
 ## Splitter container
@@ -258,10 +279,6 @@ class splitter_handler(container_handler):
             if child_xml.tag == "splitter_atts": self.xml.remove(child_xml) #Same here!
             elif child_xml: self.tree.load_xml(child_xml,self.mytree_node)
         if not self.xml.get('horizontal'): self.xml.set('horizontal', '0')
-        """if not self.atts:
-            self.atts = Element('splitter_atts')
-            self.atts.set("horizontal","0")
-            self.xml.append(self.atts)"""
 
     def get_design_panel(self,parent):
         return self.build_splitter_wnd(parent, 1)
@@ -275,27 +292,16 @@ class splitter_handler(container_handler):
 
     def build_splitter_wnd(self, parent, mode):
         self.split = self.xml.get("horizontal")
-
         self.pane = splitter_panel(parent, self)
-
-        self.splitter = MultiSplitterWindow(self.pane, -1, style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
-
-        if self.split == '1':
-            self.splitter.SetOrientation(wx.VERTICAL)
-        else:
-            self.splitter.SetOrientation(wx.HORIZONTAL)
-
+        self.splitter = MultiSplitterWindow(self.pane, -1, 
+                        style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
+        if self.split == '1': self.splitter.SetOrientation(wx.VERTICAL)
+        else: self.splitter.SetOrientation(wx.HORIZONTAL)
         self.bestSizex = -1
         self.bestSizey = -1
-
         self.tree.traverse(self.mytree_node, self.doSplit, mode, False) 
-
         self.pane.sizer.Add(self.splitter, 1, wx.EXPAND)
-
-
-        if mode != 1:
-            self.pane.hozCheck.Hide()
-
+        if mode != 1: self.pane.hozCheck.Hide()
         self.pane.SetSize((self.bestSizex, self.bestSizey))
         self.pane.Layout()
         parent.SetSize(self.pane.GetSize())
@@ -305,7 +311,6 @@ class splitter_handler(container_handler):
         node = self.tree.GetPyData(treenode)
         if mode == 1: tmp = node.get_design_panel(self.splitter)
         else: tmp = node.get_use_panel(self.splitter)
-
         if self.split == '1':
             sash = tmp.GetBestSize()[1]+1
             self.bestSizey += sash+11
@@ -316,9 +321,7 @@ class splitter_handler(container_handler):
             self.bestSizex += sash
             if self.bestSizey < tmp.GetBestSize()[1]:
                 self.bestSizey = tmp.GetBestSize()[1]+31
-
         self.splitter.AppendWindow(tmp, sash)
-
     def get_size_constraint(self):
         return 1
 
@@ -327,17 +330,16 @@ class splitter_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         sizer = wx.BoxSizer(wx.VERTICAL)
+        self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
 
         self.hozCheck = wx.CheckBox(self, -1, "Horizontal Split")
         hoz = self.handler.xml.get("horizontal")
 
-        if hoz == '1':
-            self.hozCheck.SetValue(True)
-            #self.splitsize = wx.BoxSizer(wx.HORIZONTAL)
-        else:
-            self.hozCheck.SetValue(False)
-            #self.splitsize = wx.BoxSizer(wx.VERTICAL)
+        if hoz == '1': self.hozCheck.SetValue(True)
+        else: self.hozCheck.SetValue(False)
 
+        sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
+        sizer.Add(self.title, 0)
         sizer.Add(self.hozCheck, 0, wx.EXPAND)
         sizer.Add(wx.Size(10,0))
         #sizer.Add(self.splitsize,  1, wx.EXPAND)
@@ -345,12 +347,17 @@ class splitter_panel(wx.Panel):
         self.sizer = sizer
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
-
+        self.Bind(wx.EVT_TEXT, self.on_text, id=1)
         self.Bind(wx.EVT_CHECKBOX, self.on_check_box, id=self.hozCheck.GetId())
 
     def on_check_box(self,evt):
         state = self.hozCheck.GetValue()
-        if state:
-            self.handler.xml.set("horizontal", "1")
-        else:
-            self.handler.xml.set("horizontal", "0")
+        if state: self.handler.xml.set("horizontal", "1")
+        else: self.handler.xml.set("horizontal", "0")
+
+    def on_text(self,evt):
+        txt = self.title.GetValue()
+        if txt != "":
+            self.handler.xml.set('name',txt)
+            self.handler.rename(txt)
+

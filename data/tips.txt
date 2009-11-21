@@ -1,0 +1,43 @@
+Traipse OpenRPG is a fork of the original OpenRPG software. Traipse has been designed to be easy to use while offering superb functionality and strong stability.
+
+You can find other OpenRPG users by clicking "Game Server/Browse Servers" and then double clicking on one of the servers. Try the top one: it has the most active users.
+
+For a technical question about OpenRPG try the RPGObjects OpenRPG forum here: http://www.rpgobjects.com/forum/index.php?action=vtopic&forum=1
+
+Many of the OpenRPG servers have associated web sites that help players find campaigns, find OpenRPG resources such as miniatures and charachter sheets, and can answer other questions.
+
+The Traipes Suite has a debug console that allows you to see what would appear in a regular console. The debug console allows you to copy and paste any errors that occur, and the Bug Report button allows you to submit your bug while still playing.
+
+You may observe an OpenRPG session in progress by entering a room that someone else has created. Be careful not to annoy people. If you have questions use "Whisper". Red rooms are private.
+
+The Traipse Update Manager allows you to download source code from any OpenRPG fork in the Repos tab. Just give the repository a name, then add the url and press refresh. Here are two to try it with: Traipse-Dev: http://hg.assembla.com/traipse_dev and OpenRPG-Core: http://hg.assembla.com/openrpg
+
+Room Moderation helps prevent annyoing lurkers from disrupting your game. Turn on Room Moderation by right clicking on your name in the player list and find the Moderation sub menu.
+
+OpenRPG servers are maintained by private individuals. When you connect to a new server please take a moment to read any rules they might have, such as not posting images while in the lobby.
+
+OpenRPG images are hosted in one of three ways: by a URL to any image hosting site such as Photobucket or Imageshack, by a URL to an image served by your own client program (CherryPy) or by a file uploaded to OpenRPG's dedicated image server from your local file system.
+
+You can drag an image file straight from your file system to OpenRPG's map using the Remote Image Server. In Pious Paladin this feature will be added to CherryPy so will be able to drag and drop locally as well.
+
+If you want to create a large background image for your map you can make it using OpenRPG's whiteboard features or by loading many dungeon "tile" images and then save the entire map as a .jpg file. 
+
+Locking a miniature means that it is ignored when you click around the map. Useful for images of terrain or objects.
+
+Hold down Ctrl to select or right-click a locked miniature on the map. On a Mac use the Command / Apple button.
+
+OpenRPG's main four windows are all sizeable, movable and dockable. In addition by editing the layout.xml file you can put two or more of them on a tab.
+
+You can customise OpenRPG's behaviour in four ways: plugins, custom die rollers, game system specific nodes and by using filters.
+
+OpenRPG is not written for any one role playing system, but custom features have been written to aid game play for about a dozen systems. Ask around to see what might be availble, and if nothing is, consider creating your own.
+
+OpenRPG automatically saves an html log of your entire game session and saves it in the folder myfiles/logs
+
+Thanks for selecting the Traipse distribution of OpenRPG. Traipse users are growing in number and often express joy about the stability of the software. If you see a bug, any bug, please report it with the Debug Console in Traipse Suite.
+
+Die roller notes are available on the Features Node. Right click on the top of the game tree, "Insert features Node" and double click on "Load Die Roller Notes"
+
+You can search your chat session by opening the text view of it (click the button to the right of the dice). Type in the search term and hit "find".
+
+The map has a tape measure. Hold down SHIFT and drag with the left mouse button down.

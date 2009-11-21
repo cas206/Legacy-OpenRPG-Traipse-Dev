@@ -608,8 +608,7 @@ class MapCanvas(wx.ScrolledWindow):
         try:
             xml_dom = fromstring(xml)
             if xml_dom == None: return
-            if xml_dom.tag != 'map': node_list = xml_dom.find("map")
-            else: node_list = xml_dom
+            node_list = xml_dom.find("map") if xml_dom.tag != 'map' else xml_dom
             # set map version to incoming data so layers can convert
             self.map_version = node_list.get("version")
             action = node_list.get("action")
