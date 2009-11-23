@@ -29,16 +29,15 @@ __version__ = "$Id: base_msg.py,v 1.9 2007/03/09 14:11:55 digitalxero Exp $"
 
 from threading import RLock
 from orpg.networking.mplay_client import *
-
-from xml.etree.ElementTree import XML, fromstring, parse
+from xml.etree.ElementTree import ElementTree, Element
 
 class map_element_msg_base:
 #  This is a base class
 
     def __init__(self,reentrant_lock_object = None):
 
-        if not self.tagname:
-            raise Exception, "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."; exit()
+        if not hasattr(self,"tagname"):
+            raise Exception, "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
 
         self._props = {}
         #  This is a dictionary that holds (value,changed) 2-tuples, indexed by attribute
@@ -197,38 +196,46 @@ class map_element_msg_base:
     #########################################
     #  XML importers begin
 
-    def _from_dom(self,xml,prop_func):
+    def _from_dom(self,xml_dom,prop_func):
         self.p_lock.acquire()
-        if xml.tag == self.tagname:
-            if xml.keys():
-                for k in xml.keys():
-                    prop_func(k, xml.get(k))
+        if iselement(xml_dom): ## Uses new Element Tree style
+            if xml_dom.tag == self.tagname:
+                if xml_dom.attrib:
+                    for k in xml_dom.attrib:
+                        prop_func(k,xml_dom.get(k))
+        elif not iselement(xml_dom): ## Uses old DOM style (deprecated!!)
+            if xml_dom.tagName == self.tagname:
+                if xml_dom.getAttributeKeys():
+                    for k in xml_dom.getAttributeKeys():
+                        prop_func(k,xml_dom.getAttribute(k))
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to modify a " + self.tagname + " from a non-<" + self.tagname + "/> element"
         self.p_lock.release()
 
-    def init_from_dom(self, xml):
-    #  xml must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags.
-        self._from_dom(xml,self.init_prop)
+    def init_from_dom(self,xml_dom):
+    #  xml_dom must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags.
+        self._from_dom(xml_dom,self.init_prop)
 
-    def set_from_dom(self, xml):
-    #  xml must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags
-        self._from_dom(xml, self.set_prop)
+    def set_from_dom(self,xml_dom):
+    #  xml_dom must be pointing to an empty tag.  Override in a derived class for <map/> and other similar tags
+        self._from_dom(xml_dom,self.set_prop)
 
-    def init_from_xml(self, tree):
-        #tree = XML(xmlString)
-        node_list = tree.findall(self.tagname)
+    def init_from_xml(self,xml):
+        xml_dom = parseXml(xml)
+        node_list = xml_dom.getElementsByTagName(self.tagname)
         if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
-            while len(node_list):
-                self.init_from_dom(node_list.pop())
+            while len(node_list): self.init_from_dom(node_list.pop())
+        if xml_dom: xml_dom.unlink()
 
-    def set_from_xml(self, tree):
-        #tree = XML(xmlString)
-        node_list = tree.findall(self.tagname)
+    def set_from_xml(self,xml):
+        xml_dom = parseXml(xml)
+        node_list = xml_dom.getElementsByTagName(self.tagname)
         if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
             while len(node_list): self.set_from_dom(node_list.pop())
+        if xml_dom: xml_dom.unlink()
+
     # XML importers end
     #########################################

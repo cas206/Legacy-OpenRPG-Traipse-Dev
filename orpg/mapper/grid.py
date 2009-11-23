@@ -33,8 +33,6 @@ from miniatures import SNAPTO_ALIGN_CENTER
 from miniatures import SNAPTO_ALIGN_TL
 from math import floor
 
-from xml.etree.ElementTree import ElementTree, Element, tostring
-
 # Grid mode constants
 GRID_RECTANGLE = 0
 GRID_HEXAGON = 1
@@ -63,7 +61,7 @@ class grid_layer(layer_base):
         #size_ratio is the size ajustment for Hex and ISO to make them more accurate
         self.size_ratio = 1.5
         self.snap = True
-        self.color = wx.BLACK # = color.Get()
+        self.color = wx.BLACK# = color.Get()
         #self.color = cmpColour(r,g,b)
         self.r_h = RGBHex()
         self.mode = GRID_RECTANGLE
@@ -389,37 +387,38 @@ class grid_layer(layer_base):
             # Disable pen/brush optimizations to prevent any odd effects elsewhere
 
     def layerToXML(self,action = "update"):
-        xml = Element('grid')
+        xml_str = "<grid"
         if self.color != None:
             (red,green,blue) = self.color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
-            xml.set('color', hexcolor)
-        if self.unit_size != None: xml.set('size', str(self.unit_size))
-        if self.iso_ratio != None: xml.set('ratio', str(self.iso_ratio))
+            xml_str += " color='" + hexcolor + "'"
+        if self.unit_size != None: xml_str += " size='" + str(self.unit_size) + "'"
+        if self.iso_ratio != None: xml_str += " ratio='" + str(self.iso_ratio) + "'"
         if self.snap != None:
-            if self.snap: xml.set('snap', '1')
-            else: xml.set('snap', '0')
-        if self.mode != None: xml.set('mode', str(self.mode))
-        if self.line != None: xml.set('line', str(self.line))
+            if self.snap: xml_str += " snap='1'"
+            else: xml_str += " snap='0'"
+        if self.mode != None: xml_str+= "  mode='" + str(self.mode) + "'"
+        if self.line != None: xml_str+= " line='" + str(self.line) + "'"
+        xml_str += "/>"
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
-            return tostring(xml)
+            return xml_str
         else: return ''
 
     def layerTakeDOM(self, xml_dom):
-        if xml_dom.get("color"):
-            r,g,b = self.r_h.rgb_tuple(xml_dom.get("color"))
+        if xml_dom.hasAttribute("color"):
+            r,g,b = self.r_h.rgb_tuple(xml_dom.getAttribute("color"))
             self.set_color(cmpColour(r,g,b))
         #backwards compatible with non-isometric map formated clients
         ratio = RATIO_DEFAULT
-        if xml_dom.get("ratio"): ratio = xml_dom.get("ratio")
-        if xml_dom.get("mode"):
-            self.SetMode(int(xml_dom.get("mode")))
-        if xml_dom.get("size"):
-            self.unit_size = int(xml_dom.get("size"))
+        if xml_dom.hasAttribute("ratio"): ratio = xml_dom.getAttribute("ratio")
+        if xml_dom.hasAttribute("mode"):
+            self.SetMode(int(xml_dom.getAttribute("mode")))
+        if xml_dom.hasAttribute("size"):
+            self.unit_size = int(xml_dom.getAttribute("size"))
             self.unit_size_y = self.unit_size
-        if xml_dom.get("snap"):
-            if (xml_dom.get("snap") == 'True') or (xml_dom.get("snap") == "1"): self.snap = True
+        if xml_dom.hasAttribute("snap"):
+            if (xml_dom.getAttribute("snap") == 'True') or (xml_dom.getAttribute("snap") == "1"): self.snap = True
             else: self.snap = False
-        if xml_dom.get("line"):
-            self.SetLine(int(xml_dom.get("line")))
+        if xml_dom.hasAttribute("line"):
+            self.SetLine(int(xml_dom.getAttribute("line")))

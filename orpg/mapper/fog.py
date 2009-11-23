@@ -83,7 +83,6 @@ class fog_layer(layer_base):
         self.log = component.get('log')
         layer_base.__init__(self)
         self.color = wx.Color(128, 128, 128)
-        #if "__WXGTK__" not in wx.PlatformInfo: self.color = wx.Color(128,128,128, 128)
         self.fogregion = wx.Region()
         self.fogregion.Clear()
         self.fog_bmp = None
@@ -122,8 +121,7 @@ class fog_layer(layer_base):
         self.fill_fog()
 
     def fill_fog(self):
-        if not self.use_fog:
-            return
+        if not self.use_fog: return
         mdc = wx.MemoryDC()
         mdc.SelectObject(self.fog_bmp)
         mdc.SetPen(wx.TRANSPARENT_PEN)
@@ -144,7 +142,6 @@ class fog_layer(layer_base):
         if self.fog_bmp == None or not self.fog_bmp.Ok() or not self.use_fog:
             return
         if self.last_role != self.canvas.frame.session.role: self.fill_fog()
-        
         mdc = wx.MemoryDC()
         mdc.SelectObject(self.fog_bmp)
         dc.Blit(0, 0, self.canvas.size[0], self.canvas.size[1], mdc, 0, 0, wx.AND)
@@ -184,14 +181,8 @@ class fog_layer(layer_base):
         regn.Clear()
         list = IRegion().scan_Convert(polypt)
         for i in list:
-            if regn.IsEmpty():
-                #if "__WXGTK__" not in wx.PlatformInfo: 
-                regn = wx.Region(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
-                #else: regn = wx.Region(i.left, i.y, i.right+1-i.left, 1)
-            else:
-                #if "__WXGTK__" not in wx.PlatformInfo: 
-                regn.Union(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
-                #else: regn.Union(i.left, i.y, i.right+1-i.left, 1)
+            if regn.IsEmpty(): regn = wx.Region(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
+            else: regn.Union(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
         return regn
 
     def add_area(self, area="", show="Yes"):
@@ -209,21 +200,16 @@ class fog_layer(layer_base):
         if show == "Yes": self.canvas.frame.session.send(xml_str)
 
     def layerToXML(self, action="update"):
-        if not self.use_fog: return ""
+        if not self.use_fog:
+            return ""
         fog_string = ""
         ri = wx.RegionIterator(self.fogregion)
         if not (ri.HaveRects()): fog_string = FogArea("all", self.log).toxml("del")
         while ri.HaveRects():
-            #if "__WXGTK__" not in wx.PlatformInfo:
             x1 = ri.GetX()/COURSE
             x2 = x1+(ri.GetW()/COURSE)-1
             y1 = ri.GetY()/COURSE
             y2 = y1+(ri.GetH()/COURSE)-1
-            #else:
-            #    x1 = ri.GetX()
-            #    x2 = x1+ri.GetW()-1
-            #    y1 = ri.GetY()
-            #    y2 = y1+ri.GetH()-1
             poly = FogArea(str(x1) + "," + str(y1) + ";" +
                           str(x2) + "," + str(y1) + ";" +
                           str(x2) + "," + str(y2) + ";" +
@@ -244,11 +230,11 @@ class fog_layer(layer_base):
             if not self.use_fog:
                 self.use_fog = True
                 self.recompute_fog()
-            if xml_dom.get('serial'): self.serial_number = int(xml_dom.get('serial'))
-            children = xml_dom.getchildren()
+            if xml_dom.hasAttribute('serial'): self.serial_number = int(xml_dom.getAttribute('serial'))
+            children = xml_dom._get_childNodes()
             for l in children:
-                action = l.get("action")
-                outline = l.get("outline")
+                action = l.getAttribute("action")
+                outline = l.getAttribute("outline")
                 if (outline == "all"):
                     polyline = [IPoint().make(0,0), IPoint().make(self.width-1, 0),
                               IPoint().make(self.width-1, self.height-1),
@@ -261,10 +247,10 @@ class fog_layer(layer_base):
                     polyline = []
                     lastx = None
                     lasty = None
-                    list = l.getchildren()
+                    list = l._get_childNodes()
                     for point in list:
-                        x = point.get( "x" )
-                        y = point.get( "y" )
+                        x = point.getAttribute( "x" )
+                        y = point.getAttribute( "y" )
                         if (x != lastx or y != lasty):
                             polyline.append(IPoint().make(int(x), int(y)))
                         lastx = x

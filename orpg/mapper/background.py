@@ -40,8 +40,6 @@ from orpg.tools.orpg_log import logger
 from orpg.tools.decorators import debugging
 from orpg.tools.orpg_settings import settings
 
-from xml.etree.ElementTree import ElementTree, Element, tostring, fromstring, parse
-
 ##-----------------------------
 ## background layer
 ##-----------------------------
@@ -102,7 +100,7 @@ class layer_back_ground(layer_base):
         self.type = BG_TEXTURE
         if self.img_path != path:
             try:
-                self.bg_bmp = ImageHandler.load(path, "texture", 0)
+                self.bg_bmp = ImageHandler.load(path, "texture", 0).ConvertToBitmap()
                 if self.bg_bmp == None:
                     logger.general("Invalid image type!")
                     raise Exception, "Invalid image type!"
@@ -114,7 +112,7 @@ class layer_back_ground(layer_base):
         self.isUpdated = True
         self.type = BG_IMAGE
         if self.img_path != path:
-            self.bg_bmp = ImageHandler.load(path, "background", 0)
+            self.bg_bmp = ImageHandler.load(path, "background", 0).ConvertToBitmap()
             try:
                 if self.bg_bmp == None:
                     logger.general("Invalid image type!")
@@ -136,12 +134,6 @@ class layer_back_ground(layer_base):
         if self.bg_bmp == None or not self.bg_bmp.Ok() or ((self.type != BG_TEXTURE) and (self.type != BG_IMAGE)):
             return False
         dc2 = wx.MemoryDC()
-        
-        ### Temporary ###
-        try: self.bg_bmp = self.bg_bmp.ConvertToBitmap()
-        except: pass
-        #################
-        
         dc2.SelectObject(self.bg_bmp)
         topLeft = [int(topleft[0]/scale), int(topleft[1]/scale)]
         topRight = [int((topleft[0]+size[0]+1)/scale)+1, int((topleft[1]+size[1]+1)/scale)+1]
@@ -214,52 +206,55 @@ class layer_back_ground(layer_base):
 
 
     def layerToXML(self, action="update"):
-        xml = Element('bg')
+        xml_str = "<bg"
         if self.bg_color != None:
             (red,green,blue) = self.bg_color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
-            xml.set('color', hexcolor)
-        if self.img_path != None: xml.set('path', urllib.quote(self.img_path).replace('%3A', ':'))
-        if self.type != None: xml.set('type', str(self.type))
+            xml_str += ' color="' + hexcolor + '"'
+        if self.img_path != None: xml_str += ' path="' + urllib.quote(self.img_path).replace('%3A', ':') + '"'
+        if self.type != None: xml_str += ' type="' + str(self.type) + '"'
         if self.local and self.img_path != None:
-            xml.set('local', 'True')
-            xml.set('localPath', urllib.quote(self.localPath).replace('%3A', ':'))
-            xml.set('localTime', str(self.localTime))
+            xml_str += ' local="True"'
+            xml_str += ' localPath="' + urllib.quote(self.localPath).replace('%3A', ':') + '"'
+            xml_str += ' localTime="' + str(self.localTime) + '"'
+        xml_str += "/>"
+        logger.debug(xml_str)
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
-            return tostring(xml)
+            return xml_str
         else: return ''
 
 
     def layerTakeDOM(self, xml_dom):
         type = BG_COLOR
-        color = xml_dom.get("color")
+        color = xml_dom.getAttribute("color")
+        logger.debug("color=" + color)
+        path = urllib.unquote(xml_dom.getAttribute("path"))
+        logger.debug("path=" + path)
         # Begin ted's map changes
-        if xml_dom.get("color"):
-            r,g,b = self.r_h.rgb_tuple(xml_dom.get("color"))
+        if xml_dom.hasAttribute("color"):
+            r,g,b = self.r_h.rgb_tuple(xml_dom.getAttribute("color"))
             self.set_color(cmpColour(r,g,b))
         # End ted's map changes
-        if xml_dom.get("type"):
-            type = int(xml_dom.get("type"))
+        if xml_dom.hasAttribute("type"):
+            type = int(xml_dom.getAttribute("type"))
             logger.debug("type=" + str(type))
-        if type == BG_TEXTURE: 
-            if xml_dom.get('path') != "": self.set_texture(xml_dom.get('path'))
-        elif type == BG_IMAGE: 
-            if xml_dom.get('path') != "": self.set_image(xml_dom.get('path'), 1)
+        if type == BG_TEXTURE:
+            if path != "": self.set_texture(path)
+        elif type == BG_IMAGE:
+            if path != "": self.set_image(path, 1)
         elif type == BG_NONE: self.clear()
-        if xml_dom.get('local') and xml_dom.get('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.get('localPath'))):
-            self.localPath = urllib.unquote(xml_dom.get('localPath'))
+        if xml_dom.hasAttribute('local') and xml_dom.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.getAttribute('localPath'))):
+            self.localPath = urllib.unquote(xml_dom.getAttribute('localPath'))
             self.local = True
-            self.localTime = int(xml_dom.get('localTime'))
+            self.localTime = int(xml_dom.getAttribute('localTime'))
             if self.localTime-time.time() <= 144000:
                 file = open(self.localPath, "rb")
                 imgdata = file.read()
                 file.close()
                 filename = os.path.split(self.localPath)
                 (imgtype,j) = mimetypes.guess_type(filename[1])
-                postdata = urllib.urlencode({'filename':filename[1], 
-                                            'imgdata':imgdata, 
-                                            'imgtype':imgtype})
+                postdata = urllib.urlencode({'filename':filename[1], 'imgdata':imgdata, 'imgtype':imgtype})
                 thread.start_new_thread(self.upload, (postdata, self.localPath, type))
 
 
@@ -267,12 +262,13 @@ class layer_back_ground(layer_base):
         self.lock.acquire()
         if type == 'Image' or type == 'Texture':
             url = component.get('settings').get_setting('ImageServerBaseURL')
-            recvdata = parse(urllib.urlopen(url, postdata))
+            file = urllib.urlopen(url, postdata)
+            recvdata = file.read()
+            file.close()
             try:
-                xml_dom = fromstring(recvdata).getroot()
-                xml_dom = fromstring(recvdata)
-                if xml_dom.tag == 'path':
-                    path = xml_dom.get('url')
+                xml_dom = minidom.parseString(recvdata)._get_documentElement()
+                if xml_dom.nodeName == 'path':
+                    path = xml_dom.getAttribute('url')
                     path = urllib.unquote(path)
                     if type == 'Image': self.set_image(path, 1)
                     else: self.set_texture(path)
@@ -280,7 +276,7 @@ class layer_back_ground(layer_base):
                     self.local = True
                     self.localTime = time.time()
                 else:
-                    print xml_dom.get('msg')
+                    print xml_dom.getAttribute('msg')
             except Exception, e:
                 print e
                 print recvdata

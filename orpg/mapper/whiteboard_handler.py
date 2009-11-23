@@ -30,8 +30,6 @@ __version__ = "$Id: whiteboard_handler.py,v 1.37 2007/03/09 14:11:56 digitalxero
 from base_handler import *
 from math import floor
 from math import sqrt
-from orpg.tools.orpg_log import debug
-from xml.etree.ElementTree import ElementTree, Element, tostring
 
 class whiteboard_handler(base_layer_handler):
     def __init__(self, parent, id, canvas):

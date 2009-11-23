@@ -568,7 +568,7 @@ class ServerGUI(wx.Frame):
     def OnCreateGroup( self, data ):
         (room, room_id, player, pwd) = data
         self.groups.AddGroup(data)
-        self.conns.roomList[room_id] = name
+        self.conns.roomList[room_id] = room
         data = (room, room_id, player)
         self.conns.updateRoom(data)
 
