@@ -99,7 +99,6 @@ class BmpMiniature:
         self.bottom = bmp.GetHeight()
         self.isUpdated = False
         self.gray = False
-        print bmp
         self.set_bmp(bmp)
 
     def __del__(self):
@@ -320,41 +319,47 @@ class BmpMiniature:
             dc.DrawText(label,x+1,y+1)
 
     def toxml(self, action="update"):
-        mini = Element('miniature')
-        if action == 'del':
-            mini.set('action', action)
-            mini.set('id', str(self.id))
-            return tostring(mini)
-        mini.set('action', action)
-        mini.set('id', str(self.id))
-        mini.set('label', self.label)
+        if action == "del":
+            xml_str = "<miniature action='del' id='" + self.id + "'/>"
+            return xml_str
+        xml_str = "<miniature"
+        xml_str += " action='" + action + "'"
+        xml_str += " label='" + self.label + "'"
+        xml_str+= " id='" + self.id + "'"
         if self.pos != None:
-            mini.set('posx', str(self.pos.x))
-            mini.set('posy', str(self.pos.y))
-        if self.heading != None: mini.set('heading', str(self.heading))
-        if self.face != None: mini.set('face', str(self.face))
-        if self.path != None: mini.set('path', str(urllib.quote(self.path).replace('%3A', ':')))
-        mini.set('locked', '1') if self.locked else mini.set('locked', '0')
-        mini.set('hide', '1') if self.hide else mini.set('hide', '0')
-        if self.snap_to_align != None: mini.set('align', str(self.snap_to_align))
-        if self.id != None: mini.set('zorder', str(self.zorder))
-        if self.width != None: mini.set('width', str(self.width))
-        if self.height != None: mini.set('height', str(self.height))
+            xml_str += " posx='" + str(self.pos.x) + "'"
+            xml_str += " posy='" + str(self.pos.y) + "'"
+        if self.heading != None: xml_str += " heading='" + str(self.heading) + "'"
+        if self.face != None: xml_str += " face='" + str(self.face) + "'"
+        if self.path != None: xml_str += " path='" + urllib.quote(self.path).replace('%3A', ':') + "'"
+        if self.locked: xml_str += "  locked='1'"
+        else: xml_str += "  locked='0'"
+        if self.hide: xml_str += " hide='1'"
+        else: xml_str += " hide='0'"
+        if self.snap_to_align != None: xml_str += " align='" + str(self.snap_to_align) + "'"
+        if self.id != None: xml_str += " zorder='" + str(self.zorder) + "'"
+        if self.width != None: xml_str += " width='" + str(self.width) + "'"
+        if self.height != None: xml_str += " height='" + str(self.height) + "'"
         if self.local:
-            mini.set('local', str(self.local))
-            mini.set('localPath', str(urllib.quote(self.localPath).replace('%3A', ':')))
-            mini.set('localTime', str(localTime))
+            xml_str += ' local="' + str(self.local) + '"'
+            xml_str += ' localPath="' + str(urllib.quote(self.localPath).replace('%3A', ':')) + '"'
+            xml_str += ' localTime="' + str(self.localTime) + '"'
+        xml_str += " />"
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
-            return mini
+            print xml_str; return xml_str
         else: return ''
 
     def takedom(self, xml_dom):
         self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("posx"): self.pos.x = int(xml_dom.getAttribute("posx"))
-        if xml_dom.hasAttribute("posy"): self.pos.y = int(xml_dom.getAttribute("posy"))
-        if xml_dom.hasAttribute("heading"): self.heading = int(xml_dom.getAttribute("heading"))
-        if xml_dom.hasAttribute("face"): self.face = int(xml_dom.getAttribute("face"))
+        if xml_dom.hasAttribute("posx"):
+            self.pos.x = int(xml_dom.getAttribute("posx"))
+        if xml_dom.hasAttribute("posy"):
+            self.pos.y = int(xml_dom.getAttribute("posy"))
+        if xml_dom.hasAttribute("heading"):
+            self.heading = int(xml_dom.getAttribute("heading"))
+        if xml_dom.hasAttribute("face"):
+            self.face = int(xml_dom.getAttribute("face"))
         if xml_dom.hasAttribute("path"):
             self.path = urllib.unquote(xml_dom.getAttribute("path"))
             self.set_bmp(ImageHandler.load(self.path, 'miniature', self.id))
@@ -391,7 +396,9 @@ class miniature_layer(layer_base):
         # only smaller.
         font_size = int(settings.get_setting('defaultfontsize'))
         if (font_size >= 10): font_size -= 2
-        self.label_font = wx.Font(font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
+        self.label_font = wx.Font(font_size, 
+                                  wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, 
+                                  wx.FONTWEIGHT_NORMAL,
                                   False, settings.get_setting('defaultfont'))
 
     def next_serial(self):
@@ -485,14 +492,16 @@ class miniature_layer(layer_base):
 
     def layerToXML(self, action="update"):
         """ format  """
-        mini_string = ""
+        minis_string = ""
         if self.miniatures:
-            for m in self.miniatures: mini_string = m.toxml(action)
-        if mini_string != '':
-            s = Element('miniatures')
-            s.set('serial', str(self.serial_number))
-            s.append(mini_string)
-            return tostring(s)
+            for m in self.miniatures: minis_string += m.toxml(action)
+        if minis_string != '':
+            s = "<miniatures"
+            s += " serial='" + str(self.serial_number) + "'"
+            s += ">"
+            s += minis_string
+            s += "</miniatures>"
+            return s
         else: return ""
 
     def layerTakeDOM(self, xml_dom):
@@ -521,9 +530,9 @@ class miniature_layer(layer_base):
                 if c.hasAttribute('face'): face = int(c.getAttribute('face'))
                 if c.hasAttribute('align'): snap_to_align = int(c.getAttribute('align'))
                 if c.getAttribute('zorder'): zorder = int(c.getAttribute('zorder'))
-                image = ImageHandler.load(path, 'miniature', id)
-                mini = BmpMiniature(id, path, image, pos, heading, face, label, locked, hide, snap_to_align, zorder, width, height, func='minis')
-                self.miniatures.append(mini)
+                min = BmpMiniature(id, path, ImageHandler.load(path, 'miniature', id), pos, heading, 
+                    face, label, locked, hide, snap_to_align, zorder, width, height)
+                self.miniatures.append(min)
                 if c.hasAttribute('local') and c.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(c.getAttribute('localPath'))):
                     localPath = urllib.unquote(c.getAttribute('localPath'))
                     local = True
@@ -550,13 +559,13 @@ class miniature_layer(layer_base):
         recvdata = file.read()
         file.close()
         try:
-            xml_dom = minidom.parseString(recvdata)._get_documentElement()
-            if xml_dom.nodeName == 'path':
-                path = xml_dom.getAttribute('url')
+            xml_dom = fromstring(recvdata)
+            if xml_dom.tag == 'path':
+                path = xml_dom.get('url')
                 path = urllib.unquote(path)
                 if not modify:
                     start = path.rfind("/") + 1
-                    if self.canvas.parent.layer_handlers[2].auto_label: min_label = path[start:len(path)-4]
+                    if self.canvas.parent.handlers[2].auto_label: min_label = path[start:len(path)-4]
                     else: min_label = ""
                     id = 'mini-' + self.canvas.frame.session.get_next_id()
                     self.add_miniature(id, path, pos=pos, label=min_label, local=True, 
@@ -567,7 +576,7 @@ class miniature_layer(layer_base):
                     self.miniatures[len(self.miniatures)-1].localTime = time.time()
                     self.miniatures[len(self.miniatures)-1].path = path
             else:
-                print xml_dom.getAttribute('msg')
+                print xml_dom.get('msg')
         except Exception, e:
             print e
             print recvdata

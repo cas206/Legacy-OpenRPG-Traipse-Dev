@@ -63,7 +63,7 @@ class ImageHandlerClass(object):
             if self.__fetching[path]:
                 thread.start_new_thread(self.__loadCacheThread,
                                         (path, image_type, imageId))
-        return wx.Bitmap(dir_struct["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
+        return wx.Image(dir_struct["icon"] + "fetching.png", wx.BITMAP_TYPE_PNG)
 
     def directLoad(self, path):
         # Directly load an image, no threads

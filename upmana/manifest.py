@@ -65,7 +65,7 @@ class ManifestChanges(object):
 
     def FetchList(self, parent):
         retlist = []
-        for litem in parent.findall('lobject'):
+        for litem in parent.find('list').findall('lobject'):
             if litem.get('type') == 'int': retlist.append(int(litem.text))
             if litem.get('type') == 'bool': retlist.append(litem.text == 'True')
             elif litem.get('type') == 'float': retlist.append(float(litem.text))

@@ -390,7 +390,7 @@ class rpg_grid(wx.grid.Grid):
         num = self.GetNumberRows()
         if num == 1:
             return
-        self.handler.grid.remove(self.handler.grid[num-1])#always remove last row -- nasty
+        self.handler.grid.remove(self.handler.grid[num-1])# always remove last row -- nasty
         self.DeleteRows(num-1,1)
         self.rows = self.handler.grid.findall('row')
         self.handler.refresh_rows()
@@ -401,7 +401,7 @@ class rpg_grid(wx.grid.Grid):
             return
         for r in self.rows:
             cells = r.findall('cell')
-            r.remove(r[num-1])# always remove the last column -- nasty
+            r.remove(r[num-1])                  # always remove the last column -- nasty
         self.DeleteCols(num-1,1)
         self.set_col_widths()
 
@@ -434,17 +434,17 @@ class rpg_grid_edit_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         self.grid = rpg_grid(self,handler)
+        self.main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Grid"), wx.VERTICAL)
+
         self.title = wx.TextCtrl(self, G_TITLE, handler.xml.get('name'))
 
         radio_b = wx.RadioBox(self, GRID_BOR, "Border (HTML)", choices=["no","yes"])
         border = handler.grid.get("border")
         radio_b.SetSelection(int(border))
 
-        self.auto_size = wx.CheckBox(self, G_AUTO_SIZE, " Auto Size")
-        if handler.is_autosized() == '1':
-            self.auto_size.SetValue(True)
-        else:
-            self.auto_size.SetValue(False)
+        self.auto_size = wx.CheckBox(self, G_AUTO_SIZE, "Auto Size")
+        if handler.is_autosized() == '1': self.auto_size.SetValue(True)
+        else: self.auto_size.SetValue(False)
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(wx.Button(self, G_ADD_ROW, "Add Row"), 1, wx.EXPAND)
@@ -455,7 +455,6 @@ class rpg_grid_edit_panel(wx.Panel):
         sizer.Add(wx.Size(10,10))
         sizer.Add(wx.Button(self, G_DEL_COL, "Remove Column"), 1, wx.EXPAND)
 
-        self.main_sizer = wx.StaticBoxSizer(wx.StaticBox(self,-1,"Grid"), wx.VERTICAL)
         self.main_sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         self.main_sizer.Add(self.title, 0, wx.EXPAND)
         self.main_sizer.Add(radio_b, 0, 0)

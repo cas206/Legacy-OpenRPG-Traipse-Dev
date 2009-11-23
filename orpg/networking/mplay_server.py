@@ -92,15 +92,10 @@ class game_group(object):
         self.persistant = persist
         self.mapFile = None
         ### Needs to use Element Tree closer
-        if mapFile != None:
-            f = open( mapFile )
-            tree = f.read()
-            f.close()
-        else:
-            f = open(orpg.dirpath.dir_struct["template"] + "default_map.xml")
-            tree = f.read()
-            f.close()
-        self.game_map.init_from_xml(fromstring(tree))
+        if mapFile != None: tree = parse(mapFile)
+        else: tree = parse(dir_struct["template"] + "default_map.xml")
+        tree = tree.getroot()
+        self.game_map.init_from_xml(tostring(tree))
 
     def save_map(self):
         if self.mapFile is not None and self.persistant == 1 and self.mapFile.find("default_map.xml") == -1:
@@ -191,7 +186,7 @@ class client_stub(client_base):
             #el.set('to', player)
             #el.set('from', '0')
             #el.set('group_id', group)
-            #el.text(msg)
+            #el.append(msg)
             self.outbox.put("<msg to='" + player + "' from='0' group_id='" + group + "' />" + msg)
 
     def change_group(self, group_id, groups):
@@ -319,7 +314,6 @@ class mplay_server:
         # try to use it.
         try:
             self.banDom = parse(self.userPath + 'ban_list.xml')
-            #self.banDom.normalize()
             self.banDoc = self.banDom.getroot()
 
             for element in self.banDom.findall('banned'):
@@ -362,7 +356,6 @@ class mplay_server:
         # try to use it.
         try:
             self.configDom = parse(self.userPath + 'server_ini.xml')
-            #self.configDom.normalize()
             self.configDoc = self.configDom.getroot()
             if hasattr(self, 'bootPassword'): self.boot_pwd = self.bootPassword
             else:
@@ -476,8 +469,6 @@ class mplay_server:
             #pull information from config file DOM
             try:
                 roomdefaults = self.configDom.findall("room_defaults")[0]
-                #rd.normalize()
-                #roomdefaults = self.rd.documentElement
                 try:
                     setting = roomdefaults.findall('passwords')[0]
                     rpw = setting.get('allow')
@@ -488,10 +479,10 @@ class mplay_server:
                 except: self.log_msg("Room Defaults: [Warning] Allowing Passworded Rooms")
                 try:
                     setting = roomdefaults.findall('map')[0]
-                    map = setting.get('file')
-                    if map != "":
-                        roomdefault_map = self.userPath + map.replace("myfiles/", "")
-                        self.log_msg("Room Defaults: Using " + str(map) + " for room map")
+                    mapper = setting.get('file')
+                    if mapper != "":
+                        roomdefault_map = self.userPath + mapper.replace("myfiles/", "")
+                        self.log_msg("Room Defaults: Using " + str(mapper) + " for room map")
                 except: self.log_msg("Room Defaults: [Warning] Using Default Map")
 
                 try:
@@ -758,13 +749,11 @@ class mplay_server:
             data = ServerPlugins.preParseOutgoing()
             for msg in data:
                 try:
-                    #xml_dom = parseXml(msg)
                     xml_dom = fromstring(msg).getroot()
                     if xml_dom.get('from') and int(xml_dom.get('from')) > -1:
                         xml_dom.set('from', '-1')
                     xml_dom.set('to', 'all')
                     self.incoming_msg_handler(xml_dom, msg)
-                    #xml_dom.unlink()
                 except: pass
             self.p_lock.release()
             time.sleep(0.250)
@@ -1113,15 +1102,9 @@ class mplay_server:
         new_stub.EnableMessageLogging = self.log_network_messages
         self.sendMsg(newsock, new_stub.toxml("new"), False, None)
 
-        #  try to remove circular refs
-        #if xml_dom:
-        #    xml_dom.unlink()
-
         # send confirmation
         data = self.recvMsg(newsock, new_stub.useCompression, new_stub.compressionType)
-        try:
-            xml_dom = XML(data)
-            #xml_dom = xml_dom._get_documentElement()
+        try: xml_dom = XML(data)
         except Exception, e:
             print e
             (remote_host,remote_port) = newsock.getpeername()
@@ -1129,7 +1112,8 @@ class mplay_server:
             bad_xml_string += "Please report this bug to the development team at:<br /> "
             bad_xml_string += "<a href=\"http://sourceforge.net/tracker/?group_id=2237&atid=102237\">OpenRPG bugs "
             bad_xml_string += "(http://sourceforge.net/tracker/?group_id=2237&atid=102237)</a><br />"
-            self.sendMsg( newsock, "<msg to='" + props['id'] + "' from='" + props['id'] + "' group_id='0' />" + bad_xml_string, new_stub.useCompression, new_stub.compressionType)
+            self.sendMsg( newsock, "<msg to='" + props['id'] + "' from='" + props['id'] + "' group_id='0' />" + bad_xml_string, 
+                            new_stub.useCompression, new_stub.compressionType)
 
             time.sleep(2)
             newsock.close()
@@ -1165,7 +1149,6 @@ class mplay_server:
             time.sleep(1)
             self.log_msg("Connection terminating due to version incompatibility with client (ver: " + props['version'] + "  protocol: " + props['protocol_version'] + ")" )
             newsock.close()
-            #if xml_dom: xml_dom.unlink()
             return None
 
         ip = props['ip']
@@ -1178,7 +1161,6 @@ class mplay_server:
             #  Give messages time to flow
             time.sleep(1)
             newsock.close()
-            #if xml_dom: xml_dom.unlink()
             return None
 
         """
@@ -1235,7 +1217,6 @@ class mplay_server:
 
         #  Display the lobby message
         self.SendLobbyMessage(newsock,props['id'])
-        #if xml_dom: xml_dom.unlink()
 
     def checkClientVersion(self, clientversion):
         minv = self.minClientVersion.split('.')
@@ -1353,7 +1334,6 @@ class mplay_server:
         #  Parse the XML received from the connecting client"""
         try:
             xml_dom = XML(data)
-            #xml_dom = xml_dom._get_documentElement()
 
         except:
             try: newsock.close()
@@ -1379,14 +1359,6 @@ class mplay_server:
             print "from " + str(addr) + " created the following exception: "
             traceback.print_exc()
             return #returning causes connection thread instance to terminate
-
-        #  Again attempt to clean out DOM stuff
-        """
-        try: if xml_dom: xml_dom.unlink()
-        except:
-            print "The following exception caught unlinking xml_dom:"
-            traceback.print_exc()
-            return #returning causes connection thread instance to terminate"""
 
     """
     #========================================================
@@ -1420,20 +1392,15 @@ class mplay_server:
                 data = None
             except Exception, e:
                 self.log_msg(str(e))
-                #if xml_dom: xml_dom.unlink()
-        #if xml_dom: xml_dom.unlink()
         self.log_msg("message handler thread exiting...")
         self.incoming_event.set()
 
     def parse_incoming_dom(self, data):
-        #debug((data, tostring(data) if iselement(data) else 'None element'))  Sometimes I catch an error.
         end = data.find(">") #locate end of first element of message
         head = data[:end+1]
-        #self.log_msg(head)
         xml_dom = None
         try:
             xml_dom = XML(head)
-            #xml_dom = xml_dom._get_documentElement()
             self.message_action(xml_dom, data)
 
         except Exception, e:
@@ -1488,7 +1455,6 @@ class mplay_server:
         if act == "set":
             role = xml_dom.get("role")
             boot_pwd = xml_dom.get("boot_pwd")
-        #xml_dom.unlink()
         if group_id != "0":
             self.handle_role(act, player, role, boot_pwd, group_id)
             self.log_msg(("role", (player, role)))
@@ -1505,7 +1471,6 @@ class mplay_server:
             msg ="<msg to='" + player + "' from='" + player + "' group_id='" + group_id + "'>"
             msg += "<font color='#FF0000'>PONG!?!</font>"
         self.players[player].outbox.put(msg)
-        #xml_dom.unlink()
 
     def do_system(self, xml_dom, data):
         pass
@@ -1825,7 +1790,6 @@ class mplay_server:
     def incoming_player_handler(self, xml_dom, data):
         id = xml_dom.get("id")
         act = xml_dom.get("action")
-        #group_id = xml_dom.get("group_id")
         group_id = self.players[id].group_id
         ip = self.players[id].ip
         self.log_msg("Player with IP: " + str(ip) + " joined.")
@@ -1981,7 +1945,6 @@ class mplay_server:
             given_boot_pwd = None
             try:
                 xml_dom = XML(msg)
-                #xml_dom = xml_dom._get_documentElement()
                 given_boot_pwd = xml_dom.get("boot_pwd")
 
             except:
@@ -2092,7 +2055,7 @@ class mplay_server:
 
     def admin_banip(self, ip, name="", silent = 0):
         "Ban a player from a server from the console"
-        self.adming_buile_banlist() ### Alpha ###
+        self.admin_build_banlist() ### Alpha ###
         try:
             self.ban_list[ip] = {}
             self.ban_list[ip]['ip'] = ip
@@ -2412,8 +2375,7 @@ class mplay_server:
                         self.players[pid].outbox.put(msg)
                     except: pass
             elif cmd == "savemaps":
-                for g in self.groups.itervalues():
-                    g.save_map()
+                for g in self.groups.itervalues(): g.save_map()
                 msg ="<msg to='" + pid + "' from='0' group_id='" + gid + "'>Persistent room maps saved"
                 self.players[pid].outbox.put(msg)
             else:

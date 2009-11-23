@@ -241,23 +241,18 @@ if NEWCHAT:
             self.Bind(wx.webview.EVT_WEBVIEW_BEFORE_LOAD, self.OnLinkClicked)
 
         #Wrapers so I dont have to add special Code
-        
         def SetPage(self, htmlstring):
             self.SetPageSource(htmlstring)
 
-        
         def AppendToPage(self, htmlstring):
             self.SetPageSource(self.GetPageSource() + htmlstring)
 
-        
         def GetFont(self):
             return self.__font
 
-        
         def CalculateAllFonts(self, defaultsize):
             return
 
-        
         def SetDefaultFontAndSize(self, fontname, fontsize):
             self.__font = wx.Font(int(fontsize), 
                             wx.FONTFAMILY_ROMAN, wx.FONTSTYLE_NORMAL, 
@@ -267,22 +262,18 @@ if NEWCHAT:
             return (self.GetFont().GetFaceName(), self.GetFont().GetPointSize())
 
         #Events
-        
         def OnLinkClicked(self, linkinfo):
             href = linkinfo.GetHref()
             wb = webbrowser.get()
             wb.open(href)
 
-        
         def onPopup(self, evt):
             self.PopupMenu(self.menu)
 
-        
         def LeftUp(self, event):
             event.Skip()
             wx.CallAfter(self.parent.set_chat_text_focus, None)
 
-        
         def OnM_EditCopy(self, evt):
             wx.TheClipboard.UsePrimarySelection(False)
             wx.TheClipboard.Open()
@@ -290,30 +281,25 @@ if NEWCHAT:
             wx.TheClipboard.Close()
 
         #Cutom Methods
-        
         def Header(self):
             return "<html><head><style>body {font-size: " + str(self.GetFont().GetPointSize()) + "px;font-family: " + self.GetFont().GetFaceName() + ";color: " + self.parent.textcolor + ";background-color: " + self.parent.bgcolor + ";margin: 0;padding: 0 0;height: 100%;}</style></head><body>"
 
-        
         def StripHeader(self):
             tmp = self.GetPageSource().split('<BODY>')
             if tmp[-1].find('<body>') > -1: tmp = tmp[-1].split('<body>')
             return tmp[-1]
 
-        
         def build_menu(self):
             self.menu = wx.Menu()
             item = wx.MenuItem(self.menu, wx.ID_ANY, "Copy", "Copy")
             self.Bind(wx.EVT_MENU, self.OnM_EditCopy, item)
             self.menu.AppendItem(item)
 
-        
         def scroll_down(self):
             maxrange = self.GetScrollRange(wx.VERTICAL)
             pagesize = self.GetScrollPageSize(wx.VERTICAL)
             self.Scroll(-1, maxrange-pagesize)
 
-        
         def mouse_wheel(self, event):
             amt = event.GetWheelRotation()
             units = amt/(-(event.GetWheelDelta()))
@@ -379,7 +365,6 @@ class chat_notebook(orpgTabberWnd):
             self.create_gm_tab()
         self.SetSelection(0)
 
-    
     def get_tab_index(self, chatpanel):
         "Return the index of a chatpanel in the wxNotebook."
 
@@ -387,7 +372,6 @@ class chat_notebook(orpgTabberWnd):
             if (self.GetPage(i) == chatpanel):
                 return i
 
-    
     def create_gm_tab(self):
         if self.GMChatPanel == None:
             self.GMChatPanel = chat_panel(self, -1, MAIN_TAB, 'gm')
@@ -395,7 +379,6 @@ class chat_notebook(orpgTabberWnd):
             self.SetPageImage(self.GetPageCount()-1, 1)
             self.GMChatPanel.chatwnd.SetDefaultFontAndSize(self.font, self.fontsize)
 
-    
     def create_whisper_tab(self, playerid):
         "Add a new chatpanel directly connected to integer 'playerid' via whispering."
         private_tab = chat_panel(self, -1, WHISPER_TAB, playerid)
@@ -408,7 +391,6 @@ class chat_notebook(orpgTabberWnd):
         wx.CallAfter(self.AliasLib.RefreshAliases)
         return private_tab
 
-    
     def create_group_tab(self, group_name):
         "Add a new chatpanel directly connected to integer 'playerid' via whispering."
         private_tab = chat_panel(self, -1, GROUP_TAB, group_name)
@@ -420,7 +402,6 @@ class chat_notebook(orpgTabberWnd):
         wx.CallAfter(self.AliasLib.RefreshAliases)
         return private_tab
 
-    
     def create_null_tab(self, tab_name):
         "Add a new chatpanel directly connected to integer 'playerid' via whispering."
         private_tab = chat_panel(self, -1, NULL_TAB, tab_name)
@@ -432,11 +413,9 @@ class chat_notebook(orpgTabberWnd):
         wx.CallAfter(self.AliasLib.RefreshAliases)
         return private_tab
 
-    
     def onCloseTab(self, evt):
         try: tabid = evt.GetSelection()
         except: tabid = self.GetSelection()
-
         if self.GetPageText(tabid) == 'Main Room':
             #send no close error to chat
             evt.Veto()
@@ -445,7 +424,6 @@ class chat_notebook(orpgTabberWnd):
             msg = "Are You Sure You Want To Close This Page?"
             dlg = wx.MessageDialog(self, msg, "NotebookCtrl Question",
                                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-
             if wx.Platform != '__WXMAC__':
                 dlg.SetFont(wx.Font(8, wx.NORMAL, wx.NORMAL, wx.NORMAL, False))
 
@@ -461,16 +439,13 @@ class chat_notebook(orpgTabberWnd):
         elif panel in self.group_tabs: self.group_tabs.remove(panel)
         elif panel in self.null_tabs: self.null_tabs.remove(panel)
 
-    
     def newMsg(self, tabid):
         if tabid != self.GetSelection(): self.SetPageImage(tabid, 0)
 
-    
     def onPageChanging(self, event):
         """When private chattabs are selected, set the bitmap back to 'normal'."""
         event.Skip()
 
-    
     def onPageChanged(self, event):
         """When private chattabs are selected, set the bitmap back to 'normal'."""
         selected_idx = event.GetSelection()
@@ -567,7 +542,6 @@ class chat_panel(wx.Panel):
         self.fontsize = self.chatwnd.GetFont().GetPointSize()
         self.scroll_down()
 
-    
     def set_default_font(self, fontname=None, fontsize=None):
         """Set all chatpanels to new default fontname/fontsize. 
         Returns current font settings in a (fontname, fontsize) tuple."""
@@ -581,7 +555,6 @@ class chat_panel(wx.Panel):
         self.fontsize = newfontsize
         return (self.font, self.fontsize)
 
-    
     def build_menu(self):
         top_frame = component.get('frame')
         menu = wx.Menu()
@@ -673,54 +646,44 @@ class chat_panel(wx.Panel):
         top_frame.mainmenu.Insert(2, menu, '&Chat')
 
     ## Settings Menu Events
-    
     def OnMB_ShowImages(self, event):
         if event.IsChecked(): self.settings.set_setting("Show_Images_In_Chat", '1')
         else: self.settings.set_setting("Show_Images_In_Chat", '0')
 
-    
     def OnMB_StripHTML(self, event):
-        if event.IsChecked(): self.settings.set_setting("Sstriphtml", '1')
+        if event.IsChecked(): self.settings.set_setting("striphtml", '1')
         else: self.settings.set_setting("striphtml", '0')
 
-    
     def OnMB_ChatTimeIndex(self, event):
         if event.IsChecked(): self.settings.set_setting("Chat_Time_Indexing", '1')
         else: self.settings.set_setting("Chat_Time_Indexing", '0')
 
-    
     def OnMB_ChatAutoComplete(self, event):
         if event.IsChecked(): self.settings.set_setting("SuppressChatAutoComplete", '0')
         else: self.settings.set_setting("SuppressChatAutoComplete", '1')
 
-    
     def OnMB_ShowIDinChat(self, event):
         if event.IsChecked(): self.settings.set_setting("ShowIDInChat", '1')
         else: self.settings.set_setting("ShowIDInChat", '0')
 
-    
     def OnMB_LogTimeIndex(self, event):
         if event.IsChecked(): self.settings.set_setting("TimeStampGameLog", '1')
         else: self.settings.set_setting("TimeStampGameLog", '0')
 
-    
     def OnMB_TabbedWhispers(self, event):
         if event.IsChecked(): self.settings.set_setting("tabbedwhispers", '1')
         else: self.settings.set_setting("tabbedwhispers", '0')
 
-    
     def OnMB_GMTab(self, event):
         if event.IsChecked():
             self.settings.set_setting("GMWhisperTab", '1')
             self.parent.create_gm_tab()
         else: self.settings.set_setting("GMWhisperTab", '0')
 
-    
     def OnMB_GroupWhisperTabs(self, event):
         if event.IsChecked(): self.settings.set_setting("GroupWhisperTab", '1')
         else: self.settings.set_setting("GroupWhisperTab", '0')
 
-    
     def OnMB_DiceBar(self, event):
         act = '0'
         if event.IsChecked():
@@ -734,7 +697,6 @@ class chat_panel(wx.Panel):
         for panel in self.parent.group_tabs: panel.toggle_dice(act)
         for panel in self.parent.null_tabs: panel.toggle_dice(act)
 
-    
     def OnMB_FormatButtons(self, event):
         act = '0'
         if event.IsChecked():
@@ -749,7 +711,6 @@ class chat_panel(wx.Panel):
         for panel in self.parent.group_tabs: panel.toggle_formating(act)
         for panel in self.parent.null_tabs: panel.toggle_formating(act)
 
-    
     def OnMB_AliasTool(self, event):
         act = '0'
         if event.IsChecked():
@@ -763,7 +724,6 @@ class chat_panel(wx.Panel):
         for panel in self.parent.group_tabs: panel.toggle_alias(act)
         for panel in self.parent.null_tabs:panel.toggle_alias(act)
 
-    
     def OnMB_BackgroundColor(self, event):
         top_frame = component.get('frame')
         hexcolor = self.get_color()
@@ -874,7 +834,6 @@ class chat_panel(wx.Panel):
         self.chattxt.Bind(wx.EVT_TEXT_COPY, self.chatwnd.OnM_EditCopy)
     # def build_ctrls - end
 
-    
     def build_bar(self):
         self.toolbar_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.scroll_lock = None
@@ -896,14 +855,16 @@ class chat_panel(wx.Panel):
 
     
     def build_alias(self):
-        self.aliasSizer = wx.BoxSizer(wx.HORIZONTAL) ## Future ## Add these to a sizer, then turn the toolbar_sizer into a grid so these can adjust to the frame.
+        self.aliasSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.aliasList = wx.Choice(self, wx.ID_ANY, size=(100, 25), choices=[self.defaultAliasName])
         self.aliasButton = createMaskedButton( self, dir_struct["icon"] + 'player.gif', 
-                                            'Refresh list of aliases from Game Tree', wx.ID_ANY, '#bdbdbd' )
+                                            'Refresh list of aliases from Game Tree', 
+                                            wx.ID_ANY, '#bdbdbd' )
         self.aliasList.SetSelection(0)
         self.filterList = wx.Choice(self, wx.ID_ANY, size=(100, 25), choices=[self.defaultFilterName])
         self.filterButton = createMaskedButton( self, dir_struct["icon"] + 'add_filter.gif', 
-                                             'Refresh list of filters from Game Tree', wx.ID_ANY, '#bdbdbd' )
+                                             'Refresh list of filters from Game Tree', 
+                                             wx.ID_ANY, '#bdbdbd' )
         self.filterList.SetSelection(0)
 
         self.aliasSizer.Add( self.aliasButton, 0, wx.EXPAND )
@@ -915,7 +876,6 @@ class chat_panel(wx.Panel):
 
         if self.settings.get_setting('AliasTool_On') == '0': self.toggle_alias('0')
         else: self.toggle_alias('1')
-
     
     def toggle_alias(self, act):
         if act == '0': self.toolbar_sizer.Show(self.aliasSizer, False)
@@ -927,8 +887,11 @@ class chat_panel(wx.Panel):
 
     
     def build_dice(self):
-        self.numDieText = wx.TextCtrl( self, wx.ID_ANY, "1", size= wx.Size(25, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
-        self.dieModText = wx.TextCtrl( self, wx.ID_ANY, "", size= wx.Size(50, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
+        self.diceSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.numDieText = wx.TextCtrl( self, wx.ID_ANY, "1", 
+                                    size= wx.Size(25, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
+        self.dieModText = wx.TextCtrl( self, wx.ID_ANY, "", 
+                                    size= wx.Size(50, 25), validator=orpg.tools.inputValidator.MathOnlyValidator() )
         self.d4Button = createMaskedButton(self, dir_struct["icon"]+'b_d4.gif', 'Roll d4', wx.ID_ANY)
         self.d6Button = createMaskedButton(self, dir_struct["icon"]+'b_d6.gif', 'Roll d6', wx.ID_ANY)
         self.d8Button = createMaskedButton(self, dir_struct["icon"]+'b_d8.gif', 'Roll d8', wx.ID_ANY)
@@ -936,69 +899,49 @@ class chat_panel(wx.Panel):
         self.d12Button = createMaskedButton(self, dir_struct["icon"]+'b_d12.gif', 'Roll d12', wx.ID_ANY)
         self.d20Button = createMaskedButton(self, dir_struct["icon"]+'b_d20.gif', 'Roll d20', wx.ID_ANY)
         self.d100Button = createMaskedButton(self, dir_struct["icon"]+'b_d100.gif', 'Roll d100', wx.ID_ANY)
-        self.toolbar_sizer.Add( self.numDieText, 0, wx.ALIGN_CENTER | wx.EXPAND)
-        self.toolbar_sizer.Add( self.d4Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d6Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d8Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d10Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d12Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d20Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.d100Button, 0 ,wx.EXPAND)
-        self.toolbar_sizer.Add( self.dieModText, 0, wx.ALIGN_CENTER, 5 )
+
+        self.diceSizer.Add( self.numDieText, 0, wx.ALIGN_CENTER | wx.EXPAND)
+        self.diceSizer.Add( self.d4Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d6Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d8Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d10Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d12Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d20Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.d100Button, 0 ,wx.EXPAND)
+        self.diceSizer.Add( self.dieModText, 0, wx.ALIGN_CENTER, 5 )
+
+        self.toolbar_sizer.Add( self.diceSizer, 0, wx.EXPAND)
         if self.settings.get_setting('DiceButtons_On') == '0': self.toggle_dice('0')
         else: self.toggle_dice('1')
 
     
     def toggle_dice(self, act):
-        if act == '0':
-            self.toolbar_sizer.Show(self.numDieText, False)
-            self.toolbar_sizer.Show(self.d4Button, False)
-            self.toolbar_sizer.Show(self.d6Button, False)
-            self.toolbar_sizer.Show(self.d8Button, False)
-            self.toolbar_sizer.Show(self.d10Button, False)
-            self.toolbar_sizer.Show(self.d12Button, False)
-            self.toolbar_sizer.Show(self.d20Button, False)
-            self.toolbar_sizer.Show(self.d100Button, False)
-            self.toolbar_sizer.Show(self.dieModText, False)
-            self.toolbar_sizer.Layout()
-        else:
-            self.toolbar_sizer.Show(self.numDieText, True)
-            self.toolbar_sizer.Show(self.d4Button, True)
-            self.toolbar_sizer.Show(self.d6Button, True)
-            self.toolbar_sizer.Show(self.d8Button, True)
-            self.toolbar_sizer.Show(self.d10Button, True)
-            self.toolbar_sizer.Show(self.d12Button, True)
-            self.toolbar_sizer.Show(self.d20Button, True)
-            self.toolbar_sizer.Show(self.d100Button, True)
-            self.toolbar_sizer.Show(self.dieModText, True)
-            self.toolbar_sizer.Layout()
+        if act == '0': self.toolbar_sizer.Show(self.diceSizer, False)
+        else: self.toolbar_sizer.Show(self.diceSizer, True)
+        self.toolbar_sizer.Layout()
 
     
     def build_formating(self):
+        self.formatSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.boldButton = createMaskedButton( self, dir_struct["icon"]+'bold.gif', 
                                                             'Make the selected text Bold', wx.ID_ANY, '#bdbdbd')
         self.italicButton = createMaskedButton( self, dir_struct["icon"]+'italic.gif', 
                                                             'Italicize the selected text', wx.ID_ANY, '#bdbdbd' )
         self.underlineButton = createMaskedButton( self, dir_struct["icon"]+'underlined.gif', 
                                                             'Underline the selected text', wx.ID_ANY, '#bdbdbd' )
-        self.toolbar_sizer.Add( self.boldButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.italicButton, 0, wx.EXPAND )
-        self.toolbar_sizer.Add( self.underlineButton, 0, wx.EXPAND )
+
+        self.formatSizer.Add( self.boldButton, 0, wx.EXPAND )
+        self.formatSizer.Add( self.italicButton, 0, wx.EXPAND )
+        self.formatSizer.Add( self.underlineButton, 0, wx.EXPAND )
+        self.toolbar_sizer.Add( self.formatSizer, 0, wx.EXPAND )
         if self.settings.get_setting('FormattingButtons_On') == '0': self.toggle_formating('0')
         else: self.toggle_formating('1')
 
     
     def toggle_formating(self, act):
-        if act == '0':
-            self.toolbar_sizer.Show(self.boldButton, False)
-            self.toolbar_sizer.Show(self.italicButton, False)
-            self.toolbar_sizer.Show(self.underlineButton, False)
-            self.toolbar_sizer.Layout()
-        else:
-            self.toolbar_sizer.Show(self.boldButton, True)
-            self.toolbar_sizer.Show(self.italicButton, True)
-            self.toolbar_sizer.Show(self.underlineButton, True)
-            self.toolbar_sizer.Layout()
+        if act == '0': self.toolbar_sizer.Show(self.formatSizer, False)
+        else: self.toolbar_sizer.Show(self.formatSizer, True)
+        self.toolbar_sizer.Layout()
 
     # Heroman - Ideally, we would use static labels...
     
@@ -1075,7 +1018,7 @@ class chat_panel(wx.Panel):
         if self.lastSend:                          #  This will be zero when not typing, so equiv to if is_typing
             thisTime = time.time()                 #  thisTime is a local temp variable
             if (thisTime - self.lastPress) > 4:    #  Check to see if it's been 5 seconds since our last keystroke
-                                               #    If we're not already typing, then self.lastSend will be 0
+                                                   #  If we're not already typing, then self.lastSend will be 0
 
                 self.sendTyping(0)                 #  send a typing event here (0 for False)
     #  This subroutine actually takes care of sending the messages for typing/not_typing events
@@ -1758,7 +1701,7 @@ class chat_panel(wx.Panel):
                 newline = "<div class='"+c+"'> " + self.TimeIndexString() + name + s + "</div>"
                 log( self.settings, c, name+s )
         else: send = False
-        newline = component.get('xml').strip_unicode(newline)
+        newline = chat_util.strip_unicode(newline)
         if self.lockscroll == 0:
             self.chatwnd.AppendToPage(newline)
             self.scroll_down()
@@ -1801,7 +1744,6 @@ class chat_panel(wx.Panel):
         s = self.NormalizeParse(s)
         self.set_colors()
         self.Post(s,send,myself)
-
     
     def NormalizeParse(self, s):
         for plugin_fname in self.activeplugins.keys():
@@ -1817,7 +1759,6 @@ class chat_panel(wx.Panel):
             s = self.ParseFilter(s)
             self.parsed = 1
         return s
-
     
     def ParseFilter(self, s):
         s = self.GetFilteredText(s)
@@ -1833,7 +1774,6 @@ class chat_panel(wx.Panel):
             newstr = self.ParseNode(self.resolve_nodes(matches[i][1]))
             s = s.replace(matches[i][0], newstr, 1)
         return s
-
     
     def ParseDice(self, s):
         """Parses player input for embedded dice rolls"""
@@ -1852,7 +1792,6 @@ class chat_panel(wx.Panel):
                 s = s.replace("[" + matches[i] + "]", "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
             else: s = s.replace("[" + matches[i] + "]", "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
         return s
-
     
     def PraseUnknowns(self, s):
 	# Uses a tuple. Usage: ?Label}dY. If no Label is assigned then use ?}DY
@@ -1875,7 +1814,6 @@ class chat_panel(wx.Panel):
 
     # This subroutine builds a chat display name.
     #
-    
     def chat_display_name(self, player):
         if self.settings.get_setting("ShowIDInChat") == "0":
             display_name = player[0]
@@ -1885,7 +1823,6 @@ class chat_panel(wx.Panel):
 
     # This subroutine will get a hex color and return it, or return nothing
     #
-    
     def get_color(self):
         data = wx.ColourData()
         data.SetChooseFull(True)
@@ -1901,7 +1838,6 @@ class chat_panel(wx.Panel):
             return None
     # def get_color - end
 
-    
     def replace_quotes(self, s):
         in_tag = 0
         i = 0
@@ -1928,13 +1864,106 @@ class chat_panel(wx.Panel):
                 if child.get('name') == path[step]:
                     node = child
                     step += 1
-                    self.resolve_loop(node, path, step, depth)
+                    if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
+                    elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, step, depth)
+                    else: self.resolve_loop(node, path, step, depth)
+
+
+    def resolve_grid(self, node, path, step, depth):
+        if step == depth:
+            self.data = 'Invalid Grid Reference!'
+            return
+        cell = tuple(path[step].strip('(').strip(')').split(','))
+        grid = node.find('grid')
+        rows = grid.findall('row')
+        col = rows[int(cell[0])].findall('cell')
+        self.data = col[int(cell[1])].text or 'No Cell Data!'
+        return
+
+    def resolve_cust_loop(self, node, path, step, depth):
+        node_class = node.get('class')
+        if step == depth:
+            self.resolution(node)
+        ##Build Abilities dictionary##
+        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('abilities')
+        else: ab = node.find('abilities')
+        ab_list = ab.findall('stat'); pc_stats = {}
+
+        for ability in ab_list:
+            pc_stats[ability.get('name')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
+            pc_stats[ability.get('abbr')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
+
+        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('saves')
+        else: ab = node.find('saves')
+        ab_list = ab.findall('save')
+        for save in ab_list:
+            pc_stats[save.get('name')] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+            if save.get('name') == 'Fortitude': abbr = 'Fort'
+            if save.get('name') == 'Reflex': abbr = 'Ref'
+            if save.get('name') == 'Will': abbr = 'Will'
+            pc_stats[abbr] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+
+        if path[step].lower() == 'skill':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
+            node = node.find('skills')
+            child_list = node.findall('skill')
+            for child in child_list:
+                if path[step+1].lower() == child.get('name').lower():
+                    if step+2 == depth: self.data = child.get('rank')
+                    elif path[step+2].lower() == 'check':
+                        self.data = '<b>Skill Check:</b> ' + child.get('name') + ' [1d20+'+str( int(child.get('rank')) + int(pc_stats[child.get('stat')][1]) )+']'
+            return
+
+        if path[step].lower() == 'feat':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
+            node = node.find('feats')
+            child_list = node.findall('feat')
+            for child in child_list:
+                if path[step+1].lower() == child.get('name').lower():
+                    if step+2 == depth: self.data = '<b>'+child.get('name')+'</b>'+': '+child.get('desc')
+            return
+        if path[step].lower() == 'cast':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snp')
+            node = node.find('spells')
+            child_list = node.findall('spell')
+            for child in child_list:
+                if path[step+1].lower() == child.get('name').lower():
+                    if step+2 == depth: self.data = '<b>'+child.get('name')+'</b>'+': '+child.get('desc')
+            return
+        if path[step].lower() == 'attack':
+            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('combat')
+            if path[step+1].lower() == 'melee' or path[step+1].lower() == 'm':
+                bonus_text = '(Melee)'
+                bonus = node.find('attacks')
+                bonus = bonus.find('melee')
+                bonus = bonus.attrib; d = 0
+            elif path[step+1].lower() == 'ranged' or path[step+1].lower() == 'r':
+                bonus_text = '(Ranged)'
+                bonus = node.find('attacks')
+                bonus = bonus.find('ranged')
+                bonus = bonus.attrib; d = 0
+            for b in bonus:
+                d += int(bonus[b])
+            bonus = str(d)
+            if path[step+2] == None: self.data = bonus
+            else:
+                weapons = node.find('attacks')
+                weapons = weapons.findall('weapon')
+                for child in weapons:
+                    if path[step+2].lower() == child.get('name').lower():
+                        self.data = '<b>Attack: '+bonus_text+'</b> '+child.get('name')+' [1d20+'+bonus+'] ' + 'Damage: ['+child.get('damage')+']'
+            return
+        elif pc_stats.has_key(path[step]):
+            if step+1 == depth: self.data = pc_stats[path[step]][0] + ' +('+pc_stats[path[step]][1]+')'
+            elif path[step+1].lower() == 'mod': self.data = pc_stats[path[step]][1]
+            elif path[step+1].lower() == 'check': self.data = '<b>'+path[step]+' Check:</b> [1d20+'+str(pc_stats[path[step]][1])+']'
+            return
 
     def resolution(self, node):
         if self.passed == False:
             self.passed = True
             if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
-            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'No Data!'
+            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
         else:
             self.data = ''
             pass
@@ -1945,7 +1974,6 @@ class chat_panel(wx.Panel):
         cur_loc = 0
         reg = re.compile("(!!(.*?)!!)")
         matches = reg.findall(s)
-        print matches
         for i in xrange(0,len(matches)):
             newstr = txt = '!@' + node.get('map') + '::' + matches[i][1] + '@!'
             s = s.replace(matches[i][0], newstr, 1)
@@ -1954,13 +1982,13 @@ class chat_panel(wx.Panel):
 
     def resolve_nodes(self, s):
         self.passed = False
-        self.data = 'No Data!'
+        self.data = 'Invalid Reference!'
         value = ""
         path = s.split('::')
         depth = len(path)
         self.gametree = component.get('tree')
-        dom = self.gametree.xml_root.getchildren()
-        for node in dom:
-            if node.get('name') == path[0]:
-                self.resolve_loop(node, path, 1, len(path))
+        node = self.gametree.tree_map[path[0]]['node']
+        if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
+        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
+        else: self.resolve_loop(node, path, 1, depth)
         return self.data

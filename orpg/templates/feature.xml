@@ -1,108 +1,164 @@
+<nodehandler class="tabber_handler" icon="help" module="containers" name="Traipse OpenRPG" version="1.0">
+  <nodehandler class="textctrl_handler" frame="400,400,139,110" icon="note" map="Traipse OpenRPG" module="forms" name="Node Referencing" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Traipse node referencing is unlike other distributions of OpenRPG.  The gametree mapping is a fluid map that changes with the location of your nodes.  This allows you to create a reference node that will stay with your character sheet, and if you change the location of your character sheet the reference will still work.
 
-<nodehandler class="tabber_handler" icon="help" module="containers" name="OpenRPG+ 1.7.1" version="1.0">
-  <nodehandler class="link_handler" icon="html" module="forms" name="Release Notes" version="1.0">
-    <link href="http://openrpg.digitalxero.net/wiki/index.php?page=Release+Notes"/>
+There are two ways of references node data. A Root Reference and a Child Reference.
+
+A Root Reference uses this syntax:
+!@Node::Child::Data@!
+
+Root References find the data within the node first by looking at the nodes in the tree.  The location of the node must be exact or you will return an Invalid Reference!
+
+A Child Reference uses this syntax:
+!!Node::Child::Data!!
+
+Child References work from within a container.  Child References obtain the map from a child node and then look for the node data using an appended Root Reference.  As long as the Child Reference node remains in in the same location relative to the reference, you can move the nodes around and never need to change your references again.
+
+Child Referencing works from within a PC Sheet node as well.
+
+Syntax for Special PC Sheet Nodes:
+The nodes for the specialized PC Sheets now have a new syntax.
+
+Abilities:
+To reference an Ability, use the name or abbreviation of the Ability.
+Example: !@Mikael::Strength@!
+
+This will return the Ability, the Ability Score, and it's Modifier.
+
+Mod Referencing:
+If you want to find the Ability Modifier only, use Ability::Mod
+Example: !@Mikael::Strength::Mod@!
+
+Ability Checks:
+Ability Checks are simplified as well.  Simply add Check to the reference.
+Example: !@Mikael::Strength::Check@!
+
+The new referencing features are useful if you want to refence the ability modifier in other nodes.
+
+Skills:
+Skills work the similar to Abilities.  To refence a skill's ranks use the Skill syntax
+Example: !@Jonethan::Skill::Jump@!
+
+This will return the ranks you have in Jump.  Skill Checks are made by appending Check to the statement.
+Example: !@Jonethan::Skill::Jump::Check@!
+
+If you want to reference the skills modifier, use the Mod syntax
+Example: !@Jonethan::Skill::Jump::Mod@!
+
+Combat:
+You can now reference your attacks easily with the gametree.  Using the Attack syntax you can select modifier type, and a weapon to attack with.
+Example: !@Kammen-Pai::Attack::M::Dagger@!
+
+Modifier Type:
+There are two modifier types Melee (M) or Ranged(R) You will see I added can use the long word or the short hand.
+
+Spells:
+If the PC Sheet you are using has Spells and Powers, you can use the Cast syntax to cast a spell or use a power.
+Example: !@Kammen-Pai::Cast::Ray of Frost@!
+
+The data returned is the description of the spells actions.  Spell actions are difficult to remember, and even harder to code, so this will at least work as an emoteable reference and a reminder of how the spell works.
+
+Feats:
+Feats will work the same way as spells.  Because Feats and Spells have rulings that require such finesse it is not very easy to code them.  However you will receive an easy to use reference point for what your Feat does.
+Using the Feat syntax you can the description of the Feat.
+Example: !@Kammen-Pai::Feat::Ability Focus@!
+
+</text></nodehandler><nodehandler class="link_handler" icon="html" map="Traipse OpenRPG" module="forms" name="Release Notes" version="1.0">
+    <link href="http://www.assembla.com/wiki/show/traipse" />
   </nodehandler>
-  <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG User Guide" version="1.0">
-    <link href="http://openrpg.digitalxero.net"/>
+  <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG" module="forms" name="Traipse User Guide" version="1.0">
+    <link href="http://www.assembla.com/wiki/show/traipse/User_Manual" />
   </nodehandler>
-  <nodehandler class="file_loader" icon="help" module="core" name="Load Die Roller Notes" version="1.0">
-    <file name="die_roller_notes.xml"/>
+  <nodehandler class="file_loader" icon="help" map="Traipse OpenRPG" module="core" name="Load Die Roller Notes" version="1.0">
+    <file name="die_roller_notes.xml" />
   </nodehandler>
-  <nodehandler class="group_handler" icon="gear" module="containers" name="Templates" status="useful" version="1.0">
-    <group_atts border="1" cols="1"/>
-    <nodehandler class="group_handler" icon="flask" module="containers" name="Nodes" status="useful" version="1.0">
-      <group_atts border="1" cols="1"/>
-      <nodehandler class="file_loader" icon="note" module="core" name="Create New Text Box" version="1.0">
-        <file name="textctrl.xml"/>
+  <nodehandler border="1" class="group_handler" cols="1" icon="gear" map="Traipse OpenRPG" module="containers" name="Templates" status="useful" version="1.0">
+    <group_atts border="1" cols="1" />
+    <nodehandler border="1" class="group_handler" cols="1" icon="flask" map="Traipse OpenRPG::Templates" module="containers" name="Nodes" status="useful" version="1.0">
+      <group_atts border="1" cols="1" />
+      <nodehandler class="file_loader" icon="note" map="Traipse OpenRPG::Templates::Nodes" module="core" name="Create New Text Box" version="1.0">
+        <file name="textctrl.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="gear" module="core" name="Create New List Box" version="1.0">
-        <file name="listbox.xml"/>
+      <nodehandler class="file_loader" icon="gear" map="Traipse OpenRPG::Templates::Nodes" module="core" name="Create New List Box" version="1.0">
+        <file name="listbox.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="grid" module="core" name="Create New Grid" version="1.0">
-        <file name="grid.xml"/>
+      <nodehandler class="file_loader" icon="grid" map="Traipse OpenRPG::Templates::Nodes" module="core" name="Create New Grid" version="1.0">
+        <file name="grid.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="html" module="core" name="Create New Web Link" version="1.0">
-        <file name="link.xml"/>
+      <nodehandler class="file_loader" icon="html" map="Traipse OpenRPG::Templates::Nodes" module="core" name="Create New Web Link" version="1.0">
+        <file name="link.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="image" module="core" name="Create New Web Image" version="1.0">
-        <file name="image.xml"/>
-      </nodehandler>
-    </nodehandler>
-    <nodehandler class="group_handler" module="containers" name="Containers" status="useful" version="1.0">
-      <group_atts border="1" cols="1"/>
-      <nodehandler class="file_loader" module="core" name="Create New Folder" version="1.0">
-        <file name="group.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="tabber" module="core" name="Create New Tabber" version="1.0">
-        <file name="tabber.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="divider" module="core" name="Create New Splitter" version="1.0">
-        <file name="split.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="form" module="core" name="Create New Form" version="1.0">
-        <file name="form.xml"/>
+      <nodehandler class="file_loader" icon="image" map="Traipse OpenRPG::Templates::Nodes" module="core" name="Create New Web Image" version="1.0">
+        <file name="image.xml" />
       </nodehandler>
     </nodehandler>
-    <nodehandler class="group_handler" icon="gear" module="containers" name="Tools" status="useful" version="1.0">
-      <group_atts border="1" cols="1"/>
-      <nodehandler class="file_loader" icon="gear" module="core" name="Create New Chat Macro" version="1.0">
-        <file name="macro.xml"/>
+    <nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Templates" module="containers" name="Containers" status="useful" version="1.0">
+      <group_atts border="1" cols="1" />
+      <nodehandler class="file_loader" map="Traipse OpenRPG::Templates::Containers" module="core" name="Create New Folder" version="1.0">
+        <file name="group.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="gear" module="core" name="Create New Miniature Library Tool" version="1.0">
-        <file name="minlib.xml"/>
+      <nodehandler class="file_loader" icon="tabber" map="Traipse OpenRPG::Templates::Containers" module="core" name="Create New Tabber" version="1.0">
+        <file name="tabber.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="gear" module="core" name="Create remote node loader" version="1.0">
-        <file name="urloader.xml"/>
+      <nodehandler class="file_loader" icon="divider" map="Traipse OpenRPG::Templates::Containers" module="core" name="Create New Splitter" version="1.0">
+        <file name="split.xml" />
       </nodehandler>
-      <nodehandler class="file_loader" icon="d20" module="core" name="Create New d20 Character Tool" version="1.0">
-        <file name="d20character.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="d20" module="core" name="Create New St*r W*rs Character Tool" version="1.0">
-        <file name="StarWars_d20character.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="d20" module="core" name="3rd Edition Character Tool" version="1.0">
-        <file name="dnd3e.xml"/>
-      </nodehandler>
-      <nodehandler class="file_loader" icon="d20" module="core" name="3.5 Tool" version="1.0">
-        <file name="dnd3.5.xml"/>
+      <nodehandler class="file_loader" icon="form" map="Traipse OpenRPG::Templates::Containers" module="core" name="Create New Form" version="1.0">
+        <file name="form.xml" />
       </nodehandler>
     </nodehandler>
-  </nodehandler>
-  <nodehandler class="group_handler" icon="browser" module="containers" name="OpenRPG+ Resources" version="1.0">
-    <group_atts border="1" cols="1"/>
-    <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG+ Home Page" version="1.0">
-      <link href="http://openrpg.digitalxero.net"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG Project Page" version="1.0">
-      <link href="http://openrpg.digitalxero.net"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG Forums" version="1.0">
-      <link href="http://forums.rpghost.com/forumdisplay.php?s=&amp;forumid=118"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="Submit A Bug Report" version="1.0">
-      <link href="http://openrpg.digitalxero.net/phpbb/viewtopic.php?t=10"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG Plugin HQ" version="1.0">
-      <link href="http://openrpg.mduo13.com/plugins.php"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="OpenRPG Web Ring" version="1.0">
-      <link href="http://www.ringsurf.com/netring?ring=OpenRPG;action=home"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="AutoRealm" version="1.0">
-      <link href="http://www.gryc.ws/autorealm.htm"/>
-    </nodehandler>
-    <nodehandler class="link_handler" icon="html" module="forms" name="PCGen" version="1.0">
-      <link href="http://pcgen.sourceforge.net/01_overview.php"/>
+    <nodehandler border="1" class="group_handler" cols="1" icon="gear" map="Traipse OpenRPG::Templates" module="containers" name="Tools" status="useful" version="1.0">
+      <group_atts border="1" cols="1" />
+      <nodehandler class="file_loader" icon="gear" map="Traipse OpenRPG::Templates::Tools" module="core" name="Create New Chat Macro" version="1.0">
+        <file name="macro.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="gear" map="Traipse OpenRPG::Templates::Tools" module="core" name="Create New Miniature Library Tool" version="1.0">
+        <file name="minlib.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="gear" map="Traipse OpenRPG::Templates::Tools" module="core" name="Create remote node loader" version="1.0">
+        <file name="urloader.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::Tools" module="core" name="Create New d20 Character Tool" version="1.0">
+        <file name="d20character.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::Tools" module="core" name="Create New St*r W*rs Character Tool" version="1.0">
+        <file name="StarWars_d20character.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::Tools" module="core" name="3rd Edition Character Tool" version="1.0">
+        <file name="dnd3e.xml" />
+      </nodehandler>
+      <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::Tools" module="core" name="3.5 Tool" version="1.0">
+        <file name="dnd3.5.xml" />
+      </nodehandler>
     </nodehandler>
   </nodehandler>
-  <nodehandler class="group_handler" module="containers" name="Examples (Adventures)" version="1.0">
-    <group_atts border="1" cols="1"/>
-    <nodehandler class="file_loader" icon="d20" module="core" name="Bastion Press d20 Adventure" version="1.0">
-      <file name="Bastion_adventure.xml"/>
+  <nodehandler border="1" class="group_handler" cols="1" icon="browser" map="Traipse OpenRPG" module="containers" name="OpenRPG+ Resources" version="1.0">
+    <group_atts border="1" cols="1" />
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="OpenRPG+ Home Page" version="1.0">
+      <link href="http://www.openrpg.com" />
     </nodehandler>
-    <nodehandler class="file_loader" icon="d20" module="core" name="Darwin's World d20 Adventure" version="1.0">
-      <file name="Darwin_adventure.xml"/>
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="OpenRPG Forums" version="1.0">
+      <link href="http://forums.rpghost.com/forumdisplay.php?s=&amp;forumid=118" />
+    </nodehandler>
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="OpenRPG Plugin HQ" version="1.0">
+      <link href="http://openrpg.mduo13.com/plugins.php" />
+    </nodehandler>
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="OpenRPG Web Ring" version="1.0">
+      <link href="http://www.ringsurf.com/netring?ring=OpenRPG;action=home" />
+    </nodehandler>
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="AutoRealm" version="1.0">
+      <link href="http://www.gryc.ws/autorealm.htm" />
+    </nodehandler>
+    <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::OpenRPG+ Resources" module="forms" name="PCGen" version="1.0">
+      <link href="http://pcgen.sourceforge.net/01_overview.php" />
+    </nodehandler>
+  </nodehandler>
+  <nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG" module="containers" name="Examples (Adventures)" version="1.0">
+    <group_atts border="1" cols="1" />
+    <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Examples (Adventures)" module="core" name="Bastion Press d20 Adventure" version="1.0">
+      <file name="Bastion_adventure.xml" />
+    </nodehandler>
+    <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Examples (Adventures)" module="core" name="Darwin&apos;s World d20 Adventure" version="1.0">
+      <file name="Darwin_adventure.xml" />
     </nodehandler>
   </nodehandler>
 </nodehandler>

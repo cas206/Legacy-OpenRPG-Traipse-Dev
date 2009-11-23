@@ -83,7 +83,6 @@ class fog_layer(layer_base):
         self.log = component.get('log')
         layer_base.__init__(self)
         self.color = wx.Color(128, 128, 128)
-        #if "__WXGTK__" not in wx.PlatformInfo: self.color = wx.Color(128,128,128, 128)
         self.fogregion = wx.Region()
         self.fogregion.Clear()
         self.fog_bmp = None
@@ -122,8 +121,7 @@ class fog_layer(layer_base):
         self.fill_fog()
 
     def fill_fog(self):
-        if not self.use_fog:
-            return
+        if not self.use_fog: return
         mdc = wx.MemoryDC()
         mdc.SelectObject(self.fog_bmp)
         mdc.SetPen(wx.TRANSPARENT_PEN)
@@ -144,7 +142,6 @@ class fog_layer(layer_base):
         if self.fog_bmp == None or not self.fog_bmp.Ok() or not self.use_fog:
             return
         if self.last_role != self.canvas.frame.session.role: self.fill_fog()
-        
         mdc = wx.MemoryDC()
         mdc.SelectObject(self.fog_bmp)
         dc.Blit(0, 0, self.canvas.size[0], self.canvas.size[1], mdc, 0, 0, wx.AND)
@@ -184,14 +181,8 @@ class fog_layer(layer_base):
         regn.Clear()
         list = IRegion().scan_Convert(polypt)
         for i in list:
-            if regn.IsEmpty():
-                #if "__WXGTK__" not in wx.PlatformInfo: 
-                regn = wx.Region(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
-                #else: regn = wx.Region(i.left, i.y, i.right+1-i.left, 1)
-            else:
-                #if "__WXGTK__" not in wx.PlatformInfo: 
-                regn.Union(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
-                #else: regn.Union(i.left, i.y, i.right+1-i.left, 1)
+            if regn.IsEmpty(): regn = wx.Region(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
+            else: regn.Union(i.left*COURSE, i.y*COURSE, i.right*COURSE+1-i.left*COURSE, 1*COURSE)
         return regn
 
     def add_area(self, area="", show="Yes"):
@@ -215,16 +206,10 @@ class fog_layer(layer_base):
         ri = wx.RegionIterator(self.fogregion)
         if not (ri.HaveRects()): fog_string = FogArea("all", self.log).toxml("del")
         while ri.HaveRects():
-            #if "__WXGTK__" not in wx.PlatformInfo:
             x1 = ri.GetX()/COURSE
             x2 = x1+(ri.GetW()/COURSE)-1
             y1 = ri.GetY()/COURSE
             y2 = y1+(ri.GetH()/COURSE)-1
-            #else:
-            #    x1 = ri.GetX()
-            #    x2 = x1+ri.GetW()-1
-            #    y1 = ri.GetY()
-            #    y2 = y1+ri.GetH()-1
             poly = FogArea(str(x1) + "," + str(y1) + ";" +
                           str(x2) + "," + str(y1) + ";" +
                           str(x2) + "," + str(y2) + ";" +

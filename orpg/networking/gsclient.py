@@ -30,7 +30,6 @@ from __future__ import with_statement
 __version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
 
 import meta_server_lib
-#import orpg.tools.orpg_settings
 import orpg.tools.rgbhex
 import traceback
 
@@ -259,6 +258,7 @@ class game_server_panel(wx.Panel):
                 address = server.get('address')
                 self.cur_server_index = 999
                 self.name = server.get('name')
+                self.texts["address"].SetValue(address)
                 if self.session.is_connected():
                     if self.session.host_server == address : return
                     else: self.frame.kill_mplay_session()

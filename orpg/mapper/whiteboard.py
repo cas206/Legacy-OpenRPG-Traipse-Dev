@@ -287,7 +287,7 @@ class whiteboard_layer(layer_base):
         self.serial_number -= 1
 
     def add_line(self, line_string="", upperleft=cmpPoint(0,0), lowerright=cmpPoint(0,0), color="#000000", width=1):
-        id = 'line-' + str(self.next_serial())
+        id = 'line ' + str(self.next_serial())
         line = WhiteboardLine(id, line_string, upperleft, lowerright, color=self.color, width=self.width)
         self.lines.append(line)
         xml_str = "<map><whiteboard>"
@@ -387,7 +387,7 @@ class whiteboard_layer(layer_base):
         self.font = font
 
     def add_text(self, text_string, pos, style, pointsize, weight, color="#000000"):
-        id = 'text-' + str(self.next_serial())
+        id = 'text ' + str(self.next_serial())
         text = WhiteboardText(id,text_string, pos, style, pointsize, weight, color)
         self.texts.append(text)
         xml_str = "<map><whiteboard>"
@@ -444,6 +444,7 @@ class whiteboard_layer(layer_base):
             nodename = l._get_nodeName()
             action = l.getAttribute("action")
             id = l.getAttribute('id')
+            if self.serial_number < int(id[5:]): self.serial_number = int(id[5:])
             if action == "del":
                 if nodename == 'line':
                     line = self.get_line_by_id(id)

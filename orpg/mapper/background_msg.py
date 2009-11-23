@@ -27,8 +27,7 @@
 #
 __version__ = "$Id: background_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $"
 
-from base_msg import map_element_msg_base
-from xml.etree.ElementTree import ElementTree
+from base_msg import *
 
 class bg_msg(map_element_msg_base):
 

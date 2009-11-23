@@ -79,12 +79,12 @@ class minis_msg(map_element_msg_base):
 
     def init_from_dom(self,xml_dom):
         self.p_lock.acquire()
-        if xml_dom.tag == self.tagname:
-            if xml_dom.keys():
-                for k in xml_dom.keys():
-                    self.init_prop(k, xml_dom.get(k))
+        if xml_dom.tagName == self.tagname:
+            if xml_dom.getAttributeKeys():
+                for k in xml_dom.getAttributeKeys():
+                    self.init_prop(k,xml_dom.getAttribute(k))
 
-            for c in xml_dom.getchildren():
+            for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
                 try: mini.init_from_dom(c)
                 except Exception, e: print e; continue
@@ -107,12 +107,12 @@ class minis_msg(map_element_msg_base):
 
     def set_from_dom(self,xml_dom):
         self.p_lock.acquire()
-        if xml_dom.tag == self.tagname:
-            if xml_dom.keys():
-                for k in xml_dom.keys():
-                    self.set_prop(k,xml_dom.get(k))
+        if xml_dom.tagName == self.tagname:
+            if xml_dom.getAttributeKeys():
+                for k in xml_dom.getAttributeKeys():
+                    self.set_prop(k,xml_dom.getAttribute(k))
 
-            for c in xml_dom.getchildren():
+            for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
 
                 try: mini.set_from_dom(c)
