@@ -15,7 +15,7 @@ class Term2Win(object):
     def write(self, text):
         statbar.SetStatusText(text)
         wx.Yield()
-        sys.__stdout__.write(text)
+        #sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
     @debugging
@@ -292,8 +292,6 @@ class Repos(wx.Panel):
             if repo not in self.repolist: appendlist.append(repo)
         self.repolist = repolist
 
-        #wx.Yeild()  For future refrence.
-
         for repo in appendlist:
             self.id += 1
             #Build Constructs
@@ -345,7 +343,7 @@ class Repos(wx.Panel):
 
     def AddRepo(self, event):
         repo = self.texts['reponame'].GetValue(); repo = repo.replace(' ', '_'); repo = 'repo-' + repo
-        manifest.SetString('updaterepo', repo, '') #; self.repo = repo.split(',')
+        manifest.SetString('updaterepo', repo, '')
         self.BuildRepoList(None)
 
     def DelRepo(self, event):
@@ -648,7 +646,7 @@ class updateApp(wx.App):
         logger._set_log_to_console(False)
         logger.note("Updater Start")
         component.add('validate', validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.8 (open beta)", 
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.9 (final beta)", 
                                 component, manifest, self.main)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()

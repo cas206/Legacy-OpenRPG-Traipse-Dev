@@ -58,14 +58,13 @@ def Crash(type, value, crash):
     logger.info("Printed out crash-report.txt in your System folder", True)
 
 class Term2Win(object):
-    # A stdout redirector.  Allows the messages from Mercurial to be seen in the Install Window
+    # A stdout redirector.  To be implemented later.
     def write(self, text):
-        #logger.stdout(text)
+        logger.stdout(text)
         wx.Yield()
-        sys.__stdout__.write(text)
+        #sys.__stdout__.write(text)
 
 class TrueDebug(object):
-    ### Alpha ###
     """A simple debugger. Add debug() to a function and it prints the function name and any objects included. Add an object or a group of objects in ()'s.
     Adding True to locale prints the file name where the function is. Adding False to log turns the log off.
     Adding True to parents will print out the parent functions, starting from TrueDebug.
@@ -96,6 +95,7 @@ class DebugConsole(wx.Frame):
     def __init__(self, parent):
         super(DebugConsole, self).__init__(parent, -1, "Debug Console")
         icon = wx.Icon(dir_struct["icon"]+'note.ico', wx.BITMAP_TYPE_ICO)
+        self.parent = parent
         self.SetIcon(icon)
         self.console = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.bt_clear = wx.Button(self, wx.ID_CLEAR)
@@ -123,7 +123,7 @@ class DebugConsole(wx.Frame):
         self.console.SetValue('')
 
     def bug_report(self, evt):
-        pass
+        self.parent.OnMB_HelpReportaBug()
 
 class orpgLog(object):
     _log_level = 7
@@ -150,6 +150,7 @@ class orpgLog(object):
                              'log_string': 'ERROR'},
                           1: {'colorizer': {'bold': True, 'red': True},
                              'log_string': 'EXCEPTION'}}
+
         if not self.log_name:
             self.log_name = home_dir + filename + time.strftime('%m-%d-%Y.txt',
                                                     time.localtime(time.time()))
@@ -166,8 +167,10 @@ class orpgLog(object):
     def general(self, msg, to_console=False):
         self.log(msg, ORPG_GENERAL, to_console)
 
+    def stdout(self, msg, to_console=True):
+        self.log(msg, ORPG_INFO, to_console)
+
     def exception(self, msg, to_console=True):
-        ### Beta ### Every 'Critical' exception will draw attention to the Debug Console
         component.get('frame').TraipseSuiteWarn('debug')
         self.log(msg, ORPG_CRITICAL, to_console)
 
