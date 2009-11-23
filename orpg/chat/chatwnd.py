@@ -1882,8 +1882,8 @@ class chat_panel(wx.Panel):
 
     def resolve_cust_loop(self, node, path, step, depth):
         node_class = node.get('class')
-        if step == depth:
-            self.resolution(node)
+        ## Code needs clean up. Either choose .lower() or .title(), then reset the path list's content ##
+        if step == depth: self.resolution(node)
         ##Build Abilities dictionary##
         if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('abilities')
         else: ab = node.find('abilities')
@@ -1936,12 +1936,12 @@ class chat_panel(wx.Panel):
                 bonus_text = '(Melee)'
                 bonus = node.find('attacks')
                 bonus = bonus.find('melee')
-                bonus = bonus.attrib; d = 0
+                bonus = bonus.attrib; d = int(pc_stats['Str'][1])
             elif path[step+1].lower() == 'ranged' or path[step+1].lower() == 'r':
                 bonus_text = '(Ranged)'
                 bonus = node.find('attacks')
                 bonus = bonus.find('ranged')
-                bonus = bonus.attrib; d = 0
+                bonus = bonus.attrib; d = int(pc_stats['Dex'][1])
             for b in bonus:
                 d += int(bonus[b])
             bonus = str(d)
@@ -1953,10 +1953,10 @@ class chat_panel(wx.Panel):
                     if path[step+2].lower() == child.get('name').lower():
                         self.data = '<b>Attack: '+bonus_text+'</b> '+child.get('name')+' [1d20+'+bonus+'] ' + 'Damage: ['+child.get('damage')+']'
             return
-        elif pc_stats.has_key(path[step]):
-            if step+1 == depth: self.data = pc_stats[path[step]][0] + ' +('+pc_stats[path[step]][1]+')'
-            elif path[step+1].lower() == 'mod': self.data = pc_stats[path[step]][1]
-            elif path[step+1].lower() == 'check': self.data = '<b>'+path[step]+' Check:</b> [1d20+'+str(pc_stats[path[step]][1])+']'
+        elif pc_stats.has_key(path[step].title()):
+            if step+1 == depth: self.data = pc_stats[path[step].title()][0] + ' +('+pc_stats[path[step].title()][1]+')'
+            elif path[step+1].title() == 'Mod': self.data = pc_stats[path[step].title()][1]
+            elif path[step+1].title() == 'Check': self.data = '<b>'+path[step].title()+' Check:</b> [1d20+'+str(pc_stats[path[step].title()][1])+']'
             return
 
     def resolution(self, node):

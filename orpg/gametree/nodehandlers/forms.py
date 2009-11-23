@@ -381,10 +381,9 @@ class listbox_handler(node_handler):
         node_handler.__init__(self,xml,tree_node)
         self.list = self.xml.find('list')
         self.options = self.list.findall('option')
-        if self.list.get("send_button") == "":
-            self.list.set("send_button","0")
-        if self.list.get("hide_title") == "":
-            self.list.set("hide_title","0")
+        if self.list.get("send_button") == "": self.list.set("send_button","0")
+        if self.list.get("hide_title") == "": self.list.set("hide_title","0")
+        if self.list.get("raw_mode") == "": self.list.set("raw_mode","0")
 
     def get_design_panel(self,parent):
         return listbox_edit_panel(parent,self)
@@ -401,6 +400,9 @@ class listbox_handler(node_handler):
     def is_hide_title(self):
         return int(self.list.get("hide_title", 0))
 
+    def is_raw_send(self):
+        return int(self.list.get("raw_mode",0))
+
     # single selection methods
     def get_selected_node(self):
         for opt in self.options:
@@ -410,52 +412,43 @@ class listbox_handler(node_handler):
     def get_selected_index(self):
         i = 0
         for opt in self.options:
-            if opt.get("selected") == "1":
-                return i
+            if opt.get("selected") == "1": return i
             i += 1
         return 0
 
     def get_selected_text(self):
         node = self.get_selected_node()
-        if node:
-            return node.text
-        else:
-            return ""
-
+        if node: return node.text
+        else: return ""
 
     # mult selection methods
     def get_selections(self):
         opts = []
         for opt in self.options:
-            if opt.get("selected") == "1":
-                opts.append(opt)
+            if opt.get("selected") == "1": opts.append(opt)
         return opts
 
     def get_selections_text(self):
         opts = []
         for opt in self.options:
-            if opt.get("selected") == "1":
-                opts.append(opt.text)
+            if opt.get("selected") == "1": opts.append(opt.text)
         return opts
 
     def get_selections_index(self):
         opts = []
         i = 0
         for opt in self.options:
-            if opt.get("selected") == "1":
-                opts.append(i)
+            if opt.get("selected") == "1": opts.append(i)
             i += 1
         return opts
 
     # setting selection method
     def set_selected_node(self,index,selected=1):
-        if self.get_type() != L_CHECK:
-            self.clear_selections()
+        if self.get_type() != L_CHECK: self.clear_selections()
         self.options[index].set("selected", str(bool2int(selected)))
 
     def clear_selections(self):
-        for opt in self.options:
-            opt.set("selected","0")
+        for opt in self.options: opt.set("selected","0")
 
     # misc methods
     def get_options(self):
@@ -500,6 +493,23 @@ class listbox_handler(node_handler):
     def get_value(self):
         return "\n".join(self.get_selections_text())
 
+    def on_send_to_chat(self, evt):
+        txt = self.get_selected_text()
+        txt = self.chat.ParseMap(txt, self.xml)
+        if not self.is_raw_send():
+            self.chat.ParsePost(self.tohtml(), True, True)
+            return 1
+        actionlist = self.get_selections_text()
+        for line in actionlist:
+            line = self.chat.ParseMap(line, self.xml)
+            if(line != ""):
+                if line[0] != "/": ## it's not a slash command
+                    self.chat.ParsePost(line, True, True)
+                else:
+                    action = line
+                    self.chat.chat_cmds.docmd(action)
+        return 1
+
 
 F_LIST = wx.NewId()
 F_SEND = wx.NewId()
@@ -520,25 +530,17 @@ class listbox_panel(wx.Panel):
             if self.list.GetSize()[0] > 200:
                 self.list.Destroy()
                 self.list = wx.ComboBox(self, F_LIST, cur_opt, size=(200, -1), choices=opts, style=wx.CB_READONLY)
-        elif type == L_LIST:
-            self.list = wx.ListBox(self,F_LIST,choices=opts)
-        elif type == L_RADIO:
-            self.list = wx.RadioBox(self,F_LIST,label,choices=opts,majorDimension=3)
+        elif type == L_LIST: self.list = wx.ListBox(self,F_LIST,choices=opts)
+        elif type == L_RADIO: self.list = wx.RadioBox(self,F_LIST,label,choices=opts,majorDimension=3)
         elif type == L_CHECK:
             self.list = wx.CheckListBox(self,F_LIST,choices=opts)
             self.set_checks()
 
         for i in handler.get_selections_text():
-            if type == L_DROP:
-                self.list.SetValue( i )
-            else:
-                self.list.SetStringSelection( i )
-
-        if type == L_DROP:
-            sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        else:
-            sizer = wx.BoxSizer(wx.VERTICAL)
+            if type == L_DROP: self.list.SetValue( i )
+            else: self.list.SetStringSelection( i )
+        if type == L_DROP: sizer = wx.BoxSizer(wx.HORIZONTAL)
+        else: sizer = wx.BoxSizer(wx.VERTICAL)
 
         if type != L_RADIO:
             sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
@@ -557,30 +559,20 @@ class listbox_panel(wx.Panel):
 
         parent.SetSize(self.GetBestSize())
 
-        if type == L_DROP:
-            self.Bind(wx.EVT_COMBOBOX, self.on_change, id=F_LIST)
-        elif type == L_LIST:
-            self.Bind(wx.EVT_LISTBOX, self.on_change, id=F_LIST)
-        elif type == L_RADIO:
-            self.Bind(wx.EVT_RADIOBOX, self.on_change, id=F_LIST)
-        elif type == L_CHECK:
-            self.Bind(wx.EVT_CHECKLISTBOX, self.on_check, id=F_LIST)
-
-
+        if type == L_DROP: self.Bind(wx.EVT_COMBOBOX, self.on_change, id=F_LIST)
+        elif type == L_LIST: self.Bind(wx.EVT_LISTBOX, self.on_change, id=F_LIST)
+        elif type == L_RADIO: self.Bind(wx.EVT_RADIOBOX, self.on_change, id=F_LIST)
+        elif type == L_CHECK:self.Bind(wx.EVT_CHECKLISTBOX, self.on_check, id=F_LIST)
         self.type = type
-
 
     def on_change(self,evt):
         self.handler.set_selected_node(self.list.GetSelection())
 
     def on_check(self,evt):
-        for i in xrange(self.list.GetCount()):
-            self.handler.set_selected_node(i, bool2int(self.list.IsChecked(i)))
+        for i in xrange(self.list.GetCount()): self.handler.set_selected_node(i, bool2int(self.list.IsChecked(i)))
 
     def set_checks(self):
-        for i in self.handler.get_selections_index():
-            self.list.Check(i)
-
+        for i in self.handler.get_selections_index(): self.list.Check(i)
 
 
 BUT_ADD = wx.NewId()
@@ -606,6 +598,9 @@ class listbox_edit_panel(wx.Panel):
         self.send_button = wx.CheckBox(self, F_SEND_BUTTON, " Send Button")
         self.send_button.SetValue(handler.has_send_button())
 
+        self.raw_send = wx.CheckBox(self, F_RAW_SEND, " Send as Macro")
+        self.raw_send.SetValue(handler.is_raw_send())
+
         self.hide_title = wx.CheckBox(self, F_NO_TITLE, " Hide Title")
         self.hide_title.SetValue(handler.is_hide_title())
 
@@ -623,6 +618,7 @@ class listbox_edit_panel(wx.Panel):
         sizer.Add(wx.Size(10,10))
         sizer.Add(self.send_button, 0 , wx.EXPAND)
         sizer.Add(self.hide_title, 0, wx.EXPAND)
+        sizer.Add(self.raw_send, 0, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
         sizer.Add(wx.StaticText(self, -1, "Options:"), 0, wx.EXPAND)
         sizer.Add(self.listbox,1,wx.EXPAND);
@@ -640,6 +636,7 @@ class listbox_edit_panel(wx.Panel):
         self.Bind(wx.EVT_RADIOBOX, self.on_type, id=F_TYPE)
         self.Bind(wx.EVT_CHECKBOX, self.on_hide_button, id=F_NO_TITLE)
         self.Bind(wx.EVT_CHECKBOX, self.on_send_button, id=F_SEND_BUTTON)
+        self.Bind(wx.EVT_CHECKBOX, self.on_raw_button, id=F_RAW_SEND)
 
     def on_type(self,evt):
         self.handler.set_type(evt.GetInt())
@@ -685,6 +682,9 @@ class listbox_edit_panel(wx.Panel):
 
     def on_hide_button(self,evt):
         self.handler.list.set("hide_title", str( bool2int(evt.Checked()) ))
+
+    def on_raw_button(self,evt):
+        self.handler.list.set("raw_mode",str(bool2int(evt.Checked())))
 
 
 ###############################

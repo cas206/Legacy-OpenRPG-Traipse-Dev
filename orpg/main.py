@@ -97,8 +97,7 @@ class orpgFrame(wx.Frame):
                 "on_status_event":self.on_status_event,
                 "on_password_signal":self.on_password_signal,
                 "orpgFrame":self}
-        self.settings = component.get('settings') #Arbitrary until settings updated with Core.
-        self.session = orpg.networking.mplay_client.mplay_client(self.settings.get("player"), call_backs)
+        self.session = orpg.networking.mplay_client.mplay_client(settings.get("player"), call_backs)
         self.poll_timer = wx.Timer(self, wx.NewId())
         self.Bind(wx.EVT_TIMER, self.session.poll, self.poll_timer)
         self.poll_timer.Start(100)
@@ -300,11 +299,10 @@ class orpgFrame(wx.Frame):
         self.traipseSuite.AppendItem(self.debugConsole)
 
     def TraipseSuiteWarn(self, menuitem):
-        ### Beta ### Allows for the reuse of the 'Attention' menu.
+        ### Allows for the reuse of the 'Attention' menu.
         ### component.get('frame').TraipseSuiteWarn('item') ### Portable
         self.mainmenu.Remove(8)
         self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite!")
-        #self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite!')
         if menuitem == 'debug':
             if self.debugger.IsShown() == True:
                 self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
@@ -314,11 +312,10 @@ class orpgFrame(wx.Frame):
                 self.traipseSuite.AppendItem(self.debugConsole)
 
     def TraipseSuiteWarnCleanup(self, menuitem):
-        ### Beta ### Allows for portable cleanup of the 'Attention' menu.
+        ### Allows for portable cleanup of the 'Attention' menu.
         ### component.get('frame').TraipseSuiteWarnCleanup('item') ### Portable
         self.mainmenu.Remove(8)
         self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite")        
-        #self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
         if menuitem == 'debug':
             self.traipseSuite.RemoveItem(self.debugConsole)
             self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
@@ -410,7 +407,6 @@ class orpgFrame(wx.Frame):
                 graidentTo=wx.Color(0, 128, 255), graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedAqua", True)
 
-    
     def OnMB_OpenRPGTabStylesSlantedCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedCustom"):
             settings.change('TabTheme', 'customslant')
@@ -427,7 +423,6 @@ class orpgFrame(wx.Frame):
                 textColor=wx.Color(tred, tgreen, tblue))
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedCustom", True)
 
-    
     def OnMB_OpenRPGTabStylesFlatBlackandWhite(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatBlackandWhite"):
             settings.change('TabTheme', 'flat&bw')
@@ -435,7 +430,6 @@ class orpgFrame(wx.Frame):
                 graidentTo=wx.WHITE, graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesFlatBlackandWhite", True)
 
-    
     def OnMB_OpenRPGTabStylesFlatAqua(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatAqua"):
             settings.change('TabTheme', 'flat&aqua')
@@ -443,7 +437,6 @@ class orpgFrame(wx.Frame):
                 graidentTo=wx.Color(0, 128, 255), graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesFlatAqua", True)
 
-    
     def OnMB_OpenRPGTabStylesFlatCustom(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesFlatCustom"):
             settings.change('TabTheme', 'customflat')
@@ -461,7 +454,6 @@ class orpgFrame(wx.Frame):
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesFlatCustom", True)
 
     #Window Menu
-    
     def OnMB_WindowsMenu(self, event):
         menuid = event.GetId()
         name = self.mainwindows[menuid]
@@ -474,7 +466,6 @@ class orpgFrame(wx.Frame):
             self._mgr.Update()
 
     #OpenRPG Menu
-    
     def OnMB_OpenRPGSettings(self):
         dlg = orpg.tools.orpg_settings.orpgSettingsWnd(self)
         dlg.Centre()
@@ -484,18 +475,15 @@ class orpgFrame(wx.Frame):
         self.OnCloseWindow(0)
 
     #Game Server Menu
-    
     def OnMB_GameServerBrowseServers(self):
         if self._mgr.GetPane("Browse Server Window").IsShown() == True: self._mgr.GetPane("Browse Server Window").Hide()
         else: self._mgr.GetPane("Browse Server Window").Show()
         self._mgr.Update()
 
-    
     def OnMB_GameServerServerHeartbeat(self):
         if self.mainmenu.GetMenuState("GameServerServerHeartbeat"): settings.change('Heartbeat', '1')
         else: settings.change('Heartbeat', '0')
 
-    
     def OnMB_GameServerStartServer(self):
         start_dialog = wx.ProgressDialog( "Server Loading", "Server Loading, Please Wait...", 1, self )
         # Spawn the new process and close the stdout handle from it
@@ -514,23 +502,19 @@ class orpgFrame(wx.Frame):
         start_dialog.Destroy()
 
     # Tools Menu
-    
     def OnMB_PluginControlPanel(self, evt):
         if self.pluginsFrame.IsShown() == True: self.pluginsFrame.Hide()
         else: self.pluginsFrame.Show()
 
-    
     def OnMB_UpdateManagerPanel(self, evt):
         if self.updateMana.IsShown() == True: self.updateMana.Hide()
         else: self.updateMana.Show()
 
-    
     def OnMB_DebugConsole(self, evt):
         self.TraipseSuiteWarnCleanup('debug') ### Beta ###
         if self.debugger.IsShown() == True: self.debugger.Hide()
         else: self.debugger.Show()
 
-    
     def OnMB_ToolsLoggingLevelDebug(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelDebug"): lvl |= ORPG_DEBUG
@@ -538,7 +522,6 @@ class orpgFrame(wx.Frame):
         logger.log_level = lvl
         settings.set('LoggingLevel', lvl)
 
-    
     def OnMB_ToolsLoggingLevelNote(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelNote"): lvl |= ORPG_DEBUG
@@ -546,7 +529,6 @@ class orpgFrame(wx.Frame):
         logger.log_level = lvl
         settings.set('LoggingLevel', lvl)
 
-    
     def OnMB_ToolsLoggingLevelInfo(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelInfo"): lvl |= ORPG_INFO
@@ -554,7 +536,6 @@ class orpgFrame(wx.Frame):
         logger.log_level = lvl
         settings.set('LoggingLevel', lvl)
 
-    
     def OnMB_ToolsLoggingLevelGeneral(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelGeneral"): lvl |= ORPG_GENERAL
@@ -562,12 +543,10 @@ class orpgFrame(wx.Frame):
         logger.log_level = lvl
         settings.set('LoggingLevel', lvl)
 
-    
     def OnMB_ToolsPasswordManager(self):
         if self.mainmenu.GetMenuState("ToolsPasswordManager"): self.password_manager.Enable()
         else: self.password_manager.Disable()
 
-    
     def OnMB_ToolsStatusBar(self):
         if self._mgr.GetPane("Status Window").IsShown() == True:
             self.mainmenu.SetMenuState("ToolsStatusBar", False)
@@ -577,7 +556,6 @@ class orpgFrame(wx.Frame):
             self._mgr.GetPane("Status Window").Show()
         self._mgr.Update()
 
-    
     def OnMB_ToolsSoundToolbar(self):
         if self._mgr.GetPane("Sound Control Toolbar").IsShown() == True:
             self.mainmenu.SetMenuState("ToolsSoundToolbar", False)
@@ -587,7 +565,6 @@ class orpgFrame(wx.Frame):
             self._mgr.GetPane("Sound Control Toolbar").Show()
         self._mgr.Update()
 
-    
     def OnMB_ToolsDiceBar(self):
         if self._mgr.GetPane("Dice Tool Bar").IsShown() == True:
             self.mainmenu.SetMenuState("ToolsDiceBar", False)
@@ -597,7 +574,6 @@ class orpgFrame(wx.Frame):
             self._mgr.GetPane("Dice Tool Bar").Show()
         self._mgr.Update()
 
-    
     def OnMB_ToolsMapBar(self):
         if self._mgr.GetPane("Map Tool Bar").IsShown() == True:
             self.mainmenu.SetMenuState("ToolsMapBar", False)
@@ -608,22 +584,18 @@ class orpgFrame(wx.Frame):
         self._mgr.Update()
 
     #Help Menu #Needs a custom Dialog because it is ugly on Windows
-    
     def OnMB_HelpAbout(self):
         if self.AboutORPG.IsShown() == True: self.AboutORPG.Hide()
         else: self.AboutORPG.Show()
 
-    
     def OnMB_HelpOnlineUserGuide(self):
         wb = webbrowser.get()
         wb.open("http://www.assembla.com/wiki/show/traipse/User_Manual")
 
-    
     def OnMB_HelpChangeLog(self):
         wb = webbrowser.get()
         wb.open("http://www.assembla.com/spaces/milestones/index/traipse?spaces_tool_id=Milestones")
 
-    
     def OnMB_HelpReportaBug(self):
         wb = webbrowser.get()
         wb.open("http://www.assembla.com/spaces/tickets/index/traipse_dev?spaces_tool_id=Tickets")
@@ -663,9 +635,9 @@ class orpgFrame(wx.Frame):
         logger.debug("Dimensions Set")
 
         # Update Manager 
-        self.manifest = manifest.ManifestChanges()
+        #self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager Beta 0.8", component, self.manifest, True)
+            "OpenRPG Update Manager (final beta)", component, manifest, True)
         logger.debug("Menu Created")
         h = int(xml_dom.get("height"))
         w = int(xml_dom.get("width"))
@@ -776,9 +748,7 @@ class orpgFrame(wx.Frame):
 
         #Load the layout if one exists
         layout = xml_dom.find("DockLayout")
-        try:
-            self._mgr.LoadPerspective(layout.text)
-        except: pass
+        self._mgr.LoadPerspective(layout.text)
         logger.debug("Perspective Loaded")
         self._mgr.GetPane("Browse Server Window").Hide()
         self._mgr.Update()
@@ -786,7 +756,6 @@ class orpgFrame(wx.Frame):
         logger.debug("GUI is all created")
         self.Thaw()
 
-    
     def do_tab_window(self, xml_dom, parent_wnd):
         # if container window loop through childern and do a recursive call
         temp_wnd = orpgTabberWnd(parent_wnd, style=FNB.FNB_ALLOW_FOREIGN_DND)
@@ -798,7 +767,6 @@ class orpgFrame(wx.Frame):
             temp_wnd.AddPage(wnd, name, False)
         return temp_wnd
 
-    
     def build_window(self, xml_dom, parent_wnd):
         name = xml_dom.tag
         if name == "DockLayout" or name == "dock": return
@@ -911,30 +879,21 @@ class orpgFrame(wx.Frame):
             xml_dom.append(elem)
 
         layout.write(filename)
-        """
-        temp_file = open(filename, "w")
-        temp_file.write(tostring(xml_dom))
-        temp_file.close()"""
 
-    
     def build_hotkeys(self):
         self.mainmenu.accel.xaccel.extend(self.chat.get_hot_keys())
         self.mainmenu.accel.xaccel.extend(self.map.get_hot_keys())
 
-    
     def start_timer(self):
         self.poll_timer.Start(100)
-        s = component.get('settings')
-        if s.get("Heartbeat") == "1":
+        if settings.get("Heartbeat") == "1":
             self.ping_timer.Start(1000*60)
             logger.debug("starting heartbeat...", True)
 
-    
     def kill_mplay_session(self):
         self.game_name = ""
         self.session.start_disconnect()
 
-    
     def quit_game(self, evt):
         dlg = wx.MessageDialog(self,"Exit gaming session?","Game Session",wx.YES_NO)
         if dlg.ShowModal() == wx.ID_YES:
@@ -942,13 +901,11 @@ class orpgFrame(wx.Frame):
             dlg.Destroy()
             self.kill_mplay_session()
 
-    
     def on_status_event(self, evt):
         id = evt.get_id()
         status = evt.get_data()
         if id == orpg.networking.mplay_client.STATUS_SET_URL: self.status.set_url(status)
 
-    
     def on_player_event(self, evt):
         id = evt.get_id()
         player = evt.get_data()
@@ -964,7 +921,6 @@ class orpgFrame(wx.Frame):
             self.players.update_player(player)
         self.players.Refresh()
 
-    
     def on_group_event(self, evt):
         id = evt.get_id()
         data = evt.get_data()
@@ -974,7 +930,6 @@ class orpgFrame(wx.Frame):
             self.gs.del_room(data)
         elif id == orpg.networking.mplay_client.GROUP_UPDATE: self.gs.update_room(data)
 
-    
     def on_receive(self, data, player):
         # see if we are ignoring this user
         (ignore_id, ignore_name) = self.session.get_ignore_list()
@@ -984,11 +939,9 @@ class orpgFrame(wx.Frame):
         # ok we are not ignoring this message
         #recvSound = "RecvSound"     #  this will be the default sound.  Whisper will change this below
 
-        ### Alpha  ###
         etreeEl = Element('msg')
         try: etreeEl.append(fromstring(data))
         except: etreeEl.text = data
-        ### Remove after Element Tree is integrated further ###
         if player: display_name = self.chat.chat_display_name(player)
         else: display_name = "Server Administrator"
 
@@ -996,13 +949,12 @@ class orpgFrame(wx.Frame):
 
         for child in etreeEl.getchildren():
             if child.tag == 'tree':
-                ### Alpha ### Allows users to decide if they want the node or not.
                 dlg = wx.MessageDialog(None, display_name + ' is trying to send you a tree node. Accept?', 'Question', 
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if dlg.ShowModal() == wx.ID_YES:
                   dlg.Destroy()
                   debug(child)
-                  self.tree.on_receive_data(tostring(child))       #Removed player object because it was unused.
+                  self.tree.on_receive_data(tostring(child))
                   self.chat.InfoPost(display_name + " has sent you a tree node...")
             elif child.tag == 'map':
                 #TODO: Fix map to accepts elements
@@ -1028,7 +980,6 @@ class orpgFrame(wx.Frame):
 
         ####Begin changes for Custom Exit Message by mDuo13######
         elif id == orpg.networking.mplay_client.MPLAY_DISCONNECTING:
-            settings = component.get('settings')
             custom_msg = settings.get("dcmsg")
             custom_msg=custom_msg[:80]
             if custom_msg[:3]=="/me": self.chat.send_chat_message(custom_msg[3:], 3)
@@ -1043,14 +994,12 @@ class orpgFrame(wx.Frame):
         elif id == orpg.networking.mplay_client.MPLAY_GROUP_CHANGE_F:
             self.chat.SystemPost("Room access denied!")
 
-    
     def OnCloseWindow(self, event):
         dlg = wx.MessageDialog(self, "Quit OpenRPG?", "OpenRPG", wx.YES_NO)
         if dlg.ShowModal() == wx.ID_YES:
             dlg.Destroy()
             self.closed_confirmed()
 
-    
     def closed_confirmed(self):
         self.activeplugins = component.get('plugins')
         self.aliaslib.OnMB_FileSave(None)
@@ -1067,11 +1016,9 @@ class orpgFrame(wx.Frame):
         try: settings.save()
         except Exception:
             logger.general("[WARNING] Error saving 'settings' component", True)
-
         try: self.map.pre_exit_cleanup()
         except Exception:
             logger.general("[WARNING] Map error pre_exit_cleanup()", True)
-
         try:
             save_tree = string.upper(settings.get("SaveGameTreeOnExit"))
             if  (save_tree != "0") and (save_tree != "False") and (save_tree != "NO"):
@@ -1196,9 +1143,6 @@ class orpgApp(wx.App):
         component.add('validate', validate)
         component.add("tabbedWindows", [])
 
-	    #Update Manager
-        self.manifest = manifest.ManifestChanges()
-
         self.called = False
         wx.InitAllImageHandlers()
         self.splash = orpgSplashScreen(None, dir_struct["icon"] + 'splash13.jpg', 3000, self.AfterSplash)
@@ -1207,13 +1151,11 @@ class orpgApp(wx.App):
         wx.Yield()
         return True
 
-    
     def OnKeyPress(self, evt):
         #Event handler
         if evt.AltDown() and evt.CmdDown() and evt.KeyCode == ord('I'): self.ShowShell()
         else: evt.Skip()
 
-    
     def ShowShell(self):
         #Show the PyCrust window.
         if not self._crust:
@@ -1223,7 +1165,6 @@ class orpgApp(wx.App):
         self._crust.shell.interp.locals['win'] = win
         self._crust.Show()
 
-    
     def AfterSplash(self,evt):
         if not self.called:
             self.splash.Hide()
@@ -1238,7 +1179,6 @@ class orpgApp(wx.App):
             wx.CallAfter(self.splash.Close)
             return True
 
-    
     def OnExit_CleanUp(self):
         logger.debug("Preforming cleanup\n")
         try: del os.environ["OPENRPG_BASE"]
@@ -1248,7 +1188,6 @@ class orpgApp(wx.App):
         try: os.remove(os.environ["OPENRPG_BASE"] + os.sep + 'orpg' + os.sep + 'dirpath' + os.sep + 'approot.pyc')
         except: pass
 
-    
     def OnExit(self):
         self.OnExit_CleanUp()
         #Exit
