@@ -15,7 +15,7 @@ class Term2Win(object):
     def write(self, text):
         statbar.SetStatusText(text)
         wx.Yield()
-        #sys.__stdout__.write(text)
+        sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
     @debugging
@@ -105,11 +105,23 @@ class Updater(wx.Panel):
         self.mana = self.LoadDoc()
         temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
         for ignore in self.ignorelist:
-            shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
+            if len(ignore.split('/')) > 1:
+                gets = 0; dir1 = ''
+                while gets != len(ignore.split('/'))-1:
+                    dir1 += ignore.split('/')[gets] + os.sep
+                    gets += 1
+                os.makedirs(temp+dir1)
+            shutil.copy(ignore, temp + dir1 + ignore.split('/')[len(ignore.split('/')) - 1])
         hg.clean(self.repo, self.current)
         for ignore in self.ignorelist:
             shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
             os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
+            if len(ignore.split('/')) > 1:
+                gets = 0; dir1 = ''
+                while gets != len(ignore.split('/'))-1:
+                    dir1 += ignore.split('/')[gets] + os.sep
+                    gets += 1
+                os.removedirs(temp+dir1)
 
     def LoadDoc(self):
         ignore = open(self.filename)
@@ -597,6 +609,73 @@ class Control(wx.Panel):
         if self.package_list == None: return None
         return None
 
+class Help(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.help = wx.TextCtrl(self, wx.ID_ANY, size=(-1, -1), 
+                                    style=wx.TE_MULTILINE | wx.TE_READONLY)
+        sizer.Add(self.help, 1, wx.EXPAND)
+        self.build_help()
+        self.SetSizer(sizer)
+        self.Layout()
+
+    def build_help(self):
+        help = """'Traipse' OpenRPG Update Manager Help:
+The Traipse Update Manager can be confusing at first glance. There is alot involved in the new addition so it is easy to by pass the finer details. This small page will help a new user understand how to use the new Update Manager to it's full capability.\n\n"""
+        self.help.AppendText(help)
+        help = """The Different Tabs: There are 5 different tabs available to users, and each tab has a different purpose. These five tabs are: Updater, Repos, Manifest, Control and Help.
+---
+
+The Updater Tab:
+The Updater tab is divided into three sections. The left section shows a description of the your current or selected version.  The right top section shows the files that have been updated in your current or selected version.  Underneath is a selection of buttons and check boxes.
+
+Package Select: 
+When you press this button a small window pops up showing you the available packages to update too. You can select a package and the Updater's detail sections will reflect the change.
+
+Update Now: 
+Press this button when you want to update to the selected package
+
+Auto Update: 
+Check this if want to update when you start the software. You need to have a default Repository checked in the Repo tab.
+
+No Update: 
+Check this if you do not want to see the Update Manager when you start the software.
+---\n\n"""
+        self.help.AppendText(help)
+        help = """The Repos Tab:
+The Repos tab has two parts to it. The top most part is a section is where you name and create repositories.  The second part shows you a list of all your available repositories.
+
+What is a repostiory? 
+1: a place, room, or container where something is deposited or stored (Merriam-Webster). A repository, or repo for short, is a place to hold source code so others can download it.
+
+Creating new Repos:
+Creating a new repos is really easy. First you need to give your repo a name, any name will work, then press the New button. You will see that your named repo shows up in your list immediately.
+
+You will then need to connect the named repo to a URL so you can download source code.  Enter a URL (http://hg.assembla.com/traipse) into the new entry and press the Refresh button. This downloads the new source code to your computer only. Refreshing a repo does not update your software.
+
+Default: 
+You can set any repo as your default repository. This is the repo the software will update from if you Auto Update.
+---\n\n"""
+        self.help.AppendText(help)
+        help = """The Manifest Tab:
+The Manifest Tab is really easy to understand, it's just named differently. The manifest shows a list of all the files that are being tracked by your current package. Checking files in the list will place them into a list that prevents these files from being changed when you update to a new package.
+
+The manifest can cause problems with compatibility if the newer source does not understand the unchanged files, so it would be smart to test out a new package in a different folder.
+---\n\n"""
+        self.help.AppendText(help)
+        help = """The Control Tab:
+The control tab is recommended for developers only. The control tab contains the two details elements from the Updater tab and a new section that contains all of the revisions for your selected package.
+
+You can select any of the available packages from the drop down and the list of revisions will change. You can also select any of the revisions in the list and the details on the left side will change to reflect the details of that revision.
+
+You are also allowed to update to any of the selected revisions. Older revisions often times contain bugs and newer methods of coding, so revision updates commonly cause problems with software.
+
+What is the Control Tab for?
+The control tab is for developers who want to see how the source code has changed from revision to revision. When a user downloads the software they also download all past revisions made to that software. This tab allows users to roll back if a problem has been created with new source, or for developers they can watch the software evolve.
+---"""
+        self.help.AppendText(help)
+
 class updaterFrame(wx.Frame):
     def __init__(self, parent, title, openrpg, manifest, main):
 
@@ -619,12 +698,14 @@ class updaterFrame(wx.Frame):
         page2 = Repos(nb, openrpg)
         page3 = Manifest(nb)
         page4 = Control(nb)
+        page5 = Help(nb)
 
         # add the pages to the notebook with the label to show on the tab
         nb.AddPage(page1, "Updater")
         nb.AddPage(page2, "Repos")
         nb.AddPage(page3, "Manifest")
         nb.AddPage(page4, "Control")
+        nb.AddPage(page5, 'Help')
 
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
@@ -646,7 +727,7 @@ class updateApp(wx.App):
         logger._set_log_to_console(False)
         logger.note("Updater Start")
         component.add('validate', validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 0.9 (final beta)", 
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 1.0", 
                                 component, manifest, self.main)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
@@ -675,11 +756,23 @@ class updateApp(wx.App):
             self.mana = self.LoadDoc()
             temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
             for ignore in self.ignorelist:
-                shutil.copy(ignore, temp + ignore.split('/')[len(ignore.split('/')) - 1])
+                if len(ignore.split('/')) > 1:
+                    gets = 0; dir1 = ''
+                    while gets != len(ignore.split('/'))-1:
+                        dir1 += ignore.split('/')[gets] + os.sep
+                        gets += 1
+                    os.makedirs(temp+dir1)
+                shutil.copy(ignore, temp + dir1 + ignore.split('/')[len(ignore.split('/')) - 1])
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
                 shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
                 os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
+                if len(ignore.split('/')) > 1:
+                    gets = 0; dir1 = ''
+                    while gets != len(ignore.split('/'))-1:
+                        dir1 += ignore.split('/')[gets] + os.sep
+                        gets += 1
+                    os.removedirs(temp+dir1)
         else: wx.MessageBox('No default Rpository set.  Skipping Auto Update!', 'Info')
 
     def LoadDoc(self):
