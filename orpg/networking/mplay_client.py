@@ -42,6 +42,7 @@ from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
 from orpg.orpgCore import component
 from orpg.orpg_xml import xml
 from orpg.tools.orpg_log import debug
+from orpg.tools.settings import settings
 
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring
@@ -404,7 +405,6 @@ class mplay_client(client_base):
         # be done to use the unified password manager.
         # Should really find a better solution. -- SD 8/03
         self.orpgFrame_callback = callbacks['orpgFrame']
-        self.settings = self.orpgFrame_callback.settings
         self.ignore_id = []
         self.ignore_name = []
         self.players = {}
