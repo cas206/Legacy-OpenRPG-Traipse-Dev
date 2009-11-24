@@ -253,6 +253,7 @@ class MapCanvas(wx.ScrolledWindow):
         topleft1 = self.GetViewStart()
         topleft = [topleft1[0]*scrollsize[0], topleft1[1]*scrollsize[1]]
         if (clientsize[0] > 1) and (clientsize[1] > 1):
+            self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
             dc = wx.AutoBufferedPaintDC(self)
             dc.SetPen(wx.TRANSPARENT_PEN)
             dc.SetBrush(wx.Brush(self.GetBackgroundColour(), wx.SOLID))
