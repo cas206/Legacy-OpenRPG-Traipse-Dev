@@ -339,7 +339,7 @@ class predTextCtrl(ExpandoTextCtrl):
         count = 0
         spc = -1
         while idx < len(pte):
-            if line[idx] == ' ': debug((line)); spc = idx
+            if line[idx] == ' ': spc = idx
             if pte[idx] - start > width:
                 # we've reached the max width, add a new line
                 count += 1

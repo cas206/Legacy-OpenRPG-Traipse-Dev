@@ -1,74 +1,85 @@
 <nodehandler class="tabber_handler" icon="help" module="containers" name="Traipse OpenRPG" version="1.0">
-  <nodehandler class="textctrl_handler" frame="400,400,139,110" icon="note" map="Traipse OpenRPG" module="forms" name="Node Referencing" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Traipse node referencing is unlike other distributions of OpenRPG.  The gametree mapping is a fluid map that changes with the location of your nodes.  This allows you to create a reference node that will stay with your character sheet, and if you change the location of your character sheet the reference will still work.
+  <nodehandler border="1" class="group_handler" cols="1" icon="labtop" map="Traipse OpenRPG" module="containers" name="User Manual" version="1.0">
+  <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::User Manual" module="forms" name="Traipse User Guide" version="1.0">
+    <link href="http://www.assembla.com/wiki/show/traipse/User_Manual" />
+  </nodehandler>
+  <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG::User Manual" module="forms" name="Release Notes" version="1.0">
+    <link href="http://www.assembla.com/wiki/show/traipse" />
+  </nodehandler>
+  <nodehandler class="textctrl_handler" frame="400,400,139,110" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Node Referencing" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Traipse node referencing is unlike other distributions of OpenRPG.  The gametree mapping is a fluid map that changes with the location of your nodes.  This allows you to create a reference node that will stay with your character sheet, and if you change the location of your character sheet the reference will still work.
 
-There are two ways of references node data. A Root Reference and a Child Reference.
+(Note: Renaming your node causes problems with the mapping until you restart the software. You can just move the node and the software will reset the map)
+
+Reference Types:
+  There are two ways of references node data. A Root Reference and a Child Reference.
+
+Root Reference: A node reference that starts at the gametree. The location of the node must be exact or you will return an Invalid Reference!
 
 A Root Reference uses this syntax:
 !@Node::Child::Data@!
 
-Root References find the data within the node first by looking at the nodes in the tree.  The location of the node must be exact or you will return an Invalid Reference!
+Child Reference: a node reference syntax that starts by looking at within the current container node. As long as the Child Reference is in the same container as the node, the container can change location and the reference will not be damaged. Child References work from within a PC Sheet node as well.
 
 A Child Reference uses this syntax:
 !!Node::Child::Data!!
 
-Child References work from within a container.  Child References obtain the map from a child node and then look for the node data using an appended Root Reference.  As long as the Child Reference node remains in in the same location relative to the reference, you can move the nodes around and never need to change your references again.
-
-Child Referencing works from within a PC Sheet node as well.
-
 Syntax for Special PC Sheet Nodes:
-The nodes for the specialized PC Sheets now have a new syntax.
+  The nodes for the specialized PC Sheets now have a new syntax.
 
-Abilities:
-To reference an Ability, use the name or abbreviation of the Ability.
-Example: !@Mikael::Strength@!
+Skills, Saves, and Abilities:
+  Skills, Saves, and Abilities all have a similar referencing syntax.  You can return the base value of each by using the correct syntax.
+Examples:
+!@Jonethan::Skill::Jump@! (Returns Jump ranks)
+!@Mikael::Strength@! (Returns Ability Score and Mod)
+!@Draj::Will@! (Returns Will Save and Mod)
 
-This will return the Ability, the Ability Score, and it's Modifier.
+(Saves and Abilities have a short hand and a long hand. Abilities can use the three letter abbreviation, while saves short hand are Fort, Ref, and Will)
 
-Mod Referencing:
-If you want to find the Ability Modifier only, use Ability::Mod
-Example: !@Mikael::Strength::Mod@!
-
-Ability Checks:
-Ability Checks are simplified as well.  Simply add Check to the reference.
-Example: !@Mikael::Strength::Check@!
-
-The new referencing features are useful if you want to refence the ability modifier in other nodes.
-
-Skills:
-Skills work the similar to Abilities.  To refence a skill's ranks use the Skill syntax
-Example: !@Jonethan::Skill::Jump@!
-
-This will return the ranks you have in Jump.  Skill Checks are made by appending Check to the statement.
-Example: !@Jonethan::Skill::Jump::Check@!
-
-If you want to reference the skills modifier, use the Mod syntax
-Example: !@Jonethan::Skill::Jump::Mod@!
+You can append Check to check each of these against a 1d20 roll, or you can append Mod to discover the Modifier. The Mod can be useful in other nodes
 
 Combat:
-You can now reference your attacks easily with the gametree.  Using the Attack syntax you can select modifier type, and a weapon to attack with.
+  You can now reference your attacks easily with the gametree.  Using the Attack syntax you can select modifier type, and a weapon to attack with.
 Example: !@Kammen-Pai::Attack::M::Dagger@!
 
 Modifier Type:
-There are two modifier types Melee (M) or Ranged(R) You will see I added can use the long word or the short hand.
+  There are two modifier types Melee (M) or Ranged (R) You will see I added can use the long word or the short hand.
 
-Spells:
-If the PC Sheet you are using has Spells and Powers, you can use the Cast syntax to cast a spell or use a power.
-Example: !@Kammen-Pai::Cast::Ray of Frost@!
+Powers, Spells and Feats:
+  Power, Spells and Feats are hard to sometimes hard to remember, and even harder to code.  The use of the Power, Spell or Feat syntax serves as an emote of what you are doing, as well as a reminder of what your Power, Spell, or Feat does.
 
-The data returned is the description of the spells actions.  Spell actions are difficult to remember, and even harder to code, so this will at least work as an emoteable reference and a reminder of how the spell works.
+Examples: 
+!@Kammen-Pai::Cast::Ray of Frost@!
+!@Kammen-Pai::Feat::Ability Focus@!
 
-Feats:
-Feats will work the same way as spells.  Because Feats and Spells have rulings that require such finesse it is not very easy to code them.  However you will receive an easy to use reference point for what your Feat does.
-Using the Feat syntax you can the description of the Feat.
-Example: !@Kammen-Pai::Feat::Ability Focus@!
+</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,350,33" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Gametree Additions &amp; Tips" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">With the new additions to the gametree using nodes has never been easier nor has it ever been more fluid. Included here is a list of the additions to the gametree referencing model as well as some tips on how to make the gametree work the way it was intended.
 
-</text></nodehandler><nodehandler class="link_handler" icon="html" map="Traipse OpenRPG" module="forms" name="Release Notes" version="1.0">
-    <link href="http://www.assembla.com/wiki/show/traipse" />
-  </nodehandler>
-  <nodehandler class="link_handler" icon="html" map="Traipse OpenRPG" module="forms" name="Traipse User Guide" version="1.0">
-    <link href="http://www.assembla.com/wiki/show/traipse/User_Manual" />
-  </nodehandler>
-  <nodehandler class="file_loader" icon="help" map="Traipse OpenRPG" module="core" name="Load Die Roller Notes" version="1.0">
+Grid Nodes:
+Grid nodes are now referenceable with the coordinates of the grid. Example: !@Grid::(0,0)@!
+The example will return the top left most cell data. The grid understands coordinates like this (Row, Column)
+
+Grid nodes can reference node data just like any other node can.  With a new added feature grids are even more useful. By using a new die rolling syntax you can draw just the number of the modified roll.  While this will not pass during game play, you can use it with the grid node to create a random chart. The new die roll syntax is [#XdY].
+
+# works just like q, yet it returns only the modified die result. Here is an example with a 3 x 3 Grid
+Example: !@Grid::([#1d3-1], [#1d3-1])@!
+
+The result will be a random event from the grid.
+
+Bonus: Make a 52 Card deck with 4 columns and 13 rows. (4 * 13 = 52)
+
+List Nodes:
+List nodes now have a check box that allows users to send the content as a macro. List nodes are a prime reference holder because users can place a lot of references into one small node.
+
+For the best results from a list node my tip to users would be to create a list node and place it inside the character sheet they are using.  Then all references will use the Child Referencing syntax, but the character sheet can go anywhere in the tree and the player will have easy access to all the references.
+
+Here is an example of a Fortitude save inside the recommended list node: !!Fort::Check!!
+
+Text Nodes:
+Text nodes remain little changed.  I agree with all the 1.7.1 users who tell me, if it's not broke don't fix it. With that in mind I have some good tips for text nodes.
+
+Text nodes can be used in conjuction with the new grid features to create random encounters. A GM could place a list of text nodes into a folder and the grid could reference them.
+
+Text nodes also work great when you need to have story text at hand that you don't want to type out during play.</text></nodehandler><group_atts border="1" cols="1" />
+</nodehandler><nodehandler class="file_loader" icon="help" map="Traipse OpenRPG" module="core" name="Load Die Roller Notes" version="1.0">
     <file name="die_roller_notes.xml" />
   </nodehandler>
   <nodehandler border="1" class="group_handler" cols="1" icon="gear" map="Traipse OpenRPG" module="containers" name="Templates" status="useful" version="1.0">

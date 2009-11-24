@@ -1786,10 +1786,15 @@ class chat_panel(wx.Panel):
             if newstr[0].lower() == 'q':
                 newstr = newstr[1:]
                 qmode = 1
+            if newstr[0].lower() == '#':
+                newstr = newstr[1:]
+                qmode = 2
             try: newstr = component.get('DiceManager').proccessRoll(newstr)
             except: pass
             if qmode == 1:
                 s = s.replace("[" + matches[i] + "]", "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
+            elif qmode == 2:
+                s = s.replace("[" + matches[i] + "]", newstr[len(newstr)-2:-1], 1)
             else: s = s.replace("[" + matches[i] + "]", "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
         return s
     
@@ -1876,8 +1881,9 @@ class chat_panel(wx.Panel):
         cell = tuple(path[step].strip('(').strip(')').split(','))
         grid = node.find('grid')
         rows = grid.findall('row')
-        col = rows[int(cell[0])].findall('cell')
-        self.data = col[int(cell[1])].text or 'No Cell Data!'
+        col = rows[int(self.ParseDice(cell[0]))].findall('cell')
+        try: self.data = self.NormalizeParse(col[int(self.ParseDice(cell[1]))].text) or 'No Cell Data'
+        except: self.data = 'Invalid Grid Reference!'
         return
 
     def resolve_cust_loop(self, node, path, step, depth):
