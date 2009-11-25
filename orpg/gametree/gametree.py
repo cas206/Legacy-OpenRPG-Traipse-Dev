@@ -85,6 +85,7 @@ class game_tree(wx.TreeCtrl):
         wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, 
                 wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
         self.chat = component.get('chat')
+        self.session = component.get('session')
         self.mainframe = component.get('frame')
         self.build_img_list()
         self.build_std_menu()
