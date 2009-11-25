@@ -211,8 +211,7 @@ class textctrl_handler(node_handler):
     def tohtml(self):
         txt = self.get_value()
         txt = string.replace(txt,'\n',"<br />")
-        if not self.is_hide_title():
-            txt = "<b>"+self.xml.get("name")+":</b> "+txt
+        if not self.is_hide_title(): txt = "<b>"+self.xml.get("name")+":</b> "+txt
         return txt
 
     def get_value(self):
@@ -245,8 +244,7 @@ class text_panel(wx.Panel):
         sizer.Add(wx.Size(5,0))
         sizer.Add(self.text, 1, sizer_style)
 
-        if handler.has_send_button():
-            sizer.Add(wx.Button(self, FORM_SEND_BUTTON, "Send"), 0, sizer_style)
+        if handler.has_send_button(): sizer.Add(wx.Button(self, FORM_SEND_BUTTON, "Send"), 0, sizer_style)
 
         self.sizer = sizer
         self.SetSizer(sizer)
@@ -545,18 +543,14 @@ class listbox_panel(wx.Panel):
         if type != L_RADIO:
             sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
             sizer.Add(wx.Size(5,0))
-
         sizer.Add(self.list, 1, wx.EXPAND)
-
         if handler.has_send_button():
             sizer.Add(wx.Button(self, F_SEND, "Send"), 0, wx.EXPAND)
             self.Bind(wx.EVT_BUTTON, self.handler.on_send_to_chat, id=F_SEND)
-
         self.sizer = sizer
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
         self.Fit()
-
         parent.SetSize(self.GetBestSize())
 
         if type == L_DROP: self.Bind(wx.EVT_COMBOBOX, self.on_change, id=F_LIST)
@@ -715,7 +709,7 @@ class link_handler(node_handler):
     def tohtml(self):
         href = self.link.get("href")
         title = self.xml.get("name")
-        return "<a href=\""+href+"\" >"+title+"</a>"
+        return "<a href='"+href+"' >"+title+"</a>"
 
 class link_panel(wx.StaticText):
     def __init__(self,parent,handler):
@@ -724,7 +718,6 @@ class link_panel(wx.StaticText):
         wx.StaticText.__init__(self,parent,-1,label)
         self.SetForegroundColour(wx.BLUE)
         self.Bind(wx.EVT_LEFT_DOWN, self.handler.on_use)
-
 
 P_URL = wx.NewId()
 
@@ -754,8 +747,7 @@ class link_edit_panel(wx.Panel):
         if id == P_TITLE:
             self.handler.xml.set('name',txt)
             self.handler.rename(txt)
-        elif id == P_URL:
-            self.handler.link.set('href',txt)
+        elif id == P_URL: self.handler.link.set('href',txt)
 
 ##########################
 ## webimg node handler
@@ -775,11 +767,10 @@ class webimg_handler(node_handler):
 
     def get_use_panel(self,parent):
         img = img_helper().load_url(self.link.get("href"))
-        if not img is None:
-            return wx.StaticBitmap(parent,-1,img,size= wx.Size(img.GetWidth(),img.GetHeight()))
+        if not img is None: return wx.StaticBitmap(parent,-1,img,size= wx.Size(img.GetWidth(),img.GetHeight()))
         return wx.EmptyBitmap(1, 1)
 
     def tohtml(self):
         href = self.link.get("href")
         title = self.xml.get("name")
-        return "<img src=\""+href+"\" alt="+title+" >"
+        return "<img src='"+href+"' alt="+title+" >"

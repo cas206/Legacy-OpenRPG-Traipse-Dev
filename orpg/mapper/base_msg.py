@@ -107,7 +107,6 @@ class map_element_msg_base:
             return None
 
     #  Access multiple properties
-
     def init_props(self,props):               # same as init_prop(), but takes dictionary of props
         self.p_lock.acquire()
         for k in props.keys(): self._props[k] = (props[k],0)
@@ -120,12 +119,10 @@ class map_element_msg_base:
 
     def get_all_props(self):                  # returns dictionary of all properties, regardless of change
         self.p_lock.acquire()
-
         result = {}
         for k in self._props.keys():
             (p,c) = self._props[k]
             result[k] = p
-
         self.p_lock.release()
         return result
 
@@ -201,13 +198,11 @@ class map_element_msg_base:
         if iselement(xml_dom): ## Uses new Element Tree style
             if xml_dom.tag == self.tagname:
                 if xml_dom.attrib:
-                    for k in xml_dom.attrib:
-                        prop_func(k,xml_dom.get(k))
+                    for k in xml_dom.attrib: prop_func(k,xml_dom.get(k))
         elif not iselement(xml_dom): ## Uses old DOM style (deprecated!!)
             if xml_dom.tagName == self.tagname:
                 if xml_dom.getAttributeKeys():
-                    for k in xml_dom.getAttributeKeys():
-                        prop_func(k,xml_dom.getAttribute(k))
+                    for k in xml_dom.getAttributeKeys(): prop_func(k,xml_dom.getAttribute(k))
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to modify a " + self.tagname + " from a non-<" + self.tagname + "/> element"

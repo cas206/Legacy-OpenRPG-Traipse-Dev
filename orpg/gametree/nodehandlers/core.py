@@ -34,9 +34,8 @@ try:
     from orpg.orpg_windows import *
     from orpg.dirpath import dir_struct
     from orpg.orpgCore import component
-    import webbrowser
+    import webbrowser, os
     from orpg.mapper import map
-    import os
     from wx import DisplaySize
 except:
     import wx
@@ -74,10 +73,8 @@ class node_handler:
                 (sx,sy,px,py) = [int(value) for value in frame.split(',')]
                 self.frame_size = (sx, sy)
                 (maxx, maxy) = DisplaySize()
-                if px < maxx-80 and py < maxy-50:#if it's off screen ignore the saved pos
-                    self.frame_pos  = (px, py) 
-        except:
-            pass
+                if px < maxx-80 and py < maxy-50: self.frame_pos  = (px, py) #if it's off screen ignore the saved pos
+        except: pass
 
     def on_version(self,old_version):
         ## added version control code here or implement a new on_version in your derived class.
@@ -91,12 +88,9 @@ class node_handler:
         return 0
 
     def usefulness(self,text):
-        if text=="useful":
-            self.xml.set('status',"useful")
-        elif text=="useless":
-            self.xml.set('status',"useless")
-        elif text=="indifferent":
-            self.xml.set('status',"indifferent")
+        if text=="useful": self.xml.set('status',"useful")
+        elif text=="useless": self.xml.set('status',"useless")
+        elif text=="indifferent": self.xml.set('status',"indifferent")
 
     def on_design(self,evt):
         try:
@@ -146,19 +140,16 @@ class node_handler:
             del self.mywindow
             if self.create_useframe():
                 self.mywindow.SetSize(self.frame_size)
-                if self.frame_pos:
-                    self.mywindow.SetPosition(self.frame_pos)
+                if self.frame_pos: self.mywindow.SetPosition(self.frame_pos)
                 self.mywindow.Show()
                 self.mywindow.Raise()
-            else:
-                return
+            else: return
         wx.CallAfter(self.mywindow.Layout)
 
     def create_useframe(self):
         caption = self.xml.get('name', '')
         self.mywindow = wx.Frame(None, -1, caption)
         self.mywindow.Freeze()
-
         if wx.Platform == '__WXMSW__':
             icon = wx.Icon(orpg.dirpath.dir_struct["icon"] + 'note.ico', wx.BITMAP_TYPE_ICO)
             self.mywindow.SetIcon(icon)
@@ -259,10 +250,8 @@ class node_handler:
     def delete(self):
         """ removes the tree_node and xml_node, and returns the removed xml_node """
         parent_node = self.tree.GetItemParent(self.mytree_node)
-        if parent_node == self.tree.root:
-            parent_xml = self.tree.GetPyData(parent_node)
-        else:
-            parent_xml = self.tree.GetPyData(parent_node).xml
+        if parent_node == self.tree.root: parent_xml = self.tree.GetPyData(parent_node)
+        else: parent_xml = self.tree.GetPyData(parent_node).xml
         parent_xml.remove(self.xml)
         self.tree.Delete(self.mytree_node)
         return self.xml
@@ -280,8 +269,7 @@ class node_handler:
 
     def on_save(self,evt):
         f = wx.FileDialog(self.tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
-        if f.ShowModal() == wx.ID_OK:
-            ElementTree(self.xml).write(f.GetPath())
+        if f.ShowModal() == wx.ID_OK: ElementTree(self.xml).write(f.GetPath())
         f.Destroy()
 
     def get_design_panel(self,parent):
@@ -301,16 +289,19 @@ class node_handler:
         return 0
 
     def about(self):
-        html_str = "<b>"+ self.xml.get('class')
+        """html_str = "<b>"+ self.xml.get('class')
         html_str += " Applet</b><br />by Chris Davis<br />chris@rpgarchive.com"
-        return html_str
+        return html_str"""
+        text = self.xml.get('class') + ' Applet\n'
+        text += 'by Chris Davis chris@rpgarchive.com'
+        return text
 
     def get_value(self):
         return None
 
-
 P_TITLE = 10
 P_BODY = 20
+
 class text_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
@@ -335,10 +326,8 @@ class text_edit_panel(wx.Panel):
             u_txt = ""
             bad_txt_found = 0
             for c in txt:
-                if ord(c) < 128:
-                    u_txt += c
-                else:
-                    bad_txt_found = 1
+                if ord(c) < 128: u_txt += c
+                else: bad_txt_found = 1
             if bad_txt_found:
                 wx.MessageBox("Some non 7-bit ASCII characters found and stripped","Warning!")
             txt = u_txt
@@ -350,11 +339,8 @@ class text_edit_panel(wx.Panel):
             u_txt = ""
             bad_txt_found = 0
             for c in txt:
-                if ord(c) < 128:
-                    u_txt += c
-                else:
-                    bad_txt_found = 1
-
+                if ord(c) < 128: u_txt += c
+                else: bad_txt_found = 1
             if bad_txt_found:
                 wx.MessageBox("Some non 7-bit ASCII characters found and stripped","Warning!")
             txt = u_txt
@@ -381,8 +367,6 @@ class node_loader(node_handler):
         self.tree.root_xml.insert(0, new_xml)
         tree_node = self.tree.load_xml(new_xml,self.tree.root,self.tree.root)
         return 1
-        #obj = self.tree.GetPyData(tree_node)
-        #obj.on_design(None)
 
 ##########################
 ## file loader

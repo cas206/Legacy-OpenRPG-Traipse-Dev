@@ -28,8 +28,7 @@
 __version__ = "$Id: whiteboard_handler.py,v 1.37 2007/03/09 14:11:56 digitalxero Exp $"
 
 from base_handler import *
-from math import floor
-from math import sqrt
+from math import floor, sqrt
 
 class whiteboard_handler(base_layer_handler):
     def __init__(self, parent, id, canvas):
@@ -337,9 +336,7 @@ class whiteboard_handler(base_layer_handler):
     # Added handling for double clicks within the map
     # 05-09-2003  Snowdog
     def on_left_dclick(self, evt):
-        if self.drawing_mode == 'Freeform':
-            #Freeform mode ignores the double click
-            pass
+        if self.drawing_mode == 'Freeform': pass #Freeform mode ignores the double click
         elif self.drawing_mode == 'Polyline': self.polyline_last_point( evt )
         elif self.drawing_mode == 'Text': pass
         elif self.drawing_mode == 'Circle' or self.drawing_mode == 'Cone':
@@ -573,7 +570,6 @@ class whiteboard_handler(base_layer_handler):
                 component.get("chat").InfoPost("You must be either a player or GM to use this feature")
                 self.canvas.Refresh(False)
                 return
-        #self.id +=1
             line = self.canvas.layers['whiteboard'].add_line(self.line_string,self.upperleft,self.lowerright)
             dc = self.create_dc()
             for m in range(30):

@@ -82,8 +82,7 @@ class whiteboard_msg(map_element_msg_base):
         self.p_lock.acquire()
         if xml_dom.tagName == self.tagname:
             if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.init_prop(k,xml_dom.getAttribute(k))
+                for k in xml_dom.getAttributeKeys(): self.init_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 item = item_msg(self.p_lock,c._get_nodeName())
                 try: item.init_from_dom(c)
@@ -108,8 +107,7 @@ class whiteboard_msg(map_element_msg_base):
         self.p_lock.acquire()
         if xml_dom.tagName == self.tagname:
             if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.set_prop(k,xml_dom.getAttribute(k))
+                for k in xml_dom.getAttributeKeys(): self.set_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 item = item_msg(self.p_lock, c._get_nodeName())
                 try: item.set_from_dom(c)

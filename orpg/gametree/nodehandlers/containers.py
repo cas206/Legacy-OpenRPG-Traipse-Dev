@@ -29,10 +29,11 @@
 
 from core import *
 from wx.lib.splitter import MultiSplitterWindow
-
+from orpg.tools.orpg_log import logger
+from orpg.orpgCore import component
 
 ##########################
-##  base contiainer
+##  base container
 ##########################
 
 class container_handler(node_handler):
@@ -44,21 +45,18 @@ class container_handler(node_handler):
         self.load_children()
 
     def load_children(self):
-        for child_xml in self.xml:
-            self.tree.load_xml(child_xml,self.mytree_node)
+        for child_xml in self.xml: self.tree.load_xml(child_xml,self.mytree_node)
 
     def check_map_aware(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
-        if hasattr(node,"map_aware") and node.map_aware():
-            node.on_send_to_map(evt)
+        if hasattr(node,"map_aware") and node.map_aware(): node.on_send_to_map(evt)
 
     def on_send_to_map(self, evt):
         self.tree.traverse(self.mytree_node, self.check_map_aware, evt) 
 
     def checkChildToMap(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
-        if hasattr(node,"map_aware") and node.map_aware():
-            self.mapcheck = True
+        if hasattr(node,"map_aware") and node.map_aware(): self.mapcheck = True
 
     def checkToMapMenu(self):
         self.mapcheck = False
@@ -67,29 +65,25 @@ class container_handler(node_handler):
 
     def on_drop(self,evt):
         drag_obj = self.tree.drag_obj
-        if drag_obj == self or self.tree.is_parent_node(self.mytree_node,drag_obj.mytree_node):
-            return
+        if drag_obj == self or self.tree.is_parent_node(self.mytree_node,drag_obj.mytree_node): return
         opt = wx.MessageBox("Add node as child?","Container Node",wx.YES_NO|wx.CANCEL)
         if opt == wx.YES:
             drop_xml = self.tree.drag_obj.delete()
             self.xml.insert(0, drop_xml)
             self.tree.load_xml(drop_xml, self.mytree_node)
             self.tree.Expand(self.mytree_node)
-        elif opt == wx.NO:
-            node_handler.on_drop(self,evt)
+        elif opt == wx.NO: node_handler.on_drop(self,evt)
 
     def gen_html(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
         self.html_str += "<p>" + node.tohtml()
         
     def tohtml(self):
-        self.html_str = "<table border=\"1\" ><tr><td>"
+        self.html_str = "<table border='1' ><tr><td>"
         self.html_str += "<b>"+self.xml.get("name") + "</b>"
         self.html_str += "</td></tr>\n"
         self.html_str += "<tr><td>"
-
         self.tree.traverse(self.mytree_node, self.gen_html, recurse=False)
-
         self.html_str += "</td></tr></table>"
         return self.html_str
 
@@ -113,16 +107,9 @@ class group_handler(container_handler):
         for child_xml in self.xml:
             if child_xml.get == "group_atts": #having the group attributes as a child is bad!
                 self.xml.remove(child_xml)
-            elif child_xml:
-                self.tree.load_xml(child_xml, self.mytree_node)
+            elif child_xml: self.tree.load_xml(child_xml, self.mytree_node)
         if not self.xml.get('cols'): self.xml.set('cols', '1')
         if not self.xml.get('border'): self.xml.set('border', '1')
-        """
-        if not self.atts:
-            self.atts = Element('group_atts')
-            self.atts.set("cols","1")
-            self.atts.set("border","1")
-            self.xml.append(self.atts)"""
 
     def get_design_panel(self,parent):
         return group_edit_panel(parent,self)
@@ -132,25 +119,22 @@ class group_handler(container_handler):
 
     def gen_html(self, treenode, evt):
         node = self.tree.GetPyData(treenode)
-        if self.i  not in self.tdatas:
-            self.tdatas[self.i] = ''
+        if self.i  not in self.tdatas: self.tdatas[self.i] = ''
         self.tdatas[self.i] += "<P>" + node.tohtml()
         self.i += 1
-        if self.i >= self.cols:
-            self.i = 0
+        if self.i >= self.cols: self.i = 0
 
     def tohtml(self):
         cols = self.xml.get("cols")
         border = self.xml.get("border")
-        self.html_str = "<table border=\""+border+"\" ><tr><td colspan=\""+cols+"\">"
+        self.html_str = "<table border='"+border+"' ><tr><td colspan='"+cols+"'>"
         self.html_str += "<font size=4>"+self.xml.get("name") + "</font>"
         self.html_str += "</td></tr>\n<tr>"
         self.cols = int(cols)
         self.i = 0
         self.tdatas = {}
         self.tree.traverse(self.mytree_node, self.gen_html, recurse=False)
-        for td in self.tdatas:
-            self.html_str += "<td valign=\"top\" >" + self.tdatas[td] + "</td>\n";
+        for td in self.tdatas: self.html_str += "<td valign='top' >" + self.tdatas[td] + "</td>\n";
         self.html_str += "</tr></table>"
         return self.html_str
 
@@ -171,13 +155,11 @@ class group_edit_panel(wx.Panel):
 
         radio_c = wx.RadioBox(self, GROUP_COLS, "Columns", choices=["1","2","3","4"])
         cols = handler.xml.get("cols")
-        if cols != "":
-            radio_c.SetSelection(int(cols)-1)
+        if cols != "": radio_c.SetSelection(int(cols)-1)
 
         radio_b = wx.RadioBox(self, GROUP_BOR, "Border", choices=["no","yes"])
         border = handler.xml.get("border")
-        if border != "":
-            radio_b.SetSelection(int(border))
+        if border != "": radio_b.SetSelection(int(border))
 
         sizer.Add(radio_c, 0, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
@@ -196,10 +178,8 @@ class group_edit_panel(wx.Panel):
     def on_radio_box(self,evt):
         id = evt.GetId()
         index = evt.GetInt()
-        if id == GROUP_COLS:
-            self.handler.xml.set("cols",str(index+1))
-        elif id == GROUP_BOR:
-            self.handler.xml.set("border",str(index))
+        if id == GROUP_COLS: self.handler.xml.set("cols",str(index+1))
+        elif id == GROUP_BOR: self.handler.xml.set("border",str(index))
 
     def on_text(self,evt):
         id = evt.GetId()
@@ -240,6 +220,12 @@ class tabbed_panel(orpgTabberWnd):
         if mode == 1: panel = node.get_design_panel(self)
         else: panel = node.get_use_panel(self)
         name = node.xml.get("name")
+        if name == None: ## Fixes broken 3e Inventory child
+            if node.xml.tag == 'inventory':
+                node.xml.set('name', 'Inventory')
+                name = "Inventory"
+                logger.info('A corrective action was take to a 3e PC Sheet', True)
+                component.get('frame').TraipseSuiteWarn('item')
         if panel: self.AddPage(panel, name, False)
 
 class tabbed_edit_panel(orpgTabberWnd):
@@ -314,13 +300,11 @@ class splitter_handler(container_handler):
         if self.split == '1':
             sash = tmp.GetBestSize()[1]+1
             self.bestSizey += sash+11
-            if self.bestSizex < tmp.GetBestSize()[0]:
-                self.bestSizex = tmp.GetBestSize()[0]+10
+            if self.bestSizex < tmp.GetBestSize()[0]: self.bestSizex = tmp.GetBestSize()[0]+10
         else:
             sash = tmp.GetBestSize()[0]+1
             self.bestSizex += sash
-            if self.bestSizey < tmp.GetBestSize()[1]:
-                self.bestSizey = tmp.GetBestSize()[1]+31
+            if self.bestSizey < tmp.GetBestSize()[1]: self.bestSizey = tmp.GetBestSize()[1]+31
         self.splitter.AppendWindow(tmp, sash)
     def get_size_constraint(self):
         return 1
@@ -342,7 +326,6 @@ class splitter_panel(wx.Panel):
         sizer.Add(self.title, 0)
         sizer.Add(self.hozCheck, 0, wx.EXPAND)
         sizer.Add(wx.Size(10,0))
-        #sizer.Add(self.splitsize,  1, wx.EXPAND)
 
         self.sizer = sizer
         self.SetSizer(self.sizer)

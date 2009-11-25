@@ -41,7 +41,6 @@ class map_miniature_handler(node_handler):
         </nodehandler >
     """
 
-
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.mapper = component.get("map")
@@ -56,11 +55,8 @@ class map_miniature_handler(node_handler):
 
         if path:
             path = urllib.unquote(path)
-            if ImageHandler.Cache.has_key(path):
-                bmp = ImageHandler.Cache[path]
-            else:
-                #bmp = ImageHandler.directLoad(path, 'miniature', id)
-                bmp = ImageHandler.directLoad(path)# Old Code TaS.
+            if ImageHandler.Cache.has_key(path): bmp = ImageHandler.Cache[path]
+            else: bmp = ImageHandler.directLoad(path)# Old Code TaS.
 
             if bmp:
                 img = wx.ImageFromMime(ImageHandler.Cache[path][1], ImageHandler.Cache[path][2])
@@ -111,20 +107,17 @@ class map_miniature_handler(node_handler):
                 width = int(self.xml.get("width"))
                 height = int(self.xml.get("height"))
                 pos = grid.get_snapped_to_pos(pos, align, width, height)
-            except:
-                pass
+            except: pass
             self.miniature_xml.set("posx", str(pos.x))
             self.miniature_xml.set("posy", str(pos.y))
         new_xml = self.get_to_map_XML()
         if (self.session.my_role() != self.session.ROLE_GM) and (self.session.my_role() != self.session.ROLE_PLAYER):
             component.get("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
             return
-
         if new_xml:
             self.mapper.new_data(new_xml)
             self.session.send(new_xml)
-        else:
-            print "problem converting old mini xml to new mini xml"
+        else: print "problem converting old mini xml to new mini xml"
 
     def about(self):
         return "Miniature node by Andrew Bennett"

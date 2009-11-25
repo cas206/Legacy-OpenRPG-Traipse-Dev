@@ -101,7 +101,7 @@ class grid_layer(layer_base):
                 elif self.mode == GRID_ISOMETRIC:
                     x = (topLeft.x)-(mini_width/2)
                     y = (topLeft.y)-(mini_height)
-                else:# GRID_RECTANGLE
+                else: # GRID_RECTANGLE
                     x = topLeft.x + ((self.unit_size - mini_width) / 2)
                     y = topLeft.y + ((self.unit_size_y - mini_height) /2)
             else:

@@ -851,7 +851,6 @@ class orpgFrame(wx.Frame):
         elif pane.name == 'Map Tool Bar': self.mainmenu.SetMenuState('ToolsMapBar', False) 
         else: 
             for wndid, wname in self.mainwindows.iteritems():
-                #print pane.name, wname, wndid
                 if pane.name == wname: self.windowsmenu.Check(wndid, False); break
         evt.Skip()
         self._mgr.Update()
@@ -1073,7 +1072,7 @@ class orpgFrame(wx.Frame):
 ## About Dialog class
 ########################################
 class AboutORPG(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, description=''):
         super(AboutORPG, self).__init__(parent, -1, "About 'Traipse' OpenRPG")
         icon = None
         icon = wx.Icon(dir_struct["icon"]+'d20.ico', wx.BITMAP_TYPE_ICO)
@@ -1094,7 +1093,7 @@ class AboutORPG(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.Min) 
         self.Min(None)
 
-        description = "OpenRPG is a Virtual Game Table that allows users to connect via a network and play table "
+        description += "OpenRPG is a Virtual Game Table that allows users to connect via a network and play table "
         description += "top games with friends.  'Traipse' is an OpenRPG distro that is easy to setup and provides superb "
         description += "functionality.  OpenRPG is originally designed by Chris Davis."
 

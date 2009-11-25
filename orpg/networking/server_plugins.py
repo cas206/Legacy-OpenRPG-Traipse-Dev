@@ -1,5 +1,4 @@
-import sys
-import os
+import sys, os
 from orpg.dirpath import dir_struct
 
 class _SingletonKey(object):

@@ -104,21 +104,16 @@ class minilib_handler( node_handler ):
             url = mini.get(ATTRIBUTE_URL)
             label = mini.get(ATTRIBUTE_NAME)
             flag = 0
-            try:
-                flag = eval( mini.get(ATTRIBUTE_UNIQUE) )
-            except:
-                pass
+            try: flag = eval( mini.get(ATTRIBUTE_UNIQUE) )
+            except: pass
             show = 'yes'
-            if flag:
-                show = 'no'
-
+            if flag: show = 'no'
             str += """<tr>
                 <td> %s </td>
                 <td><img src="%s"></td>
                 <td> %s </td>
                 <td> %s </td>
             </tr>""" % ( label, url, url, show )
-
         str += "</table>"
         return str
 
@@ -129,8 +124,7 @@ class minilib_handler( node_handler ):
 
     def on_drop(self, evt):
         drag_obj = self.tree.drag_obj
-        if drag_obj == self or self.tree.is_parent_node( self.mytree_node, drag_obj.mytree_node ):
-            return
+        if drag_obj == self or self.tree.is_parent_node( self.mytree_node, drag_obj.mytree_node ): return
         elif isinstance( drag_obj, map_miniature_nodehandler.map_miniature_handler ):
             drop_xml = self.tree.drag_obj.xml#.delete()
             obj = drop_xml[0]
@@ -138,21 +132,17 @@ class minilib_handler( node_handler ):
             unique = ''
             for attrib in obj.keys():
                 key = TO_MINILIB_MAP.get( attrib, attrib )
-                if key != None:
-                    dict[ key ] = obj.get( attrib )
+                if key != None: dict[ key ] = obj.get( attrib )
             dict[ ATTRIBUTE_UNIQUE ] = unique
             self.new_mini( dict )
-        else:
-            node_handler.on_drop(self, evt)
+        else: node_handler.on_drop(self, evt)
 
 
     def new_mini( self, data={}, add=1 ):
         mini = Element( TAG_MINIATURE )
-        for key in data.keys():
-            mini.set( key, data[ key ] )
+        for key in data.keys(): mini.set( key, data[ key ] )
         for key in CORE_ATTRIBUTES:
-            if mini.get( key ) == '':
-                mini.set( key, '0' )
+            if mini.get( key ) == '': mini.set( key, '0' )
         if add:
             self.add_mini( mini )
             self.add_leaf( mini )
@@ -169,15 +159,13 @@ class minilib_handler( node_handler ):
 
     def update_leaves( self ):
         self.mydata = []
-        for n in self.xml.findall(TAG_MINIATURE):
-            self.add_leaf( n )
+        for n in self.xml.findall(TAG_MINIATURE): self.add_leaf( n )
 
     def on_drag( self, evt ):
         print 'drag event caught'
 
     def send_mini_to_map( self, mini, count=1, addName=True ):
-        if mini == None:
-            return
+        if mini == None: return
         if mini.get( ATTRIBUTE_URL ) == '' or mini.get( ATTRIBUTE_URL ) == 'http://':
             self.chat.ParsePost( self.chat.colorize(self.chat.syscolor, '"%s" is not a valid URL, the mini "%s" will not be added to the map' % ( mini.get( ATTRIBUTE_URL ), mini.get( ATTRIBUTE_NAME ) )) )
             return
@@ -202,15 +190,11 @@ class minilib_handler( node_handler ):
             # translate our attributes to map attributes
             key = FROM_MINILIB_MAP.get( k, k )
             if key != None:
-                if not addName and k == 'name':
-                    pass
-                else:
-                    msg.init_prop( key, mini_xml.get( k ) )
+                if not addName and k == 'name': pass
+                else: msg.init_prop( key, mini_xml.get( k ) )
         unique = self.is_unique( mini_xml )
-        if addName:
-            label = mini_xml.get( ATTRIBUTE_NAME )
-        else:
-            label = ''
+        if addName: label = mini_xml.get( ATTRIBUTE_NAME )
+        else: label = ''
         return msg.get_all_xml()
 
     def is_unique( self, mini ):
@@ -259,9 +243,6 @@ class minilib_use_panel(wx.Panel):
 
         self.map = component.get('map')
         names = self.buildList()
-        # self.keys = self.list.keys()
-        # self.keys.sort()
-
 
         s = self.GetClientSizeTuple()
 
@@ -298,8 +279,7 @@ class minilib_use_panel(wx.Panel):
         """Returns a dictionary of label => game tree miniature DOM node mappings.
         """
         self.list = []
-        for mini in self.handler.xml.findall(TAG_MINIATURE):
-            self.list.append( mini.get( ATTRIBUTE_NAME ) )
+        for mini in self.handler.xml.findall(TAG_MINIATURE): self.list.append( mini.get( ATTRIBUTE_NAME ) )
         return self.list
 
     def on_close(self, evt):
@@ -310,22 +290,15 @@ class minilib_use_panel(wx.Panel):
         """
         btn = self.FindWindowById(evt.GetId())
         sendName = True
+        try: count = eval( self.count.GetValue() )
+        except: count = 1
         try:
-            count = eval( self.count.GetValue() )
-        except:
-            count = 1
-
-        try:
-            if eval( unique ):
-                count = 1
+            if eval( unique ): count = 1
             unique = eval( unique )
-        except:
-            pass
+        except: pass
 
-        if btn.GetLabel() == 'Add No Label':
-            sendName = False
-        for index in self.listbox.GetSelections():
-            self.handler.send_mini_to_map( self.handler.get_mini( index ), count, sendName )
+        if btn.GetLabel() == 'Add No Label': sendName = False
+        for index in self.listbox.GetSelections(): self.handler.send_mini_to_map( self.handler.get_mini( index ), count, sendName )
 
 
 class minpedit(wx.Panel):
@@ -394,12 +367,8 @@ class minpedit(wx.Panel):
                 'How many %s\'s do you want to add?' %
                 ( self.grid.getSelectedLabel() ), 'Batch mini add', '2' )
             if dlg.ShowModal() == wx.ID_OK:
-                try:
-                    value = eval( dlg.GetValue() )
-                except:
-                    value = 0
-                # for loop in range( 0, value ):
-                #     self.send_to_map()
+                try: value = eval( dlg.GetValue() )
+                except: value = 0
                 print 'getting selected index for batch send'
                 index = self.grid.GetGridCursorRow()
                 print 'sending batch to map'
@@ -415,15 +384,9 @@ class minilib_grid(wx.grid.Grid):
         wx.grid.Grid.__init__(self, parent, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS )
         self.parent = parent
         self.handler = handler
-        #self.keys = [ ATTRIBUTE_NAME, ATTRIBUTE_URL, ATTRIBUTE_UNIQUE ]
         self.keys = CORE_ATTRIBUTES
         self.CreateGrid( 1, len( self.keys ) )
-        # self.SetColLabelValue( 0, 'Name' )
-        # self.SetColLabelValue( 1, 'URL' )
-        # self.SetColSize( 1, 250 )
-        # self.SetColLabelValue( 2, 'Unique' )
-        for key in self.keys:
-            self.SetColLabelValue( self.keys.index( key ), key )
+        for key in self.keys: self.SetColLabelValue( self.keys.index( key ), key )
         self.update_all()
         self.selectedRow = 0
         self.AutoSizeColumns()
@@ -433,8 +396,7 @@ class minilib_grid(wx.grid.Grid):
     def update_cols( self ):
         for n in self.handler.xml.findall(TAG_MINIATURE):
             for k in n.keys():
-                if k not in self.keys:
-                    self.keys.append( k )
+                if k not in self.keys: self.keys.append( k )
 
     def select_cell( self, evt ):
         """Event handler for grid cell selection changes.  It stores the
@@ -492,13 +454,11 @@ class minilib_grid(wx.grid.Grid):
         count = 0
         for n in list:
             for k in n.keys():
-                if k not in self.keys:
-                    self.keys.append( k )
+                if k not in self.keys: self.keys.append( k )
         count = len( self.keys )
         if self.GetNumberCols() < count:
             self.AppendCols( count - self.GetNumberCols() )
-            for k in self.keys:
-                self.SetColLabelValue( self.keys.index( k ), k )
+            for k in self.keys: self.SetColLabelValue( self.keys.index( k ), k )
         count = len( list )
         rowcount = self.GetNumberRows()
         if ( count > rowcount ):
@@ -531,13 +491,11 @@ class minilib_grid(wx.grid.Grid):
         """
         list = self.getList()
         item = list[ row ]
-        for key in self.keys:
-            self.GetTable().SetValue( row, self.keys.index( key ), item.get( key ) )
+        for key in self.keys: self.GetTable().SetValue( row, self.keys.index( key ), item.get( key ) )
 
     def update_data_row( self, row ):
         """Updates the DOM nodw 'row' with grid data from 'row'
         """
         list = self.getList()
         item = list[ row ]
-        for key in self.keys:
-            item.set( key, string.strip( self.GetTable().GetValue( row, self.keys.index( key ) ) ) ) 
+        for key in self.keys: item.set( key, string.strip( self.GetTable().GetValue( row, self.keys.index( key ) ) ) ) 

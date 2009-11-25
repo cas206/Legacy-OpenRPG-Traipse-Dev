@@ -29,11 +29,7 @@
 __version__ = "$Id: miniatures.py,v 1.46 2007/12/07 20:39:50 digitalxero Exp $"
 
 from base import *
-import thread
-import time
-import urllib
-import os.path
-import mimetypes
+import thread, time, urllib, os.path, mimetypes
 
 import xml.dom.minidom as minidom
 from orpg.tools.orpg_settings import settings
@@ -106,10 +102,6 @@ class BmpMiniature:
         self.image = None
 
     def set_bmp(self, bmp):
-        ### Alpha ###
-        try: bmp = bmp.ConvertToImage()
-        except: pass
-        ### Still ironing out some kinks to FlexiRPG's map features ###
         self.image = bmp
         self.image.ConvertAlphaToMask()
         self.generate_bmps()
@@ -149,18 +141,6 @@ class BmpMiniature:
     def draw(self, dc, mini_layer, op=wx.COPY):
         if self.hide and mini_layer.canvas.frame.session.my_role() == mini_layer.canvas.frame.session.ROLE_GM:
             # set the width and height of the image
-            """
-            if self.width and self.height:
-                tmp_image = self.bmp.ConvertToImage()
-                tmp_image.Rescale(int(self.width), int(self.height))
-                tmp_image.ConvertAlphaToMask()
-                self.bmp = tmp_image.ConvertToBitmap()
-                mask = wx.Mask(self.bmp, wx.Colour(tmp_image.GetMaskRed(), 
-                    tmp_image.GetMaskGreen(), tmp_image.GetMaskBlue()))
-                self.bmp.SetMask(mask)
-                del tmp_image
-                del mask
-            """
             self.left = 0
             self.right = self.bmp.GetWidth()
             self.top = 0
@@ -269,14 +249,30 @@ class BmpMiniature:
                 triangle = []
                 # Figure out which direction to draw the marker!!
                 tri_list = {
-                FACE_NORTH: [cmpPoint(x_center - x_quarter, y_center - y_half ), cmpPoint(x_center, y_center - y_3quarter ), cmpPoint(x_center + x_quarter, y_center - y_half)],
-                FACE_SOUTH: [cmpPoint(x_center - x_quarter, y_center + y_half ), cmpPoint(x_center, y_center + y_3quarter ), cmpPoint(x_center + x_quarter, y_center + y_half )],
-                FACE_NORTHEAST: [cmpPoint(x_center + x_quarter, y_center - y_half ), cmpPoint(x_center + x_3quarter, y_center - y_3quarter ), cmpPoint(x_center + x_half, y_center - y_quarter)],
-                FACE_EAST: [cmpPoint(x_center + x_half, y_center - y_quarter ), cmpPoint(x_center + x_3quarter, y_center ), cmpPoint(x_center + x_half, y_center + y_quarter )],
-                FACE_SOUTHEAST: [cmpPoint(x_center + x_half, y_center + y_quarter ), cmpPoint(x_center + x_3quarter, y_center + y_3quarter ), cmpPoint(x_center + x_quarter, y_center + y_half )],
-                FACE_SOUTHWEST: [cmpPoint(x_center - x_quarter, y_center + y_half ), cmpPoint(x_center - x_3quarter, y_center + y_3quarter ), cmpPoint(x_center - x_half, y_center + y_quarter )],
-                FACE_WEST: [cmpPoint(x_center - x_half, y_center + y_quarter ), cmpPoint(x_center - x_3quarter, y_center ), cmpPoint(x_center - x_half, y_center - y_quarter )],
-                FACE_NORTHWEST: [cmpPoint(x_center - x_half, y_center - y_quarter ), cmpPoint(x_center - x_3quarter, y_center - y_3quarter ), cmpPoint(x_center - x_quarter, y_center - y_half )]}
+                FACE_NORTH: [cmpPoint(x_center - x_quarter, y_center - y_half ), 
+                            cmpPoint(x_center, y_center - y_3quarter ), 
+                            cmpPoint(x_center + x_quarter, y_center - y_half)],
+                FACE_SOUTH: [cmpPoint(x_center - x_quarter, y_center + y_half ), 
+                            cmpPoint(x_center, y_center + y_3quarter ), 
+                            cmpPoint(x_center + x_quarter, y_center + y_half )],
+                FACE_NORTHEAST: [cmpPoint(x_center + x_quarter, y_center - y_half ), 
+                                cmpPoint(x_center + x_3quarter, y_center - y_3quarter ), 
+                                cmpPoint(x_center + x_half, y_center - y_quarter)],
+                FACE_EAST: [cmpPoint(x_center + x_half, y_center - y_quarter ), 
+                            cmpPoint(x_center + x_3quarter, y_center ), 
+                            cmpPoint(x_center + x_half, y_center + y_quarter )],
+                FACE_SOUTHEAST: [cmpPoint(x_center + x_half, y_center + y_quarter ), 
+                                cmpPoint(x_center + x_3quarter, y_center + y_3quarter ), 
+                                cmpPoint(x_center + x_quarter, y_center + y_half )],
+                FACE_SOUTHWEST: [cmpPoint(x_center - x_quarter, y_center + y_half ), 
+                                cmpPoint(x_center - x_3quarter, y_center + y_3quarter ), 
+                                cmpPoint(x_center - x_half, y_center + y_quarter )],
+                FACE_WEST: [cmpPoint(x_center - x_half, y_center + y_quarter ), 
+                            cmpPoint(x_center - x_3quarter, y_center ), 
+                            cmpPoint(x_center - x_half, y_center - y_quarter )],
+                FACE_NORTHWEST: [cmpPoint(x_center - x_half, y_center - y_quarter ), 
+                                cmpPoint(x_center - x_3quarter, y_center - y_3quarter ), 
+                                cmpPoint(x_center - x_quarter, y_center - y_half )]}
                 for tri in tri_list[self.heading]:
                     triangle.append(tri)
                 del tri_list
@@ -352,14 +348,10 @@ class BmpMiniature:
 
     def takedom(self, xml_dom):
         self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("posx"):
-            self.pos.x = int(xml_dom.getAttribute("posx"))
-        if xml_dom.hasAttribute("posy"):
-            self.pos.y = int(xml_dom.getAttribute("posy"))
-        if xml_dom.hasAttribute("heading"):
-            self.heading = int(xml_dom.getAttribute("heading"))
-        if xml_dom.hasAttribute("face"):
-            self.face = int(xml_dom.getAttribute("face"))
+        if xml_dom.hasAttribute("posx"): self.pos.x = int(xml_dom.getAttribute("posx"))
+        if xml_dom.hasAttribute("posy"): self.pos.y = int(xml_dom.getAttribute("posy"))
+        if xml_dom.hasAttribute("heading"): self.heading = int(xml_dom.getAttribute("heading"))
+        if xml_dom.hasAttribute("face"): self.face = int(xml_dom.getAttribute("face"))
         if xml_dom.hasAttribute("path"):
             self.path = urllib.unquote(xml_dom.getAttribute("path"))
             self.set_bmp(ImageHandler.load(self.path, 'miniature', self.id))
@@ -369,17 +361,13 @@ class BmpMiniature:
         if xml_dom.hasAttribute("hide"):
             if xml_dom.getAttribute("hide") == '1' or xml_dom.getAttribute("hide") == 'True': self.hide = True
             else: self.hide = False
-        if xml_dom.hasAttribute("label"):
-            self.label = xml_dom.getAttribute("label")
-        if xml_dom.hasAttribute("zorder"):
-            self.zorder = int(xml_dom.getAttribute("zorder"))
+        if xml_dom.hasAttribute("label"): self.label = xml_dom.getAttribute("label")
+        if xml_dom.hasAttribute("zorder"): self.zorder = int(xml_dom.getAttribute("zorder"))
         if xml_dom.hasAttribute("align"):
             if xml_dom.getAttribute("align") == '1' or xml_dom.getAttribute("align") == 'True': self.snap_to_align = 1
             else: self.snap_to_align = 0
-        if xml_dom.hasAttribute("width"):
-            self.width = int(xml_dom.getAttribute("width"))
-        if xml_dom.hasAttribute("height"):
-            self.height = int(xml_dom.getAttribute("height"))
+        if xml_dom.hasAttribute("width"): self.width = int(xml_dom.getAttribute("width"))
+        if xml_dom.hasAttribute("height"): self.height = int(xml_dom.getAttribute("height"))
 
 ##-----------------------------
 ## miniature layer
@@ -448,8 +436,7 @@ class miniature_layer(layer_base):
 
     def get_miniature_by_id(self, id):
         for mini in self.miniatures:
-            if str(mini.id) == str(id):
-                return mini
+            if str(mini.id) == str(id): return mini
         return None
 
     def del_miniature(self, min):
@@ -513,9 +500,7 @@ class miniature_layer(layer_base):
             id = c.getAttribute('id')
             if action == "del": 
                 mini = self.get_miniature_by_id(id)
-                if mini:
-                    self.miniatures.remove(mini)
-                    del mini
+                if mini: self.miniatures.remove(mini); del mini
             elif action == "new":
                 pos = cmpPoint(int(c.getAttribute('posx')),int(c.getAttribute('posy')))
                 path = urllib.unquote(c.getAttribute('path'))
@@ -546,7 +531,7 @@ class miniature_layer(layer_base):
                         postdata = urllib.urlencode({'filename':filename[1], 'imgdata':imgdata, 'imgtype':imgtype})
                         thread.start_new_thread(self.upload, (postdata, localPath, True))
                 #  collapse the zorder.  If the client behaved well, then nothing should change.
-                #    Otherwise, this will ensure that there's some kind of z-order
+                #  Otherwise, this will ensure that there's some kind of z-order
                 self.collapse_zorder()
             else:
                 mini = self.get_miniature_by_id(id)
@@ -575,8 +560,7 @@ class miniature_layer(layer_base):
                     self.miniatures[len(self.miniatures)-1].localPath = filename
                     self.miniatures[len(self.miniatures)-1].localTime = time.time()
                     self.miniatures[len(self.miniatures)-1].path = path
-            else:
-                print xml_dom.get('msg')
+            else: print xml_dom.get('msg')
         except Exception, e:
             print e
             print recvdata

@@ -81,8 +81,7 @@ class minis_msg(map_element_msg_base):
         self.p_lock.acquire()
         if xml_dom.tagName == self.tagname:
             if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.init_prop(k,xml_dom.getAttribute(k))
+                for k in xml_dom.getAttributeKeys(): self.init_prop(k,xml_dom.getAttribute(k))
 
             for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
@@ -90,16 +89,13 @@ class minis_msg(map_element_msg_base):
                 except Exception, e: print e; continue
                 id = mini.get_prop("id")
                 action = mini.get_prop("action")
-
                 if action == "new": self.children[id] = mini
                 elif action == "del":
                     if self.children.has_key(id):
                         self.children[id] = None
                         del self.children[id]
-
                 elif action == "update":
-                    if self.children.has_key(id):
-                        self.children[id].init_props(mini.get_all_props())
+                    if self.children.has_key(id): self.children[id].init_props(mini.get_all_props())
         else:
             self.p_lock.release()
             raise Exception, "Error attempting to initialize a " + self.tagname + " from a non-<" + self.tagname + "/> element"
@@ -109,12 +105,9 @@ class minis_msg(map_element_msg_base):
         self.p_lock.acquire()
         if xml_dom.tagName == self.tagname:
             if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.set_prop(k,xml_dom.getAttribute(k))
-
+                for k in xml_dom.getAttributeKeys(): self.set_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 mini = mini_msg(self.p_lock)
-
                 try: mini.set_from_dom(c)
                 except Exception, e: print e; continue
                 id = mini.get_prop("id")

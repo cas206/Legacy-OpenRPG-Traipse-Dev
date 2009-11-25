@@ -52,10 +52,8 @@ class rpg_grid_handler(node_handler):
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.grid = self.xml.find('grid')
-        if self.grid.get("border") == "":
-            self.grid.set("border","1")
-        if self.grid.get("autosize") == "":
-            self.grid.set("autosize","1")
+        if self.grid.get("border") == "": self.grid.set("border","1")
+        if self.grid.get("autosize") == "": self.grid.set("autosize","1")
         self.macros = self.xml.find('macros')
         self.myeditor = None
         self.refresh_rows()
@@ -71,8 +69,7 @@ class rpg_grid_handler(node_handler):
         for row in self.grid.findall('row'):
             first_cell = row.find('cell')
             name = first_cell.text
-            if name == None or name == '':
-                name = "Row"
+            if name == None or name == '': name = "Row"
             new_tree_node = tree.AppendItem(self.mytree_node,name,icons['gear'],icons['gear'])
             handler = grid_row_handler(row,new_tree_node,self)
             tree.SetPyData(new_tree_node,handler)
@@ -87,11 +84,9 @@ class rpg_grid_handler(node_handler):
             cells = r.findall('cell')
             html_str += "<tr>"
             for c in cells:
-                #html_str += "<td width='"+c.get('size')+"' >" bug here
                 html_str += "<td >"
                 text = c.text
-                if text == None or text == '':
-                    text = '<br />'
+                if text == None or text == '': text = '<br />'
                 html_str += text + "</td>"
             html_str += "</tr>"
         html_str += "</table>"
@@ -131,8 +126,7 @@ class grid_row_handler(node_handler):
         for c in cells: # should loop over rows first, then cells
             html_str += "<td >"
             text = c.text
-            if text == '' or text is None:
-                text = '<br />'
+            if text == '' or text is None: text = '<br />'
             html_str += text + "</td>"
             html_str += "</tr>"
         html_str += "</table>"
@@ -140,10 +134,8 @@ class grid_row_handler(node_handler):
 
     def get_value(self):
         cells = self.xml.findall('cell')
-        if len(cells) == 2:
-            return getText(cells[1])
-        else:
-            return None
+        if len(cells) == 2: return getText(cells[1])
+        else: return None
 
     def set_value(self, new_value):
         cells = self.xml.findall('cell')
@@ -178,7 +170,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
     def __init__(self):
         wx.grid.PyGridCellEditor.__init__(self)
 
-
     def Create(self, parent, id, evtHandler):
         """
         Called to create the control, which must derive from wxControl.
@@ -187,9 +178,7 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc = wx.TextCtrl(parent, id, "", style=wx.TE_PROCESS_ENTER | wx.TE_PROCESS_TAB)
         self._tc.SetInsertionPoint(0)
         self.SetControl(self._tc)
-        if evtHandler:
-            self._tc.PushEventHandler(evtHandler)
-
+        if evtHandler: self._tc.PushEventHandler(evtHandler)
 
     def SetSize(self, rect):
         """
@@ -198,15 +187,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         PaintBackground and do something meaningful there.
         """
         self._tc.SetDimensions(rect.x+1, rect.y+1, rect.width+2, rect.height+2)
-
-
-    #def Show(self, show, attr): #deprecated DeprecationWarning: Please use PyGridCellEditor.Show instead.
-    #    """
-    #    Show or hide the edit control.  You can use the attr (if not None)
-    #    to set colours or fonts for the control.
-    #    """
-    #    self.base_Show(show, attr) # Removed to prevent recursive error type.
-
 
     def BeginEdit(self, row, col, grid):
         """
@@ -222,7 +202,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         # For this example, select the text
         self._tc.SetSelection(0, self._tc.GetLastPosition())
 
-
     def EndEdit(self, row, col, grid):
         """
         Complete the editing of the current cell. Returns True if the value
@@ -230,7 +209,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         *Must Override*
         """
         changed = False
-
         val = self._tc.GetValue()
         if val != self.startValue:
             changed = True
@@ -240,7 +218,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc.SetValue('')
         return changed
 
-
     def Reset(self):
         """
         Reset the value in the control back to its starting value.
@@ -249,20 +226,14 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         self._tc.SetValue(self.startValue)
         self._tc.SetInsertionPointEnd()
 
-
     def IsAcceptedKey(self, evt):
         """
         Return True to allow the given key to start editing: the base class
         version only checks that the event has no modifiers.  F2 is special
         and will always start the editor.
         """
-
-        ## Oops, there's a bug here, we'll have to do it ourself..
-        ##return self.base_IsAcceptedKey(evt)
-
         return (not (evt.ControlDown() or evt.AltDown()) and
                 evt.GetKeyCode() != wx.WXK_SHIFT)
-
 
     def StartingKey(self, evt):
         """
@@ -274,24 +245,15 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         if key in [wx.WXK_NUMPAD0, wx.WXK_NUMPAD1, wx.WXK_NUMPAD2, wx.WXK_NUMPAD3, wx.WXK_NUMPAD4,
                    wx.WXK_NUMPAD5, wx.WXK_NUMPAD6, wx.WXK_NUMPAD7, wx.WXK_NUMPAD8, wx.WXK_NUMPAD9]:
             ch = ch = chr(ord('0') + key - wx.WXK_NUMPAD0)
-
         elif key < 256 and key >= 0 and chr(key) in string.printable:
             ch = chr(key)
-            if not evt.ShiftDown():
-                ch = string.lower(ch)
-
-        if ch is not None:
-            # For this example, replace the text.  Normally we would append it.
-            self._tc.AppendText(ch)
-        else:
-            evt.Skip()
-
-
+            if not evt.ShiftDown(): ch = string.lower(ch)
+        if ch is not None: self._tc.AppendText(ch)
+        else: evt.Skip()
 
     def Destroy(self):
         """final cleanup"""
         self.base_Destroy()
-
 
     def Clone(self):
         """
@@ -301,7 +263,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         return MyCellEditor()
 
 
-
 class rpg_grid(wx.grid.Grid):
     """grid for attacks"""
     def __init__(self, parent, handler):
@@ -309,7 +270,6 @@ class rpg_grid(wx.grid.Grid):
         self.parent = parent
         self.handler = handler
 
-        #  Registers a "custom" cell editor (really the example from Robin Dunn with minor mods
         self.RegisterDataType(wx.grid.GRID_VALUE_STRING, wx.grid.GridCellStringRenderer(),MyCellEditor())
 
         self.rows = handler.grid.findall('row')
@@ -320,8 +280,7 @@ class rpg_grid(wx.grid.Grid):
         self.SetColLabelSize(0)
         self.set_col_widths()
 
-        for i in range(0,len(self.rows)):
-            self.refresh_row(i)
+        for i in range(0,len(self.rows)): self.refresh_row(i)
 
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
         self.Bind(wx.grid.EVT_GRID_COL_SIZE, self.on_col_size)
@@ -329,8 +288,7 @@ class rpg_grid(wx.grid.Grid):
 
 
     def on_leftdclick(self,evt):
-        if self.CanEnableCellControl():
-            self.EnableCellEditControl()
+        if self.CanEnableCellControl(): self.EnableCellEditControl()
 
     def on_col_size(self, evt):
         col = evt.GetRowOrCol()
@@ -345,8 +303,7 @@ class rpg_grid(wx.grid.Grid):
         value = self.GetCellValue(row,col)
         cells = self.rows[row].findall('cell')
         cells[col].text = value
-        if col == 0:
-            self.handler.refresh_rows()
+        if col == 0: self.handler.refresh_rows()
 
     def set_col_widths(self):
         cells = self.rows[0].findall('cell')
@@ -354,8 +311,7 @@ class rpg_grid(wx.grid.Grid):
             try:
                 size = int(cells[i].get('size'))
                 self.SetColSize(i,size)
-            except:
-                continue
+            except: continue
 
     def refresh_row(self,rowi):
         cells = self.rows[rowi].findall('cell')
@@ -388,8 +344,7 @@ class rpg_grid(wx.grid.Grid):
 
     def del_row(self,evt=None):
         num = self.GetNumberRows()
-        if num == 1:
-            return
+        if num == 1: return
         self.handler.grid.remove(self.handler.grid[num-1])# always remove last row -- nasty
         self.DeleteRows(num-1,1)
         self.rows = self.handler.grid.findall('row')
@@ -397,8 +352,7 @@ class rpg_grid(wx.grid.Grid):
 
     def del_col(self,evt=None):
         num = self.GetNumberCols()
-        if num == 1:
-            return
+        if num == 1: return
         for r in self.rows:
             cells = r.findall('cell')
             r.remove(r[num-1])                  # always remove the last column -- nasty
@@ -421,7 +375,6 @@ class rpg_grid_panel(wx.Panel):
         self.SetAutoLayout(True)
         self.Fit()
         parent.SetSize(self.GetBestSize())
-
 
 G_AUTO_SIZE = wx.NewId()
 G_ADD_ROW = wx.NewId()

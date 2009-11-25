@@ -35,10 +35,7 @@ from orpg.orpg_windows import *
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from nodehandlers import core
-import string
-import urllib
-import time
-import os
+import string, urllib, time, os
 
 from orpg.orpg_xml import xml
 from orpg.tools.validate import validate
@@ -87,9 +84,6 @@ class game_tree(wx.TreeCtrl):
     def __init__(self, parent, id):
         wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, 
                 wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
-        #self.xml = component.get('xml') #
-        self.settings = component.get('settings')
-        self.session = component.get('session')
         self.chat = component.get('chat')
         self.mainframe = component.get('frame')
         self.build_img_list()
@@ -127,8 +121,7 @@ class game_tree(wx.TreeCtrl):
         else: logger.debug("Nodehandler for " + nodehandler + " already exists!")
     
     def remove_nodehandler(self, nodehandler):
-        if self.nodehandlers.has_key(nodehandler):
-            del self.nodehandlers[nodehandler]
+        if self.nodehandlers.has_key(nodehandler): del self.nodehandlers[nodehandler]
         else: logger.debug("No nodehandler for " + nodehandler + " exists!")
 
     def init_nodehandlers(self):
@@ -154,9 +147,6 @@ class game_tree(wx.TreeCtrl):
         self.add_nodehandler('node_loader', core.node_loader)
         self.add_nodehandler('url_loader', core.url_loader)
         self.add_nodehandler('min_map', core.min_map)
-
-    #   event = wxKeyEvent
-    #   set to be called by wxWindows by EVT_CHAR macro in __init__
     
     def on_key_up(self, evt):
         key_code = evt.GetKeyCode()
@@ -189,7 +179,7 @@ class game_tree(wx.TreeCtrl):
             if curSelection:
                 nextSelect = self.GetItemParent(curSelection)
                 self.on_del(evt)
-                try:
+                try: 
                     if self.GetItemText(nextSelect) != "": self.SelectItem(nextSelect)
                 except: pass
         elif key_code == wx.WXK_F2:
@@ -218,8 +208,7 @@ class game_tree(wx.TreeCtrl):
 
     
     def load_tree(self, filename=dir_struct["user"]+'tree.xml', error=0):
-        self.settings.change("gametree", filename)
-        #check file exists
+        settings.change("gametree", filename)
         if not os.path.exists(filename):
             emsg = "Gametree Missing!\n"+filename+" cannot be found.\n\n"\
                  "Would you like to locate it?\n"\
@@ -227,13 +216,10 @@ class game_tree(wx.TreeCtrl):
             self.locate_valid_tree("Gametree Error", emsg)
             return
         try:
-            f = open(filename, "rb")
-            tree = parse(f)
+            tree = parse(filename)
             self.xml_root = tree.getroot()
         except:
-            f.close()
             self.xml_root = None
-        ### Alpha  ### Doing some work on Gametree to add Element Tree, slowly at first. 
 
         if not self.xml_root:
             os.rename(filename,filename+".corrupt")
@@ -348,14 +334,12 @@ class game_tree(wx.TreeCtrl):
         self.Bind(wx.EVT_MENU, self.on_tree_prop, id=TOP_TREE_PROP)
         self.Bind(wx.EVT_MENU, self.on_insert_features, id=TOP_FEATURES)
 
-    
     def do_std_menu(self, evt, obj):
         try: self.std_menu.Enable(STD_MENU_MAP, obj.checkToMapMenu())
         except: self.std_menu.Enable(STD_MENU_MAP, obj.map_aware())
         self.std_menu.Enable(STD_MENU_CLONE, obj.can_clone())
         self.PopupMenu(self.std_menu)
 
-    
     def strip_html(self, player):
         ret_string = ""
         x = 0
@@ -369,7 +353,6 @@ class game_tree(wx.TreeCtrl):
         logger.debug(ret_string)
         return ret_string
 
-    
     def on_receive_data(self, data):
         self.insert_xml(data)
     
@@ -396,11 +379,9 @@ class game_tree(wx.TreeCtrl):
                 if len(selections) == len(opts): self.chat.ParsePost(obj.tohtml(),True,True)
                 else:
                     player_ids = []
-                    for s in selections:
-                        player_ids.append(players[s][2])
+                    for s in selections: player_ids.append(players[s][2])
                     self.chat.whisper_to_players(obj.tohtml(),player_ids)
 
-    
     def on_export_html(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","HTML (*.html)|*.html",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
@@ -410,36 +391,30 @@ class game_tree(wx.TreeCtrl):
             with open(f.GetPath(),"w") as f:
                 data = "<html><head><title>"+obj.xml.get("name")+"</title></head>"
                 data += "<body bgcolor='#FFFFFF' >"+obj.tohtml()+"</body></html>"
-                for tag in ("</tr>","</td>","</th>","</table>","</html>","</body>"):
-                    data = data.replace(tag,tag+"\n")
+                for tag in ("</tr>","</td>","</th>","</table>","</html>","</body>"): data = data.replace(tag,tag+"\n")
                 f.write(data)
             self.last_save_dir, throwaway = os.path.split( f.GetPath() )
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    
     def indifferent(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("indifferent")
 
-    
     def useful(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useful")
 
-    
     def useless(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.usefulness("useless")
 
-    
     def on_email(self,evt):
         pass
 
-    
     def on_send_to(self, evt):
         players = self.session.get_players()
         opts = []
@@ -461,7 +436,6 @@ class game_tree(wx.TreeCtrl):
                     for s in selections: self.session.send(xmldata,players[s][2])
             dlg.Destroy()
 
-    
     def on_icon(self, evt):
         icons = self.icons.keys()
         icons.sort()
@@ -473,7 +447,6 @@ class game_tree(wx.TreeCtrl):
             obj.change_icon(key)
         dlg.Destroy()
 
-    
     def on_wizard(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -485,7 +458,6 @@ class game_tree(wx.TreeCtrl):
         self.insert_xml(xml_data)
         logger.debug(xml_data)
 
-    
     def on_clone(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
@@ -498,11 +470,30 @@ class game_tree(wx.TreeCtrl):
             else: parent_xml = self.GetPyData(parent_node).xml
             for i in range(len(parent_xml)):
                 if parent_xml[i] is obj.xml:
+                    name = self.clone_renaming(parent_xml, parent_xml[i].get('name'))
+                    clone_xml.set('name', name)
                     parent_xml.insert(i, clone_xml)
                     break
             self.load_xml(clone_xml, parent_node, prev_sib)
 
-    
+    def clone_renaming(self, node, name):
+        node_list = node.getchildren()
+        parent = node
+        append = name.split('_')
+        try: append_d = int(append[len(append)-1]); del append[len(append)-1]
+        except: append_d = False
+        if append_d: 
+            append_d += 1; name = ''
+            for a in append: name += a+'_'
+            name = name+str(append_d)
+        if not append_d:
+            append_d = 1; name = ''
+            for a in append: name += a+'_'
+            name = name+str(append_d)
+        for n in node_list:
+            if n.get('name') == name: name = self.clone_renaming(parent, name)
+        return name
+
     def on_save(self, evt):
         """save node to a xml file"""
         item = self.GetSelection()
@@ -510,7 +501,6 @@ class game_tree(wx.TreeCtrl):
         obj.on_save(evt)
         os.chdir(dir_struct["home"])
 
-    
     def on_save_tree_as(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
@@ -519,18 +509,15 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    
     def on_save_tree(self, evt=None):
-        filename = self.settings.get_setting("gametree")
+        filename = settings.get_setting("gametree")
         self.save_tree(filename)
 
-    
     def save_tree(self, filename=dir_struct["user"]+'tree.xml'):
         self.xml_root.set("version", GAMETREE_VERSION)
         settings.change("gametree", filename)
         ElementTree(self.xml_root).write(filename)
 
-    
     def on_load_new_tree(self, evt):
         f = wx.FileDialog(self,"Select a file", self.last_save_dir,"","*.xml",wx.OPEN)
         if f.ShowModal() == wx.ID_OK:
@@ -539,7 +526,6 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    
     def on_insert_file(self, evt):
         """loads xml file into the tree"""
         if self.last_save_dir == ".":
@@ -551,7 +537,6 @@ class game_tree(wx.TreeCtrl):
         f.Destroy()
         os.chdir(dir_struct["home"])
 
-    
     def on_insert_url(self, evt):
         """loads xml url into the tree"""
         dlg = wx.TextEntryDialog(self,"URL?","Insert URL", "http://")
@@ -561,35 +546,29 @@ class game_tree(wx.TreeCtrl):
             self.insert_xml(file.read())
         dlg.Destroy()
 
-    
     def on_insert_features(self, evt):
         self.insert_xml(open(dir_struct["template"]+"feature.xml","r").read())
 
-    
     def on_tree_prop(self, evt):
-        dlg = gametree_prop_dlg(self, self.settings)
+        dlg = gametree_prop_dlg(self, settings)
         if dlg.ShowModal() == wx.ID_OK: pass
         dlg.Destroy()
 
-    
     def on_node_design(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_design(evt)
 
-    
     def on_node_use(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_use(evt)
 
-    
     def on_node_pp(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
         obj.on_html_view(evt)
 
-    
     def on_del(self, evt):
         status_value = "none"
         try:
@@ -604,31 +583,28 @@ class game_tree(wx.TreeCtrl):
                         parent_handler = self.GetPyData(parent_item)
                         status_value = parent_handler.get('status')
                         name = parent_handler.get('name')
-                        if status_value == "useless":
-                            break
-                        elif status_value == "useful":
-                            break
-                    except:
-                        status_value = "none"
+                        if status_value == "useless": break
+                        elif status_value == "useful": break
+                    except: status_value = "none"
                     parent_item = self.GetItemParent(parent_item)
                 if status_value == "useful":
                     dlg = wx.MessageDialog(self, `name` + "  And everything beneath it are considered useful.  \n\nAre you sure you want to delete this item?",'Important Item',wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                     if dlg.ShowModal() == wx.ID_YES: handler.delete()
                 else: handler.delete()
         except:
-            if self.GetSelection() == self.GetRootItem():
-                msg = wx.MessageDialog(None,"You can't delete the root item.","Delete Error",wx.OK)
+            if self.GetSelection() == self.GetRootItem(): msg = wx.MessageDialog(None,"You can't delete the root item.","Delete Error",wx.OK)
             else: msg = wx.MessageDialog(None,"Unknown error deleting node.","Delete Error",wx.OK)
             msg.ShowModal()
             msg.Destroy()
 
-    
     def on_about(self, evt):
         item = self.GetSelection()
         obj = self.GetPyData(item)
-        about = MyAboutBox(self,obj.about())
-        about.ShowModal()
-        about.Destroy()
+        text = str(obj.about())
+        #about = MyAboutBox(self, obj.about())
+        wx.MessageBox(text, 'About')#.ShowModal()
+        #about.ShowModal()
+        #about.Destroy()
     
     def on_send_to_map(self, evt):
         item = self.GetSelection()
@@ -648,18 +624,13 @@ class game_tree(wx.TreeCtrl):
             wx.MessageBox("Error Importing Node or Tree")
             logger.general("Error Importing Node or Tree")
             return
-
         if new_xml.tag == "gametree":
-            for xml_child in new_xml:
-                self.load_xml(xml_child, self.root)
+            for xml_child in new_xml: self.load_xml(xml_child, self.root)
             return
-
         if new_xml.tag == "tree":
             self.xml_root.append(new_xml.find('nodehandler'))
-            for xml_child in new_xml:
-                self.load_xml(xml_child, self.root)
+            for xml_child in new_xml: self.load_xml(xml_child, self.root)
             return
-
         self.xml_root.append(new_xml)
         self.load_xml(new_xml, self.root, self.root)
     
@@ -695,8 +666,7 @@ class game_tree(wx.TreeCtrl):
             family_tree = self.get_tree_map(parent_node)
             family_tree.reverse()
             map_str = '' #'!@'
-            for member in family_tree:
-                map_str += member +'::'
+            for member in family_tree: map_str += member +'::'
             map_str = map_str[:len(map_str)-2] #+'@!'
             xml_element.set('map', map_str)
 
@@ -717,8 +687,7 @@ class game_tree(wx.TreeCtrl):
             try:
                 py_class = xml_element.get("class")
                 logger.debug("nodehandler class: " + py_class)
-                if not self.nodehandlers.has_key(py_class):
-                    raise Exception("Unknown Nodehandler for " + py_class)
+                if not self.nodehandlers.has_key(py_class): raise Exception("Unknown Nodehandler for " + py_class)
                 self.nodes[self.id] = self.nodehandlers[py_class](xml_element, new_tree_node)
                 self.SetPyData(new_tree_node, self.nodes[self.id])
                 logger.debug("Node Data set")
@@ -769,7 +738,7 @@ class game_tree(wx.TreeCtrl):
             self.SelectItem(item)
             if(isinstance(obj,core.node_handler)):
                 if not obj.on_ldclick(evt):
-                    action = self.settings.get_setting("treedclick")
+                    action = settings.get_setting("treedclick")
                     if action == "use": obj.on_use(evt)
                     elif action == "design": obj.on_design(evt)
                     elif action == "print": obj.on_html_view(evt)
@@ -806,8 +775,7 @@ class game_tree(wx.TreeCtrl):
         child, cookie = self.GetFirstChild(root)
         while child.IsOk():
             function(child, data)
-            if recurse:
-                self.traverse(child, function, data)
+            if recurse: self.traverse(child, function, data)
             child, cookie = self.GetNextChild(root, cookie)
     
     def on_label_change(self, evt):
@@ -825,8 +793,7 @@ class game_tree(wx.TreeCtrl):
         else:
             self.was_labeling = 1
             item = evt.GetItem()
-            if item == self.GetRootItem():
-                evt.Veto()
+            if item == self.GetRootItem(): evt.Veto()
     
     def on_drag(self, evt):
         self.rename_flag = 0
@@ -861,7 +828,6 @@ class gametree_prop_dlg(wx.Dialog):
     
     def __init__(self, parent, settings):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, "Game Tree Properties")
-        self.settings  = settings
 
         #sizers
         sizers = {}
@@ -919,10 +885,10 @@ class gametree_prop_dlg(wx.Dialog):
 
     
     def on_ok(self,evt):
-        self.settings.change("gametree",self.ctrls[CTRL_TREE_FILE].GetValue())
-        self.settings.change("SaveGameTreeOnExit",str(self.ctrls[CTRL_YES].GetValue()))
-        if self.ctrls[CTRL_USE].GetValue(): self.settings.change("treedclick","use")
-        elif self.ctrls[CTRL_DESIGN].GetValue(): self.settings.change("treedclick","design")
-        elif self.ctrls[CTRL_PRINT].GetValue(): self.settings.change("treedclick","print")
-        elif self.ctrls[CTRL_CHAT].GetValue(): self.settings.change("treedclick","chat")
+        settings.change("gametree",self.ctrls[CTRL_TREE_FILE].GetValue())
+        settings.change("SaveGameTreeOnExit",str(self.ctrls[CTRL_YES].GetValue()))
+        if self.ctrls[CTRL_USE].GetValue(): settings.change("treedclick","use")
+        elif self.ctrls[CTRL_DESIGN].GetValue(): settings.change("treedclick","design")
+        elif self.ctrls[CTRL_PRINT].GetValue(): settings.change("treedclick","print")
+        elif self.ctrls[CTRL_CHAT].GetValue(): settings.change("treedclick","chat")
         self.EndModal(wx.ID_OK)

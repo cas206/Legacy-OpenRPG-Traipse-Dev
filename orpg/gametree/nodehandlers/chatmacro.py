@@ -80,9 +80,6 @@ class macro_edit_panel(wx.Panel):
         self.text = {}
         self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name'))
         self.text[P_BODY] = wx.TextCtrl(self, P_BODY, handler.text._get_nodeValue(), style=wx.TE_MULTILINE)
-
-        #P_BODY : wx.TextCtrl(self, P_BODY,handler.text._get_nodeValue(), style=wx.TE_MULTILINE)
-
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
         sizer.Add(wx.StaticText(self, -1, "Text Body:"), 0, wx.EXPAND)
@@ -98,10 +95,8 @@ class macro_edit_panel(wx.Panel):
     def on_text(self,evt):
         id = evt.GetId()
         txt = self.text[id].GetValue()
-        if txt == "":
-            return
+        if txt == "": return
         if id == P_TITLE:
             self.handler.master_dom.setAttribute('name',txt)
             self.handler.rename(txt)
-        elif id == P_BODY:
-            self.handler.set_text(txt)
+        elif id == P_BODY: self.handler.set_text(txt)

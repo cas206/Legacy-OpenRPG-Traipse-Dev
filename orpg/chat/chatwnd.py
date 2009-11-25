@@ -1993,7 +1993,8 @@ class chat_panel(wx.Panel):
         path = s.split('::')
         depth = len(path)
         self.gametree = component.get('tree')
-        node = self.gametree.tree_map[path[0]]['node']
+        try: node = self.gametree.tree_map[path[0]]['node']
+        except: return self.data
         if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
         elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
         else: self.resolve_loop(node, path, 1, depth)

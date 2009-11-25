@@ -55,26 +55,15 @@ PLAYER_MODERATE_TAKE_VOICE = wx.NewId()
 PLAYER_SHOW_VERSION = wx.NewId()
 WG_LIST = {}
 
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
 PLAYER_WG_MENU = wx.NewId()
 PLAYER_WG_CREATE = wx.NewId()
 PLAYER_WG_CLEAR_ALL = wx.NewId()
 WG_MENU_LIST = {}
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
 
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
 PLAYER_COMMAND_MENU = wx.NewId()
 PLAYER_COMMAND_PASSWORD_ALTER = wx.NewId()
 PLAYER_COMMAND_ROOM_RENAME = wx.NewId()
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
+
 
 class player_list(wx.ListCtrl):
     def __init__( self, parent):
@@ -96,17 +85,13 @@ class player_list(wx.ListCtrl):
         self.InsertColumn( 0, "ID" )
         self.InsertColumn( 1, "Player")
         self.InsertColumn( 2, "Status" )
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
+
         ##Main Menu
         self.wgMenu = wx.Menu()
         #Add the Base Menu items, so they are always at the bottom
         self.wgMenu.Append(PLAYER_WG_CREATE, "Create")
         self.wgMenu.Append(PLAYER_WG_CLEAR_ALL, "Delete All Groups")
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
+
         # Create the role menu
         self.roleMenu = wx.Menu()
         self.roleMenu.SetTitle( "Assign Role" )
@@ -121,18 +106,14 @@ class player_list(wx.ListCtrl):
         self.moderateMenu.AppendSeparator()
         self.moderateMenu.Append( PLAYER_MODERATE_GIVE_VOICE, "Give Voice" )
         self.moderateMenu.Append( PLAYER_MODERATE_TAKE_VOICE, "Take Voice" )
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
+
         # Create the room control menu
         self.commandMenu = wx.Menu()
         self.commandMenu.SetTitle( "Room Controls" )
         self.commandMenu.Append( PLAYER_COMMAND_PASSWORD_ALTER, "Password" )
         self.commandMenu.Append( PLAYER_COMMAND_ROOM_RENAME, "Room Name" )
         self.commandMenu.AppendSeparator()
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
+
         # Create the pop up menu
         self.menu = wx.Menu()
         self.menu.SetTitle( "Player Menu" )
@@ -141,13 +122,7 @@ class player_list(wx.ListCtrl):
         self.menu.Append( PLAYER_IGNORE, "Toggle &Ignore" )
         self.menu.AppendSeparator()
         self.menu.Append( PLAYER_WHISPER, "Whisper" )
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         self.menu.AppendMenu(PLAYER_WG_MENU, "Whisper Groups", self.wgMenu)
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         self.menu.AppendSeparator()
         self.menu.AppendMenu( PLAYER_MODERATE_MENU, "Moderate", self.moderateMenu )
         self.menu.AppendMenu( PLAYER_COMMAND_MENU, "Room Control", self.commandMenu )
@@ -155,6 +130,7 @@ class player_list(wx.ListCtrl):
         self.menu.AppendMenu( PLAYER_ROLE_MENU, "Assign Role", self.roleMenu )
         self.menu.AppendSeparator()
         self.menu.Append( PLAYER_SHOW_VERSION, "Version" )
+
         # Event processing for our menu
         self.Bind(wx.EVT_MENU, self.on_menu_item, id=PLAYER_BOOT)
         self.Bind(wx.EVT_MENU, self.on_menu_item, id=PLAYER_IGNORE)
@@ -167,30 +143,13 @@ class player_list(wx.ListCtrl):
         self.Bind(wx.EVT_MENU, self.on_menu_role_change, id=PLAYER_ROLE_PLAYER)
         self.Bind(wx.EVT_MENU, self.on_menu_role_change, id=PLAYER_ROLE_GM)
         self.Bind(wx.EVT_MENU, self.on_menu_item, id=PLAYER_SHOW_VERSION)
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         self.Bind(wx.EVT_MENU, self.on_menu_whispergroup, id=PLAYER_WG_CREATE)
         self.Bind(wx.EVT_MENU, self.on_menu_whispergroup, id=PLAYER_WG_CLEAR_ALL)
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
         self.Bind(wx.EVT_MENU, self.on_menu_password, id=PLAYER_COMMAND_PASSWORD_ALTER)
         self.Bind(wx.EVT_MENU, self.on_menu_room_rename, id=PLAYER_COMMAND_ROOM_RENAME)
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
         self.Bind(wx.EVT_LEFT_DCLICK, self.on_d_lclick)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_menu)
         self.sized = 1
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#
-#       Revised 8/03 to add support for password manager
-#---------------------------------------------------------
 
     def AutoAdjust(self):
         self.SetColumnWidth(0, -1)
@@ -251,13 +210,7 @@ class player_list(wx.ListCtrl):
                         new_name = b + "&quote" + e
                         oldloc = loc +1
                 self.session.set_room_name(new_name, boot_pwd)
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
 
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
     def clean_sub_menus(self):
         for mid in WG_MENU_LIST:
             try:
@@ -289,10 +242,6 @@ class player_list(wx.ListCtrl):
             elif id == WG_MENU_LIST[mid]["clear"]: WG_LIST[mid].clear(); return
             elif id == WG_MENU_LIST[mid]["whisper"]: self.chat.set_chat_text("/gw " + mid + "="); return
         return
-
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
 
     def on_menu_moderate( self, evt ):
         "Change the moderated status of a room or player."
@@ -397,9 +346,6 @@ class player_list(wx.ListCtrl):
             #else:
             self.menu.Enable(PLAYER_BOOT,1)
             self.menu.SetLabel(PLAYER_BOOT,"Boot")
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
             self.menu.Enable(PLAYER_WG_MENU, True)
             item = self.GetItem( self.selected_item )
             if len(WG_MENU_LIST) > len(WG_LIST): self.clean_sub_menus()
@@ -438,9 +384,6 @@ class player_list(wx.ListCtrl):
                 self.Bind(wx.EVT_MENU, self.on_menu_whispergroup, id=WG_MENU_LIST[gid]["add"] )
                 self.Bind(wx.EVT_MENU, self.on_menu_whispergroup, id=WG_MENU_LIST[gid]["remove"] )
                 self.Bind(wx.EVT_MENU, self.on_menu_whispergroup, id=WG_MENU_LIST[gid]["clear"] )
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
             self.PopupMenu(self.menu,pos)
 
     def add_player(self,player):
@@ -461,15 +404,8 @@ class player_list(wx.ListCtrl):
     def del_player(self,player):
         i = self.FindItemData(-1,int(player[2]))
         self.DeleteItem(i)
-
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         for gid in WG_LIST:
             if WG_LIST[gid].has_key(int(player[2])): del WG_LIST[gid][int(player[2])]
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
 
         # play sound
         setobj = component.get('settings')
@@ -520,13 +456,7 @@ class player_list(wx.ListCtrl):
 
     def reset(self):
         self.whisperCount = 0
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         WG_LIST.clear()
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
         self.DeleteAllItems()
 
     def strip_html(self,player):
