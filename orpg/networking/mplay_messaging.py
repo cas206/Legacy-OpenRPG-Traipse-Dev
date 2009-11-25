@@ -48,10 +48,8 @@ def myescape(data):
 
 class messenger:
     def __init__(self, *args, **kwargs):
-        #self.xml = component.get("xml") used once, no need for the object.
         self.dir_struct = component.get("dir_struct") #used?
         self.validate = component.get("validate") #used??
-        #self.settings = component.get("settings") ## used once, no need for the object.
         if kwargs.has_key('isServer'):
             self.isServer = kwargs['isServer']
         else:
@@ -121,7 +119,6 @@ class messenger:
 
 
     def build_message(self, *args, **kwargs):
-        #print args
         message = '<' + args[0]
 
         #Setup the attributes of the message
@@ -134,11 +131,9 @@ class messenger:
             #Close the first part
             message += '>'
             message += escape(args[1])
-
             #Close the whole thing
             message += '</' + args[0] + '>'
-        else:
-            message += ' />'
+        else: message += ' />'
         return message
 
     def disconnect(self):
@@ -289,14 +284,12 @@ class messenger:
         logger.note("message handler thread running...", ORPG_NOTE)
         while self.alive or self.status == 'connected':
             data = None
-            try:
-                data = self.inbox.get(0)
+            try: data = self.inbox.get(0)
             except Queue.Empty:
                 time.sleep(0.25) #sleep 1/4 second
                 continue
             bytes = len(data)
-            if bytes < 5:
-                continue
+            if bytes < 5: continue
             try:
                 thread.start_new_thread(self.parse_incoming_dom,(str(data),))
                 #data has been passed... unlink from the variable references
@@ -311,7 +304,6 @@ class messenger:
         self.inbox_event.set()
 
     def parse_incoming_dom(self, data):
-        #print data
         xml_dom = None
         try:
             xml_dom = component.get("xml").parseXml(data)
@@ -342,19 +334,15 @@ class messenger:
 
         # Loop as long as we have a connection
         while( self.get_status() == 'connected' ):
-            try:
-                readMsg = self.outbox.get( block=1 )
-
+            try: readMsg = self.outbox.get( block=1 )
             except Exception, text:
                 logger.exception("Exception:  messenger->sendThread():  " + str(text)
-
             # If we are here, it's because we have data to send, no doubt!
             if self.status == 'connected':
                 try:
                     # Send the entire message, properly formated/encoded
                     sent = self.sendMsg( self.sock, readMsg )
-                except:
-                    logger.exception("Exception:  messenger->sendThread():\n" + traceback.format_exc()
+                except: logger.exception("Exception:  messenger->sendThread():\n" + traceback.format_exc()
             else:
                 # If we are not connected, purge the data queue
                 logger.note("Data queued without a connection, purging data from queue...")
@@ -374,11 +362,9 @@ class messenger:
         try:
             # Send the encoded length
             sentl = sock.send( lp )
-
             # Now, send the message the the length was describing
             sentm = sock.send( msg )
-            if self.isServer:
-                logger.debug("('data_sent', " + str(sentl+sentm) + ")")
+            if self.isServer: logger.debug("('data_sent', " + str(sentl+sentm) + ")")
             return sentm
         except socket.error, e:
             logger.exception("Socket Error: messenger->sendMsg(): " +  traceback.format_exc())
@@ -395,15 +381,11 @@ class messenger:
 
             # Make sure we didn't get disconnected
             bytes = len( readMsg )
-            if bytes == 0:
-                break
-
+            if bytes == 0: break
             # Check the length of the message
             bytes = len( readMsg )
-
             # Make sure we are still connected
-            if bytes == 0:
-                break
+            if bytes == 0: break
             else:
                 # Pass along the message so it can be processed
                 self.inbox.put( readMsg )
@@ -456,14 +438,11 @@ class messenger:
             # Now, convert to a usable form
             (length,) = unpack( 'i', lenData )
             length = socket.ntohl( length )
-
             # Read exactly the remaining amount of data
             msgData = self.recvData( sock, length )
 
-            if self.isServer:
-                logger.debug("('data_recv', " + str(length+4) + ")")
-        except:
-            logger.exception("Exception: messenger->recvMsg():\n" + traceback.format_exc())
+            if self.isServer: logger.debug("('data_recv', " + str(length+4) + ")")
+        except: logger.exception("Exception: messenger->recvMsg():\n" + traceback.format_exc())
         return msgData
 
 if __name__ == "__main__":

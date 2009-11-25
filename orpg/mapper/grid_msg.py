@@ -35,3 +35,4 @@ class grid_msg(map_element_msg_base):
     def __init__(self,reentrant_lock_object = None):
         self.tagname = "grid"
         map_element_msg_base.__init__(self,reentrant_lock_object)
+

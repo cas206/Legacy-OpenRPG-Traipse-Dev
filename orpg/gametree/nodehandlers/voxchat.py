@@ -28,9 +28,7 @@
 
 __version__ = "$Id: voxchat.py,v 1.37 2007/05/06 16:42:55 digitalxero Exp $"
 
-import re
-import os
-import string
+import re, os, string, core
 
 from orpg.orpg_windows import *
 import core

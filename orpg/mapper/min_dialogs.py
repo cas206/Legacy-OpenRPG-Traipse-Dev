@@ -224,7 +224,6 @@ class min_list_edit_panel(wx.Panel):
         listsizer.Add(self.labelcombo,0, wx.EXPAND)
         self.pathcombo = wx.ComboBox(self, PATH_COMBO, "no change",style=wx.CB_DROPDOWN)
         self.positioncombo = wx.ComboBox(self, POS_COMB, "no change", choices=["no change"], style=wx.CB_READONLY)
-        #self.positioncombo.SetValue(`min_list[0].pos`)
         self.labelcombo.Append("no change")
         self.pathcombo.Append("no change")
         for m in min_list:
@@ -267,9 +266,7 @@ class min_list_edit_panel(wx.Panel):
         ###Group together the postion radiobox and the and its selection elements
         ###
         xpos = int(min_list[0].pos[0])
-        #xpos = int(`min_list[0].pos`[1:`min_list[0].pos`.index(',')])
         ypos = int(min_list[0].pos[1])
-        #ypos = int(`min_list[0].pos`[`min_list[0].pos`.rfind(',')+1:len(`min_list[0].pos`)-1])
         self.scx = wx.SpinCtrl(self, POS_SPIN, "", (-1,-1), wx.Size(75,25))
         self.scx.SetRange(0,self.grid.return_grid()[0])
         self.scx.SetValue(xpos)

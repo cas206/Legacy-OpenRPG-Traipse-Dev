@@ -106,8 +106,7 @@ class fog_layer(layer_base):
 
     def resize(self, size):
         try:
-            if self.width == size[0] and self.height == size[1]:
-                return
+            if self.width == size[0] and self.height == size[1]: return
             self.recompute_fog()
         except: pass
 
@@ -139,8 +138,7 @@ class fog_layer(layer_base):
         del mdc
 
     def layerDraw(self, dc, topleft, size):
-        if self.fog_bmp == None or not self.fog_bmp.Ok() or not self.use_fog:
-            return
+        if self.fog_bmp == None or not self.fog_bmp.Ok() or not self.use_fog: return
         if self.last_role != self.canvas.frame.session.role: self.fill_fog()
         mdc = wx.MemoryDC()
         mdc.SelectObject(self.fog_bmp)
@@ -152,17 +150,14 @@ class fog_layer(layer_base):
         regn = self.scanConvert(polyline)
         area = ""
         for i in polyline:
-            if (area != ""):
-                area += ";"
+            if (area != ""): area += ";"
             area += str(i.X) + "," + str(i.Y)
         if mode == 'new':
-            if self.fogregion.IsEmpty():
-                self.fogregion = regn
+            if self.fogregion.IsEmpty(): self.fogregion = regn
             else: self.fogregion.UnionRegion(regn)
             self.add_area(area, show)
         else:
-            if not self.fogregion.IsEmpty():
-                self.fogregion.SubtractRegion(regn)
+            if not self.fogregion.IsEmpty(): self.fogregion.SubtractRegion(regn)
             else:
                 self.fogregion = wx.Region(0, 0, self.canvas.size[0], self.canvas.size[1])
                 self.fogregion.SubtractRegion(regn)
@@ -200,8 +195,7 @@ class fog_layer(layer_base):
         if show == "Yes": self.canvas.frame.session.send(xml_str)
 
     def layerToXML(self, action="update"):
-        if not self.use_fog:
-            return ""
+        if not self.use_fog: return ""
         fog_string = ""
         ri = wx.RegionIterator(self.fogregion)
         if not (ri.HaveRects()): fog_string = FogArea("all", self.log).toxml("del")
@@ -222,8 +216,7 @@ class fog_layer(layer_base):
             s += fog_string
             s += "</fog>"
             return s
-        else:
-            return ""
+        else: return ""
 
     def layerTakeDOM(self, xml_dom):
         try:

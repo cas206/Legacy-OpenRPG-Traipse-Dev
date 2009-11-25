@@ -84,7 +84,6 @@ STATUS_SET_URL = 1
 
 def parseXml(data):
     "parse and return doc"
-    #print data
     doc = xml.parseXml(data)
     doc.normalize()
     return doc
@@ -268,7 +267,6 @@ class client_base:
         self.startedEvent.set()
 
     def disconnect(self):
-        debug()
         self.set_status(MPLAY_DISCONNECTING)
         self.log_msg("client stub " + self.ip +" disconnecting...")
         self.log_msg("closing sockets...")
@@ -291,6 +289,7 @@ class client_base:
     def use_roles(self):
         if self.useroles: return 1
         else: return 0
+
     def update_self_from_player(self, player):
         try: (self.name, self.ip, self.id, 
                 self.text_status, self.version, 
@@ -315,15 +314,12 @@ class client_base:
         el.set('client_string', self.client_string)
         el.set('useCompression', str(self.useCompression))
         cmpType = 'None'
-        if cmpBZ2 and (self.compressionType == 'Undefined' or self.compressionType == bz2):
-            cmpType = 'bz2'
-        elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib):
-            cmpType = 'zlib'
+        if cmpBZ2 and (self.compressionType == 'Undefined' or self.compressionType == bz2): cmpType = 'bz2'
+        elif cmpZLIB and (self.compressionType == 'Undefined' or self.compressionType == zlib): cmpType = 'zlib'
         el.set('cmpType', cmpType)
         return tostring(el)
 
     def log_msg(self,msg):
-        debug(msg, log=False)
         if self.log_console: self.log_console(msg)
 
     def get_status(self):
@@ -525,10 +521,6 @@ class mplay_client(client_base):
         el.set('boot_pwd', boot_pwd)
         self.send(tostring(el), id)
 
-#---------------------------------------------------------
-# [START] Snowdog Password/Room Name altering code 12/02
-#---------------------------------------------------------
-
     def set_room_pass(self, npwd, pwd=""):
         el = Element('alter')
         el.set('key', 'pwd')
@@ -575,10 +567,6 @@ class mplay_client(client_base):
         el.set('gid', self.group_id)
         self.outbox.put(tostring(el))
         self.update()
-
-#---------------------------------------------------------
-# [END] Snowdog Password/Room Name altering code  12/02
-#---------------------------------------------------------
 
     def display_roles(self):
         el = Element('role')
@@ -681,19 +669,18 @@ class mplay_client(client_base):
             end = data.find(">")
             head = data[:end+1]
             msg = data[end+1:]
-            ### Alpha ###
+            ### This if statement should help close invalid messages. ###
             if head[end:] != '/':
                 if head[end:] != '>': head = head[:end] + '/>' 
-            ### This if statement should help close invalid messages.  Since it needs fixing, use the try except message for now.
             try: el = fromstring(head)
             except: el = fromstring(head[:end] +'/>')
+            ###########
 
             try:
                 el1 = fromstring(msg)
                 el.append(el1)
             except ExpatError:
                 el.text = msg
-                #logger.general("Bad Message: \n" + data)
         id = el.get('from') or el.get('id')
         if el.tag in self.msg_handlers: self.msg_handlers[el.tag](id, data, el)
 
@@ -718,10 +705,10 @@ class mplay_client(client_base):
         elif self.is_valid_id(id): self.on_receive(msg, self.players[id])
 
     def on_ping(self, id, msg, etreeEl):
-        #a REAL ping time implementation by Snowdog 8/03
+        # A REAL ping time implementation by Snowdog 8/03
         # recieves special server <ping time="###" /> command
         # where ### is a returning time from the clients ping command
-        #get current time, pull old time from object and compare them
+        # get current time, pull old time from object and compare them
         # the difference is the latency between server and client * 2
         ct = time.clock()
         ot = etreeEl.get("time")
@@ -772,7 +759,6 @@ class mplay_client(client_base):
             self.clear_players()
             self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE, self.groups[self.group_id]))
             self.players[self.id] = self.get_my_info() 
-            #(self.name,self.ip,self.id,self.text_status)
             self.on_player_event(mplay_event(PLAYER_NEW, self.players[self.id]))
         elif act == "failed":
             self.on_mplay_event(mplay_event(MPLAY_GROUP_CHANGE_F))

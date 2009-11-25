@@ -91,7 +91,6 @@ class game_group(object):
         self.voice = {}
         self.persistant = persist
         self.mapFile = None
-        ### Needs to use Element Tree closer
         if mapFile != None: tree = parse(mapFile)
         else: tree = parse(dir_struct["template"] + "default_map.xml")
         tree = tree.getroot()
@@ -349,7 +348,6 @@ class mplay_server:
     # as needed, over-riding any default values as requested.
 
     def initServerConfig(self):
-        debug(log=False)
         self.log_msg("Processing Server Configuration File... " + self.userPath)
         # make sure the server_ini.xml exists!
         validate.config_file( "server_ini.xml", "default_server_ini.xml" )
@@ -849,7 +847,6 @@ class mplay_server:
         self.log_msg("Server stopped!")
 
     def log_msg(self,msg):
-        debug(parents=True)
         if self.log_to_console:
             if self.log_console: self.log_console(msg)
             else: print str(msg)
@@ -1195,6 +1192,7 @@ class mplay_server:
                 self.handle_role("set", props['id'], "GM", self.groups[LOBBY_ID].boot_pwd, LOBBY_ID)
                 cmsg = "Client Connect: (" + str(props['id']) + ") " + str(props['name']) + " [" + str(props['ip']) + "]"
                 self.log_msg(cmsg)
+                self.log_msg(("update_group", (self.groups[LOBBY_ID].name, LOBBY_ID, len(self.groups[LOBBY_ID].players) ) ))
                 cmsg = ("connect", props) #################################################
                 self.log_msg(cmsg)
 
@@ -1605,6 +1603,7 @@ class mplay_server:
             #notify user about others in the room
             self.return_room_roles(from_id,group_id)
             self.log_msg(("join_group", (self.groups[group_id].name, group_id, from_id)))
+            self.log_msg(("update_group", (self.groups[group_id].name, group_id, len(self.groups[group_id].players) )))
             self.handle_role("set", from_id, self.players[from_id].role, self.groups[group_id].boot_pwd, group_id)
         except Exception, e:
             self.log_msg(str(e))
@@ -1909,7 +1908,7 @@ class mplay_server:
 
     def handle_role(self, act, player, role, given_boot_pwd, group_id):
         if act == "display":
-            msg = "<msg to=\"" + player + "\" from=\"0\" group_id=\"" + group_id + "\" />"
+            msg = "<msg to='" + player + "' from='0' group_id='" + group_id + "' />"
             msg += "Displaying Roles<br /><br /><u>Role</u>&nbsp&nbsp&nbsp<u>Player</u><br />"
             keys = self.players.keys()
             for m in keys:
@@ -1996,7 +1995,7 @@ class mplay_server:
                         self.check_group(to_id, group_id)
                     else:
                         #tell the clients password manager the password failed -- SD 8/03
-                        pm = "<password signal=\"fail\" type=\"admin\" id=\"" + group_id + "\" data=\"\"/>"
+                        pm = "<password signal='fail' type='admin' id='" + group_id + "' data=''/>"
                         self.players[from_id].outbox.put(pm)
                         print "boot passwords did not match"
 
@@ -2027,8 +2026,9 @@ class mplay_server:
             time.sleep( 1 )
 
             self.log_msg("kicking player " + str(id) + " from server.")
+
             #  Send delete player event to all
-            self.send_to_group("0",group_id,self.players[id].toxml("del"))
+            self.send_to_group("0", group_id, self.players[id].toxml("del"))
 
             #  Remove the player from local data structures
             self.del_player(id,group_id)
@@ -2080,8 +2080,7 @@ class mplay_server:
             # Send a message to everyone in the victim's room, letting them know someone has been booted
             ban_msg = "<msg to='all' from='0' group_id='%s'/><font color='#FF0000'>Banning '(%s) %s' from server... %s</font>" % ( group_id, id, self.players[id].name, str(message))
             self.log_msg("ban_msg:" + ban_msg)
-            if (silent == 0):
-                self.send_to_group("0", group_id, ban_msg)
+            if (silent == 0): self.send_to_group("0", group_id, ban_msg)
             time.sleep( .1 )
 
             self.log_msg("baning player " + str(id) + " from server.")
@@ -2520,12 +2519,11 @@ class mplay_server:
             keys = self.groups.keys()
             keys.sort(id_compare)
             for k in keys:
-                debug((self.groups, self.groups[k], self.groups[k].name))
                 groupstring = "<tr><td bgcolor='" + COLOR2 + "' colspan='2'>"
                 groutstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
                 groupstring += "</td><td bgcolor=" + COLOR2 + " > <i>Password: " + self.groups[k].pwd + "</td>"
                 groupstring += "<td bgcolor=" + COLOR2 + " > Boot: " + self.groups[k].boot_pwd + "</i></td></tr>"
-                pl += groupstring; debug(groupstring)
+                pl += groupstring
                 ids = self.groups[k].get_player_ids()
                 ids.sort(id_compare)
                 for id in ids:

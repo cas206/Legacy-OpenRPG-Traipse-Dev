@@ -52,7 +52,6 @@ metacache_lock = RLock()
 
 def get_server_dom(data=None,path=None, string=False):
     # post data at server and get the resulting DOM
-    #debug()
     if path == None:
         # get meta server URI
         path = getMetaServerBaseURL()
@@ -85,7 +84,6 @@ def get_server_dom(data=None,path=None, string=False):
     else: return etreeEl
 
 def post_server_data(name, realHostName=None):
-    #debug()
     if realHostName: data = urlencode({"server_data[name]":name,
                                   "server_data[version]":PROTOCOL_VERSION,
                                   "act":"new",
@@ -99,7 +97,6 @@ def post_server_data(name, realHostName=None):
     return int(etreeEl.get('id'))
 
 def post_failed_connection(id,meta=None,address=None,port=None):
-    #debug((meta, address, port))
     #  For now, turning this off.  This needs to be re-vamped for
     #  handling multiple Metas.
     return 0
@@ -109,7 +106,6 @@ def post_failed_connection(id,meta=None,address=None,port=None):
     #return ret_val
 
 def remove_server(id):
-    #debug(id)
     data = urlencode({"id":id,"act":"del"});
     etreeEl = get_server_dom(data)
     return int(etreeEl.get("return"))
@@ -497,7 +493,6 @@ class registerThread(Thread):
         finally: self.rlock.release()
 
     def register(self, name=None, realHostName=None, num_users=None):
-        #debug((name, realHostName, num_users))
         """
           Designed to handle the registration, both new and
           repeated.
@@ -538,7 +533,6 @@ class registerThread(Thread):
                                         "act":"register"} )
             try: # this POSTS the request and returns the result
                 etreeEl = get_server_dom(data=data, path=self.path)
-                #debug(etreeEl) 
             except:
                 if META_DEBUG: print "Problem talking to server.  Setting interval for retry ..."
                 if META_DEBUG: print data
@@ -560,7 +554,6 @@ class registerThread(Thread):
 
             #  If there is a DOM returned ....
             if etreeEl:
-                #debug(etreeEl)
                 #  If there's an error, echo it to the console
                 if etreeEl.get("errmsg"):
                     print "Error durring registration:  " + etreeEl.get("errmsg")

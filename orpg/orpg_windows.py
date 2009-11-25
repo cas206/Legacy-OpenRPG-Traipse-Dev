@@ -277,7 +277,7 @@ class html_text_edit(wx.Panel):
         (beg,end) = self.text.GetSelection()
         if beg != end: sel_txt = txt[beg:end]
         else: return
-        print txt
+
 	# TaS - sirebral. Replaces 6 lines with 4 lines.
 	recycle_bin = {self.BOLD: "b", self.ITALIC: "i", self.UNDER: "u"}
 	if recycle_bin.has_key(id):
@@ -329,7 +329,6 @@ class http_html_window(wx.html.HtmlWindow):
         else: self.load_url(self.path+address)
 
     def load_url(self,path):
-        print path
         dlg = wx.ProgressDialog("HTML Document","Loading...",3,self)
         dlg.Update(1)
         try:
@@ -483,7 +482,6 @@ class orpgScrolledMessageFrameEditor(wx.Frame):
 
         # continue search from insertion point instead of top
         self.matchPosition = self.matchPositionOld = self.text.GetInsertionPoint()
-
         # find search string in chatbuffer
         self.matchPosition = string.find(textValue[self.matchPositionOld:], matchValue)
         # cumulate position for substring matching in continuing search

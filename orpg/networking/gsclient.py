@@ -57,7 +57,6 @@ class server_instance:
 
 def server_instance_compare(x,y):
     """compares server insances for list sort"""
-    ### Alpha ### makes changes from core.
     DEV_SERVER = "OpenRPG DEV"
     xname = x.name
     xuser = int(x.user)
@@ -299,12 +298,8 @@ class game_server_panel(wx.Panel):
         except: pass
         address = self.texts["address"].GetValue()
         if self.session.is_connected():
-            if self.session.host_server == address :
-                #currently connected to address. Do nothing.
-                return
-            else:
-                #address differs, disconnect.
-                self.frame.kill_mplay_session()
+            if self.session.host_server == address : return #currently connected to address. Do nothing.
+            else: self.frame.kill_mplay_session() #address differs, disconnect.
         self.do_connect(address)
 
     def on_room_dbclick(self, evt=None):
@@ -355,7 +350,6 @@ class game_server_panel(wx.Panel):
         evt.Skip()
 
     def add_room(self, data):
-        #debug()
         i = self.room_list.GetItemCount()
         if (data[2]=="1") or (data[2]=="True"): pwd="yes"
         else: pwd="no"
@@ -366,7 +360,6 @@ class game_server_panel(wx.Panel):
         self.refresh_room_list()
 
     def del_room(self, data):
-        #debug(data)
         i = self.room_list.FindItemData(-1, int(data[0]))
         self.room_list.DeleteItem(i)
         self.refresh_room_list()
@@ -400,7 +393,6 @@ class game_server_panel(wx.Panel):
             self.cur_room_index = -1
             self.frame.status.set_connect_status("Not Connected")
         else:
-            #data = self.session.get_my_group()
             self.frame.status.set_connect_status(self.name)
             self.set_cur_room_text("Lobby")
 
@@ -485,7 +477,6 @@ class game_server_panel(wx.Panel):
                 part = 0
                 partLength = 1.0/length
                 for n in node_list:
-                    #if n.get('id') and n.get('name') and n.get('num_users') and n.get('address') and n.get('port'):
                     self.svrList.append(server_instance(n.get('id'), n.get('name'), 
                                         n.get('num_users'), n.get('address'), 
                                         n.get('port')))
@@ -624,18 +615,10 @@ class game_server_panel(wx.Panel):
             self.session.send_create_group(name, pwd, boot_pwd, minversion)
             self.set_lobbybutton(1); #enable the Lobby quickbutton
 
-#---------------------------------------------------------
-# [START] Snowdog: Updated Game Server Window 12/02
-#---------------------------------------------------------
-
     def on_size(self, evt):
         # set column widths for room list
         # set column widths for server list
         pass
-
-#---------------------------------------------------------
-# [END] Snowdog: Updated Game Server Window 12/02
-#---------------------------------------------------------
 
     def colorize_group_list(self, groups):
         try:

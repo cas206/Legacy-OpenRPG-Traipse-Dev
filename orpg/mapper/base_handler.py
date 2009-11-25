@@ -99,11 +99,9 @@ class base_layer_handler(wx.Panel):
 
     def on_save_map_jpg(self, evt):
         directory = dir_struct["user"]
-        if directory == None:
-            directory = ""
+        if directory == None: directory = ""
         d = wx.FileDialog(self.GetParent(), "Save map as a jpg", directory, "", "*.jpg", wx.SAVE)
-        if d.ShowModal() != wx.ID_OK:
-            return
+        if d.ShowModal() != wx.ID_OK: return
         filename = d.GetPath()
         width = self.canvas.size[0]
         height = self.canvas.size[1]
@@ -133,7 +131,6 @@ class base_layer_handler(wx.Panel):
     def on_left_up(self,evt):
         pass
 
-    #added to base layer by Snowdog 5/03
     def on_left_dclick(self,evt):
         pass
 

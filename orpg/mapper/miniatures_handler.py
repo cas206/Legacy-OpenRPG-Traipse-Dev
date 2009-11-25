@@ -29,16 +29,11 @@ __version__ = "$Id: miniatures_handler.py,v 1.43 2007/12/07 20:39:50 digitalxero
 
 from base_handler import *
 from min_dialogs import *
-import thread
-import time
-import mimetypes
-import urllib
+import thread, time, mimetypes, urllib, wx, os
 
-import wx
 from grid import GRID_RECTANGLE
 from grid import GRID_HEXAGON
 from grid import GRID_ISOMETRIC
-import os
 
 from orpg.tools.orpg_settings import settings
 
@@ -202,7 +197,6 @@ class miniatures_handler(base_layer_handler):
         self.canvas.send_map_data()
         self.canvas.Refresh(False)
 
-
     def build_menu(self,label = "Miniature"):
         base_layer_handler.build_menu(self,label)
         self.main_menu.AppendSeparator()
@@ -314,8 +308,7 @@ class miniatures_handler(base_layer_handler):
             for item in self.mini_rclick_menu_extra_items.items(): self.min_menu.Append(item[1], item[0])
         if len(self.background_rclick_menu_extra_items)>0:
             self.main_menu.AppendSeparator()
-            for item in self.background_rclick_menu_extra_items.items():
-                self.main_menu.Append(item[1], item[0])
+            for item in self.background_rclick_menu_extra_items.items(): self.main_menu.Append(item[1], item[0])
 
     def do_min_menu(self,pos):
         self.canvas.PopupMenu(self.min_menu,pos)
@@ -620,8 +613,7 @@ class miniatures_handler(base_layer_handler):
         postdata = urllib.urlencode({'filename':filename, 'imgdata':imgdata, 'imgtype':imgtype})
         if self.settings.get_setting('LocalorRemote') == 'Remote':
             thread.start_new_thread(self.canvas.layers['miniatures'].upload, (postdata, filepath), {'pos':cmpPoint(x,y)})
-        else:
-            self.CherryPit(filepath, '')
+        else: self.CherryPit(filepath, '')
 
     def on_tooltip_timer(self, *args):
         pos = args[0]
@@ -634,8 +626,7 @@ class miniatures_handler(base_layer_handler):
             tooltip = mini_list[0].label
             #self.canvas.SetToolTipString(mini_list[0].label) 
             #Once set, it never unsets, so it sucks.
-        else:
-            self.canvas.SetToolTipString('')
+        else: self.canvas.SetToolTipString('')
 
     def on_motion(self,evt):
         if evt.Dragging() and evt.LeftIsDown():

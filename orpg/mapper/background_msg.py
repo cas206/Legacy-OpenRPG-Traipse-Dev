@@ -34,3 +34,4 @@ class bg_msg(map_element_msg_base):
     def __init__(self,reentrant_lock_object = None):
         self.tagname = "bg"
         map_element_msg_base.__init__(self,reentrant_lock_object)
+

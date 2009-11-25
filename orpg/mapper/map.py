@@ -32,11 +32,7 @@ from map_msg import *
 from min_dialogs import *
 from map_prop_dialog import *
 
-import random
-import os
-import thread
-#import gc #Garbage Collecter Needed?
-import traceback
+import random, os, thread, traceback
 
 from miniatures_handler import *
 from whiteboard_handler import *
@@ -811,7 +807,6 @@ class map_wnd(wx.Panel):
     def on_left_down(self, evt):
         self.layer_handlers[self.current_layer].on_left_down(evt)
 
-    #double click handler added by Snowdog 5/03
     def on_left_dclick(self, evt):
         self.layer_handlers[self.current_layer].on_left_dclick(evt)
 

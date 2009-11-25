@@ -29,15 +29,10 @@
 __version__ = "$Id: background.py,v 1.29 2007/03/09 14:11:55 digitalxero Exp $"
 
 from base import *
-import thread
-import urllib
-import os.path
-import time
-import mimetypes
+import thread, urllib, os.path, time, mimetypes
 
 from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
-from orpg.tools.decorators import debugging
 from orpg.tools.orpg_settings import settings
 
 ##-----------------------------
@@ -59,13 +54,11 @@ class layer_back_ground(layer_base):
         self.r_h = RGBHex()
         self.clear()
 
-
     def error_loading_image(self, image):
         msg = "Unable to load image:" + `image`
         dlg = wx.MessageDialog(self.canvas,msg,'File not Found',wx.ICON_EXCLAMATION)
         dlg.ShowModal()
         dlg.Destroy()
-
 
     def clear(self):
         self.type = BG_NONE
@@ -77,15 +70,12 @@ class layer_back_ground(layer_base):
         self.localTime = -1
         self.isUpdated = True
 
-
     def get_type(self):
         return self.type
-
 
     def get_img_path(self):
         if self.img_path: return self.img_path
         else: return ""
-
 
     def get_color(self):
         hexcolor = "#FFFFFF"
@@ -93,7 +83,6 @@ class layer_back_ground(layer_base):
             (red,green,blue) = self.bg_color.Get()
             hexcolor = self.r_h.hexstring(red, green, blue)
         return hexcolor
-
 
     def set_texture(self, path):
         self.isUpdated = True
@@ -106,7 +95,6 @@ class layer_back_ground(layer_base):
                     raise Exception, "Invalid image type!"
             except: self.error_loading_image(path)
         self.img_path = path
-
 
     def set_image(self, path, scale):
         self.isUpdated = True
@@ -121,14 +109,12 @@ class layer_back_ground(layer_base):
         self.img_path = path
         return (self.bg_bmp.GetWidth(),self.bg_bmp.GetHeight())
 
-
     def set_color(self, color):
         self.isUpdated = True
         self.type = BG_COLOR
         (r,g,b) = color.Get()
         self.bg_color = cmpColour(r,g,b)
         self.canvas.SetBackgroundColour(self.bg_color)
-
 
     def layerDraw(self, dc, scale, topleft, size):
         if self.bg_bmp == None or not self.bg_bmp.Ok() or ((self.type != BG_TEXTURE) and (self.type != BG_IMAGE)):
@@ -204,7 +190,6 @@ class layer_back_ground(layer_base):
         del dc2
         return True
 
-
     def layerToXML(self, action="update"):
         xml_str = "<bg"
         if self.bg_color != None:
@@ -223,7 +208,6 @@ class layer_back_ground(layer_base):
             self.isUpdated = False
             return xml_str
         else: return ''
-
 
     def layerTakeDOM(self, xml_dom):
         type = BG_COLOR
@@ -256,7 +240,6 @@ class layer_back_ground(layer_base):
                 (imgtype,j) = mimetypes.guess_type(filename[1])
                 postdata = urllib.urlencode({'filename':filename[1], 'imgdata':imgdata, 'imgtype':imgtype})
                 thread.start_new_thread(self.upload, (postdata, self.localPath, type))
-
 
     def upload(self, postdata, filename, type):
         self.lock.acquire()

@@ -49,7 +49,7 @@ you right click on the weapon you wish to attack with.
     <save base="0" magmod="0" miscmod="0" name="Will" stat="Wis"/>
   </saves>
 </character>
-<inventory>
+<inventory name="Inventory">
 <Platinum>0</Platinum>
 <Gold>0</Gold>
 <Silver>0</Silver>

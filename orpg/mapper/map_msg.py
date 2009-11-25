@@ -92,8 +92,7 @@ class map_msg(map_element_msg_base):
                 self.clear()
             # Process all of the properties in each tag
             if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.set_prop(k,xml_dom.getAttribute(k))
+                for k in xml_dom.getAttributeKeys(): self.set_prop(k,xml_dom.getAttribute(k))
             for c in xml_dom._get_childNodes():
                 name = c._get_nodeName()
                 if not self.children.has_key(name):
