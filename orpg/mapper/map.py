@@ -703,8 +703,8 @@ class map_wnd(wx.Panel):
         wx.Panel.__init__(self, parent, id)
         self.canvas = MapCanvas(self, -1)
         self.session = component.get('session')
-        self.chat = component.get('chat')
         self.top_frame = component.get('frame')
+        self.chat = self.top_frame.chat
         self.root_dir = os.getcwd()
         self.current_layer = 2
         self.layer_tabs = orpgTabberWnd(self, style=FNB.FNB_NO_X_BUTTON|FNB.FNB_BOTTOM|FNB.FNB_NO_NAV_BUTTONS)

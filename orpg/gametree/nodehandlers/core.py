@@ -53,9 +53,9 @@ class node_handler:
     def __init__(self,xml,tree_node):
         self.xml = xml
         self.mytree_node = tree_node
-        self.tree = open_rpg.get_component('tree')
-        self.frame = open_rpg.get_component('frame')
-        self.chat = open_rpg.get_component('chat')
+        self.tree = component.get('tree')
+        self.frame = component.get('frame')
+        self.chat = component.get('chat')
         self.drag = True
         self.myeditor = None # designing
         self.myviewer = None # prett print
@@ -381,7 +381,7 @@ class file_loader(node_handler):
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.file_node = self.xml[0]
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
 
     def on_ldclick(self,evt):
         file_name = self.file_node.get("name")
@@ -413,7 +413,7 @@ class url_loader(node_handler):
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.file_node = self.xml[0]
-        self.frame = open_rpg.get_component('frame')
+        self.frame = component.get('frame')
 
     def on_ldclick(self,evt):
         file_name = self.file_node.get("url")
@@ -444,9 +444,14 @@ class min_map(node_handler):
     """
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
-        self.map = open_rpg.get_component('map')
-        self.mapdata = self.xml[0]
+        self.map = component.get('map')
+        self.mapdata = self.xml.find('map')
 
     def on_ldclick(self,evt):
+        if (component.get('session').my_role() != component.get('session').ROLE_GM):
+            component.get('chat').InfoPost("You must be a GM to use this feature")
+            return
         self.map.new_data(tostring(self.mapdata))
+        component.get('session').send(tostring(self.mapdata))
+        self.map.canvas.send_map_data()
         return 1
