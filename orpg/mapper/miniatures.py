@@ -550,7 +550,7 @@ class miniature_layer(layer_base):
                 path = urllib.unquote(path)
                 if not modify:
                     start = path.rfind("/") + 1
-                    if self.canvas.parent.handlers[2].auto_label: min_label = path[start:len(path)-4]
+                    if self.canvas.parent.layer_handlers[2].auto_label: min_label = path[start:len(path)-4]
                     else: min_label = ""
                     id = 'mini-' + self.canvas.frame.session.get_next_id()
                     self.add_miniature(id, path, pos=pos, label=min_label, local=True, 
