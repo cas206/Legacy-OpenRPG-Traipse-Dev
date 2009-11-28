@@ -98,6 +98,7 @@ class orpgFrame(wx.Frame):
                 "on_password_signal":self.on_password_signal,
                 "orpgFrame":self}
         self.session = orpg.networking.mplay_client.mplay_client(settings.get("player"), call_backs)
+        component.add("session", self.session)
         self.poll_timer = wx.Timer(self, wx.NewId())
         self.Bind(wx.EVT_TIMER, self.session.poll, self.poll_timer)
         self.poll_timer.Start(100)
@@ -110,19 +111,13 @@ class orpgFrame(wx.Frame):
 
         #create password manager --SD 8/03
         self.password_manager = component.get('password_manager')
-        component.add("session", self.session)
-        component.add('frame', self)
 
         # build frame windows
+        component.add('frame', self)
         self.build_menu()
         self.build_gui()
         self.build_hotkeys()
-
         logger.debug("GUI Built")
-        component.add("chat",self.chat)
-        component.add("map",self.map)
-        component.add("alias", self.aliaslib)
-
         logger.debug("openrpg components all added")
         self.tree.load_tree(settings.get("gametree"))
         logger.debug("Tree Loaded")
@@ -138,9 +133,7 @@ class orpgFrame(wx.Frame):
         try: tipotday_start = int(tipotday_start)
         except TypeError: tipotday_start = 0
 
-
         self.TipOfTheDay = wx.CreateFileTipProvider(dir_struct['data']+'tips.txt', tipotday_start)
-
         #Load Update Manager
         component.add('updatemana', self.updateMana)
         logger.debug("update manager reloaded")
@@ -163,7 +156,6 @@ class orpgFrame(wx.Frame):
         try:
             if settings.get('tipotday_enabled').lower() != '0': self.ShowTipOfTheDay()
         except: self.add_setting('Tip of the Day')
-
 
     def add_setting(self, setting):
         if setting == 'Tip of the Day':
@@ -204,7 +196,6 @@ class orpgFrame(wx.Frame):
                 else: pass
         except: traceback.print_exc()
 
-    
     def build_menu(self):
         menu = \
                 [[
@@ -583,7 +574,6 @@ class orpgFrame(wx.Frame):
             self._mgr.GetPane("Map Tool Bar").Show()
         self._mgr.Update()
 
-    #Help Menu #Needs a custom Dialog because it is ugly on Windows
     def OnMB_HelpAbout(self):
         if self.AboutORPG.IsShown() == True: self.AboutORPG.Hide()
         else: self.AboutORPG.Show()
@@ -732,6 +722,7 @@ class orpgFrame(wx.Frame):
 
         #Create the Alias Lib Window
         self.aliaslib = orpg.tools.aliaslib.AliasLib()
+        component.add("alias", self.aliaslib)
         self.aliaslib.Hide()
         logger.debug("Alias Window Created")
         menuid = wx.NewId()
@@ -747,9 +738,11 @@ class orpgFrame(wx.Frame):
         logger.debug("AUI Bindings Done")
 
         #Load the layout if one exists
-        layout = xml_dom.find("DockLayout")
-        self._mgr.LoadPerspective(layout.text)
-        logger.debug("Perspective Loaded")
+        try:
+            layout = xml_dom.find("DockLayout")
+            self._mgr.LoadPerspective(layout.text)
+            logger.debug("Perspective Loaded")
+        except: pass
         self._mgr.GetPane("Browse Server Window").Hide()
         self._mgr.Update()
         self.Maximize(maximized)
@@ -785,6 +778,8 @@ class orpgFrame(wx.Frame):
         elif name == "map":
             temp_wnd = orpg.mapper.map.map_wnd(parent_wnd, -1)
             self.map = temp_wnd
+            component.add("map",self.map)
+
         elif name == "tree":
             temp_wnd = orpg.gametree.gametree.game_tree(parent_wnd, -1)
             self.tree = temp_wnd
@@ -799,6 +794,7 @@ class orpgFrame(wx.Frame):
             temp_wnd = orpg.chat.chatwnd.chat_notebook(parent_wnd, wx.DefaultSize)
             self.chattabs = temp_wnd
             self.chat = temp_wnd.MainChatPanel
+            component.add("chat",self.chat)
 
         elif name == "player":
             temp_wnd = orpg.player_list.player_list(parent_wnd)
@@ -840,7 +836,6 @@ class orpgFrame(wx.Frame):
         self._mgr.AddPane(temp_wnd, wndinfo)
         return temp_wnd
 
-    
     def onPaneClose(self, evt):
         pane = evt.GetPane()
         #Arbitrary If ELIF fix. Items had incorrect ID's set. Finding correct ID will fix it for the iteration.
@@ -855,7 +850,6 @@ class orpgFrame(wx.Frame):
         evt.Skip()
         self._mgr.Update()
 
-    
     def saveLayout(self):
         filename = dir_struct["user"] + "layout.xml"
         layout = parse(filename)
@@ -869,14 +863,12 @@ class orpgFrame(wx.Frame):
         xml_dom.set("posx", str(x_pos))
         xml_dom.set("posy", str(y_pos))
         xml_dom.set("maximized", str(max))
-        try:
-            xml_dom.find("DockLayout").text = str(self._mgr.SavePerspective())
+        try: xml_dom.find("DockLayout").text = str(self._mgr.SavePerspective())
         except:
             elem = Element('DockLayout')
             elem.set("DO_NO_EDIT","True")
             elem.text = str(self._mgr.SavePerspective())
             xml_dom.append(elem)
-
         layout.write(filename)
 
     def build_hotkeys(self):

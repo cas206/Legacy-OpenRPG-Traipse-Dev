@@ -1881,8 +1881,8 @@ class chat_panel(wx.Panel):
         cell = tuple(path[step].strip('(').strip(')').split(','))
         grid = node.find('grid')
         rows = grid.findall('row')
-        col = rows[int(self.ParseDice(cell[0]))].findall('cell')
-        try: self.data = self.ParseMap(col[int(self.ParseDice(cell[1]))].text, node) or 'No Cell Data'
+        col = rows[int(self.ParseDice(cell[0]))-1].findall('cell')
+        try: self.data = self.ParseMap(col[int(self.ParseDice(cell[1]))-1].text, node) or 'No Cell Data'
         except: self.data = 'Invalid Grid Reference!'
         return
 

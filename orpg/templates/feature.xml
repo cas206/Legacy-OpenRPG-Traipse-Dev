@@ -1,21 +1,48 @@
 <nodehandler class="tabber_handler" icon="help" module="containers" name="Traipse OpenRPG" version="1.0">
   <nodehandler border="0" class="group_handler" cols="1" icon="goblin" map="Traipse OpenRPG" module="containers" name="Bonus Nodes" version="1.0">
-  <nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes" module="containers" name="Encounters" version="1.0">
-  <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="forms" name="Roll" version="1.0">
-  <text multiline="1" raw_mode="1" send_button="1">!!Random::([#1d3-1],0)!!</text>
-</nodehandler><nodehandler class="rpg_grid_handler" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="rpg_grid" name="Random" version="1.0">
-  <grid autosize="0" border="1">
+  <nodehandler class="form_handler" frame="409,414,406,127" height="600" icon="wizard1" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Deck" version="1.0" width="400">
+  <nodehandler class="rpg_grid_handler" frame="400,400,425,69" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Deck" module="rpg_grid" name="52 Card Deck" version="1.0">
+  <grid autosize="1" border="1">
     <row version="1.0">
-      <cell>!!Set 1::Enc 1!!</cell>
-      </row>
+      <cell>AS</cell>
+      <cell>AD</cell>
+    <cell>AC</cell><cell>AH</cell></row>
     <row version="1.0">
-      <cell>!!Set 1::Enc 2!!</cell>
-      </row>
-  <row version="1.0"><cell>!!Set 1::Enc 3!!</cell></row></grid>
+      <cell>KS</cell>
+      <cell>KD</cell>
+    <cell>KC</cell><cell>KH</cell></row>
+  <row version="1.0"><cell>QS</cell><cell>QD</cell><cell>QC</cell><cell>QH</cell></row><row version="1.0"><cell>JS</cell><cell>JD</cell><cell>JC</cell><cell>JH</cell></row><row version="1.0"><cell>10S</cell><cell>10D</cell><cell>10C</cell><cell>10H</cell></row><row version="1.0"><cell>9S</cell><cell>9D</cell><cell>9C</cell><cell>9H</cell></row><row version="1.0"><cell>8S</cell><cell>8D</cell><cell>8C</cell><cell>8H</cell></row><row version="1.0"><cell>7S</cell><cell>7D</cell><cell>7C</cell><cell>7H</cell></row><row version="1.0"><cell>6S</cell><cell>6D</cell><cell>6C</cell><cell>6H</cell></row><row version="1.0"><cell>5S</cell><cell>5D</cell><cell>5C</cell><cell>5H</cell></row><row version="1.0"><cell>4S</cell><cell>4D</cell><cell>4C</cell><cell>4H</cell></row><row version="1.0"><cell>3S</cell><cell>3D</cell><cell>3C</cell><cell>3H</cell></row><row version="1.0"><cell>2S</cell><cell>2D</cell><cell>2C</cell><cell>2H</cell></row></grid>
   <macros>
     <macro name="" />
   </macros>
-</nodehandler><nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="containers" name="Set 1" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" frame="400,90,497,106" icon="note" map="Traipse OpenRPG::Bonus Nodes::Deck" module="forms" name="Draw" version="1.0">
+  <text multiline="0" raw_mode="1" send_button="1">!!52 Card Deck::([#1d13], [#1d4])!!</text>
+</nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,501,72" height="600" icon="orc" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Encounters" version="1.0" width="400">
+  <nodehandler class="listbox_handler" frame="400,153,348,150" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="forms" name="Roll" version="1.0">
+  <list raw_mode="1" send_button="1" type="1">
+    <option selected="0" value="">!!Chart::([#1d3],0)!!</option>
+    <option selected="1" value="">!!Chart::([#1d2],1)!!</option>
+    <option selected="0" value="">Option Text III</option>
+  </list>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,0,48" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="rpg_grid" name="Chart" version="1.0">
+  <grid autosize="0" border="1">
+    <row version="1.0">
+      <cell size="119">!!Set 1::Enc 1!!</cell>
+      <cell size="115">!!Set 2::Enc 1!!</cell></row>
+    <row version="1.0">
+      <cell>!!Set 1::Enc 2!!</cell>
+      <cell>!!Set 2::Enc 2!!</cell></row>
+  <row version="1.0"><cell>!!Set 1::Enc 3!!</cell><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler border="1" class="group_handler" cols="1" icon="ninja" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="containers" name="Set 2" version="1.0">
+  <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters::Set 2" module="forms" name="Enc 2" version="1.0">
+  <text multiline="1" send_button="1">Hoot Hoot. It's an owl.</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters::Set 2" module="forms" name="Enc 1" version="1.0">
+  <text multiline="1" send_button="1">Set 2 Random Encounter.</text>
+</nodehandler><group_atts border="1" cols="1" />
+</nodehandler><nodehandler border="1" class="group_handler" cols="1" icon="knight" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="containers" name="Set 1" version="1.0">
   <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters::Set 1" module="forms" name="Enc 2" version="1.0">
   <text multiline="1" send_button="1">Dark Elves.  Watch out!</text>
 </nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters::Set 1" module="forms" name="Enc 3" version="1.0">
@@ -23,8 +50,7 @@
 </nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::Bonus Nodes::Encounters::Set 1" module="forms" name="Enc 1" version="1.0">
   <text multiline="1" send_button="1">A Wandering Minotaur</text>
 </nodehandler><group_atts border="1" cols="1" />
-</nodehandler><group_atts border="1" cols="1" />
-</nodehandler><nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes" module="containers" name="Book" version="1.0">
+</nodehandler></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes" module="containers" name="Book" version="1.0">
   <nodehandler class="listbox_handler" frame="400,400,0,48" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Book" module="forms" name="Index" version="1.0">
   <list hide_title="0" raw_mode="1" send_button="1" type="1">
     <option selected="1" value="">!!Chapter 1::Part 1!!</option>
@@ -45,24 +71,6 @@ Is this the end already?</text>
 
 An introduction to your adventure module can be placed here.</text>
 </nodehandler><group_atts border="1" cols="1" />
-</nodehandler><group_atts border="1" cols="1" />
-</nodehandler><nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes" module="containers" name="Deck" version="1.0">
-  <nodehandler class="textctrl_handler" frame="400,400,66,87" icon="note" map="Traipse OpenRPG::Bonus Nodes::Deck" module="forms" name="Draw" version="1.0">
-  <text multiline="1" raw_mode="1" send_button="1">!!52 Card Deck::([#1d13-1], [#1d4-1])!!</text>
-</nodehandler><nodehandler class="rpg_grid_handler" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Deck" module="rpg_grid" name="52 Card Deck" version="1.0">
-  <grid autosize="1" border="1">
-    <row version="1.0">
-      <cell>AS</cell>
-      <cell>AD</cell>
-    <cell>AC</cell><cell>AH</cell></row>
-    <row version="1.0">
-      <cell>KS</cell>
-      <cell>KD</cell>
-    <cell>KC</cell><cell>KH</cell></row>
-  <row version="1.0"><cell>QS</cell><cell>QD</cell><cell>QC</cell><cell>QH</cell></row><row version="1.0"><cell>JS</cell><cell>JD</cell><cell>JC</cell><cell>JH</cell></row><row version="1.0"><cell>10S</cell><cell>10D</cell><cell>10C</cell><cell>10H</cell></row><row version="1.0"><cell>9S</cell><cell>9D</cell><cell>9C</cell><cell>9H</cell></row><row version="1.0"><cell>8S</cell><cell>8D</cell><cell>8C</cell><cell>8H</cell></row><row version="1.0"><cell>7S</cell><cell>7D</cell><cell>7C</cell><cell>7H</cell></row><row version="1.0"><cell>6S</cell><cell>6D</cell><cell>6C</cell><cell>6H</cell></row><row version="1.0"><cell>5S</cell><cell>5D</cell><cell>5C</cell><cell>5H</cell></row><row version="1.0"><cell>4S</cell><cell>4D</cell><cell>4C</cell><cell>4H</cell></row><row version="1.0"><cell>3S</cell><cell>3D</cell><cell>3C</cell><cell>3H</cell></row><row version="1.0"><cell>2S</cell><cell>2D</cell><cell>2C</cell><cell>2H</cell></row></grid>
-  <macros>
-    <macro name="" />
-  </macros>
 </nodehandler><group_atts border="1" cols="1" />
 </nodehandler><group_atts border="1" cols="1" />
 </nodehandler><nodehandler border="1" class="group_handler" cols="1" icon="labtop" map="Traipse OpenRPG" module="containers" name="User Manual" version="1.0">
@@ -123,13 +131,13 @@ Examples:
 </text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,452,36" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Gametree Additions &amp; Tips" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">  With the new additions to the gametree using nodes has never been easier nor has it ever been more fluid. Included here is a list of the additions to the gametree referencing model as well as some tips on how to make the gametree work the way it was intended.
 
 Grid Nodes:
-  Grid nodes are now referenceable with the coordinates of the grid. Example: !@Grid::(0,0)@!
+  Grid nodes are now referenceable with the coordinates of the grid. Example: !@Grid::(1,1)@!
 The example will return the top left most cell data. The grid understands coordinates like this (Row, Column)
 
   Grid nodes can reference node data just like any other node can.  With a new added feature grids are even more useful. By using a new die rolling syntax you can draw just the number of the modified roll.  While this will not pass during game play, you can use it with the grid node to create a random chart. The new die roll syntax is [#XdY]. # works just like q, yet it returns only the modified die result. 
 
   Here is an example with a 3 x 3 Grid
-Example: !@Grid::([#1d3-1], [#1d3-1])@!
+Example: !@Grid::([#1d3], [#1d3])@!
 
 The result will be a random event from the grid.
 
