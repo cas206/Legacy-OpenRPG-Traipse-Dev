@@ -20,8 +20,8 @@
 </nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,501,72" height="600" icon="orc" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Encounters" version="1.0" width="400">
   <nodehandler class="listbox_handler" frame="400,153,348,150" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="forms" name="Roll" version="1.0">
   <list raw_mode="1" send_button="1" type="1">
-    <option selected="0" value="">!!Chart::([#1d3],0)!!</option>
-    <option selected="1" value="">!!Chart::([#1d2],1)!!</option>
+    <option selected="1" value="">!!Chart::([#1d3],1)!!</option>
+    <option selected="0" value="">!!Chart::([#1d2],1)!!</option>
     <option selected="0" value="">Option Text III</option>
   </list>
 </nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,0,48" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="rpg_grid" name="Chart" version="1.0">
@@ -131,13 +131,13 @@ Examples:
 </text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,452,36" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Gametree Additions &amp; Tips" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">  With the new additions to the gametree using nodes has never been easier nor has it ever been more fluid. Included here is a list of the additions to the gametree referencing model as well as some tips on how to make the gametree work the way it was intended.
 
 Grid Nodes:
-  Grid nodes are now referenceable with the coordinates of the grid. Example: !@Grid::(1,1)@!
+  Grid nodes are now referenceable with the coordinates of the grid. Example: !@Grid::(0,0)@!
 The example will return the top left most cell data. The grid understands coordinates like this (Row, Column)
 
   Grid nodes can reference node data just like any other node can.  With a new added feature grids are even more useful. By using a new die rolling syntax you can draw just the number of the modified roll.  While this will not pass during game play, you can use it with the grid node to create a random chart. The new die roll syntax is [#XdY]. # works just like q, yet it returns only the modified die result. 
 
   Here is an example with a 3 x 3 Grid
-Example: !@Grid::([#1d3], [#1d3])@!
+Example: !@Grid::([#1d3-1], [#1d3-1])@!
 
 The result will be a random event from the grid.
 

@@ -1,13 +1,11 @@
-
-<nodehandler class="tabber_handler" icon="tabber" module="containers" name="Die Roller Notes" version="1.0">
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="Basics" version="1.0">
-    <text multiline="1" send_button="1">
-The new dieroller is design with expansion in mind. While there are a number of new dieroller options in the base roller, the new design facilitates the building of new rollers that can be loaded at any time.  In this test build three are 3 rollers: std, d20, and wod.  The std roller is the generic roller.  It has generic dice options and is the base for all other dierollers. The d20 and wod rollers are game specific rollers and have game specific options.  They also serve as examples for how to create your own rollers in python.
+<nodehandler class="tabber_handler" frame="987,495,14,101" icon="tabber" module="containers" name="Die Roller Notes" version="1.0">
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="Basics" version="1.0">
+    <text multiline="1" send_button="1">The new dieroller is design with expansion in mind. While there are a number of new dieroller options in the base roller, the new design facilitates the building of new rollers that can be loaded at any time.  In this test build three are 3 rollers: std, d20, and wod.  The std roller is the generic roller.  It has generic dice options and is the base for all other dierollers. The d20 and wod rollers are game specific rollers and have game specific options.  They also serve as examples for how to create your own rollers in python.
 
 ** Please not that this is our initial release of the roller.  The new syntax might see odd to you.  We are considering an alternative syntax, and this is being discussed on the openrpg.com forums. In if you have strong opinions on this, you might want to hop over there and give your 2 cents. **
 
 Dierollers:
-You can see what roller you are using by using the &quot;/dieroller&quot; command in chat.  By default it should be &quot;std&quot;.  To set the die roller, use &quot;/dieroller roller_name&quot;.  So to load the d20 roller, type &quot;/dieroller d20&quot;. Its easy!
+You can see what roller you are using by using the "/dieroller" command in chat.  By default it should be "std".  To set the die roller, use "/dieroller roller_name".  So to load the d20 roller, type "/dieroller d20". Its easy!
 
 Basic Syntax.
 The basic syntax is the same, 3d6+3, rolls three six side dice plus 3.  However, the new roller has other options, they look like this:
@@ -25,9 +23,8 @@ Now this option rolls 10d6 and takes the lowest two rolls. Basically, to use an 
 This example rolls 10d10 with a minimum roll of 4 and takes the lowest 5.  Pretty nifty if I do say so myself.
 </text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="STD rollers" version="1.0">
-    <text multiline="1" send_button="1">
-Now that you know how to roll dice, lets look at the standard options.
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="STD rollers" version="1.0">
+    <text multiline="1" send_button="1">Now that you know how to roll dice, lets look at the standard options.
 
 takeHighest - take highest X rolls
 
@@ -54,9 +51,15 @@ each - apply X value to all dice
 [10d10.each(2)] - add 2 to every die roll
 </text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="d20 roller" version="1.0">
-    <text multiline="1" send_button="1">
-Remember, to use the d20 roller type: &quot;/dieroller d20&quot;
+  <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Die Roller Notes" module="forms" name="7th Sea" version="1.0">
+    <text multiline="1" send_button="1">The 7th Sea roller is part of the Standard rollers in Traipse.
+
+The 7th Sea roller includes a truncated version that allows you to roll quickly.
+
+[7k3] = [3d10.takeHighest(3).open(10)]
+</text>
+  </nodehandler><nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="d20 roller" version="1.0">
+    <text multiline="1" send_button="1">Remember, to use the d20 roller type: "/dieroller d20"
 
 dc(DC,mod) - make a DC check.
 
@@ -67,17 +70,40 @@ attack(AC,mod,critical) - make an attack roll.
 [1d20.attack(20,5,19) - make an attack roll against AC 20 with a modifier of +5 and a critical range of 19-20.
 </text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="wod roller" version="1.0">
-    <text multiline="1" send_button="1">
-Remember, to use the wod roller type: &quot;/dieroller wod&quot;
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="wod roller" version="1.0">
+    <text multiline="1" send_button="1">Remember, to use the wod roller type: "/dieroller wod"
 
 vs(target) - vs roll against target
 
-[3d10.vs(5)] - vs roll against 5.</text>
+[3d10.vs(5)] - vs roll against 5.
+
+The wod roller also has a shortend version in Traipse.
+[3v5] = [3d10.vs(5)]</text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="Hero Roller" version="1.0">
-    <text multiline="1" send_button="0">
-Skill Roller, example [3d6.sk(11,0)]--
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="mythos roller" version="1.0">
+    <text multiline="1" send_button="1">Remember, to use the mythos roller type: "/dieroller mythos"
+
+The mythos roller is a roller designed by community request. The roller uses a new style of versus similar to the wod roller.
+
+The difference is in the target. If the roller rolls [3d12.vs(2)], then the software looks for numerals of 2.
+
+Targets:
+2 = [2, 4, 6, 8, 10, 12]
+3 = [3, 6, 9, 12]
+4 = [4, 8, 12]
+6 = [6, 12]
+
+vs(target) - vs roll against target
+
+[3d12.vs(6)] - vs roll against 6, 12.
+
+The mythos roller also works with the new shortened vs. roll
+
+[3v3] = [3d12.vs(3)] - vs roll against 3, 6, 9, 12</text>
+  </nodehandler><nodehandler class="textctrl_handler" frame="400,400,308,51" icon="note" map="Die Roller Notes" module="forms" name="Hero Roller" version="1.0">
+    <text multiline="1" send_button="0">Remember, to use the hero roller type: "/dieroller hero"
+
+Skill Roller, example [3d6.sk(11,0)]
 Make a SKill roll.  The first number of the two modifiers is the rating in the skill, 11 meaning 11 or less.  The second number is any penalty or bonus you have for the roll.  A positive number is a bonus, a negative number is a penalty.  As with many Hero system rolls, the only die choice that makes sense is 3d6
 
 To-hit roller, example  [3d6.cv(5,1)]
@@ -96,19 +122,27 @@ Basic Killing damage roller, example [2d6.hk()]
 Make a damage roll for Killing damage.  Always uses a stun multiplier of 1 for ease of use with the Hit Location roller mentioned above.  No modifiers exist.  Contributed by Heroman
 </text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="? Option" version="1.0">
-    <text multiline="1" send_button="1">
-Another new feature is the ? option.  If you place a ? in a dice string you will be prompt by a dialog for the value.  This is useful when using die rolls in character sheets. From example:
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="? Option" version="1.0">
+    <text multiline="1" send_button="1">Another new feature is the ? option.  If you place a ? in a dice string you will be prompt by a dialog for the value.  This is useful when using die rolls in character sheets. From example:
 
 [3d6+?] - will ask you for a value to replace ?.
-[3d6+?StrMod] will ask you for a value to replace ? and give you the Hint that it should be your StrMod. This Hint system can be used for as many ? as you have in your roll
-[?NumDice}d6+?StrMod+?Weapon Bonus+?Misc Bonus] - If you notice the } after NumDice, that tells the Hint system to stop looking for Alpha character, otherwise it would try to include the d in it's hint.
 
-A more game specific example might look like this:
+The Hint System:
+You can add a hint to your ? Option by adding a label after ?
+[3d6+?StrMod] will ask you for a value to replace ? and give you the Hint that it should be your StrMod. This Hint system can be used for as many ? as you have in your roll
+
+The Stop Break:
+The '}' character is a stop break that tells the Hint system to stop looking for Alpha characters.  
+
+Example: [?NumDice}d6+?StrMod+?Weapon Bonus+?Misc Bonus] 
+
+If you notice the '}' after NumDice, that tells the Hint system to stop looking for Alpha character, otherwise it would try to include the d in it's hint.
+
+A more game specific example might look like this (using the d20 roller):
 
 [1d20.dc(?DC,5)] - this will prompted you for the ? value, which is the DC.</text>
   </nodehandler>
-  <nodehandler class="textctrl_handler" icon="note" module="forms" name="The End" version="1.0">
+  <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="The End" version="1.0">
     <text multiline="1" send_button="1">Well, that's all I have to say about the new roller.  More options and game specific rollers on the way.  If you're interested in coding a roller for your favorite game, drop by the dev server and we'll try and help you out.
 
 -Chris Davis
