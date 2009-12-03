@@ -131,73 +131,31 @@ class orpgSettingsWnd(wx.Dialog):
             self.settings.set_setting(self.changes[i][0], self.changes[i][1])
             top_frame = component.get('frame')
 
-            if self.changes[i][0] == 'defaultfontsize' or self.changes[i][0] == 'defaultfont':
-                self.chat.chatwnd.SetDefaultFontAndSize(self.settings.get_setting('defaultfont'), 
-                                                        self.settings.get_setting('defaultfontsize'))
-                self.chat.InfoPost("Font is now " + 
-                                    self.settings.get_setting('defaultfont') + " point size " + 
-                                    self.settings.get_setting('defaultfontsize'))
-                self.chat.chatwnd.scroll_down()
+            ## Settings are now reactive and organized ##
+            ok = {'IdleStatusAlias': self.chat.chat_cmds.on_status,
+                'dieroller': self.dieroller_ok,
+                'defaultfontsize': self.font_ok,
+                'defaultfont': self.font_ok,
+                'bgcolor': self.text_ok,
+                'textcolor': self.text_ok,
+                'ColorTree': self.colortree_ok,
+                'player': self.session.set_name,
+                'TabBackgroundGradient': self.tab_gradient_ok}
 
-            if self.changes[i][0] == 'bgcolor' or self.changes[i][0] == 'textcolor':
-                self.chat.chatwnd.SetPage(self.chat.ResetPage())
-                self.chat.chatwnd.scroll_down()
-                if self.settings.get_setting('ColorTree') == '1':
-                    top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                    top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
-                    top_frame.tree.Refresh()
-                    top_frame.players.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                    top_frame.players.SetForegroundColour(self.settings.get_setting('textcolor'))
-                    top_frame.players.Refresh()
-                else:
-                    top_frame.tree.SetBackgroundColour('white')
-                    top_frame.tree.SetForegroundColour('black')
-                    top_frame.tree.Refresh()
-                    top_frame.players.SetBackgroundColour('white')
-                    top_frame.players.SetForegroundColour('black')
-                    top_frame.players.Refresh()
+            if self.changes[i][0] in ok.keys(): ok[self.changes[i][0]](self.changes[i][1])
 
-            if self.changes[i][0] == 'ColorTree':
-                if self.changes[i][1] == '1':
-                    top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                    top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
-                    top_frame.tree.Refresh()
-                    top_frame.players.SetBackgroundColour(self.settings.get_setting('bgcolor'))
-                    top_frame.players.SetForegroundColour(self.settings.get_setting('textcolor'))
-                    top_frame.players.Refresh()
-                else:
-                    top_frame.tree.SetBackgroundColour('white')
-                    top_frame.tree.SetForegroundColour('black')
-                    top_frame.tree.Refresh()
-                    top_frame.players.SetBackgroundColour('white')
-                    top_frame.players.SetForegroundColour('black')
-                    top_frame.players.Refresh()
+            elif self.changes[i][0] == 'GMWhisperTab' and self.changes[i][1] == '1': self.chat.parent.create_gm_tab()
 
-            if self.changes[i][0] == 'GMWhisperTab' and self.changes[i][1] == '1': self.chat.parent.create_gm_tab()
-            self.toggleToolBars(self.chat, self.changes[i])
-            try: self.toggleToolBars(self.chat.parent.GMChatPanel, self.changes[i])
-            except: pass
-            for panel in self.chat.parent.whisper_tabs: self.toggleToolBars(panel, self.changes[i])
-            for panel in self.chat.parent.group_tabs: self.toggleToolBars(panel, self.changes[i])
-            for panel in self.chat.parent.null_tabs: self.toggleToolBars(panel, self.changes[i])
-
-            if self.changes[i][0] == 'player': self.session.name = str(self.changes[i][1])
-
-            if (self.changes[i][0][:3] == 'Tab' and self.changes[i][1][:6] == 'custom') or\
+            elif (self.changes[i][0][:3] == 'Tab' and self.changes[i][1][:6] == 'custom') or\
                 (self.changes[i][0][:3] == 'Tab' and self.settings.get_setting('TabTheme')[:6] == 'custom'):
-
                 gfrom = self.settings.get_setting('TabGradientFrom')
                 (fred, fgreen, fblue) = rgbconvert.rgb_tuple(gfrom)
-
                 gto = self.settings.get_setting('TabGradientTo')
                 (tored, togreen, toblue) = rgbconvert.rgb_tuple(gto)
-
                 tabtext = self.settings.get_setting('TabTextColor')
                 (tred, tgreen, tblue) = rgbconvert.rgb_tuple(tabtext)
-
                 for wnd in tabbedwindows:
                     style = wnd.GetWindowStyleFlag()
-                    # remove old tabs style
                     mirror = ~(FNB.FNB_VC71 | FNB.FNB_VC8 | FNB.FNB_FANCY_TABS | FNB.FNB_COLORFUL_TABS)
                     style &= mirror
                     if self.settings.get_setting('TabTheme') == 'customslant': style |= FNB.FNB_VC8
@@ -208,13 +166,73 @@ class orpgSettingsWnd(wx.Dialog):
                     wnd.SetNonActiveTabTextColour(wx.Color(tred, tgreen, tblue))
                     wnd.Refresh()
 
-            if self.changes[i][0] == 'TabBackgroundGradient':
-                for wnd in tabbedwindows:
-                    (red, green, blue) = rgbconvert.rgb_tuple(self.changes[i][1])
-                    wnd.SetTabAreaColour(wx.Color(red, green, blue))
-                    wnd.Refresh()
+            self.toggleToolBars(self.chat, self.changes[i])
+            try: self.toggleToolBars(self.chat.parent.GMChatPanel, self.changes[i])
+            except: pass
+            for panel in self.chat.parent.whisper_tabs: self.toggleToolBars(panel, self.changes[i])
+            for panel in self.chat.parent.group_tabs: self.toggleToolBars(panel, self.changes[i])
+            for panel in self.chat.parent.null_tabs: self.toggleToolBars(panel, self.changes[i])
+
         self.settings.save()
         self.Destroy()
+
+    def tab_gradient_ok(self, changes):
+        for wnd in tabbedwindows:
+            (red, green, blue) = rgbconvert.rgb_tuple(changes)
+            wnd.SetTabAreaColour(wx.Color(red, green, blue))
+            wnd.Refresh()
+
+    def dieroller_ok(self, changes):
+        rm = component.get('DiceManager')
+        try:
+            rm.setRoller(changes)
+            self.chat.SystemPost('You have changed your die roller to the <b>"' + changes + '"</b> roller.')
+        except:
+            rm.setRoller('std')
+            self.settings.change('dieroller', 'std')
+            self.chat.SystemPost('<b>"' + changes + '"</b> is an invalid roller. Setting roller to <b>"std"</b>')
+
+    def colortree_ok(self, changes):
+        if changes == '1':
+            top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
+            top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
+            top_frame.tree.Refresh()
+            top_frame.players.SetBackgroundColour(self.settings.get_setting('bgcolor'))
+            top_frame.players.SetForegroundColour(self.settings.get_setting('textcolor'))
+            top_frame.players.Refresh()
+        else:
+            top_frame.tree.SetBackgroundColour('white')
+            top_frame.tree.SetForegroundColour('black')
+            top_frame.tree.Refresh()
+            top_frame.players.SetBackgroundColour('white')
+            top_frame.players.SetForegroundColour('black')
+            top_frame.players.Refresh()
+
+    def font_ok(self, changes):
+        self.chat.chatwnd.SetDefaultFontAndSize(self.settings.get_setting('defaultfont'), 
+                                                self.settings.get_setting('defaultfontsize'))
+        self.chat.InfoPost("Font is now " + 
+                            self.settings.get_setting('defaultfont') + " point size " + 
+                            self.settings.get_setting('defaultfontsize'))
+        self.chat.chatwnd.scroll_down()
+
+    def text_ok(self, changes):
+        self.chat.chatwnd.SetPage(self.chat.ResetPage())
+        self.chat.chatwnd.scroll_down()
+        if self.settings.get_setting('ColorTree') == '1':
+            top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
+            top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
+            top_frame.tree.Refresh()
+            top_frame.players.SetBackgroundColour(self.settings.get_setting('bgcolor'))
+            top_frame.players.SetForegroundColour(self.settings.get_setting('textcolor'))
+            top_frame.players.Refresh()
+        else:
+            top_frame.tree.SetBackgroundColour('white')
+            top_frame.tree.SetForegroundColour('black')
+            top_frame.tree.Refresh()
+            top_frame.players.SetBackgroundColour('white')
+            top_frame.players.SetForegroundColour('black')
+            top_frame.players.Refresh()
 
     def toggleToolBars(self, panel, changes):
         if changes[0] == 'AliasTool_On': panel.toggle_alias(changes[1])

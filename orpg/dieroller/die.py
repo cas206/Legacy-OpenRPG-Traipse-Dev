@@ -37,64 +37,43 @@ import copy
 
 class die_base(UserList.UserList):
 
-    
     def __init__(self,source = []):
         if isinstance(source, (int, float, basestring)):
             s = []
             s.append(di(source))
-        else:
-            s = source
+        else: s = source
         UserList.UserList.__init__(self,s)
 
-
-    
     def sum(self):
         s = 0
         for a in self.data:
             s += int(a)
         return s
 
-    
     def __lshift__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            o = other
-        elif hasattr(other,"sum"):
-            o = other.sum()
-        else:
-            return None
-
+        if type(other) == type(3) or type(other) == type(3.0): o = other
+        elif hasattr(other,"sum"): o = other.sum()
+        else: return None
         result = []
         for die in self:
-            if die < o:
-                result.append(die)
+            if die < o: result.append(die)
         return self.__class__(result)
 
-    
     def __rshift__(self,other):
-
-        if type(other) == type(3) or type(other) == type(3.0):
-            o = other
-        elif hasattr(other,"sum"):
-            o = other.sum()
-        else:
-            return None
-
+        if type(other) == type(3) or type(other) == type(3.0): o = other
+        elif hasattr(other,"sum"): o = other.sum()
+        else: return None
         result = []
         for die in self:
-            if die > o:
-                result.append(die)
+            if die > o: result.append(die)
         return self.__class__(result)
 
-    
     def __rlshift__(self,other):
         return self.__rshift__(other)
 
-    
     def __rrshift__(self,other):
         return self.__lshift__(other)
 
-
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -102,102 +81,60 @@ class die_base(UserList.UserList):
                 myStr += ","
                 myStr += str(a)
             myStr += "] = (" + str(self.sum()) + ")"
-        else:
-            myStr = "[] = (0)"
+        else: myStr = "[] = (0)"
         return myStr
 
-    
     def __lt__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() < other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() < other.sum())
-        else:
-            return UserList.UserList.__lt__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() < other)
+        elif hasattr(other,"sum"): return  (self.sum() < other.sum())
+        else: return UserList.UserList.__lt__(self,other)
 
-    
     def __le__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() <= other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() <= other.sum())
-        else:
-            return UserList.UserList.__le__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() <= other)
+        elif hasattr(other,"sum"): return  (self.sum() <= other.sum())
+        else: return UserList.UserList.__le__(self,other)
 
-    
     def __eq__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() == other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() == other.sum())
-        else:
-            return UserList.UserList.__eq__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() == other)
+        elif hasattr(other,"sum"): return  (self.sum() == other.sum())
+        else: return UserList.UserList.__eq__(self,other)
 
-    
     def __ne__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() != other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() != other.sum())
-        else:
-            return UserList.UserList.__ne__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() != other)
+        elif hasattr(other,"sum"):return  (self.sum() != other.sum())
+        else: return UserList.UserList.__ne__(self,other)
 
-    
     def __gt__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() > other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() > other.sum())
-        else:
-            return UserList.UserList.__gt__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() > other)
+        elif hasattr(other,"sum"): return  (self.sum() > other.sum())
+        else: return UserList.UserList.__gt__(self,other)
 
-    
     def __ge__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return (self.sum() >= other)
-        elif hasattr(other,"sum"):
-            return  (self.sum() >= other.sum())
-        else:
-            return UserList.UserList.__ge__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return (self.sum() >= other)
+        elif hasattr(other,"sum"): return  (self.sum() >= other.sum())
+        else: return UserList.UserList.__ge__(self,other)
 
-    
     def __cmp__(self,other):
         #  this function included for backwards compatibility
         #  As of 2.1, lists implement the "rich comparison"
         #  methods overloaded above.
-        if type(other) == type(3) or type(other) == type(3.0):
-            return cmp(self.sum(), other)
-        elif hasattr(other,"sum"):
-            return  cmp(self.sum(), other.sum())
-        else:
-            return UserList.UserList.__cmp__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return cmp(self.sum(), other)
+        elif hasattr(other,"sum"): return  cmp(self.sum(), other.sum())
+        else: return UserList.UserList.__cmp__(self,other)
 
-
-    
     def __rcmp__(self,other):
         return self.__cmp__(other)
 
-    
     def __add__(self,other):
         mycopy = copy.deepcopy(self)
-        if type(other) == type(3) or type(other) == type(3.0):
-            #if other < 0:
-            #    return self.__sub__(-other)
-            #other = [di(other,other)]
-            other = [static_di(other)]
-            #return self.sum() + other
-
-        elif type(other) == type("test"):
-            return self
+        if type(other) == type(3) or type(other) == type(3.0): other = [static_di(other)]
+        elif type(other) == type("test"): return self
         mycopy.extend(other)
-        #result = UserList.UserList.__add__(mycopy,other)
         return mycopy
 
-    
     def __iadd__(self,other):
         return self.__add__(other)
 
-    
     def __radd__(self,other):
         mycopy = copy.deepcopy(self)
         if type(other) == type(3) or type(other) == type(3.0):
@@ -207,27 +144,20 @@ class die_base(UserList.UserList):
         mycopy.insert(0,other)
         return mycopy
 
-    
     def __int__(self):
         return self.sum()
 
-    
     def __sub__(self,other):
         mycopy = copy.deepcopy(self)
         if type(other) == type(3) or type(other) == type(3.0):
             neg_die = static_di(-other)
-            #neg_die.set_value(-other)
             other = [neg_die]
-            #return self.sum() - other
-        else:
-            other = -other
+        else: other = -other
         mycopy.extend(other)
         return mycopy
 
-    
     def __rsub__(self,other):
         mycopy = -copy.deepcopy(self)
-        #print type(other)
         if type(other) == type(3) or type(other) == type(3.0):
             new_die = di(0)
             new_die.set_value(other)
@@ -235,18 +165,13 @@ class die_base(UserList.UserList):
         mycopy.insert(0,other)
         return mycopy
 
-    
     def __isub__(self,other):
         return self.__sub__(other)
 
-    
     def __mul__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return self.sum() * other
-        elif hasattr(other,"sum"):
-            return other.sum() * self.sum()
-        else:
-            return UserList.UserList.__mul__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return self.sum() * other
+        elif hasattr(other,"sum"): return other.sum() * self.sum()
+        else: return UserList.UserList.__mul__(self,other)
 
     
     def __rmul__(self,other):
@@ -254,21 +179,15 @@ class die_base(UserList.UserList):
 
     
     def __div__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return float(self.sum()) / other
-        elif hasattr(other,"sum"):
-            return  float(self.sum()) / other.sum()
-        else:
-            return UserList.UserList.__div__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return float(self.sum()) / other
+        elif hasattr(other,"sum"): return  float(self.sum()) / other.sum()
+        else: return UserList.UserList.__div__(self,other)
 
     
     def __rdiv__(self,other):
-        if type(other) == type(3) or type(other) == type(3.0):
-            return other / float(self.sum())
-        elif hasattr(other,"sum"):
-            return  other.sum() / float(self.sum())
-        else:
-            return UserList.UserList.__rdiv__(self,other)
+        if type(other) == type(3) or type(other) == type(3.0): return other / float(self.sum())
+        elif hasattr(other,"sum"): return  other.sum() / float(self.sum())
+        else: return UserList.UserList.__rdiv__(self,other)
 
     
     def __mod__(self,other):
