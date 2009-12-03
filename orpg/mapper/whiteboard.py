@@ -277,7 +277,7 @@ class whiteboard_layer(layer_base):
         self.serial_number -= 1
 
     def add_line(self, line_string="", upperleft=cmpPoint(0,0), lowerright=cmpPoint(0,0), color="#000000", width=1):
-        id = 'line ' + str(self.next_serial())
+        id = 'line-' + self.canvas.session.get_next_id()
         line = WhiteboardLine(id, line_string, upperleft, lowerright, color=self.color, width=self.width)
         self.lines.append(line)
         xml_str = "<map><whiteboard>"
@@ -368,7 +368,7 @@ class whiteboard_layer(layer_base):
         self.font = font
 
     def add_text(self, text_string, pos, style, pointsize, weight, color="#000000"):
-        id = 'text ' + str(self.next_serial())
+        id = 'text-' + self.canvas.session.get_next_id()
         text = WhiteboardText(id,text_string, pos, style, pointsize, weight, color)
         self.texts.append(text)
         xml_str = "<map><whiteboard>"
@@ -423,7 +423,9 @@ class whiteboard_layer(layer_base):
             nodename = l._get_nodeName()
             action = l.getAttribute("action")
             id = l.getAttribute('id')
-            if self.serial_number < int(id[5:]): self.serial_number = int(id[5:])
+            try:
+                if self.serial_number < int(id.split('-')[2]): self.serial_number = int(id.split('-')[2])
+            except: pass
             if action == "del":
                 if nodename == 'line':
                     line = self.get_line_by_id(id)
@@ -474,7 +476,6 @@ class whiteboard_layer(layer_base):
                 if nodename == "text":
                     text = self.get_text_by_id(id)
                     if text: text.takedom(l)
-        #self.canvas.send_map_data()
 
     def add_temp_line(self, line_string):
         line = WhiteboardLine(0, line_string, wx.Point(0,0), wx.Point(0,0), 

@@ -161,21 +161,25 @@ class PluginDB(object):
             dict_el = Element(dictname)
             dict_el.set('type', 'dict')
             plugin.append(dict_el)
-        else:
-            dict_el.remove(list_el.find('dict'))
+        else: 
+            refs = dict_el.findall('dict')
+            keys = val.keys()
+            for r in refs:
+                if r.find('dobject').get('name') in keys: 
+                    logger.debug('Duplicate Dictionary Reference', True); return
         dict_el.append(self.BuildDict(val))
         self.SaveDoc()
 
     def FetchDict(self, parent):
         retdict = {}
-        for ditem in parent.findall('dobject'):
+        for ditem in parent.find('dict').findall('dobject'):
             key = self.normal(ditem.get('name'))
             if ditem.get('type') == 'int': value = int(ditem.text)
             elif ditem.get('type') == 'bool': value = ditem.text == 'True'
             elif ditem.get('type') == 'float': value = float(ditem.text)
             elif ditem.get('type') == 'list': value = self.FetchList(ditem)
             elif ditem.get('type') == 'dict': value = self.FetchDict(ditem)
-            else: value = str(self.normal(ditem[0]))
+            else: value = str(self.normal(ditem.text))
             retdict[key] = value
         return retdict
 

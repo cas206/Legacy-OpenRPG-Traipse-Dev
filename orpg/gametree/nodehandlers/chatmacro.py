@@ -39,16 +39,17 @@ class macro_handler(node_handler):
             <text>some text here</text>
         </nodehandler >
     """
-    def __init__(self,xml_dom,tree_node):
-        node_handler.__init__(self,xml_dom,tree_node)
-        self.text_elem = self.master_dom.getElementsByTagName('text')[0]
-        self.text = component.get('xml').safe_get_text_node(self.text_elem)
+    def __init__(self,xml,tree_node):
+        node_handler.__init__(self,xml,tree_node)
+        self.xml = xml
+        self.text_elem = self.xml.find('text')
+        self.text = self.text_elem.text
 
     def set_text(self,txt):
-        self.text._set_nodeValue(txt)
+        self.text = txt
 
     def on_use(self,evt):
-        txt = self.text._get_nodeValue()
+        txt = self.text
         actionlist = txt.split("\n")
         for line in actionlist:
             if(line != ""):
@@ -63,8 +64,8 @@ class macro_handler(node_handler):
         return macro_edit_panel(parent,self)
 
     def tohtml(self):
-        title = self.master_dom.getAttribute("name")
-        txt = self.text._get_nodeValue()
+        title = self.xml.get("name")
+        txt = self.text
         txt = string.replace(txt,'\n',"<br />")
         return "<P><b>"+title+":</b><br />"+txt
 
@@ -78,8 +79,8 @@ class macro_edit_panel(wx.Panel):
         self.handler = handler
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Chat Macro"), wx.VERTICAL)
         self.text = {}
-        self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.master_dom.getAttribute('name'))
-        self.text[P_BODY] = wx.TextCtrl(self, P_BODY, handler.text._get_nodeValue(), style=wx.TE_MULTILINE)
+        self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
+        self.text[P_BODY] = wx.TextCtrl(self, P_BODY, handler.text, style=wx.TE_MULTILINE)
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
         sizer.Add(wx.StaticText(self, -1, "Text Body:"), 0, wx.EXPAND)
@@ -97,6 +98,6 @@ class macro_edit_panel(wx.Panel):
         txt = self.text[id].GetValue()
         if txt == "": return
         if id == P_TITLE:
-            self.handler.master_dom.setAttribute('name',txt)
+            self.handler.xml.setAttribute('name',txt)
             self.handler.rename(txt)
         elif id == P_BODY: self.handler.set_text(txt)

@@ -42,9 +42,10 @@ from gurps import *
 from runequest import *
 from savage import *
 from trinity import *
+from mythos import *
 import re
 
-rollers = ['std','wod','d20','hero','shadowrun', 'sr4','hackmaster','srex','wodex', 'gurps', 'runequest', 'sw', 'trinity']
+rollers = ['std','wod','d20','hero','shadowrun', 'sr4','hackmaster','srex','wodex', 'gurps', 'runequest', 'sw', 'trinity', 'mythos']
 
 class roller_manager:
     
@@ -70,14 +71,29 @@ class roller_manager:
     
     def stdDieToDClass(self,match):
         s = match.group(0)
-        (num,sides) = s.split('d')
+        num_sides = s.split('d')
+        if len(num_sides) > 1: num_sides; num = num_sides[0]; sides = num_sides[1]
+        else: return self.non_stdDieToDClass(s) # Use a non standard converter.
 
         if sides.strip().upper() == 'F': sides = "'f'"
         try:
-            if int(num) > 100 or int(sides) > 10000:
-                return None
+            if int(num) > 100 or int(sides) > 10000: return None
         except: pass
         return "(" + num.strip() + "**" + self.roller_class + "(" + sides.strip() + "))"
+
+
+    def non_stdDieToDClass(self, s):
+        num_sides = s.split('v')
+        if len(num_sides) > 1: 
+            num_sides; num = num_sides[0]; sides = num_sides[1]
+            if self.roller_class == 'stry': sides = '12'; target = num_sides[1]
+            elif self.roller_class == 'wod': sides = '10'; target = num_sides[1]
+            return "("+num.strip()+"**"+self.roller_class+"("+sides.strip()+")).vs("+target+")"
+        num_sides = s.split('k')
+        if len(num_sides) > 1: 
+            num_sides; num = num_sides[0]; sides = '10'; target = num_sides[1]
+            return "("+num.strip()+"**"+self.roller_class+"("+sides.strip()+")).takeHighest("+target+").open(10)"
+
 
     #  Use this to convert ndm-style (3d6) dice to d_base format
     
