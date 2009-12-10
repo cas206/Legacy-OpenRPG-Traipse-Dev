@@ -49,12 +49,14 @@ import orpg.networking.mplay_client
 import orpg.mapper.map
 import orpg.mapper.images
 
+import orpg.dieroller.utils
+
 #Update Manager# Un remark if you have Mercurial installed
 import upmana.updatemana
 import upmana.manifest as manifest
 
 from orpg.dirpath import dir_struct
-from orpg.dieroller.utils import DiceManager
+#from orpg.dieroller.utils import DiceManager
 from orpg.tools.settings import settings
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
@@ -106,7 +108,8 @@ class orpgFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.session.update, self.ping_timer)
 
         # create roller manager
-        self.DiceManager = DiceManager(settings.get("dieroller"))
+        self.DiceManager = orpg.dieroller.utils.roller_manager()
+        self.DiceManager.setRoller(settings.get("dieroller"))
         component.add('DiceManager', self.DiceManager)
 
         #create password manager --SD 8/03

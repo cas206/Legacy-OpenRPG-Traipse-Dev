@@ -31,37 +31,35 @@
 #              Much thanks to whoever wrote the original shadowrun roller (akoman I believe)
 
 
-from die import *
+from std import std
+from orpg.dieroller.base import *
 
 __version__ = "$Id: wodex.py,v 1.9 2007/05/06 16:42:55 digitalxero Exp $"
 
 class wodex(std):
-    
+    name = "wodex"
+
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-    
     def vs(self,actualtarget=6):
         return oldwodVs(self,actualtarget,(6))
 
-    
     def wod(self,actualtarget=8):
         return newwodVs(self,actualtarget,(8))
 
-    
     def exalt(self, actualtarget=7):
         return exaltVs(self, actualtarget)
 
-    
     def exaltDmg(self, actualtarget=7):
         return exaltDmg(self, actualtarget)
 
-    
     def vswide(self,actualtarget=6,maxtarget=10):    #wide simply means it reports TNs from 2 to a specified max.
         return oldwodVs(self,actualtarget,2,maxtarget)
 
+die_rollers.register(wodex)
+
 class oldwodVs(std):
-    
     def __init__(self,source=[],actualtarget=6,mintn=2,maxtn=10):
         std.__init__(self, source)
         if actualtarget > 10:
@@ -91,7 +89,6 @@ class oldwodVs(std):
 
     #count successes, by looping through each die, and checking it against the currently set TN
     #1's subtract successes.
-    
     def __sum__(self):
         s = 0
         for r in self.data:
@@ -104,7 +101,6 @@ class oldwodVs(std):
     #a modified sum, but this one takes a target argument, and is there because otherwise it is difficult to loop through
     #tns counting successes against each one without changing target, which is rather dangerous as the original TN could
     #easily be lost. 1s subtract successes from everything.
-    
     def xsum(self,curtarget):
         s = 0
         for r in self.data:
@@ -115,7 +111,6 @@ class oldwodVs(std):
         return s
 
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -136,7 +131,6 @@ class oldwodVs(std):
         return myStr
 
 class newwodVs(std):
-    
     def __init__(self,source=[],actualtarget=8,mintn=8,maxtn=8):
         std.__init__(self, source)
         if actualtarget > 30:
@@ -167,7 +161,6 @@ class newwodVs(std):
     #a modified sum, but this one takes a target argument, and is there because otherwise it is difficult to loop through
     #tns counting successes against each one without changing target, which is rather dangerous as the original TN could
     #easily be lost. 1s subtract successes from original but not re-rolls.
-    
     def xsum(self,curtarget,subones=1):
         s = 0
         done = 1
@@ -185,7 +178,6 @@ class newwodVs(std):
         else:
             return self.xsum(0)
 
-    
     def openended(self,num):
         if num <= 1:
             self
@@ -200,7 +192,6 @@ class newwodVs(std):
             return self.openended(num)
 
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -221,7 +212,6 @@ class newwodVs(std):
         return myStr
 
 class exaltVs(std):
-    
     def __init__(self, source=[], actualtarget=7):
         std.__init__(self, source)
 
@@ -234,7 +224,6 @@ class exaltVs(std):
             self.target = actualtarget
 
 
-    
     def xsum(self, target):
         s = 0
 
@@ -247,7 +236,6 @@ class exaltVs(std):
         return s
 
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = str(self.data)
@@ -266,7 +254,6 @@ class exaltVs(std):
             return myStr
 
 class exaltDmg(std):
-    
     def __init__(self, source=[], actualtarget=7):
         std.__init__(self, source)
         if actualtarget > 10:
@@ -277,7 +264,6 @@ class exaltDmg(std):
         else:
             self.target = actualtarget
 
-    
     def xsum(self, target):
         s = 0
 
@@ -286,7 +272,6 @@ class exaltDmg(std):
                 s += 1
         return s
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = str(self.data)

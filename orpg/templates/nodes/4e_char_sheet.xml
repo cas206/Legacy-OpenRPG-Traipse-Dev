@@ -1,0 +1,101 @@
+<nodehandler class="tabber_handler" frame="400,400,358,183" icon="tabber" map="Group" module="containers" name="4e PC Sheet" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet" module="forms" name="Using the 4e Node" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">Because the GPL absorbs material that uses it, even secondary material .. this node is designed to be as generic as possible.
+
+Explinations on how to use will be included.</text></nodehandler><nodehandler class="listbox_handler" frame="400,400,0,48" icon="gear" map="4e PC Sheet" module="forms" name="Skills" version="1.0">
+        <list raw_mode="1" send_button="1" type="1">
+          <option selected="0" value="0">Climb [1d20+5+!!Abilities::(1,3)!!+(!!General::Level!!/2)]</option>
+          <option selected="1" value="0">Hide [1d20+5+!!Abilities::(2,3)!!+(!!General::Level!!/2)]</option>
+          <option selected="0" value="0">Spot [1d20+5+!!Abilities::(4,3)!!+(!!General::Level!!/2)]</option>
+        </list>
+      </nodehandler>
+      <nodehandler class="form_handler" frame="400,400,307,186" height="600" icon="form" map="4e PC Sheet" module="forms" name="General" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Name" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Player" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Race" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Class" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="4e PC Sheet::General" module="forms" name="Level" version="1.0">
+  <text multiline="0" raw_mode="1" send_button="0">4</text>
+</nodehandler></nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,488,115" icon="grid" map="4e PC Sheet" module="rpg_grid" name="Abilities" version="1.0">
+        <grid autosize="1" border="1">
+          <row version="1.0">
+            <cell>Str</cell>
+            <cell>8</cell>
+          <cell size="197">(!!Abilities::(1,2)!!-10)/2</cell></row>
+          <row version="1.0">
+            <cell>Dex</cell>
+            <cell>8</cell>
+          <cell>(!!Abilities::(2,2)!!-10)/2</cell></row>
+          <row version="1.0">
+            <cell>Con</cell>
+            <cell>8</cell>
+          <cell>(!!Abilities::(3,2)!!-10)/2</cell></row>
+          <row version="1.0">
+            <cell>Int</cell>
+            <cell>8</cell>
+          <cell>(!!Abilities::(4,2)!!-10)/2</cell></row>
+          <row version="1.0">
+            <cell>Wis</cell>
+            <cell>8</cell>
+          <cell>(!!Abilities::(5,2)!!-10)/2</cell></row>
+          <row version="1.0">
+            <cell>Cha</cell>
+            <cell>8</cell>
+          <cell>(!!Abilities::(6,2)!!-10)/2</cell></row>
+        </grid>
+        <macros>
+          <macro name="" />
+        </macros>
+      </nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet" module="forms" name="Inventory" version="1.0">
+  <text multiline="1" raw_mode="0" send_button="0">text</text>
+</nodehandler><nodehandler class="form_handler" frame="400,400,210,87" height="600" icon="form" map="4e PC Sheet" module="forms" name="Combat" version="1.0" width="400">
+  <nodehandler border="1" class="group_handler" cols="1" map="4e PC Sheet::Combat" module="containers" name="At Will" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="4e PC Sheet::Combat::At Will" module="containers" name="0" version="1.0">
+  <nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet::Combat::At Will::0" module="forms" name="Will Spell" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="1">!#Combat::Spells::0::Cantrip#!</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet::Combat::At Will::0" module="forms" name="At Will" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="1">&lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
+&lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
+</nodehandler><group_atts border="1" cols="1" />
+</nodehandler><group_atts border="1" cols="1" />
+</nodehandler><nodehandler border="1" class="group_handler" cols="1" map="4e PC Sheet::Combat" module="containers" name="Spells" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="4e PC Sheet::Combat::Spells" module="containers" name="0" version="1.0">
+  <nodehandler class="textctrl_handler" frame="400,400,260,70" icon="note" map="4e PC Sheet::Combat::Spells::0" module="forms" name="Cantrip" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="0">/me casts &lt;b&gt;Cantrip:&lt;/b&gt; A great powerful magic has been cast.</text>
+</nodehandler><group_atts border="1" cols="1" />
+</nodehandler><group_atts border="1" cols="1" />
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="Weapons" version="1.0">
+  <grid autosize="1" border="1">
+    <row version="1.0">
+      <cell>Weapon</cell>
+      <cell>Damage</cell>
+    </row>
+    <row version="1.0">
+      <cell>Sword</cell>
+      <cell>d6</cell>
+    </row>
+  <row version="1.0"><cell>Mace</cell><cell>d8</cell></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler></nodehandler><nodehandler class="listbox_handler" frame="400,400,397,93" icon="gear" map="4e PC Sheet" module="forms" name="At Wills" version="1.0">
+  <list raw_mode="1" send_button="1" type="1">
+    <option selected="0" value="">!!Combat::At Will::0::At Will!!</option>
+    <option selected="1" value="">!!Combat::At Will::0::Will Spell!!</option>
+    <option selected="0" value="">Option Text III</option>
+  </list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,0,48" icon="gear" map="4e PC Sheet" module="forms" name="Spells" version="1.0">
+  <list raw_mode="1" send_button="1" type="1">
+    <option selected="1" value="">/me casts &lt;b&gt;Spell:&lt;/b&gt; !!Combat::Spells::0::Cantrip!!</option>
+    <option selected="0" value="">Option Text II</option>
+    <option selected="0" value="">Option Text III</option>
+  </list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,0,48" icon="gear" map="4e PC Sheet" module="forms" name="Attacks" version="1.0">
+  <list raw_mode="1" send_button="1" type="1">
+    <option selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !!Combat::Weapons::(2,1)!! [1d20+!!Abilities::(1,3)!!] &lt;b&gt;Damage:&lt;/b&gt; [1!!Combat::Weapons::(2,2)!!]</option>
+    <option selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !!Combat::Weapons::(3,1)!! [1d20+!!Abilities::(1,3)!!] &lt;b&gt;Damage:&lt;/b&gt; [1!!Combat::Weapons::(3,2)!!]</option>
+    <option selected="0" value="">Option Text III</option>
+  </list>
+</nodehandler></nodehandler>

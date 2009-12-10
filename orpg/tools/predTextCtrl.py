@@ -379,7 +379,7 @@ class predTextCtrl(ExpandoTextCtrl):
 
         begin = 0
         for offset in range(insert - 1):
-            if st[-(offset + 2)] not in string.letters:
+            if st[-(offset + 2)] not in string.ascii_letters:
                 begin = insert - (offset + 1)
                 break
         return st[begin:insert]
@@ -460,7 +460,7 @@ class predTextCtrl(ExpandoTextCtrl):
                 #  newSt if it's a letter.  If it's not a letter, (e.g. a comma or
                 #  hyphen) a space is added to newSt in it's place.
                 for ch in st:
-                    if ch not in string.letters:
+                    if ch not in string.ascii_letters:
                         newSt += " "
                     else:
                         newSt += ch
@@ -494,7 +494,7 @@ class predTextCtrl(ExpandoTextCtrl):
                 #   Handle any other non-ascii events by calling parent's OnChar()
                 self.parent.OnChar(event)     #Call super.OnChar to get default behavior
                 return
-        elif asciiKey in string.letters:
+        elif asciiKey in string.ascii_letters:
            #  This is the real meat and potatoes of predTextCtrl.  This is where most of the
            #  wx.TextCtrl logic is changed.
             (startSel,endSel) = self.GetSelection()                 #  get the curren selection
@@ -511,7 +511,7 @@ class predTextCtrl(ExpandoTextCtrl):
             insert = startSel + 1                                   #  creates an int that denotes where the new InsertionPoint
                                                                     #  should be.
             curWord = ""                                            #  Assume there's a problem with finding the curWord
-            if (len(back) == 0) or (back[0] not in string.letters): #  We should only insert a prediction if we are typing
+            if (len(back) == 0) or (back[0] not in string.ascii_letters): #  We should only insert a prediction if we are typing
                                                                     #  at the end of a word, not in the middle.  There are
                                                                     #  three cases: we are typing at the end of the string or
                                                                     #  we are typing in the middle of the string and the next

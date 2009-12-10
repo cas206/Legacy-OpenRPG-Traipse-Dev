@@ -29,54 +29,51 @@
 #
 # v.1 original release DJM
 
-from die import *
+__version__ = "$Id: hero.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
+
 from time import time, clock
 import random
 
-__version__ = "$Id: hero.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
+from std import std
+from orpg.dieroller.base import *
 
 # Hero stands for "Hero system" not 20 sided die :)
 
 class hero(std):
-    
+    name = "hero"
+
     def __init__(self,source=[]):
         std.__init__(self,source)
 
 # these methods return new die objects for specific options
 
-    
     def k(self,mod):
         return herok(self,mod)
 
-    
     def hl(self):
         return herohl(self)
 
-    
     def hk(self):
         return herohk(self)
 
-    
     def n(self):
         return heron(self)
 
-    
     def cv(self,cv,mod):
         return herocv(self,cv,mod)
 
-    
     def sk(self,sk,mod):
         return herosk(self,sk,mod)
 
+die_rollers.register(hero)
+
 class herocv(std):
-    
     def __init__(self,source=[],cv=10,mod=0):
         std.__init__(self,source)
         self.cv = cv
         self.mod = mod
 
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -91,17 +88,14 @@ class herocv(std):
         return myStr
 
 class herosk(std):
-    
     def __init__(self,source=[],sk=11,mod=0):
         std.__init__(self,source)
         self.sk = sk
         self.mod = mod
 
-    
     def is_success(self):
         return (((self.sum()-self.mod) <= self.sk))
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -128,12 +122,10 @@ class herosk(std):
         return myStr
 
 class herok(std):
-    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
         self.mod = mod
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -151,12 +143,10 @@ class herok(std):
         return myStr
 
 class herohl(std):
-    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
         self.mod = mod
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         side = random.randint(1,6)
@@ -197,12 +187,10 @@ class herohl(std):
         return myStr
 
 class herohk(std):
-    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
         self.mod = mod
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
@@ -217,12 +205,10 @@ class herohk(std):
         return myStr
 
 class heron(std):
-    
     def __init__(self,source=[],mod=0):
         std.__init__(self,source)
         self.bodtot=0
 
-    
     def __str__(self):
         myStr = "[" + str(self.data[0])
         if self.data[0] == 6:
