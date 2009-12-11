@@ -83,7 +83,7 @@ The wod roller also has a shortend version in Traipse.
   <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="Alternity Roller" version="1.0">
     <text multiline="1" send_button="1">Remember, to use the mythos roller type: "/dieroller alternity"
 
-The altnerity roller is a roller designed by community members. The roller has two syntax methods for skill and attack.
+The alternity roller is a roller designed by community members. The roller has two syntax methods for skill and attack.
 
 Skill:
 [1d20.sk(1, 0)]
