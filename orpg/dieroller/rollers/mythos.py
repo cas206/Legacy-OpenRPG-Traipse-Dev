@@ -30,21 +30,26 @@
 # Targetthr is the Threshhold target
 # for compatibility with Mage die rolls.
 # Threshhold addition by robert t childers
-from die import *
+
+from std import std
+from orpg.dieroller.base import *
 
 __version__ = "$Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $"
 
 
-class wod(std):
-    
+class mythos(std):
+    name = "mythos"
     def __init__(self,source=[],target=0,targetthr=0):
         std.__init__(self,source)
         self.target = target
         self.targetthr = targetthr
-
-    
+  
     def vs(self,target):
         self.target = target
+        if target == 2: self.targets = [2, 4, 6, 8, 10, 12]
+        if target == 3: self.targets = [3, 6, 9, 12]
+        if target == 4: self.targets = [4, 8, 12]
+        if target == 5: self.targets = [6, 12]
         return self
 
     
@@ -58,20 +63,16 @@ class wod(std):
         s = 0
         s1 = self.targetthr
         botch = 0
-        for a in self.data:
-            rolls.extend(a.gethistory())
+        for a in self.data: rolls.extend(a.gethistory())
         for r in rolls:
-            if r >= self.target or r == 10:
+            if r in self.targets or r == 12:
                 s += 1
-                if s1 >0:
+                if s1 > 0:
                     s1 -= 1
                     s -= 1
-                else:
-                    botch = 1
-            elif r == 1:
-                s -= 1
-            if botch == 1 and s < 0:
-                s = 0
+                else: botch = 1
+            elif r == 1: s -= 1
+            if botch == 1 and s < 0: s = 0
         return s
 
     
@@ -81,12 +82,9 @@ class wod(std):
             for a in self.data[1:]:
                 myStr += ","
                 myStr += str(a)
-            if self.sum() < 0:
-                myStr += "] vs " +str(self.target)+" result of a botch"
-            elif self.sum() == 0:
-                myStr += "] vs " +str(self.target)+" result of a failure"
-            else:
-                myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
-
-
+            if self.sum() < 0: myStr += "] vs " +str(self.target)+" result of a botch"
+            elif self.sum() == 0: myStr += "] vs " +str(self.target)+" result of a failure"
+            else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
+
+die_rollers.register(mythos)

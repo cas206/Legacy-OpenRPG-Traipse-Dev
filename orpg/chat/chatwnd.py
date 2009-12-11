@@ -1792,10 +1792,12 @@ class chat_panel(wx.Panel):
             try: newstr = component.get('DiceManager').proccessRoll(newstr)
             except: pass
             if qmode == 1:
-                s = s.replace("[" + matches[i] + "]", "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
+                s = s.replace("[" + matches[i] + "]", 
+                            "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
             elif qmode == 2:
                 s = s.replace("[" + matches[i] + "]", newstr[len(newstr)-2:-1], 1)
-            else: s = s.replace("[" + matches[i] + "]", "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
+            else: s = s.replace("[" + matches[i] + "]", 
+                            "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
         return s
     
     def PraseUnknowns(self, s):
@@ -1848,14 +1850,11 @@ class chat_panel(wx.Panel):
         i = 0
         rs = s[:]
         for c in s:
-            if c == "<":
-                in_tag += 1
+            if c == "<": in_tag += 1
             elif c == ">":
-                if in_tag:
-                    in_tag -= 1
+                if in_tag: in_tag -= 1
             elif c == '"':
-                if in_tag:
-                    rs = rs[:i] + "'" + rs[i+1:]
+                if in_tag: rs = rs[:i] + "'" + rs[i+1:]
             i += 1
         return rs
 
@@ -1896,8 +1895,12 @@ class chat_panel(wx.Panel):
         ab_list = ab.findall('stat'); pc_stats = {}
 
         for ability in ab_list:
-            pc_stats[ability.get('name')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
-            pc_stats[ability.get('abbr')] = ( str(ability.get('base')), str((int(ability.get('base'))-10)/2) )
+            pc_stats[ability.get('name')] = ( 
+                    str(ability.get('base')), 
+                    str((int(ability.get('base'))-10)/2) )
+            pc_stats[ability.get('abbr')] = ( 
+                    str(ability.get('base')), 
+                    str((int(ability.get('base'))-10)/2) )
 
         if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('saves')
         else: ab = node.find('saves')
@@ -1981,7 +1984,30 @@ class chat_panel(wx.Panel):
         reg = re.compile("(!!(.*?)!!)")
         matches = reg.findall(s)
         for i in xrange(0,len(matches)):
-            newstr = txt = '!@' + node.get('map') + '::' + matches[i][1] + '@!'
+            tree_map = node.get('map') + '::' + matches[i][1]
+            newstr = '!@'+ tree_map +'@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            s = self.ParseNode(s)
+            s = self.ParseParent(s, tree_map)
+        return s
+
+    def ParseParent(self, s, tree_map):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!#(.*?)#!)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            ## Build the new tree_map
+            new_map = tree_map.split('::')
+            del new_map[len(new_map)-1]
+            parent_map = matches[i][1].split('::')
+            ## Find an index or use 1 for ease of use.
+            try: index = new_map.index(parent_map[0])
+            except: index = 1
+            ## Just replace the old tree_map from the index.
+            new_map[index:len(new_map)] = parent_map
+            newstr = '::'.join(new_map)
+            newstr = '!@'+ newstr +'@!'
             s = s.replace(matches[i][0], newstr, 1)
             s = self.ParseNode(s)
         return s

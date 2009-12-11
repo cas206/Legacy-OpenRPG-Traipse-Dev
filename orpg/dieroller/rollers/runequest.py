@@ -1,7 +1,3 @@
-
-
-
-
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -56,53 +52,49 @@
 #  o Added Sorcery Fumble table to sorcery spell roller
 #
 
-from die import *
+__version__ = "$Id: runequest.py,v 1.4 2006/11/15 12:11:22 digitalxero Exp $"
+
 from time import time, clock
 import random
 from math import floor
 
-__version__ = "$Id: runequest.py,v 1.4 2006/11/15 12:11:22 digitalxero Exp $"
+from std import std
+from orpg.dieroller.base import *
 
 # rq stands for "Runequest"
 
 class runequest(std):
-    
+    name = "runequest"
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-    # these methods return new die objects for specific options
+# these methods return new die objects for specific options
 
-    
     def skill(self,sk,mod,ma):
         return rqskill(self,sk,mod,ma)
 
-    
     def parry(self,sk,mod,ma,AP):
         return rqparry(self,sk,mod,ma,AP)
 
-    
     def dodge(self,sk,mod,ma):
         return rqdodge(self,sk,mod,ma)
 
-    
     def attack(self,sk,mod,ma,mindam,maxdam,bondam,trueswd):
         return rqattack(self,sk,mod,ma,mindam,maxdam,bondam,trueswd)
 
-    
     def sorcery(self,sk,mod,pow,cer,int,acc,mlt):
         return rqsorcery(self,sk,mod,pow,cer,int,acc,mlt)
 
-    
     def trainskill(self,initial,final):
         return rqtrainskill(self,initial,final)
 
-    
     def trainskillcost(self,cost,sk):
         return rqtrainskillcost(self,cost,sk)
 
-    
     def trainskilltime(self,time,sk):
         return rqtrainskilltime(self,time,sk)
+
+die_rollers.register(runequest)
 
 #  RQ Skill Training Cost/Time unlimited
 #
@@ -113,13 +105,11 @@ class runequest(std):
 #
 #
 class rqtrainskill(std):
-    
     def __init__(self,source=[],initial=11,final=0):
         std.__init__(self,source)
         self.s = initial
         self.f = final
 
-    
     def __str__(self):
         myStr = "Unrestricted Training"
 
@@ -153,13 +143,11 @@ class rqtrainskill(std):
 #
 #
 class rqtrainskillcost(std):
-    
     def __init__(self,source=[],cost=11,sk=0):
         std.__init__(self,source)
         self.cost = cost
         self.sk   = sk
 
-    
     def __str__(self):
         myStr = ""
 
@@ -199,13 +187,11 @@ class rqtrainskillcost(std):
 #
 #
 class rqtrainskilltime(std):
-    
     def __init__(self,source=[],time=11,sk=0):
         std.__init__(self,source)
         self.time = time
         self.sk   = sk
 
-    
     def __str__(self):
         myStr = ""
 
@@ -259,30 +245,24 @@ class rqtrainskilltime(std):
 #             if ( $fum == 100 ) { $fum = '00'; };
 #
 class rqskill(std):
-    
     def __init__(self,source=[],sk=11,mod=0,ma=0):
         std.__init__(self,source)
         self.sk  = sk
         self.mod = mod
         self.ma  = ma
 
-    
     def is_success(self):
         return (((self.sum() <= (self.sk + self.mod)) or (self.sum() <= 5)) and (self.sum() <= 95))
 
-    
     def is_ma(self):
         return (self.sum() <= self.ma)
 
-    
     def is_special(self):
         return (self.sum() <= int(floor((self.sk + self.mod)/5)))
 
-    
     def is_critical(self):
         return (self.sum() <= int(floor((self.sk + self.mod) / 20)))
 
-    
     def is_fumble(self):
         if ( self.sk >= 100 ):
             fum = 0
@@ -291,7 +271,6 @@ class rqskill(std):
         final_fum = ( 100 - int( floor( fum/20  ) ) )
         return (  self.sum() >= final_fum )
 
-    
     def __str__(self):
         strAdd="+"
         swapmod= self.mod
@@ -303,12 +282,18 @@ class rqskill(std):
         myStr = " (" + str(modSum) + ")"
         myStr += " vs [" + str(self.sk) + strAdd + str(swapmod) + "]"
 
-        if self.is_fumble(): myStr += " <b><font color=red>Fumble!</font></b>"
-        elif self.is_critical(): myStr += " <b><font color=green>Critical!</font></b>"
-        elif self.is_special(): myStr += " <i><font color=green>Special!</font></i>"
-        elif self.is_success() and self.is_ma(): myStr += " <i><font color=green>Special!</font></i>"
-        elif self.is_success(): myStr += " <font color=blue>Success!</font>"
-        else: myStr += " <font color=red>Failure!</font>"
+        if self.is_fumble():
+            myStr += " <b><font color=red>Fumble!</font></b>"
+        elif self.is_critical():
+            myStr += " <b><font color=green>Critical!</font></b>"
+        elif self.is_special():
+            myStr += " <i><font color=green>Special!</font></i>"
+        elif self.is_success() and self.is_ma():
+            myStr += " <i><font color=green>Special!</font></i>"
+        elif self.is_success():
+            myStr += " <font color=blue>Success!</font>"
+        else:
+            myStr += " <font color=red>Failure!</font>"
 
         Diff = self.sk - modSum
         myStr += " </font>"
@@ -325,7 +310,6 @@ class rqskill(std):
 #
 
 class rqparry(std):
-    
     def __init__(self,source=[],sk=11,mod=0,ma=0,AP=0):
         std.__init__(self,source)
         self.sk = sk
@@ -333,27 +317,21 @@ class rqparry(std):
         self.ma  = ma
         self.AP = AP
 
-    
     def is_success(self):
         return (((self.sum() <= (self.sk + self.mod)) or (self.sum() <= 5)) and (self.sum() <= 95))
 
-    
     def is_special(self):
         return (self.sum() <= int(floor((self.sk + self.mod) / 5)))
 
-    
     def is_ma(self):
         return (self.sum() <= self.ma)
 
-    
     def is_riposte(self):
         return (self.sum() <= (self.ma / 5))
 
-    
     def is_critical(self):
         return ( (  self.sum() <= int( floor( ( self.sk + self.mod  )/20 ) ) ) )
 
-    
     def is_fumble(self):
         if ( self.sk >= 100 ):
             fum = 0
@@ -362,7 +340,6 @@ class rqparry(std):
         final_fum = ( 100 - int( floor( fum/20  ) ) )
         return (  self.sum() >= final_fum )
 
-    
     def __str__(self):
 
         # get fumble roll result in case needed
@@ -389,7 +366,7 @@ class rqparry(std):
             myStr += " <b><font color=green>Critical!</font> All damage blocked!</b>"
             myStr += " Riposte next SR"
         elif self.is_critical():
-         myStr += " <b><font color=green>Critical!</font> All damage blocked!</b>"
+            myStr += " <b><font color=green>Critical!</font> All damage blocked!</b>"
         elif self.is_special and self.is_riposte():
             myStr += " <i><font color=green>Special!</font> Weapon/Shield AP [" + str(spec_AP) + "]</i>"
             myStr += " Riposte next SR"
@@ -416,7 +393,6 @@ class rqparry(std):
 #
 
 class rqdodge(std):
-    
     def __init__(self,source=[],sk=11,mod=0,ma=0,AP=0):
         std.__init__(self,source)
         self.sk = sk
@@ -424,27 +400,21 @@ class rqdodge(std):
         self.ma  = ma
         self.AP = AP
 
-    
     def is_success(self):
         return (((self.sum() <= (self.sk + self.mod)) or (self.sum() <= 5)) and (self.sum() <= 95))
 
-    
     def is_special(self):
         return (self.sum() <= int(floor((self.sk + self.mod) / 5)))
 
-    
     def is_ma(self):
         return (self.sum() <= self.ma)
 
-    
     def is_riposte(self):
         return (self.sum() <= (self.ma / 5))
 
-    
     def is_critical(self):
         return ( (  self.sum() <= int( floor( ( self.sk + self.mod  )/20 ) ) ) )
 
-    
     def is_fumble(self):
         if ( self.sk >= 100 ):
             fum = 0
@@ -453,7 +423,6 @@ class rqdodge(std):
         final_fum = ( 100 - int( floor( fum/20  ) ) )
         return (  self.sum() >= final_fum )
 
-    
     def __str__(self):
 
         # get fumble roll result in case needed
@@ -509,7 +478,6 @@ class rqdodge(std):
 #             skill%, modifer, ma%, min weap dam, max weap dam, dam bonus, truesword_enabled
 #
 class rqattack(std):
-    
     def __init__(self,source=[],sk=11,mod=0,ma=0,mindam=0,maxdam=0,bondam=0,trueswd=0):
         std.__init__(self,source)
         self.sk = sk
@@ -520,27 +488,21 @@ class rqattack(std):
         self.bondam = bondam
         self.trueswd = trueswd
 
-    
     def is_success(self):
         return (((self.sum() <= (self.sk + self.mod)) or (self.sum() <= 5)) and (self.sum() <= 95))
 
-    
     def is_ma(self):
         return (self.sum() <= self.ma)
 
-    
     def is_special(self):
         return (self.sum() <= int(floor((self.sk + self.mod) / 5)))
 
-    
     def is_critical(self):
         return ((self.sum() <= int(floor((self.sk + self.mod) / 20))))
 
-    
     def is_supercritical(self):
         return (self.sum() == 1)
 
-    
     def is_fumble(self):
         if ( self.sk >= 100 ):
             fum = 0
@@ -549,7 +511,6 @@ class rqattack(std):
         final_fum = ( 100 - int( floor( fum/20  ) ) )
         return (  self.sum() >= final_fum )
 
-    
     def __str__(self):
 
         # get fumble roll result in case needed
@@ -634,7 +595,6 @@ class rqattack(std):
 # Hold: (-2% per point in spell Held)
 #
 class rqsorcery(std):
-    
     def __init__(self,source=[],sk=11,mod=0,pow=0,cer=0,int=0,acc=0,mlt=0):
         std.__init__(self,source)
         self.sk  = sk   # sorcery skill
@@ -645,19 +605,15 @@ class rqsorcery(std):
         self.acc = acc  # accelerate ( -5% )
         self.mlt = mlt  # multispell ( -10% )
 
-    
     def is_success(self):
         return (((self.sum() <= (self.sk + self.mod)) or (self.sum() <= 5)) and (self.sum() <= 95))
 
-    
     def is_special(self):
         return ( (  self.sum() <= int( floor( ( self.sk + self.mod  )/5  ) ) ) )
 
-    
     def is_critical(self):
         return ( (  self.sum() <= int( floor( ( self.sk + self.mod  )/20 ) ) ) )
 
-    
     def is_fumble(self):
         if ( self.sk >= 100 ):
             fum = 0
@@ -666,7 +622,6 @@ class rqsorcery(std):
         final_fum = ( 100 - int( floor( fum/20  ) ) )
         return (  self.sum() >= final_fum )
 
-    
     def __str__(self):
 
         # get fumble roll result in case needed
@@ -694,7 +649,7 @@ class rqsorcery(std):
         if fum_roll == 2 :
             fum_string = "<br /><font color=purple>Caster takes 1 point of Damage to Head  </font>"
 
-        # roll ceremony
+            # roll ceremony
         ceremony_roll = random.randint( self.cer, (self.cer*6) )
 
         # subtract manipulations
@@ -738,3 +693,4 @@ class rqsorcery(std):
         myStr += "Multispell(-10):["    + str( self.mlt      ) + "] ---"
 
         return myStr
+

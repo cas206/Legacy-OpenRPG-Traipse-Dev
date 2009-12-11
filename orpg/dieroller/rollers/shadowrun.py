@@ -42,25 +42,27 @@
 #           refers to 'open-ended rolling' whereas in Shadowrun it refers to an 'Open Test' where
 #           the objective is to find the highest die total out of rolled dice. This is then generally
 #           used as the target in a 'Success Test' (for which .vs functions)
-from die import *
 
 __version__ = "1.0"
 
+from std import std
+from orpg.dieroller.base import *
+
 class shadowrun(std):
-    
+    name = "shadowrun"
+
     def __init__(self,source=[],target=2):
         std.__init__(self,source)
 
-    
     def vs(self,target):
         return srVs(self, target)
 
-    
     def open(self):
         return srOpen(self)
 
+die_rollers.register(shadowrun)
+
 class srVs(std):
-    
     def __init__(self,source=[], target=2):
         std.__init__(self, source)
         # In Shadowrun, not target number may be below 2. All defaults are set to two and any
@@ -73,7 +75,6 @@ class srVs(std):
         # made the dieroller generic enough to use any die type
         self.openended(self[0].sides)
 
-    
     def openended(self,num):
         if num <= 1:
             self
@@ -87,7 +88,6 @@ class srVs(std):
         else:
             return self.openended(num)
 
-    
     def __sum__(self):
         s = 0
         for r in self.data:
@@ -95,7 +95,6 @@ class srVs(std):
                 s += 1
         return s
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -109,12 +108,10 @@ class srVs(std):
         return myStr
 
 class srOpen(std):
-    
     def __init__(self,source=[]):
         std.__init__(self,source)
         self.openended(self[0].sides)
 
-    
     def openended(self,num):
         if num <= 1:
             self
@@ -128,7 +125,6 @@ class srOpen(std):
         else:
             return self.openended(num)
 
-    
     def __sum__(self):
         s = 0
         for r in self.data:
@@ -136,7 +132,6 @@ class srOpen(std):
                 s = r
         return s
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
