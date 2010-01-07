@@ -132,7 +132,7 @@ class node_handler:
         self.myeditor.Thaw()
         return True
 
-    def on_use(self,evt):
+    def on_use(self, evt):
         try:
             self.mywindow.Show()
             self.mywindow.Raise()
@@ -423,7 +423,6 @@ class url_loader(node_handler):
 
     def on_design(self,evt):
         tlist = ['Title','URL']
-        print "design filename",self.xml.get('name')
         vlist = [self.xml.get("name"),
                  self.file_node.get("url")]
         dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")

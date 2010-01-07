@@ -105,7 +105,7 @@ class group_handler(container_handler):
     def load_children(self):
         self.atts = None
         for child_xml in self.xml:
-            if child_xml.get == "group_atts": #having the group attributes as a child is bad!
+            if child_xml.tag == "group_atts": #having the group attributes as a child is bad!
                 self.xml.remove(child_xml)
             elif child_xml: self.tree.load_xml(child_xml, self.mytree_node)
         if not self.xml.get('cols'): self.xml.set('cols', '1')
@@ -201,10 +201,10 @@ class tabber_handler(container_handler):
         container_handler.__init__(self, xml, tree_node)
 
     def get_design_panel(self,parent):
-        return tabbed_edit_panel(parent, self)
+        return tabbed_panel(parent, self, 1)
 
     def get_use_panel(self,parent):
-        return tabbed_panel(parent, self, 1)
+        return tabbed_panel(parent, self, 0)
 
 
 class tabbed_panel(orpgTabberWnd):
@@ -217,6 +217,7 @@ class tabbed_panel(orpgTabberWnd):
 
     def pick_panel(self, treenode, mode):
         node = self.handler.tree.GetPyData(treenode)
+
         if mode == 1: panel = node.get_design_panel(self)
         else: panel = node.get_use_panel(self)
         name = node.xml.get("name")
@@ -262,7 +263,7 @@ class splitter_handler(container_handler):
     def load_children(self):
         self.atts = None
         for child_xml in self.xml:
-            if child_xml.tag == "splitter_atts": self.xml.remove(child_xml) #Same here!
+            if child_xml.tag == "splitter_atts": print 'splitter_atts exist!'; self.xml.remove(child_xml) #Same here!
             elif child_xml: self.tree.load_xml(child_xml,self.mytree_node)
         if not self.xml.get('horizontal'): self.xml.set('horizontal', '0')
 
@@ -270,7 +271,7 @@ class splitter_handler(container_handler):
         return self.build_splitter_wnd(parent, 1)
 
     def get_use_panel(self,parent):
-        return self.build_splitter_wnd(parent, 2)
+        return self.build_splitter_wnd(parent, 0)
 
     def on_drop(self,evt):
         drag_obj = self.tree.drag_obj

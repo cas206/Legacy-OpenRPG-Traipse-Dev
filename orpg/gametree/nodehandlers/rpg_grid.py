@@ -381,6 +381,7 @@ G_ADD_ROW = wx.NewId()
 G_ADD_COL = wx.NewId()
 G_DEL_ROW = wx.NewId()
 G_DEL_COL = wx.NewId()
+G_BUT_REF = wx.NewId()
 
 class rpg_grid_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
@@ -407,6 +408,8 @@ class rpg_grid_edit_panel(wx.Panel):
         sizer.Add(wx.Button(self, G_ADD_COL, "Add Column"), 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
         sizer.Add(wx.Button(self, G_DEL_COL, "Remove Column"), 1, wx.EXPAND)
+        sizer.Add(wx.Size(10,10))
+        sizer.Add(wx.Button(self, G_BUT_REF, "Reference"), 1)
 
         self.main_sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         self.main_sizer.Add(self.title, 0, wx.EXPAND)
@@ -426,6 +429,39 @@ class rpg_grid_edit_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.grid.del_col, id=G_DEL_COL)
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=GRID_BOR)
         self.Bind(wx.EVT_CHECKBOX, self.on_auto_size, id=G_AUTO_SIZE)
+        self.Bind(wx.EVT_BUTTON, self.on_reference, id=G_BUT_REF)
+
+    ## EZ_Tree Core TaS - Prof.Ebral ##
+    def on_reference(self, evt, car=None):
+        self.do_tree = wx.Frame(self, -1, 'Tree')
+        self.ez_tree = orpg.gametree.gametree
+        self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
+        #self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick) ## Remove for Alpha ##
+        self.temp_wnd.load_tree(settings.get("gametree"))
+        self.do_tree.Show()
+
+    def on_ldclick(self, evt):
+        self.rename_flag = 0
+        pt = evt.GetPosition()
+        (item, flag) = self.temp_wnd.HitTest(pt)
+        if item.IsOk():
+            obj = self.temp_wnd.GetPyData(item)
+            self.temp_wnd.SelectItem(item)
+            start = self.handler.xml.get('map').split('::')
+            end = obj.xml.get('map').split('::')
+            x = 0
+            if start[x] == end[x]:
+                try:
+                    while start[x] == end[x]:
+                        del end[x], start[x]
+                        x += 1
+                except: 
+                    complete = "!!"
+                    for e in end: complete += e +'::'
+                    complete = complete + obj.xml.get('name') + '!!'
+            self.value_entry.SetValue(complete); self.reload_options()
+        self.do_tree.Destroy()
+    #####                        #####
 
     def on_auto_size(self,evt):
         self.handler.set_autosize(bool2int(evt.Checked()))

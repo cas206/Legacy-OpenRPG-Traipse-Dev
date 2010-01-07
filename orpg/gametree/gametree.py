@@ -25,6 +25,15 @@
 #
 # Description: The file contains code fore the game tree shell
 #
+# Traipse EZ_Tree Reference System (TaS - Prof.Ebral):
+#
+# The new EZ_Tree Reference System being implemented takes full advantage of 
+# Python's OOP Language. The entire tree code is being reused, but a new ID is 
+# being created which 'shuts off' some of the features of the tree and adds new ones.
+# This new feature will allow users to quickly add a Reference button to new node
+# handlers. The button will show a faximile of the tree and users can then create a
+# node reference with ease!
+#
 
 from __future__ import with_statement
 
@@ -78,29 +87,32 @@ TOP_SAVE_TREE = wx.NewId()
 TOP_SAVE_TREE_AS = wx.NewId()
 TOP_TREE_PROP = wx.NewId()
 TOP_FEATURES = wx.NewId()
+EZ_REF = wx.NewId()
 
 class game_tree(wx.TreeCtrl):
     
     def __init__(self, parent, id):
-        wx.TreeCtrl.__init__(self,parent,id,  wx.DefaultPosition, 
+        wx.TreeCtrl.__init__(self,parent,id, wx.DefaultPosition, 
                 wx.DefaultSize,style=wx.TR_EDIT_LABELS | wx.TR_HAS_BUTTONS)
         self.chat = component.get('chat')
         self.session = component.get('session')
         self.mainframe = component.get('frame')
+        self.ez_ref = True if id == EZ_REF else False
         self.build_img_list()
-        self.build_std_menu()
+        if not self.ez_ref: self.build_std_menu()
         self.nodehandlers = {}
         self.nodes = {}
         self.init_nodehandlers()
-        self.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
-        self.Bind(wx.EVT_RIGHT_DOWN, self.on_rclick)
-        self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, id=id)
-        self.Bind(wx.EVT_LEFT_UP, self.on_left_up)
-        self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
-        self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.on_label_change, id=self.GetId())
-        self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_label_begin, id=self.GetId())
-        self.Bind(wx.EVT_CHAR, self.on_char)
-        self.Bind(wx.EVT_KEY_UP, self.on_key_up)
+        if not self.ez_ref:
+            self.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
+            self.Bind(wx.EVT_RIGHT_DOWN, self.on_rclick)
+            self.Bind(wx.EVT_TREE_BEGIN_DRAG, self.on_drag, id=id)
+            self.Bind(wx.EVT_LEFT_UP, self.on_left_up)
+            self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+            self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.on_label_change, id=self.GetId())
+            self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.on_label_begin, id=self.GetId())
+            self.Bind(wx.EVT_CHAR, self.on_char)
+            self.Bind(wx.EVT_KEY_UP, self.on_key_up)
         self.id = 1
         self.dragging = False
         self.last_save_dir = dir_struct["user"]
@@ -108,7 +120,13 @@ class game_tree(wx.TreeCtrl):
 
         #Create tree from default if it does not exist
         validate.config_file("tree.xml","default_tree.xml")
-        component.add("tree", self)
+
+        ## The EZ_Tree Reference creates a duplicate component called tree_back. This is because the
+        ## tree wont parse fully without adding the component, and when a dupplicate component is created
+        ## the older one is deleted. If there are an C++ errors the tree_back can be used as a failsafe
+
+        if not self.ez_ref: component.add("tree", self); component.add('tree_back', self) ## Fail Safe
+        component.add('tree', self)
 
         #build tree
         self.root = self.AddRoot("Game Tree", self.icons['gear'])
@@ -206,7 +224,6 @@ class game_tree(wx.TreeCtrl):
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
             return
-
     
     def load_tree(self, filename=dir_struct["user"]+'tree.xml', error=0):
         settings.change("gametree", filename)
@@ -662,6 +679,7 @@ class game_tree(wx.TreeCtrl):
         if parent_node == self.root:
             self.tree_map[xml_element.get('name')] = {}
             self.tree_map[xml_element.get('name')]['node'] = xml_element
+            xml_element.set('map', '')
         if parent_node != self.root:
             ## Loading XML seems to lag on Grids and Images need a cache for load speed ##
             family_tree = self.get_tree_map(parent_node)

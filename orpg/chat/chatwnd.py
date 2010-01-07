@@ -1971,12 +1971,12 @@ class chat_panel(wx.Panel):
     def resolution(self, node):
         if self.passed == False:
             self.passed = True
-            if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
+            if node.get('class') == 'textctrl_handler': s = str(node.find('text').text)
             else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
         else:
             self.data = ''
             pass
-        self.data = self.ParseMap(self.data, node)
+        self.data = self.ParseMap(s, node)
 
     def ParseMap(self, s, node):
         """Parses player input for embedded nodes rolls"""
@@ -2018,9 +2018,9 @@ class chat_panel(wx.Panel):
         value = ""
         path = s.split('::')
         depth = len(path)
-        self.gametree = component.get('tree')
+        self.gametree = component.get('tree_back')
         try: node = self.gametree.tree_map[path[0]]['node']
-        except: return self.data
+        except Exception, e: return self.data
         if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
         elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
         else: self.resolve_loop(node, path, 1, depth)
