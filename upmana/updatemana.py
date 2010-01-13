@@ -57,7 +57,7 @@ class Updater(wx.Panel):
         self.sizer.Add(self.buttons['advanced'], (2,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['update'], (3,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['finish'], (4,3), flag=wx.EXPAND)
-        self.buttons['finish'].Disable()
+        #self.buttons['finish'].Disable()
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
@@ -131,9 +131,9 @@ class Updater(wx.Panel):
         ignore.close()
 
     def Finish(self, evt=None):
-        try: self.parent.Destroy()
-        except:
-            print 'Fail'; exit()
+        try: component.get('upmana-win').OnClose(None)
+        except Exception, e:
+            print 'Fail', e; exit()
 
     def ChooseBranch(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
@@ -729,6 +729,7 @@ class updateApp(wx.App):
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 1.0", 
                                 component, manifest, self.main)
+        component.add('upmana-win', self.updater)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass

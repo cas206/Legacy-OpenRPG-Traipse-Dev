@@ -1983,12 +1983,13 @@ class chat_panel(wx.Panel):
         cur_loc = 0
         reg = re.compile("(!!(.*?)!!)")
         matches = reg.findall(s)
+        tree_map = node.get('map')
         for i in xrange(0,len(matches)):
-            tree_map = node.get('map') + '::' + matches[i][1]
+            tree_map = tree_map + '::' + matches[i][1]
             newstr = '!@'+ tree_map +'@!'
             s = s.replace(matches[i][0], newstr, 1)
             s = self.ParseNode(s)
-            s = self.ParseParent(s, tree_map)
+        s = self.ParseParent(s, tree_map)
         return s
 
     def ParseParent(self, s, tree_map):

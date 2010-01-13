@@ -350,18 +350,34 @@ class textctrl_edit_panel(wx.Panel):
             self.temp_wnd.SelectItem(item)
             start = self.handler.xml.get('map').split('::')
             end = obj.xml.get('map').split('::')
-            x = 0
-            if start[x] == end[x]:
-                try:
-                    while start[x] == end[x]:
-                        del end[x], start[x]
-                        x += 1
-                except: 
-                    complete = "!!"
-                    for e in end: complete += e +'::'
-                    complete = complete + obj.xml.get('name') + '!!'
-            self.text.AppendText(complete); self.on_text(evt)
+            if obj.xml.get('class') != 'rpg_grid_handler' or obj.xml.get('class') != 'textctrl_handler': do = 'None'
+            elif end[0] == '' or start[0] != end[0]: do = 'Root'
+            elif start == end: do = 'Child'
+            elif start != end: do = 'Parent'
+            if do == 'Root':
+                complete = "!@"
+                for e in end: 
+                    if e != '': complete += e +'::'
+                complete = complete + obj.xml.get('name') + '@!'
+            elif do == 'Parent':
+                while start[0] == end[0]:
+                    top = start[0]
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!#" + top + "::"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '#!'
+            elif do == 'Child':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!!"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '!!'
+            if do != 'None': self.text.AppendText(complete); self.on_text(evt)
         self.do_tree.Destroy()
+        if do == 'None':
+            wx.MessageBox('Invalid Reference', 'Error')
     #####                        #####
 
     def on_text(self,evt):
@@ -757,18 +773,35 @@ class listbox_edit_panel(wx.Panel):
             self.temp_wnd.SelectItem(item)
             start = self.handler.xml.get('map').split('::')
             end = obj.xml.get('map').split('::')
-            x = 0
-            if start[x] == end[x]:
-                try:
-                    while start[x] == end[x]:
-                        del end[x], start[x]
-                        x += 1
-                except: 
-                    complete = "!!"
-                    for e in end: complete += e +'::'
-                    complete = complete + obj.xml.get('name') + '!!'
-            self.value_entry.SetValue(complete); self.reload_options()
+            print obj.xml.get('class')
+            if obj.xml.get('class') != 'rpg_grid_handler' or obj.xml.get('class') != 'textctrl_handler': do = 'None'
+            elif end[0] == '' or start[0] != end[0]: do = 'Root'
+            elif start == end: do = 'Child'
+            elif start != end: do = 'Parent'
+            if do == 'Root':
+                complete = "!@"
+                for e in end: 
+                    if e != '': complete += e +'::'
+                complete = complete + obj.xml.get('name') + '@!'
+            elif do == 'Parent':
+                while start[0] == end[0]:
+                    top = start[0]
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!#" + top + "::"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '#!'
+            elif do == 'Child':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!!"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '!!'
+            if do != 'None': self.value_entry.AppendText(complete); self.reload_options()
         self.do_tree.Destroy()
+        if do == 'None':
+            wx.MessageBox('Invalid Reference', 'Error')
     #####                        #####
 
     def on_edit_ok(self, evt):
