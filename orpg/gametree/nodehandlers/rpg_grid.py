@@ -449,7 +449,7 @@ class rpg_grid_edit_panel(wx.Panel):
             self.temp_wnd.SelectItem(item)
             start = self.handler.xml.get('map').split('::')
             end = obj.xml.get('map').split('::')
-            if obj.xml.get('class') != 'rpg_grid_handler' or obj.xml.get('class') != 'textctrl_handler': do = 'None'
+            if obj.xml.get('class') not in ['rpg_grid_handler', 'textctrl_handler']: do = 'None'
             elif end[0] == '' or start[0] != end[0]: do = 'Root'
             elif start == end: do = 'Child'
             elif start != end: do = 'Parent'
