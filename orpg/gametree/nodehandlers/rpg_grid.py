@@ -366,7 +366,7 @@ class rpg_grid_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
-        self.grid = rpg_grid(self,handler)
+        self.grid = rpg_grid(self, handler)
         label = handler.xml.get('name')
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
@@ -440,6 +440,21 @@ class rpg_grid_edit_panel(wx.Panel):
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        self.value_entry.AppendText(complete); self.reload_options()
+
     def on_ldclick(self, evt):
         self.rename_flag = 0
         pt = evt.GetPosition()
@@ -473,7 +488,10 @@ class rpg_grid_edit_panel(wx.Panel):
                 complete = "!!"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '!!'
-            if do != 'None': self.value_entry.AppendText(complete); self.reload_options()
+            if do != 'None': 
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else: self.value_entry.AppendText(complete); self.reload_options()
         self.do_tree.Destroy()
         if do == 'None':
             wx.MessageBox('Invalid Reference', 'Error')

@@ -264,6 +264,7 @@ class text_panel(wx.Panel):
     def on_send(self, evt):
         txt = self.text.GetValue()
         txt = self.chat.ParseMap(txt, self.handler.xml)
+        txt = self.chat.ParseParent(txt, self.handler.xml.get('map'))
         if not self.handler.is_raw_send():
             self.chat.ParsePost(self.handler.tohtml(), True, True)
             return 1
@@ -341,6 +342,21 @@ class textctrl_edit_panel(wx.Panel):
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        self.text.AppendText(complete); self.on_text(evt)
+
     def on_ldclick(self, evt):
         self.rename_flag = 0
         pt = evt.GetPosition()
@@ -374,7 +390,10 @@ class textctrl_edit_panel(wx.Panel):
                 complete = "!!"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '!!'
-            if do != 'None': self.text.AppendText(complete); self.on_text(evt)
+            if do != 'None': 
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else: self.text.AppendText(complete); self.on_text(evt)
         self.do_tree.Destroy()
         if do == 'None':
             wx.MessageBox('Invalid Reference', 'Error')
@@ -391,6 +410,7 @@ class textctrl_edit_panel(wx.Panel):
             txt = self.text.GetValue()
             #txt = strip_text(txt) ##Does not seem to exist. 
             self.handler.text_elem.text = txt
+        #component.add('tree', component.get('tree_back')) ## Backup
 
     def on_button(self,evt):
         self.handler.text_elem.set("multiline",str(bool2int(evt.Checked())))
@@ -571,12 +591,14 @@ class listbox_handler(node_handler):
     def on_send_to_chat(self, evt):
         txt = self.get_selected_text()
         txt = self.chat.ParseMap(txt, self.xml)
+        txt = self.chat.ParseParent(txt, self.xml.get('map'))
         if not self.is_raw_send():
             self.chat.ParsePost(self.tohtml(), True, True)
             return 1
         actionlist = self.get_selections_text()
         for line in actionlist:
             line = self.chat.ParseMap(line, self.xml)
+            line = self.chat.ParseParent(line, self.xml.get('map'))
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
                     self.chat.ParsePost(line, True, True)
@@ -764,6 +786,21 @@ class listbox_edit_panel(wx.Panel):
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        self.value_entry.AppendText(complete)
+
     def on_ldclick(self, evt):
         self.rename_flag = 0
         pt = evt.GetPosition()
@@ -773,7 +810,7 @@ class listbox_edit_panel(wx.Panel):
             self.temp_wnd.SelectItem(item)
             start = self.handler.xml.get('map').split('::')
             end = obj.xml.get('map').split('::')
-            if obj.xml.get('class') != 'rpg_grid_handler' or obj.xml.get('class') != 'textctrl_handler': do = 'None'
+            if obj.xml.get('class') not in ['rpg_grid_handler', 'textctrl_handler']: do = 'None'
             elif end[0] == '' or start[0] != end[0]: do = 'Root'
             elif start == end: do = 'Child'
             elif start != end: do = 'Parent'
@@ -797,7 +834,10 @@ class listbox_edit_panel(wx.Panel):
                 complete = "!!"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '!!'
-            if do != 'None': self.value_entry.AppendText(complete); self.reload_options()
+            if do != 'None': 
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else: self.value_entry.AppendText(complete); self.reload_options()
         self.do_tree.Destroy()
         if do == 'None':
             wx.MessageBox('Invalid Reference', 'Error')

@@ -1860,7 +1860,7 @@ class chat_panel(wx.Panel):
 
     def resolve_loop(self, node, path, step, depth):
         if step == depth:
-            self.resolution(node)
+            return self.resolution(node)
         else:
             child_list = node.findall('nodehandler')
             for child in child_list:
@@ -1868,10 +1868,12 @@ class chat_panel(wx.Panel):
                 if child.get('name') == path[step]:
                     node = child
                     step += 1
-                    if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
+                    if node.get('class') in ('dnd35char_handler', 
+                                            "SWd20char_handler", 
+                                            "d20char_handler", 
+                                            "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
                     elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, step, depth)
                     else: self.resolve_loop(node, path, step, depth)
-
 
     def resolve_grid(self, node, path, step, depth):
         if step == depth:
@@ -1884,6 +1886,69 @@ class chat_panel(wx.Panel):
         try: self.data = self.ParseMap(col[int(self.ParseDice(cell[1]))-1].text, node) or 'No Cell Data'
         except: self.data = 'Invalid Grid Reference!'
         return
+
+    def resolution(self, node):
+        if self.passed == False:
+            self.passed = True
+            if node.get('class') == 'textctrl_handler': 
+                s = str(node.find('text').text)
+            else: s = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
+        else:
+            s = ''
+        self.data = self.ParseMap(s, node)
+
+    def ParseMap(self, s, node):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!!(.*?)!!)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            tree_map = node.get('map')
+            tree_map = tree_map + '::' + matches[i][1]
+            newstr = '!@'+ tree_map +'@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            s = self.ParseNode(s)
+            s = self.ParseParent(s, tree_map)
+        return s
+
+    def ParseParent(self, s, tree_map):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!#(.*?)#!)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            ## Build the new tree_map
+            new_map = tree_map.split('::')
+            del new_map[len(new_map)-1]
+            parent_map = matches[i][1].split('::')
+            ## Find an index or use 1 for ease of use.
+            try: index = new_map.index(parent_map[0])
+            except: index = 1
+            ## Just replace the old tree_map from the index.
+            new_map[index:len(new_map)] = parent_map
+            newstr = '::'.join(new_map)
+            newstr = '!@'+ newstr +'@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            #s = self.ParseMap(s, node) ## Needs to be added
+            s = self.ParseNode(s)
+        return s
+
+    def resolve_nodes(self, s):
+        self.passed = False
+        self.data = 'Invalid Reference!'
+        value = ""
+        path = s.split('::')
+        depth = len(path)
+        self.gametree = component.get('tree_back')
+        try: node = self.gametree.tree_map[path[0]]['node']
+        except Exception, e: return self.data
+        if node.get('class') in ('dnd35char_handler', 
+                                "SWd20char_handler", 
+                                "d20char_handler", 
+                                "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
+        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
+        else: self.resolve_loop(node, path, 1, depth)
+        return self.data
 
     def resolve_cust_loop(self, node, path, step, depth):
         node_class = node.get('class')
@@ -1906,7 +1971,7 @@ class chat_panel(wx.Panel):
         else: ab = node.find('saves')
         ab_list = ab.findall('save')
         for save in ab_list:
-            pc_stats[save.get('name')] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+            pc_stats[save.get('name')] = (str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
             if save.get('name') == 'Fortitude': abbr = 'Fort'
             if save.get('name') == 'Reflex': abbr = 'Ref'
             if save.get('name') == 'Will': abbr = 'Will'
@@ -1967,62 +2032,3 @@ class chat_panel(wx.Panel):
             elif path[step+1].title() == 'Mod': self.data = pc_stats[path[step].title()][1]
             elif path[step+1].title() == 'Check': self.data = '<b>'+path[step].title()+' Check:</b> [1d20+'+str(pc_stats[path[step].title()][1])+']'
             return
-
-    def resolution(self, node):
-        if self.passed == False:
-            self.passed = True
-            if node.get('class') == 'textctrl_handler': s = str(node.find('text').text)
-            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
-        else:
-            self.data = ''
-            pass
-        self.data = self.ParseMap(s, node)
-
-    def ParseMap(self, s, node):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!!(.*?)!!)")
-        matches = reg.findall(s)
-        tree_map = node.get('map')
-        for i in xrange(0,len(matches)):
-            tree_map = tree_map + '::' + matches[i][1]
-            newstr = '!@'+ tree_map +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-        s = self.ParseParent(s, tree_map)
-        return s
-
-    def ParseParent(self, s, tree_map):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!#(.*?)#!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            ## Build the new tree_map
-            new_map = tree_map.split('::')
-            del new_map[len(new_map)-1]
-            parent_map = matches[i][1].split('::')
-            ## Find an index or use 1 for ease of use.
-            try: index = new_map.index(parent_map[0])
-            except: index = 1
-            ## Just replace the old tree_map from the index.
-            new_map[index:len(new_map)] = parent_map
-            newstr = '::'.join(new_map)
-            newstr = '!@'+ newstr +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-        return s
-
-    def resolve_nodes(self, s):
-        self.passed = False
-        self.data = 'Invalid Reference!'
-        value = ""
-        path = s.split('::')
-        depth = len(path)
-        self.gametree = component.get('tree_back')
-        try: node = self.gametree.tree_map[path[0]]['node']
-        except Exception, e: return self.data
-        if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
-        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
-        else: self.resolve_loop(node, path, 1, depth)
-        return self.data
