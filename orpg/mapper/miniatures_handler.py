@@ -358,7 +358,7 @@ class miniatures_handler(base_layer_handler):
             name = self.sel_rmin.label if self.sel_rmin.label else 'Unnamed Miniature'
             node.set('name', name)
             node.append(fromstring(mini))
-            gametree = component.get('tree')
+            gametree = component.get('tree_fs')
             gametree.insert_xml(tostring(node))
             ### ElementTree is a nice decision from Core, kudos!! ###
         elif id == MIN_SHOW_HIDE:

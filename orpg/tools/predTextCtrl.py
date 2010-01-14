@@ -311,13 +311,14 @@ class predTextCtrl(ExpandoTextCtrl):
     # Purpose:  Constructor for predTextCtrl.  Calls wx.TextCtrl.__init__ to get default init
     #           behavior and then inits a LetterTree and captures the parent for later use in
     #           passing events up the chain.
-    def __init__(self, parent, id = -1, value = "" , size = wx.DefaultSize, style = 0, name = "text",keyHook = None, validator=None):
+    def __init__(self, parent, id = -1, value = "", size = (30,30), style = 0, name = "text", keyHook = None, validator=None):
 
         #  Call super() for default behavior
         if validator:
             ExpandoTextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name, validator=validator )
         else:
             ExpandoTextCtrl.__init__(self, parent, id=id, value=value, size=size, style=style, name=name)
+
 
         self.tree = LetterTree      #  Instantiate a new LetterTree.
         #  TODO:  make name of word file an argument.
@@ -427,27 +428,23 @@ class predTextCtrl(ExpandoTextCtrl):
                                                            #  clobber the prediction.
 
                     return                                 #  Don't pass tab on in this case
-            elif event.GetKeyCode() == wx.WXK_RETURN and event.ShiftDown():
-                logger.exception('Shift + Enter Not completed, 439, predtextCtrl', True)
-                st = self.GetValue()
-                st += '<br />'
-                return
 
-            elif event.GetKeyCode() == wx.WXK_RETURN:            #  We want to hook returns, so that we can update the word list
+            elif event.GetKeyCode() == wx.WXK_RETURN:      #  We want to hook returns, so that we can update the word list
                 st = self.GetValue()                       #  Grab the text from the control
                 newSt = ""                                 #  Init a buffer
                 #  This block of code, by popular demand, changes the behavior of the control to ignore any prediction that
-                #    hasn't been "accepted" when the enter key is struck.
-                (startSel,endSel) = self.GetSelection()                 #  get the curren selection
+                #  hasn't been "accepted" when the enter key is struck.
+                (startSel,endSel) = self.GetSelection()    #  get the curren selection
 
                 #
                 # Start update
                 # Changed the following to allow for more friendly behavior in
                 # a multilined predTextCtrl.
                 #
-                # front = st[:startSel]                                   #  Slice off the text to the front of where we are
-                # back = st[endSel:]                                      #  Slice off the text to the end from where we are
-                # st = front + back                          #  This expression creates a string that get rid of any selected text.
+                # front = st[:startSel]                      #  Slice off the text to the front of where we are
+                # back = st[endSel:]                         #  Slice off the text to the end from where we are
+                # st = front + back                          #  This expression creates a string that get rid 
+                                                             #  of any selected text.
                 # self.SetValue(st)
 
                 self.Remove( startSel, endSel )
@@ -470,8 +467,7 @@ class predTextCtrl(ExpandoTextCtrl):
                 #  new ones
                 for aWord in string.split(newSt):
                     self.tree.incWord(string.lower(aWord))
-
-                self.parent.OnChar(event)                   #  Now that all of the words are added, pass the event and return
+                self.parent.OnChar(event) #  Now that all of the words are added, pass the event and return
                 return
 
             #  We want to capture the right arrow key to fix a slight UI bug that occurs when one right arrows

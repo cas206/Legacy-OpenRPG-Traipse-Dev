@@ -168,7 +168,6 @@ class chat_html_window(wx.html.HtmlWindow):
         self.Bind(wx.EVT_MENU, self.OnM_EditCopy, item)
         self.menu.AppendItem(item)
 
-    
     def OnM_EditCopy(self, evt):
         wx.TheClipboard.UsePrimarySelection(False)
         wx.TheClipboard.Open()
@@ -524,6 +523,12 @@ class chat_panel(wx.Panel):
         self.lockscroll = False      # set the default to scrolling on.
         self.chat_cmds = commands.chat_commands(self)
         self.html_strip = strip_html
+        self.f_keys = {wx.WXK_F1: 'event.GetKeyCode() == wx.WXK_F1', wx.WXK_F2: 'event.GetKeyCode() == wx.WXK_F2', 
+                    wx.WXK_F3: 'event.GetKeyCode() == wx.WXK_F3', wx.WXK_F4: 'event.GetKeyCode() == wx.WXK_F4', 
+                    wx.WXK_F5: 'event.GetKeyCode() == wx.WXK_F5', wx.WXK_F6: 'event.GetKeyCode() == wx.WXK_F6', 
+                    wx.WXK_F7: 'event.GetKeyCode() == wx.WXK_F7', wx.WXK_F8: 'event.GetKeyCode() == wx.WXK_F8', 
+                    wx.WXK_F9: 'event.GetKeyCode() == wx.WXK_F9', wx.WXK_F10: 'event.GetKeyCode() == wx.WXK_F10', 
+                    wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
         #Alias Lib stuff
         self.defaultAliasName = 'Use Real Name'
         self.defaultFilterName = 'No Filter'
@@ -831,6 +836,7 @@ class chat_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.lock_scroll, self.scroll_lock)
         self.chattxt.Bind(wx.EVT_MOUSEWHEEL, self.chatwnd.mouse_wheel)
         self.chattxt.Bind(wx.EVT_CHAR, self.chattxt.OnChar)
+        self.chattxt.Bind(wx.EVT_KEY_DOWN, self.on_chat_key_down)
         self.chattxt.Bind(wx.EVT_TEXT_COPY, self.chatwnd.OnM_EditCopy)
     # def build_ctrls - end
 
@@ -1092,50 +1098,47 @@ class chat_panel(wx.Panel):
     #
     # Note:  self.chattxt now handles it's own Key events.  It does, however still
     #        call it's parent's (self) OnChar to handle "default" behavior.
+
+    def submit_chat_text(self, s):
+        self.histidx = -1
+        self.temptext = ""
+        self.history = [s] + self.history 
+        #if not len(macroText): self.chattxt.SetValue("")
+
+        # play sound
+        sound_file = self.settings.get_setting("SendSound")
+        if sound_file != '': component.get('sound').play(sound_file)
+        if s[0] != "/": ## it's not a slash command
+            s = self.ParsePost( s, True, True )
+        else: self.chat_cmds.docmd(s) # emote is in chatutils.py
+
+    def on_chat_key_down(self, event):
+        s = self.chattxt.GetValue()
+        if event.GetKeyCode() == wx.WXK_RETURN and not event.ShiftDown():
+            logger.debug("event.GetKeyCode() == wx.WXK_RETURN")
+            self.set_colors()
+            if self.session.get_status() == MPLAY_CONNECTED:
+                self.sendTyping(0)
+            if len(s):
+                self.chattxt.SetValue('')
+                s = s.replace('\n', '<br />')
+                self.submit_chat_text(s)
+            return
+        event.Skip()
     
     def OnChar(self, event):
         s = self.chattxt.GetValue()
-        #self.histlen = len(self.history) - 1
 
-        ## RETURN KEY (no matter if there is text in chattxt)
-        #  This section is run even if there is nothing in the chattxt (as opposed to the next wx.WXK_RETURN handler
-        if event.GetKeyCode() == wx.WXK_RETURN:
-            logger.debug("event.GetKeyCode() == wx.WXK_RETURN")
-            self.set_colors()
-            if self.session.get_status() == MPLAY_CONNECTED:          #  only do if we're connected
-                self.sendTyping(0)                                    #  Send a "not_typing" event on enter key press
-        macroText=""
-        recycle_bin = {wx.WXK_F1: 'event.GetKeyCode() == wx.WXK_F1', wx.WXK_F2: 'event.GetKeyCode() == wx.WXK_F2', 
-                    wx.WXK_F3: 'event.GetKeyCode() == wx.WXK_F3', wx.WXK_F4: 'event.GetKeyCode() == wx.WXK_F4', 
-                    wx.WXK_F5: 'event.GetKeyCode() == wx.WXK_F5', wx.WXK_F6: 'event.GetKeyCode() == wx.WXK_F6', 
-                    wx.WXK_F7: 'event.GetKeyCode() == wx.WXK_F7', wx.WXK_F8: 'event.GetKeyCode() == wx.WXK_F8', 
-                    wx.WXK_F9: 'event.GetKeyCode() == wx.WXK_F9', wx.WXK_F10: 'event.GetKeyCode() == wx.WXK_F10', 
-                    wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
+        macroText = ""
+        s_key = False
+        if self.f_keys.has_key(event.GetKeyCode()): s_key = self.f_keys[event.GetKeyCode()]
 
-        bin_event = event.GetKeyCode()
-        if recycle_bin.has_key(bin_event):
-	    logger.debug(lambda bin_event: recycle_bin[bin_event])
-	    macroText = self.settings.get_setting(recycle_bin[bin_event][29:])
-	    recycle_bin = {}; del bin_event
+        if s_key: macroText = settings.get(s_key[29:])
 
         # Append to the existing typed text as needed and make sure the status doesn't change back.
         if len(macroText):
             self.sendTyping(0)
-            s = macroText
-
-        ## RETURN KEY (and not text in control)
-        if (event.GetKeyCode() == wx.WXK_RETURN and len(s)) or len(macroText):
-            logger.debug("(event.GetKeyCode() == wx.WXK_RETURN and len(s)) or len(macroText)")
-            self.histidx = -1
-            self.temptext = ""
-            self.history = [s] + self.history#prepended instead of appended now, so higher index = greater age
-            if not len(macroText): self.chattxt.SetValue("")
-            # play sound
-            sound_file = self.settings.get_setting("SendSound")
-            if sound_file != '': component.get('sound').play(sound_file)
-            if s[0] != "/": ## it's not a slash command
-                s = self.ParsePost( s, True, True )
-            else: self.chat_cmds.docmd(s) # emote is in chatutils.py
+            self.submit_chat_text(macroText)
 
         ## UP KEY
         elif event.GetKeyCode() == wx.WXK_UP:
@@ -1227,6 +1230,14 @@ class chat_panel(wx.Panel):
                 self.lock_scroll(0)
                 self.Post()
             event.Skip()
+
+        elif event.GetKeyCode() == wx.WXK_RETURN and event.ShiftDown():
+            st = self.chattxt.GetValue().split('\x0b')
+            st += '\n'
+            i = self.chattxt.GetInsertionPoint()
+            self.chattxt.SetValue(''.join(st))
+            self.chattxt.SetInsertionPoint(i+1)
+            return
 
         ## NOTHING
         else: event.Skip()
@@ -1939,7 +1950,7 @@ class chat_panel(wx.Panel):
         value = ""
         path = s.split('::')
         depth = len(path)
-        self.gametree = component.get('tree_back')
+        self.gametree = component.get('tree_fs')
         try: node = self.gametree.tree_map[path[0]]['node']
         except Exception, e: return self.data
         if node.get('class') in ('dnd35char_handler', 

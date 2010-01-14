@@ -125,7 +125,7 @@ class game_tree(wx.TreeCtrl):
         ## tree wont parse fully without adding the component, and when a dupplicate component is created
         ## the older one is deleted. If there are an C++ errors the tree_back can be used as a failsafe
 
-        if not self.ez_ref: component.add("tree", self); component.add('tree_back', self) ## Fail Safe
+        if not self.ez_ref: component.add("tree", self); component.add('tree_fs', self) ## Fail Safe
         component.add('tree', self)
 
         #build tree
@@ -337,8 +337,8 @@ class game_tree(wx.TreeCtrl):
         self.Bind(wx.EVT_MENU, self.on_export_html, id=STD_MENU_HTML)
         self.top_menu = wx.Menu()
         self.top_menu.SetTitle("game tree")
-        self.top_menu.Append(TOP_IFILE,"&Insert File")
-        self.top_menu.Append(TOP_INSERT_URL,"Insert &URL")
+        self.top_menu.Append(TOP_IFILE,"&Insert Node File")
+        self.top_menu.Append(TOP_INSERT_URL,"Insert Node &URL")
         self.top_menu.Append(TOP_FEATURES, "Insert &Features Node")
         self.top_menu.Append(TOP_NEW_TREE, "&Load New Tree")
         self.top_menu.Append(TOP_SAVE_TREE,"&Save Tree")

@@ -335,17 +335,18 @@ class textctrl_edit_panel(wx.Panel):
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
     def on_reference(self, evt, car=None):
-        self.do_tree = wx.Frame(self, -1, 'Tree')
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
         self.ez_tree = orpg.gametree.gametree
         self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
         self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
+        component.get('tree_fs').save_tree(settings.get("gametree"))
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
     def get_grid_ref(self, obj, complete):
         self.temp_wnd.Freeze()
         self.grid_ref = complete
-        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Mini Grid')
         self.temp_grid = obj.get_use_panel(self.mini_grid)
         self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
         self.mini_grid.Show()
@@ -356,6 +357,7 @@ class textctrl_edit_panel(wx.Panel):
         col = str(evt.GetCol()+1)
         complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
         self.text.AppendText(complete); self.on_text(evt)
+        self.mini_grid.Destroy()
 
     def on_ldclick(self, evt):
         self.rename_flag = 0
@@ -410,7 +412,6 @@ class textctrl_edit_panel(wx.Panel):
             txt = self.text.GetValue()
             #txt = strip_text(txt) ##Does not seem to exist. 
             self.handler.text_elem.text = txt
-        #component.add('tree', component.get('tree_back')) ## Backup
 
     def on_button(self,evt):
         self.handler.text_elem.set("multiline",str(bool2int(evt.Checked())))
@@ -779,17 +780,18 @@ class listbox_edit_panel(wx.Panel):
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
     def on_reference(self, evt, car=None):
-        self.do_tree = wx.Frame(self, -1, 'Tree')
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
         self.ez_tree = orpg.gametree.gametree
         self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
         self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
+        component.get('tree_fs').save_tree(settings.get("gametree"))
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
     def get_grid_ref(self, obj, complete):
         self.temp_wnd.Freeze()
         self.grid_ref = complete
-        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Grid')
         self.temp_grid = obj.get_use_panel(self.mini_grid)
         self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
         self.mini_grid.Show()
@@ -800,6 +802,7 @@ class listbox_edit_panel(wx.Panel):
         col = str(evt.GetCol()+1)
         complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
         self.value_entry.AppendText(complete)
+        self.mini_grid.Destroy()
 
     def on_ldclick(self, evt):
         self.rename_flag = 0
@@ -848,12 +851,12 @@ class listbox_edit_panel(wx.Panel):
         self.handler.edit_option(self.index, self.value_entry.GetValue())
         self.reload_options()
         self.dlg.Destroy()
-        component.add('tree', component.get('tree_back')) ## Backup
+        #component.add('tree', component.get('tree_fs')) ## Backup
         return
 
     def on_edit_cancel(self, evt):
         self.dlg.Destroy()
-        component.add('tree', component.get('tree_back')) ## Backup
+        #component.add('tree', component.get('tree_fs')) ## Backup
         return
 
     def on_remove(self,evt):

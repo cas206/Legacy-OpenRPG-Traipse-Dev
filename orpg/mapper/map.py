@@ -473,8 +473,8 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_left_up(self, evt):
         if evt.ShiftDown(): self.on_tape_up(evt)
-        elif component.get("tree").dragging:
-            tree = component.get("tree")
+        elif component.get('tree_fs').dragging:
+            tree = component.get('tree_fs')
             if tree.drag_obj.map_aware():
                 tree.drag_obj.on_send_to_map(evt)
                 tree.dragging = False
@@ -483,7 +483,7 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_motion(self, evt):
         if evt.ShiftDown(): self.on_tape_motion(evt)
-        elif evt.LeftIsDown() and component.get("tree").dragging: pass
+        elif evt.LeftIsDown() and component.get('tree_fs').dragging: pass
         else: self.frame.on_motion(evt)
 
     def on_zoom_out(self, evt):

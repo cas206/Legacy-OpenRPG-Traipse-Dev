@@ -433,17 +433,18 @@ class rpg_grid_edit_panel(wx.Panel):
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
     def on_reference(self, evt, car=None):
-        self.do_tree = wx.Frame(self, -1, 'Tree')
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
         self.ez_tree = orpg.gametree.gametree
         self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
-        #self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick) ## Remove for Alpha ##
+        self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick) ## Remove for Alpha ##
+        component.get('tree_fs').save_tree(settings.get("gametree"))
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
 
     def get_grid_ref(self, obj, complete):
         self.temp_wnd.Freeze()
         self.grid_ref = complete
-        self.mini_grid = wx.Frame(self, -1, 'Mini Grid')
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Mini Grid')
         self.temp_grid = obj.get_use_panel(self.mini_grid)
         self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
         self.mini_grid.Show()
@@ -453,7 +454,12 @@ class rpg_grid_edit_panel(wx.Panel):
         row = str(evt.GetRow()+1)
         col = str(evt.GetCol()+1)
         complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
-        self.value_entry.AppendText(complete); self.reload_options()
+        col = self.grid.GetGridCursorCol()
+        row = self.grid.GetGridCursorRow()
+        self.grid.SetCellValue(row, col, complete)
+        cells = self.grid.rows[row].findall('cell')
+        cells[col].text = complete
+        self.mini_grid.Destroy()
 
     def on_ldclick(self, evt):
         self.rename_flag = 0
@@ -488,10 +494,15 @@ class rpg_grid_edit_panel(wx.Panel):
                 complete = "!!"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '!!'
-            if do != 'None': 
+            if do != 'None':
                 if obj.xml.get('class') == 'rpg_grid_handler': 
                     self.get_grid_ref(obj, complete)
-                else: self.value_entry.AppendText(complete); self.reload_options()
+                else:
+                    col = self.grid.GetGridCursorCol()
+                    row = self.grid.GetGridCursorRow()
+                    self.grid.SetCellValue(row, col, complete)
+                    cells = self.grid.rows[row].findall('cell')
+                    cells[col].text = complete
         self.do_tree.Destroy()
         if do == 'None':
             wx.MessageBox('Invalid Reference', 'Error')
