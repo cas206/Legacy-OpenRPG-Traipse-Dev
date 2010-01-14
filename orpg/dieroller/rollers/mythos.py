@@ -39,6 +39,7 @@ __version__ = "$Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $"
 
 class mythos(std):
     name = "mythos"
+
     def __init__(self,source=[],target=0,targetthr=0):
         std.__init__(self,source)
         self.target = target
@@ -52,12 +53,10 @@ class mythos(std):
         if target == 5: self.targets = [6, 12]
         return self
 
-    
     def thr(self,targetthr):
         self.targetthr = targetthr
         return self
 
-    
     def sum(self):
         rolls = []
         s = 0
@@ -75,7 +74,6 @@ class mythos(std):
             if botch == 1 and s < 0: s = 0
         return s
 
-    
     def __str__(self):
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
@@ -86,5 +84,14 @@ class mythos(std):
             elif self.sum() == 0: myStr += "] vs " +str(self.target)+" result of a failure"
             else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
+
+    def non_stdDie(self, s): ## Puu-san
+        num_sides = s.split('v')
+        if len(num_sides) > 1: 
+            num_sides; num = num_sides[0]; sides = num_sides[1]
+            sides = '10'; target = num_sides[1]
+            ret = ['(', num.strip(), "**die_rollers['mythos'](",
+                    sides.strip(), ')).vs(', target, ')']
+            return ''.join(ret)
 
 die_rollers.register(mythos)

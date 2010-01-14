@@ -185,8 +185,9 @@ class orpgSettingsWnd(wx.Dialog):
         rm = component.get('DiceManager')
         try:
             rm.setRoller(changes)
-            self.chat.SystemPost('You have changed your die roller to the <b>"' + rm.getRoller.name + '"</b> roller.')
-        except:
+            self.chat.SystemPost('You have changed your die roller to the <b>"' + rm.getRoller() + '"</b> roller.')
+        except Exception, e:
+            print e
             rm.setRoller('std')
             self.settings.change('dieroller', 'std')
             self.chat.SystemPost('<b>"' + changes + '"</b> is an invalid roller. Setting roller to <b>"std"</b>')

@@ -156,7 +156,8 @@ class MapCanvas(wx.ScrolledWindow):
             else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
-            img = wx.ImageFromMime(path[1], path[2])
+            if path == 'failed': img = wx.Image(dir_struct["icon"] + "failed.png", wx.BITMAP_TYPE_PNG)
+            else: img = wx.ImageFromMime(path[1], path[2])
             try:
                 # Now, apply the image to the proper object
                 if image_type == "miniature":

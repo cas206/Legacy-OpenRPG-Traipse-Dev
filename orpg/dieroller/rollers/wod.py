@@ -65,12 +65,9 @@ class wod(std):
                 if s1 >0:
                     s1 -= 1
                     s -= 1
-                else:
-                    botch = 1
-            elif r == 1:
-                s -= 1
-            if botch == 1 and s < 0:
-                s = 0
+                else: botch = 1
+            elif r == 1: s -= 1
+            if botch == 1 and s < 0: s = 0
         return s
 
     def __str__(self):
@@ -79,14 +76,18 @@ class wod(std):
             for a in self.data[1:]:
                 myStr += ","
                 myStr += str(a)
-            if self.sum() < 0:
-                myStr += "] vs " +str(self.target)+" result of a botch"
-            elif self.sum() == 0:
-                myStr += "] vs " +str(self.target)+" result of a failure"
-            else:
-                myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
-
-
+            if self.sum() < 0: myStr += "] vs " +str(self.target)+" result of a botch"
+            elif self.sum() == 0: myStr += "] vs " +str(self.target)+" result of a failure"
+            else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
+
+    def non_stdDie(self, s):
+        num_sides = s.split('v')
+        if len(num_sides) > 1: 
+            num_sides; num = num_sides[0]; sides = num_sides[1]
+            sides = '10'; target = num_sides[1]
+            ret = ['(', num.strip(), "**die_rollers['wod'](",
+                    sides.strip(), ')).vs(', target, ')']
+            s = ''.join(ret); return str(eval(s))
 
 die_rollers.register(wod)

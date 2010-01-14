@@ -106,7 +106,7 @@ class ImageHandlerClass(object):
             self.__fetching = {}
             urllib.urlcleanup()
 
-#Private Methods
+    #Private Methods
     def __loadThread(self, path, image_type, imageId):
         uriPath = urllib.unquote(path)
         try:
@@ -121,11 +121,13 @@ class ImageHandlerClass(object):
             else:
                 logger.general("Image refused to load or URI did not "
                                "reference a valid image: " + path, True)
+                self.__queue.put(('failed', image_type, imageId))
                 del self.__fetching[path]
         except IOError:
             del self.__fetching[path]
             logger.general("Unable to resolve/open the specified URI; "
                            "image was NOT laoded: " + path, True)
+            self.__queue.put((dir_struct["icon"] + "failed.png", image_type, imageId))
 
     def __loadCacheThread(self, path, image_type, imageId):
         try:
