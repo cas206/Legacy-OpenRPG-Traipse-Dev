@@ -387,6 +387,7 @@ class rpg_grid_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.parent = parent
         self.grid = rpg_grid(self,handler)
         self.main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Grid"), wx.VERTICAL)
 
@@ -430,6 +431,7 @@ class rpg_grid_edit_panel(wx.Panel):
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=GRID_BOR)
         self.Bind(wx.EVT_CHECKBOX, self.on_auto_size, id=G_AUTO_SIZE)
         self.Bind(wx.EVT_BUTTON, self.on_reference, id=G_BUT_REF)
+        self.parent.Bind(wx.EVT_CLOSE, self.tree_failsafe)
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
     def on_reference(self, evt, car=None):
@@ -440,6 +442,10 @@ class rpg_grid_edit_panel(wx.Panel):
         component.get('tree_fs').save_tree(settings.get("gametree"))
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
+
+    def tree_failsafe(self, evt):
+        self.parent.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
 
     def get_grid_ref(self, obj, complete):
         self.temp_wnd.Freeze()

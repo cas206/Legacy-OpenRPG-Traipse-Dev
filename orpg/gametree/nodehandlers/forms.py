@@ -256,7 +256,6 @@ class text_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.on_send, id=FORM_SEND_BUTTON)
 
     def on_text(self, evt):
-        debug()
         txt = self.text.GetValue()
         #txt = strip_text(txt) ##Does not seem to exist.
         self.handler.text_elem.text = txt
@@ -289,6 +288,7 @@ class textctrl_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.parent = parent
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Text Properties"), wx.VERTICAL)
 
         self.title = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
@@ -332,6 +332,7 @@ class textctrl_edit_panel(wx.Panel):
         self.Bind(wx.EVT_CHECKBOX, self.on_hide_button, id=F_HIDE_TITLE)
         self.Bind(wx.EVT_CHECKBOX, self.on_send_button, id=F_SEND_BUTTON)
         self.Bind(wx.EVT_BUTTON, self.on_reference, id=T_BUT_REF)
+        self.parent.Bind(wx.EVT_CLOSE, self.tree_failsafe)
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
     def on_reference(self, evt, car=None):
@@ -342,6 +343,10 @@ class textctrl_edit_panel(wx.Panel):
         component.get('tree_fs').save_tree(settings.get("gametree"))
         self.temp_wnd.load_tree(settings.get("gametree"))
         self.do_tree.Show()
+
+    def tree_failsafe(self, evt):
+        self.parent.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
 
     def get_grid_ref(self, obj, complete):
         self.temp_wnd.Freeze()
@@ -776,6 +781,7 @@ class listbox_edit_panel(wx.Panel):
         self.handler.add_option(self.caption_entry.GetValue(), self.value_entry.GetValue())
         self.reload_options()
         self.dlg.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
         return
 
     ## EZ_Tree Core TaS - Prof.Ebral ##
@@ -851,12 +857,12 @@ class listbox_edit_panel(wx.Panel):
         self.handler.edit_option(self.index, self.value_entry.GetValue())
         self.reload_options()
         self.dlg.Destroy()
-        #component.add('tree', component.get('tree_fs')) ## Backup
+        component.add('tree', component.get('tree_fs')) ## Backup
         return
 
     def on_edit_cancel(self, evt):
         self.dlg.Destroy()
-        #component.add('tree', component.get('tree_fs')) ## Backup
+        component.add('tree', component.get('tree_fs')) ## Backup
         return
 
     def on_remove(self,evt):

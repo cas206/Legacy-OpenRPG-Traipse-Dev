@@ -54,7 +54,7 @@ class node_handler:
         self.xml = xml
         self.mytree_node = tree_node
         self.tree = component.get('tree')
-        self.core_tree = component.get('tree_fs')
+        #self.tree = component.get('tree_fs')
         self.frame = component.get('frame')
         self.chat = component.get('chat')
         self.drag = True
@@ -83,7 +83,7 @@ class node_handler:
         pass
 
     def on_rclick(self,evt):
-        self.core_tree.do_std_menu(evt,self)
+        self.tree.do_std_menu(evt,self)
 
     def on_ldclick(self,evt):
         return 0
@@ -217,28 +217,28 @@ class node_handler:
         self.chat.ParsePost(self.tohtml(),True,True)
 
     def on_drop(self, evt):
-        drag_obj = self.core_tree.drag_obj
-        if drag_obj == self or self.core_tree.is_parent_node(self.mytree_node, drag_obj.mytree_node):
+        drag_obj = self.tree.drag_obj
+        if drag_obj == self or self.tree.is_parent_node(self.mytree_node, drag_obj.mytree_node):
             return
-        drop_xml = self.core_tree.drag_obj.delete()
-        parent_node = self.core_tree.GetItemParent(self.mytree_node)
-        prev_sib = self.core_tree.GetPrevSibling(self.mytree_node)
-        if parent_node == self.core_tree.root: parent_xml = self.core_tree.GetPyData(parent_node)
-        else: parent_xml = self.core_tree.GetPyData(parent_node).xml
+        drop_xml = self.tree.drag_obj.delete()
+        parent_node = self.tree.GetItemParent(self.mytree_node)
+        prev_sib = self.tree.GetPrevSibling(self.mytree_node)
+        if parent_node == self.tree.root: parent_xml = self.tree.GetPyData(parent_node)
+        else: parent_xml = self.tree.GetPyData(parent_node).xml
         for i in range(len(parent_xml)):
             if parent_xml[i] is self.xml:
                 parent_xml.insert(i, drop_xml)
                 break
         if not prev_sib.IsOk():
             prev_sib = parent_node
-        self.core_tree.load_xml(drop_xml, parent_node, prev_sib)
+        self.tree.load_xml(drop_xml, parent_node, prev_sib)
 
     def get_tree(self):
         family = []
         test = treenode
-        while test != self.core_tree.root:
-            test = self.core_tree.GetItemParent(test)
-            parent = self.core_tree.GetItemText(test)
+        while test != self.tree.root:
+            test = self.tree.GetItemParent(test)
+            parent = self.tree.GetItemText(test)
             family.append(parent)
         return family
 
@@ -250,26 +250,26 @@ class node_handler:
 
     def delete(self):
         """ removes the tree_node and xml_node, and returns the removed xml_node """
-        parent_node = self.core_tree.GetItemParent(self.mytree_node)
-        if parent_node == self.core_tree.root: parent_xml = self.core_tree.GetPyData(parent_node)
-        else: parent_xml = self.core_tree.GetPyData(parent_node).xml
+        parent_node = self.tree.GetItemParent(self.mytree_node)
+        if parent_node == self.tree.root: parent_xml = self.tree.GetPyData(parent_node)
+        else: parent_xml = self.tree.GetPyData(parent_node).xml
         parent_xml.remove(self.xml)
-        self.core_tree.Delete(self.mytree_node)
+        self.tree.Delete(self.mytree_node)
         return self.xml
 
     def rename(self,name):
         if len(name):
-            self.core_tree.SetItemText(self.mytree_node,name)
+            self.tree.SetItemText(self.mytree_node,name)
             self.xml.set('name', name)
 
     def change_icon(self,icon):
         self.xml.set("icon",icon)
-        self.core_tree.SetItemImage(self.mytree_node, self.core_tree.icons[icon])
-        self.core_tree.SetItemImage(self.mytree_node, self.core_tree.icons[icon], wx.TreeItemIcon_Selected)
-        self.core_tree.Refresh()
+        self.tree.SetItemImage(self.mytree_node, self.tree.icons[icon])
+        self.tree.SetItemImage(self.mytree_node, self.tree.icons[icon], wx.TreeItemIcon_Selected)
+        self.tree.Refresh()
 
     def on_save(self,evt):
-        f = wx.FileDialog(self.core_tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
+        f = wx.FileDialog(self.tree,"Select a file", orpg.dirpath.dir_struct["user"],"","XML files (*.xml)|*.xml",wx.SAVE)
         if f.ShowModal() == wx.ID_OK: ElementTree(self.xml).write(f.GetPath())
         f.Destroy()
 
@@ -365,8 +365,8 @@ class node_loader(node_handler):
     def on_ldclick(self,evt):
         title = self.xml.get('name')
         new_xml = XML(tostring(self.xml[0]))
-        self.core_tree.root_xml.insert(0, new_xml)
-        tree_node = self.core_tree.load_xml(new_xml,self.core_tree.root,self.core_tree.root)
+        self.tree.root_xml.insert(0, new_xml)
+        tree_node = self.tree.load_xml(new_xml,self.tree.root,self.tree.root)
         return 1
 
 ##########################
@@ -386,19 +386,19 @@ class file_loader(node_handler):
 
     def on_ldclick(self,evt):
         file_name = self.file_node.get("name")
-        self.core_tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
         return 1
 
     def on_design(self,evt):
         tlist = ['Title','File Name']
         vlist = [self.xml.get("name"),
                   self.file_node.get("name")]
-        dlg = orpgMultiTextEntry(self.core_tree.GetParent(),tlist,vlist,"File Loader Edit")
+        dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")
         if dlg.ShowModal() == wx.ID_OK:
             vlist = dlg.get_values()
             self.file_node.set('name', vlist[1])
             self.xml.set('name', vlist[0])
-            self.core_tree.SetItemText(self.mytree_node,vlist[0])
+            self.tree.SetItemText(self.mytree_node,vlist[0])
         dlg.Destroy()
 
 ##########################
@@ -419,19 +419,19 @@ class url_loader(node_handler):
     def on_ldclick(self,evt):
         file_name = self.file_node.get("url")
         file = urllib.urlopen(file_name)
-        self.core_tree.insert_xml(file.read())
+        self.tree.insert_xml(file.read())
         return 1
 
     def on_design(self,evt):
         tlist = ['Title','URL']
         vlist = [self.xml.get("name"),
                  self.file_node.get("url")]
-        dlg = orpgMultiTextEntry(self.core_tree.GetParent(),tlist,vlist,"File Loader Edit")
+        dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")
         if dlg.ShowModal() == wx.ID_OK:
             vlist = dlg.get_values()
             self.file_node.set('url', vlist[1])
             self.xml.set('name', vlist[0])
-            self.core_tree.SetItemText(self.mytree_node,vlist[0])
+            self.tree.SetItemText(self.mytree_node,vlist[0])
         dlg.Destroy()
 
 
