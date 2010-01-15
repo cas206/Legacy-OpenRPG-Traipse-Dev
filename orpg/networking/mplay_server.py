@@ -887,7 +887,7 @@ class mplay_server:
         print
 
     def broadcast(self,msg):
-        self.send_to_all("0","<msg to='all' from='0' group_id='1'><font color='#FF0000'>" + msg + "</font></msg>")
+        self.send_to_all("0","<msg to='all' from='0' group_id='1'><chat alias='Server Administrator' type='1' version]'1.0'><font color='#FF0000'>" + msg + "</font></chat></msg>")
 
     def console_log(self):
         if self.log_to_console == 1:
@@ -1107,8 +1107,9 @@ class mplay_server:
             (remote_host,remote_port) = newsock.getpeername()
             bad_xml_string =  "Your client sent an illegal message to the server and will be disconnected. "
             bad_xml_string += "Please report this bug to the development team at:<br /> "
-            bad_xml_string += "<a href=\"http://sourceforge.net/tracker/?group_id=2237&atid=102237\">OpenRPG bugs "
-            bad_xml_string += "(http://sourceforge.net/tracker/?group_id=2237&atid=102237)</a><br />"
+##########
+            bad_xml_string += "<a href='http://www.assembla.com/wiki/show/traipse_dev'>Traipse OpenRPG bugs "
+            bad_xml_string += "(http://www.assembla.com/wiki/show/traipse_dev)</a><br />"
             self.sendMsg( newsock, "<msg to='" + props['id'] + "' from='" + props['id'] + "' group_id='0' />" + bad_xml_string, 
                             new_stub.useCompression, new_stub.compressionType)
 
@@ -1320,16 +1321,6 @@ class mplay_server:
             try: newsock.close()
             except: pass
             return #returning causes connection thread instance to terminate
-        #  Clear out the xml_dom in preparation for new stuff, if necessary
-        """try: if xml_dom: xml_dom.unlink()
-
-        except:
-            self.log_msg( "The following exception caught unlinking xml_dom:")
-            self.log_msg("Continuing")
-            try: newsock.close()
-            except: pass
-            return #returning causes connection thread instance to terminate
-        #  Parse the XML received from the connecting client"""
         try:
             xml_dom = XML(data)
 
@@ -2159,7 +2150,7 @@ class mplay_server:
             self.log_msg("Exception: send_to_all(): " + str(e))
 
     def send_to_group(self, from_id, group_id, data):
-        #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"'><font color='#FF0000'>" + data + "</font>")
+        data = ("<msg to='all' from='0' group_id='"+str(group_id)+"'>" + data + "</msg>")
         data = ServerPlugins.postParseIncoming(data) #Function breaks here.
         try:
             self.p_lock.acquire()
@@ -2184,10 +2175,8 @@ class mplay_server:
 
     def send_group_list(self, to_id, action="new"):
         try:
-            print self.groups
             for key in self.groups:
                 xml = self.groups[key].toxml(action)
-                print xml, key
                 self.players[to_id].outbox.put(xml)
         except Exception, e:
             self.log_msg("Exception: send_group_list(): (client #"+to_id+") : " + str(e))
@@ -2520,7 +2509,7 @@ class mplay_server:
             keys.sort(id_compare)
             for k in keys:
                 groupstring = "<tr><td bgcolor='" + COLOR2 + "' colspan='2'>"
-                groutstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
+                groupstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
                 groupstring += "</td><td bgcolor=" + COLOR2 + " > <i>Password: " + self.groups[k].pwd + "</td>"
                 groupstring += "<td bgcolor=" + COLOR2 + " > Boot: " + self.groups[k].boot_pwd + "</i></td></tr>"
                 pl += groupstring
@@ -2550,7 +2539,7 @@ class mplay_server:
             pl += "<tr><td colspan='4' bgcolor=" + COLOR1 + ">"
             pl += "<font color=" + COLOR4 + "><b><i>Statistics: groups: " + str(len(self.groups)) + "  "
             pl += "players: " +  str(len(self.players)) + "</i></b></font></td></tr></table>"
-        except Exception, e: self.log_msg(str(e))
+        except Exception, e: print e; self.log_msg(str(e))
         self.p_lock.release()
         return pl
 

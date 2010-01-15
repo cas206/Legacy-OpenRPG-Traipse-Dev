@@ -57,6 +57,7 @@ class roller_manager(object):
 
     def stdDieToDClass(self, match):
         s = match.group(0)
+        self.mod = str(match.string[len(s):])
         num_sides = s.split('d')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]
@@ -65,11 +66,10 @@ class roller_manager(object):
                 if int(num) > 100 or int(sides) > 10000: return None
             except: pass
             ret = ['(', num.strip(), "**die_rollers['", self.getRoller(), "'](",
-                    sides.strip(), '))']
-            s =  ''.join(ret); return str(eval(s)) ## Moved eval here for portability.
-
-        ## Portable Non Standard Die Characters (for Puu-san)
-        else: s = die_rollers._rollers[self.getRoller()]().non_stdDie(s); return s
+                    sides.strip(), '))'+self.mod]
+            s =  ''.join(ret); s = str(eval(s)); return s ## Moved eval here for portability.
+        ## Portable Non Standard Die Characters #Prof-Ebral
+        else: s = die_rollers._rollers[self.getRoller()]().non_stdDie(s); self.mod = ''; return s
 
     #  Use this to convert ndm-style (3d6) dice to d_base format
     def convertTheDieString(self,s):
@@ -83,9 +83,15 @@ class roller_manager(object):
                 test = eval(s2)
                 return s2
             except Exception, e: print e; pass"""
+            try: return self.do_math(s)
+            except: pass
         return result
+
+    def do_math(self, s):
+        self.mod = ''
+        return str(eval(s))
 
     def proccessRoll(self, s):
         v = str(self.convertTheDieString(s))
-        return v
+        return v[:len(v)-len(self.mod)]
 
