@@ -5,7 +5,6 @@ import shutil
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger, crash
-from orpg.tools.decorators import debugging
 from upmana.validate import validate
 from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
@@ -18,7 +17,6 @@ class Term2Win(object):
         sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
-    @debugging
     def __init__(self, parent, component):
         wx.Panel.__init__(self, parent)
         ### Status Bar ###
@@ -715,6 +713,7 @@ class updaterFrame(wx.Frame):
         p.Layout()
         self.Refresh()
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        component.add('upmana-win', self)
 
     def OnClose(self, event):
         if self.main == False: self.Destroy()
@@ -729,7 +728,6 @@ class updateApp(wx.App):
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 1.0", 
                                 component, manifest, self.main)
-        component.add('upmana-win', self.updater)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()
         else: pass

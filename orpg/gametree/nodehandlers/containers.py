@@ -200,10 +200,10 @@ class tabber_handler(container_handler):
     def __init__(self, xml, tree_node):
         container_handler.__init__(self, xml, tree_node)
 
-    def get_design_panel(self,parent):
+    def get_design_panel(self, parent):
         return tabbed_panel(parent, self, 1)
 
-    def get_use_panel(self,parent):
+    def get_use_panel(self, parent):
         return tabbed_panel(parent, self, 0)
 
 
@@ -212,6 +212,7 @@ class tabbed_panel(orpgTabberWnd):
         orpgTabberWnd.__init__(self, parent, style=FNB.FNB_NO_X_BUTTON)
         self.handler = handler
         self.parent = parent
+        if mode == 1: self.AddPage(tabbed_edit_panel(parent, handler), 'Tabber', False)
         handler.tree.traverse(handler.mytree_node, self.pick_panel, mode, False)
         parent.SetSize(self.GetBestSize())
 
@@ -229,9 +230,9 @@ class tabbed_panel(orpgTabberWnd):
                 component.get('frame').TraipseSuiteWarn('item')
         if panel: self.AddPage(panel, name, False)
 
-class tabbed_edit_panel(orpgTabberWnd):
+class tabbed_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
-        orpgTabberWnd.__init__(self, parent, style=FNB.FNB_NO_X_BUTTON)
+        wx.Panel.__init__(self, parent, -1, style=FNB.FNB_NO_X_BUTTON)
         self.handler = handler
         self.parent = parent
         main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Tabber"), wx.VERTICAL)
@@ -241,7 +242,9 @@ class tabbed_edit_panel(orpgTabberWnd):
         self.SetSizer(main_sizer)
         self.SetAutoLayout(True)
         self.Fit()
+        parent.SetSize(self.GetBestSize())
         self.Bind(wx.EVT_TEXT, self.on_text, id=1)
+
 
     def on_text(self,evt):
         txt = self.title.GetValue()

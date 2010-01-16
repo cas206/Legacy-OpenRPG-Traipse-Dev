@@ -384,10 +384,9 @@ class textctrl_edit_panel(wx.Panel):
                 complete = complete + obj.xml.get('name') + '@!'
             elif do == 'Parent':
                 while start[0] == end[0]:
-                    top = start[0]
                     del end[0], start[0]
                     if len(start) == 0 or len(end) == 0: break
-                complete = "!#" + top + "::"
+                complete = "!#"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '#!'
             elif do == 'Child':
@@ -695,7 +694,6 @@ class listbox_edit_panel(wx.Panel):
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "List Box Properties"), wx.VERTICAL)
 
         self.text = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
-
         self.listbox = wx.ListCtrl(self, LIST_CTRL, style=wx.LC_REPORT)
         self.listbox.InsertColumn(0, 'Caption')
         self.listbox.InsertColumn(1, 'Value')
@@ -830,10 +828,9 @@ class listbox_edit_panel(wx.Panel):
                 complete = complete + obj.xml.get('name') + '@!'
             elif do == 'Parent':
                 while start[0] == end[0]:
-                    top = start[0]
                     del end[0], start[0]
                     if len(start) == 0 or len(end) == 0: break
-                complete = "!#" + top + "::"
+                complete = "!#"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '#!'
             elif do == 'Child':

@@ -487,10 +487,9 @@ class rpg_grid_edit_panel(wx.Panel):
                 complete = complete + obj.xml.get('name') + '@!'
             elif do == 'Parent':
                 while start[0] == end[0]:
-                    top = start[0]
                     del end[0], start[0]
                     if len(start) == 0 or len(end) == 0: break
-                complete = "!#" + top + "::"
+                complete = "!#"
                 for e in end: complete += e +'::'
                 complete = complete + obj.xml.get('name') + '#!'
             elif do == 'Child':
