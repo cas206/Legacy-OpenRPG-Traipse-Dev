@@ -1906,7 +1906,9 @@ class chat_panel(wx.Panel):
             else: s = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
         else:
             s = ''
-        self.data = self.ParseMap(s, node)
+        s = self.ParseMap(s, node)
+        s = self.ParseParent(s, node.get('map'))
+        self.data = s
 
     def ParseMap(self, s, node):
         """Parses player input for embedded nodes rolls"""
@@ -1950,7 +1952,7 @@ class chat_panel(wx.Panel):
         value = ""
         path = s.split('::')
         depth = len(path)
-        self.gametree = component.get('tree_fs')
+        self.gametree = component.get('tree')
         try: node = self.gametree.tree_map[path[0]]['node']
         except Exception, e: return self.data
         if node.get('class') in ('dnd35char_handler', 

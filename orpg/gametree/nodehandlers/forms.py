@@ -863,7 +863,7 @@ class listbox_edit_panel(wx.Panel):
         return
 
     def on_remove(self,evt):
-        index = self.listbox.GetSelection()
+        index = self.listbox.GetFocusedItem()
         if index >= 0:
             self.handler.remove_option(index)
             self.reload_options()
