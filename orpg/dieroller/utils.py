@@ -55,48 +55,43 @@ class roller_manager(object):
     def listRollers(self):
         return die_rollers.keys()
 
-    def stdDieToDClass(self,match):
+    def stdDieToDClass(self, match):
         s = match.group(0)
+        self.mod = str(match.string[len(s):])
         num_sides = s.split('d')
-        if len(num_sides) > 1: num_sides; num = num_sides[0]; sides = num_sides[1]
-        else: return self.non_stdDieToDClass(s) # Use a non standard converter.
-
-        if sides.strip().upper() == 'F': sides = "'f'"
-        try:
-            if int(num) > 100 or int(sides) > 10000: return None
-        except: pass
-        ret = ['(', num.strip(), "**die_rollers['", self.getRoller(), "'](",
-                sides.strip(), '))']
-        return ''.join(ret)
-
-    def non_stdDieToDClass(self, s):
-        num_sides = s.split('v')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]
-            if self.getRoller() == 'mythos': sides = '12'; target = num_sides[1]
-            elif self.getRoller() == 'wod': sides = '10'; target = num_sides[1]
+            if sides.strip().upper() == 'F': sides = "'f'"
+            try:
+                if int(num) > 100 or int(sides) > 10000: return None
+            except: pass
             ret = ['(', num.strip(), "**die_rollers['", self.getRoller(), "'](",
-                    sides.strip(), ')).vs(', target, ')']
-            return ''.join(ret)
-
-        num_sides = s.split('k')
-        if len(num_sides) > 1: 
-            num_sides; num = num_sides[0]; sides = '10'; target = num_sides[1]
-            ret = ['(', num.strip(), "**die_rollers['", self.getRoller(), "'](",
-                    sides.strip(), ')).takeHighest(', target, ').open(10)']
-            return ''.join(ret)
+                    sides.strip(), '))'+self.mod]
+            s =  ''.join(ret); s = str(eval(s)); return s ## Moved eval here for portability.
+        ## Portable Non Standard Die Characters #Prof-Ebral
+        else: s = die_rollers._rollers[self.getRoller()]().non_stdDie(s); self.mod = ''; return s
 
     #  Use this to convert ndm-style (3d6) dice to d_base format
     def convertTheDieString(self,s):
         reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[\dFf]+")
         (result, num_matches) = reg.subn(self.stdDieToDClass, s)
         if num_matches == 0 or result is None:
-            try:
-                s2 = self.roller_class + "(0)." + s
+            reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[a-zA-Z]+") ## Prof Ebral
+            (result, num_matches) = reg.subn(self.stdDieToDClass, s) ## Prof Ebral
+            """try: ## Kinda pointless when you can create new Regular Expressions
+                s2 = self.roller_class + "(0)." + s ## Broken method
                 test = eval(s2)
                 return s2
+            except Exception, e: print e; pass"""
+            try: return self.do_math(s)
             except: pass
         return result
 
+    def do_math(self, s):
+        self.mod = ''
+        return str(eval(s))
+
     def proccessRoll(self, s):
-        return str(eval(self.convertTheDieString(s)))
+        v = str(self.convertTheDieString(s))
+        return v[:len(v)-len(self.mod)]
+

@@ -129,7 +129,6 @@ class orpgSettingsWnd(wx.Dialog):
 
         for i in xrange(0,len(self.changes)):
             self.settings.set_setting(self.changes[i][0], self.changes[i][1])
-            top_frame = component.get('frame')
 
             ## Settings are now reactive and organized ##
             ok = {'IdleStatusAlias': self.chat.chat_cmds.on_status,
@@ -186,13 +185,15 @@ class orpgSettingsWnd(wx.Dialog):
         rm = component.get('DiceManager')
         try:
             rm.setRoller(changes)
-            self.chat.SystemPost('You have changed your die roller to the <b>"' + rm.getRoller.name + '"</b> roller.')
-        except:
+            self.chat.SystemPost('You have changed your die roller to the <b>"' + rm.getRoller() + '"</b> roller.')
+        except Exception, e:
+            print e
             rm.setRoller('std')
             self.settings.change('dieroller', 'std')
             self.chat.SystemPost('<b>"' + changes + '"</b> is an invalid roller. Setting roller to <b>"std"</b>')
 
     def colortree_ok(self, changes):
+        top_frame = component.get('frame')
         if changes == '1':
             top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
             top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))
@@ -219,6 +220,7 @@ class orpgSettingsWnd(wx.Dialog):
     def text_ok(self, changes):
         self.chat.chatwnd.SetPage(self.chat.ResetPage())
         self.chat.chatwnd.scroll_down()
+        top_frame = component.get('frame')
         if self.settings.get_setting('ColorTree') == '1':
             top_frame.tree.SetBackgroundColour(self.settings.get_setting('bgcolor'))
             top_frame.tree.SetForegroundColour(self.settings.get_setting('textcolor'))

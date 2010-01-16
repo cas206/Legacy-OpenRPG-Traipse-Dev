@@ -366,7 +366,7 @@ class rpg_grid_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
-        self.grid = rpg_grid(self,handler)
+        self.grid = rpg_grid(self, handler)
         label = handler.xml.get('name')
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
@@ -381,11 +381,13 @@ G_ADD_ROW = wx.NewId()
 G_ADD_COL = wx.NewId()
 G_DEL_ROW = wx.NewId()
 G_DEL_COL = wx.NewId()
+G_BUT_REF = wx.NewId()
 
 class rpg_grid_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.parent = parent
         self.grid = rpg_grid(self,handler)
         self.main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Grid"), wx.VERTICAL)
 
@@ -407,6 +409,8 @@ class rpg_grid_edit_panel(wx.Panel):
         sizer.Add(wx.Button(self, G_ADD_COL, "Add Column"), 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
         sizer.Add(wx.Button(self, G_DEL_COL, "Remove Column"), 1, wx.EXPAND)
+        sizer.Add(wx.Size(10,10))
+        sizer.Add(wx.Button(self, G_BUT_REF, "Reference"), 1)
 
         self.main_sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         self.main_sizer.Add(self.title, 0, wx.EXPAND)
@@ -426,6 +430,88 @@ class rpg_grid_edit_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.grid.del_col, id=G_DEL_COL)
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=GRID_BOR)
         self.Bind(wx.EVT_CHECKBOX, self.on_auto_size, id=G_AUTO_SIZE)
+        self.Bind(wx.EVT_BUTTON, self.on_reference, id=G_BUT_REF)
+        self.parent.Bind(wx.EVT_CLOSE, self.tree_failsafe)
+
+    ## EZ_Tree Core TaS - Prof.Ebral ##
+    def on_reference(self, evt, car=None):
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
+        self.ez_tree = orpg.gametree.gametree
+        self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
+        self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick) ## Remove for Alpha ##
+        component.get('tree_fs').save_tree(settings.get("gametree"))
+        self.temp_wnd.load_tree(settings.get("gametree"))
+        self.do_tree.Show()
+
+    def tree_failsafe(self, evt):
+        self.parent.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
+
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Mini Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        col = self.grid.GetGridCursorCol()
+        row = self.grid.GetGridCursorRow()
+        self.grid.SetCellValue(row, col, complete)
+        cells = self.grid.rows[row].findall('cell')
+        cells[col].text = complete
+        self.mini_grid.Destroy()
+
+    def on_ldclick(self, evt):
+        self.rename_flag = 0
+        pt = evt.GetPosition()
+        (item, flag) = self.temp_wnd.HitTest(pt)
+        if item.IsOk():
+            obj = self.temp_wnd.GetPyData(item)
+            self.temp_wnd.SelectItem(item)
+            start = self.handler.xml.get('map').split('::')
+            end = obj.xml.get('map').split('::')
+            if obj.xml.get('class') not in ['rpg_grid_handler', 'textctrl_handler']: do = 'None'
+            elif end[0] == '' or start[0] != end[0]: do = 'Root'
+            elif start == end: do = 'Child'
+            elif start != end: do = 'Parent'
+            if do == 'Root':
+                complete = "!@"
+                for e in end: 
+                    if e != '': complete += e +'::'
+                complete = complete + obj.xml.get('name') + '@!'
+            elif do == 'Parent':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!#"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '#!'
+            elif do == 'Child':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!!"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '!!'
+            if do != 'None':
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else:
+                    col = self.grid.GetGridCursorCol()
+                    row = self.grid.GetGridCursorRow()
+                    self.grid.SetCellValue(row, col, complete)
+                    cells = self.grid.rows[row].findall('cell')
+                    cells[col].text = complete
+        self.do_tree.Destroy()
+        if do == 'None':
+            wx.MessageBox('Invalid Reference', 'Error')
+    #####                        #####
 
     def on_auto_size(self,evt):
         self.handler.set_autosize(bool2int(evt.Checked()))

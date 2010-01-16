@@ -392,8 +392,8 @@ class di:
 
     def __cmp__(self,other):
         #  this function included for backwards compatibility
-#  As of 2.1, lists implement the "rich comparison"
-#  methods overloaded above.
+        #  As of 2.1, lists implement the "rich comparison"
+        #  methods overloaded above.
         if type(other) == type(3) or type(other) == type(3.0):
             return cmp(self.value, other)
         elif hasattr(other,"value"):

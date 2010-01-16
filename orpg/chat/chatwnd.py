@@ -168,7 +168,6 @@ class chat_html_window(wx.html.HtmlWindow):
         self.Bind(wx.EVT_MENU, self.OnM_EditCopy, item)
         self.menu.AppendItem(item)
 
-    
     def OnM_EditCopy(self, evt):
         wx.TheClipboard.UsePrimarySelection(False)
         wx.TheClipboard.Open()
@@ -524,6 +523,12 @@ class chat_panel(wx.Panel):
         self.lockscroll = False      # set the default to scrolling on.
         self.chat_cmds = commands.chat_commands(self)
         self.html_strip = strip_html
+        self.f_keys = {wx.WXK_F1: 'event.GetKeyCode() == wx.WXK_F1', wx.WXK_F2: 'event.GetKeyCode() == wx.WXK_F2', 
+                    wx.WXK_F3: 'event.GetKeyCode() == wx.WXK_F3', wx.WXK_F4: 'event.GetKeyCode() == wx.WXK_F4', 
+                    wx.WXK_F5: 'event.GetKeyCode() == wx.WXK_F5', wx.WXK_F6: 'event.GetKeyCode() == wx.WXK_F6', 
+                    wx.WXK_F7: 'event.GetKeyCode() == wx.WXK_F7', wx.WXK_F8: 'event.GetKeyCode() == wx.WXK_F8', 
+                    wx.WXK_F9: 'event.GetKeyCode() == wx.WXK_F9', wx.WXK_F10: 'event.GetKeyCode() == wx.WXK_F10', 
+                    wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
         #Alias Lib stuff
         self.defaultAliasName = 'Use Real Name'
         self.defaultFilterName = 'No Filter'
@@ -831,6 +836,7 @@ class chat_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.lock_scroll, self.scroll_lock)
         self.chattxt.Bind(wx.EVT_MOUSEWHEEL, self.chatwnd.mouse_wheel)
         self.chattxt.Bind(wx.EVT_CHAR, self.chattxt.OnChar)
+        self.chattxt.Bind(wx.EVT_KEY_DOWN, self.on_chat_key_down)
         self.chattxt.Bind(wx.EVT_TEXT_COPY, self.chatwnd.OnM_EditCopy)
     # def build_ctrls - end
 
@@ -1092,50 +1098,47 @@ class chat_panel(wx.Panel):
     #
     # Note:  self.chattxt now handles it's own Key events.  It does, however still
     #        call it's parent's (self) OnChar to handle "default" behavior.
+
+    def submit_chat_text(self, s):
+        self.histidx = -1
+        self.temptext = ""
+        self.history = [s] + self.history 
+        #if not len(macroText): self.chattxt.SetValue("")
+
+        # play sound
+        sound_file = self.settings.get_setting("SendSound")
+        if sound_file != '': component.get('sound').play(sound_file)
+        if s[0] != "/": ## it's not a slash command
+            s = self.ParsePost( s, True, True )
+        else: self.chat_cmds.docmd(s) # emote is in chatutils.py
+
+    def on_chat_key_down(self, event):
+        s = self.chattxt.GetValue()
+        if event.GetKeyCode() == wx.WXK_RETURN and not event.ShiftDown():
+            logger.debug("event.GetKeyCode() == wx.WXK_RETURN")
+            self.set_colors()
+            if self.session.get_status() == MPLAY_CONNECTED:
+                self.sendTyping(0)
+            if len(s):
+                self.chattxt.SetValue('')
+                s = s.replace('\n', '<br />')
+                self.submit_chat_text(s)
+            return
+        event.Skip()
     
     def OnChar(self, event):
         s = self.chattxt.GetValue()
-        #self.histlen = len(self.history) - 1
 
-        ## RETURN KEY (no matter if there is text in chattxt)
-        #  This section is run even if there is nothing in the chattxt (as opposed to the next wx.WXK_RETURN handler
-        if event.GetKeyCode() == wx.WXK_RETURN:
-            logger.debug("event.GetKeyCode() == wx.WXK_RETURN")
-            self.set_colors()
-            if self.session.get_status() == MPLAY_CONNECTED:          #  only do if we're connected
-                self.sendTyping(0)                                    #  Send a "not_typing" event on enter key press
-        macroText=""
-        recycle_bin = {wx.WXK_F1: 'event.GetKeyCode() == wx.WXK_F1', wx.WXK_F2: 'event.GetKeyCode() == wx.WXK_F2', 
-                    wx.WXK_F3: 'event.GetKeyCode() == wx.WXK_F3', wx.WXK_F4: 'event.GetKeyCode() == wx.WXK_F4', 
-                    wx.WXK_F5: 'event.GetKeyCode() == wx.WXK_F5', wx.WXK_F6: 'event.GetKeyCode() == wx.WXK_F6', 
-                    wx.WXK_F7: 'event.GetKeyCode() == wx.WXK_F7', wx.WXK_F8: 'event.GetKeyCode() == wx.WXK_F8', 
-                    wx.WXK_F9: 'event.GetKeyCode() == wx.WXK_F9', wx.WXK_F10: 'event.GetKeyCode() == wx.WXK_F10', 
-                    wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
+        macroText = ""
+        s_key = False
+        if self.f_keys.has_key(event.GetKeyCode()): s_key = self.f_keys[event.GetKeyCode()]
 
-        bin_event = event.GetKeyCode()
-        if recycle_bin.has_key(bin_event):
-	    logger.debug(lambda bin_event: recycle_bin[bin_event])
-	    macroText = self.settings.get_setting(recycle_bin[bin_event][29:])
-	    recycle_bin = {}; del bin_event
+        if s_key: macroText = settings.get(s_key[29:])
 
         # Append to the existing typed text as needed and make sure the status doesn't change back.
         if len(macroText):
             self.sendTyping(0)
-            s = macroText
-
-        ## RETURN KEY (and not text in control)
-        if (event.GetKeyCode() == wx.WXK_RETURN and len(s)) or len(macroText):
-            logger.debug("(event.GetKeyCode() == wx.WXK_RETURN and len(s)) or len(macroText)")
-            self.histidx = -1
-            self.temptext = ""
-            self.history = [s] + self.history#prepended instead of appended now, so higher index = greater age
-            if not len(macroText): self.chattxt.SetValue("")
-            # play sound
-            sound_file = self.settings.get_setting("SendSound")
-            if sound_file != '': component.get('sound').play(sound_file)
-            if s[0] != "/": ## it's not a slash command
-                s = self.ParsePost( s, True, True )
-            else: self.chat_cmds.docmd(s) # emote is in chatutils.py
+            self.submit_chat_text(macroText)
 
         ## UP KEY
         elif event.GetKeyCode() == wx.WXK_UP:
@@ -1227,6 +1230,14 @@ class chat_panel(wx.Panel):
                 self.lock_scroll(0)
                 self.Post()
             event.Skip()
+
+        elif event.GetKeyCode() == wx.WXK_RETURN and event.ShiftDown():
+            st = self.chattxt.GetValue().split('\x0b')
+            st += '\n'
+            i = self.chattxt.GetInsertionPoint()
+            self.chattxt.SetValue(''.join(st))
+            self.chattxt.SetInsertionPoint(i+1)
+            return
 
         ## NOTHING
         else: event.Skip()
@@ -1860,7 +1871,7 @@ class chat_panel(wx.Panel):
 
     def resolve_loop(self, node, path, step, depth):
         if step == depth:
-            self.resolution(node)
+            return self.resolution(node)
         else:
             child_list = node.findall('nodehandler')
             for child in child_list:
@@ -1868,10 +1879,12 @@ class chat_panel(wx.Panel):
                 if child.get('name') == path[step]:
                     node = child
                     step += 1
-                    if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
+                    if node.get('class') in ('dnd35char_handler', 
+                                            "SWd20char_handler", 
+                                            "d20char_handler", 
+                                            "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
                     elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, step, depth)
                     else: self.resolve_loop(node, path, step, depth)
-
 
     def resolve_grid(self, node, path, step, depth):
         if step == depth:
@@ -1884,6 +1897,71 @@ class chat_panel(wx.Panel):
         try: self.data = self.ParseMap(col[int(self.ParseDice(cell[1]))-1].text, node) or 'No Cell Data'
         except: self.data = 'Invalid Grid Reference!'
         return
+
+    def resolution(self, node):
+        if self.passed == False:
+            self.passed = True
+            if node.get('class') == 'textctrl_handler': 
+                s = str(node.find('text').text)
+            else: s = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
+        else:
+            s = ''
+        s = self.ParseMap(s, node)
+        s = self.ParseParent(s, node.get('map'))
+        self.data = s
+
+    def ParseMap(self, s, node):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!!(.*?)!!)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            tree_map = node.get('map')
+            tree_map = tree_map + '::' + matches[i][1]
+            newstr = '!@'+ tree_map +'@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            s = self.ParseNode(s)
+            s = self.ParseParent(s, tree_map)
+        return s
+
+    def ParseParent(self, s, tree_map):
+        """Parses player input for embedded nodes rolls"""
+        cur_loc = 0
+        reg = re.compile("(!#(.*?)#!)")
+        matches = reg.findall(s)
+        for i in xrange(0,len(matches)):
+            ## Build the new tree_map
+            new_map = tree_map.split('::')
+            del new_map[len(new_map)-1]
+            parent_map = matches[i][1].split('::')
+            ## Find an index or use 1 for ease of use.
+            try: index = new_map.index(parent_map[0])
+            except: index = 1
+            ## Just replace the old tree_map from the index.
+            new_map[index:len(new_map)] = parent_map
+            newstr = '::'.join(new_map)
+            newstr = '!@'+ newstr +'@!'
+            s = s.replace(matches[i][0], newstr, 1)
+            #s = self.ParseMap(s, node) ## Needs to be added
+            s = self.ParseNode(s)
+        return s
+
+    def resolve_nodes(self, s):
+        self.passed = False
+        self.data = 'Invalid Reference!'
+        value = ""
+        path = s.split('::')
+        depth = len(path)
+        self.gametree = component.get('tree')
+        try: node = self.gametree.tree_map[path[0]]['node']
+        except Exception, e: return self.data
+        if node.get('class') in ('dnd35char_handler', 
+                                "SWd20char_handler", 
+                                "d20char_handler", 
+                                "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
+        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
+        else: self.resolve_loop(node, path, 1, depth)
+        return self.data
 
     def resolve_cust_loop(self, node, path, step, depth):
         node_class = node.get('class')
@@ -1906,7 +1984,7 @@ class chat_panel(wx.Panel):
         else: ab = node.find('saves')
         ab_list = ab.findall('save')
         for save in ab_list:
-            pc_stats[save.get('name')] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
+            pc_stats[save.get('name')] = (str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
             if save.get('name') == 'Fortitude': abbr = 'Fort'
             if save.get('name') == 'Reflex': abbr = 'Ref'
             if save.get('name') == 'Will': abbr = 'Will'
@@ -1967,61 +2045,3 @@ class chat_panel(wx.Panel):
             elif path[step+1].title() == 'Mod': self.data = pc_stats[path[step].title()][1]
             elif path[step+1].title() == 'Check': self.data = '<b>'+path[step].title()+' Check:</b> [1d20+'+str(pc_stats[path[step].title()][1])+']'
             return
-
-    def resolution(self, node):
-        if self.passed == False:
-            self.passed = True
-            if node.get('class') == 'textctrl_handler': self.data = str(node.find('text').text)
-            else: self.data = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
-        else:
-            self.data = ''
-            pass
-        self.data = self.ParseMap(self.data, node)
-
-    def ParseMap(self, s, node):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!!(.*?)!!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            tree_map = node.get('map') + '::' + matches[i][1]
-            newstr = '!@'+ tree_map +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-            s = self.ParseParent(s, tree_map)
-        return s
-
-    def ParseParent(self, s, tree_map):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!#(.*?)#!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            ## Build the new tree_map
-            new_map = tree_map.split('::')
-            del new_map[len(new_map)-1]
-            parent_map = matches[i][1].split('::')
-            ## Find an index or use 1 for ease of use.
-            try: index = new_map.index(parent_map[0])
-            except: index = 1
-            ## Just replace the old tree_map from the index.
-            new_map[index:len(new_map)] = parent_map
-            newstr = '::'.join(new_map)
-            newstr = '!@'+ newstr +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-        return s
-
-    def resolve_nodes(self, s):
-        self.passed = False
-        self.data = 'Invalid Reference!'
-        value = ""
-        path = s.split('::')
-        depth = len(path)
-        self.gametree = component.get('tree')
-        try: node = self.gametree.tree_map[path[0]]['node']
-        except: return self.data
-        if node.get('class') in ('dnd35char_handler', "SWd20char_handler", "d20char_handler", "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
-        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
-        else: self.resolve_loop(node, path, 1, depth)
-        return self.data

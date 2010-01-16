@@ -5,7 +5,6 @@ import shutil
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import logger, crash
-from orpg.tools.decorators import debugging
 from upmana.validate import validate
 from orpg.dirpath import dir_struct
 from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
@@ -18,7 +17,6 @@ class Term2Win(object):
         sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
-    @debugging
     def __init__(self, parent, component):
         wx.Panel.__init__(self, parent)
         ### Status Bar ###
@@ -57,7 +55,7 @@ class Updater(wx.Panel):
         self.sizer.Add(self.buttons['advanced'], (2,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['update'], (3,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['finish'], (4,3), flag=wx.EXPAND)
-        self.buttons['finish'].Disable()
+        #self.buttons['finish'].Disable()
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
@@ -131,9 +129,9 @@ class Updater(wx.Panel):
         ignore.close()
 
     def Finish(self, evt=None):
-        try: self.parent.Destroy()
-        except:
-            print 'Fail'; exit()
+        try: component.get('upmana-win').OnClose(None)
+        except Exception, e:
+            print 'Fail', e; exit()
 
     def ChooseBranch(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
@@ -715,6 +713,7 @@ class updaterFrame(wx.Frame):
         p.Layout()
         self.Refresh()
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        component.add('upmana-win', self)
 
     def OnClose(self, event):
         if self.main == False: self.Destroy()

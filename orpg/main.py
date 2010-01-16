@@ -631,6 +631,9 @@ class orpgFrame(wx.Frame):
         #self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
             "OpenRPG Update Manager 1.0", component, manifest, True)
+        print component.get('upmana-win')
+        component.add('upmana-win', self.updateMana)
+        print component.get('upmana-win')
         logger.debug("Menu Created")
         h = int(xml_dom.get("height"))
         w = int(xml_dom.get("width"))
@@ -943,7 +946,7 @@ class orpgFrame(wx.Frame):
 
         for child in etreeEl.getchildren():
             if child.tag == 'tree':
-                dlg = wx.MessageDialog(None, display_name + ' is trying to send you a tree node. Accept?', 'Question', 
+                dlg = wx.MessageDialog(None, component.strip_html(display_name) + ' is trying to send you a tree node. Accept?', 'Question', 
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if dlg.ShowModal() == wx.ID_YES:
                   dlg.Destroy()

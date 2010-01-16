@@ -71,6 +71,16 @@ class ORPGStorage(object):
         if self.__components.has_key(key): del self.__components[key]
         else: return
 
+    def strip_html(self, string):
+        ret_string = ""; x = 0; in_tag = 0
+        for x in range(len(string)) :
+            if string[x] == "<" or string[x] == ">" or in_tag == 1 :
+                if string[x] == "<": in_tag = 1
+                elif string[x] == ">": in_tag = 0
+                else: pass
+            else: ret_string = ret_string + string[x]
+        return ret_string
+
     ###Grumpy to Ornery###
     def add_component(self, key, com):
         return self.add(key, com)

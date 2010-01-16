@@ -156,7 +156,8 @@ class MapCanvas(wx.ScrolledWindow):
             else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
-            img = wx.ImageFromMime(path[1], path[2])
+            if path == 'failed': img = wx.Image(dir_struct["icon"] + "failed.png", wx.BITMAP_TYPE_PNG)
+            else: img = wx.ImageFromMime(path[1], path[2])
             try:
                 # Now, apply the image to the proper object
                 if image_type == "miniature":
@@ -472,8 +473,8 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_left_up(self, evt):
         if evt.ShiftDown(): self.on_tape_up(evt)
-        elif component.get("tree").dragging:
-            tree = component.get("tree")
+        elif component.get('tree_fs').dragging:
+            tree = component.get('tree_fs')
             if tree.drag_obj.map_aware():
                 tree.drag_obj.on_send_to_map(evt)
                 tree.dragging = False
@@ -482,7 +483,7 @@ class MapCanvas(wx.ScrolledWindow):
 
     def on_motion(self, evt):
         if evt.ShiftDown(): self.on_tape_motion(evt)
-        elif evt.LeftIsDown() and component.get("tree").dragging: pass
+        elif evt.LeftIsDown() and component.get('tree_fs').dragging: pass
         else: self.frame.on_motion(evt)
 
     def on_zoom_out(self, evt):

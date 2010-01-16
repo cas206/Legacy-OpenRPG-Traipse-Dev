@@ -2145,6 +2145,7 @@ class mplay_server:
         except: pass
 
     def send(self,msg,player,group):
+        debug(msg)
         self.players[player].send(msg,player,group)
 
     def send_to_all(self,from_id,data):
@@ -2159,8 +2160,9 @@ class mplay_server:
             self.log_msg("Exception: send_to_all(): " + str(e))
 
     def send_to_group(self, from_id, group_id, data):
-        #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"'><font color='#FF0000'>" + data + "</font>")
+        #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"' /><font color='#FF0000'>" + data + "</font>")
         data = ServerPlugins.postParseIncoming(data) #Function breaks here.
+        debug(data)
         try:
             self.p_lock.acquire()
             keys = self.groups[group_id].get_player_ids()
@@ -2520,7 +2522,7 @@ class mplay_server:
             keys.sort(id_compare)
             for k in keys:
                 groupstring = "<tr><td bgcolor='" + COLOR2 + "' colspan='2'>"
-                groutstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
+                groupstring += "<b>Group " + str(k)  + ": " +  self.groups[k].name  + "</b>"
                 groupstring += "</td><td bgcolor=" + COLOR2 + " > <i>Password: " + self.groups[k].pwd + "</td>"
                 groupstring += "<td bgcolor=" + COLOR2 + " > Boot: " + self.groups[k].boot_pwd + "</i></td></tr>"
                 pl += groupstring

@@ -32,6 +32,7 @@ from containers import *
 import orpg.minidom as minidom
 from orpg.orpg_xml import xml
 from wx.lib.scrolledpanel import ScrolledPanel
+from orpg.tools.settings import settings
 
 def bool2int(b):
     #in wxPython 2.5+, evt.Checked() returns True or False instead of 1.0 or 0.
@@ -255,7 +256,6 @@ class text_panel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.on_send, id=FORM_SEND_BUTTON)
 
     def on_text(self, evt):
-        debug()
         txt = self.text.GetValue()
         #txt = strip_text(txt) ##Does not seem to exist.
         self.handler.text_elem.text = txt
@@ -263,6 +263,7 @@ class text_panel(wx.Panel):
     def on_send(self, evt):
         txt = self.text.GetValue()
         txt = self.chat.ParseMap(txt, self.handler.xml)
+        txt = self.chat.ParseParent(txt, self.handler.xml.get('map'))
         if not self.handler.is_raw_send():
             self.chat.ParsePost(self.handler.tohtml(), True, True)
             return 1
@@ -281,11 +282,13 @@ F_SEND_BUTTON = wx.NewId()
 F_RAW_SEND = wx.NewId()
 F_HIDE_TITLE = wx.NewId()
 F_TEXT = wx.NewId()
+T_BUT_REF = wx.NewId()
 
 class textctrl_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.parent = parent
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Text Properties"), wx.VERTICAL)
 
         self.title = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
@@ -297,6 +300,7 @@ class textctrl_edit_panel(wx.Panel):
         self.hide_title.SetValue(handler.is_hide_title())
         self.send_button = wx.CheckBox(self, F_SEND_BUTTON, " Send Button")
         self.send_button.SetValue(handler.has_send_button())
+        button_ref = wx.Button(self, T_BUT_REF, "Reference")
 
         sizer.Add(wx.StaticText(self, P_TITLE, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.title, 0, wx.EXPAND)
@@ -305,6 +309,7 @@ class textctrl_edit_panel(wx.Panel):
         sizer.Add(self.raw_send, 0, wx.EXPAND)
         sizer.Add(self.hide_title, 0, wx.EXPAND)
         sizer.Add(self.send_button, 0 , wx.EXPAND)
+        sizer.Add(button_ref, 0)
         sizer.Add(wx.Size(10,10))
         if handler.is_multi_line():
             sizer_style = wx.EXPAND
@@ -326,6 +331,79 @@ class textctrl_edit_panel(wx.Panel):
         self.Bind(wx.EVT_CHECKBOX, self.on_raw_button, id=F_RAW_SEND)
         self.Bind(wx.EVT_CHECKBOX, self.on_hide_button, id=F_HIDE_TITLE)
         self.Bind(wx.EVT_CHECKBOX, self.on_send_button, id=F_SEND_BUTTON)
+        self.Bind(wx.EVT_BUTTON, self.on_reference, id=T_BUT_REF)
+        self.parent.Bind(wx.EVT_CLOSE, self.tree_failsafe)
+
+    ## EZ_Tree Core TaS - Prof.Ebral ##
+    def on_reference(self, evt, car=None):
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
+        self.ez_tree = orpg.gametree.gametree
+        self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
+        self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
+        component.get('tree_fs').save_tree(settings.get("gametree"))
+        self.temp_wnd.load_tree(settings.get("gametree"))
+        self.do_tree.Show()
+
+    def tree_failsafe(self, evt):
+        self.parent.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
+
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Mini Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        self.text.AppendText(complete); self.on_text(evt)
+        self.mini_grid.Destroy()
+
+    def on_ldclick(self, evt):
+        self.rename_flag = 0
+        pt = evt.GetPosition()
+        (item, flag) = self.temp_wnd.HitTest(pt)
+        if item.IsOk():
+            obj = self.temp_wnd.GetPyData(item)
+            self.temp_wnd.SelectItem(item)
+            start = self.handler.xml.get('map').split('::')
+            end = obj.xml.get('map').split('::')
+            if obj.xml.get('class') not in ['rpg_grid_handler', 'textctrl_handler']: do = 'None'
+            elif end[0] == '' or start[0] != end[0]: do = 'Root'
+            elif start == end: do = 'Child'
+            elif start != end: do = 'Parent'
+            if do == 'Root':
+                complete = "!@"
+                for e in end: 
+                    if e != '': complete += e +'::'
+                complete = complete + obj.xml.get('name') + '@!'
+            elif do == 'Parent':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!#"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '#!'
+            elif do == 'Child':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!!"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '!!'
+            if do != 'None': 
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else: self.text.AppendText(complete); self.on_text(evt)
+        self.do_tree.Destroy()
+        if do == 'None':
+            wx.MessageBox('Invalid Reference', 'Error')
+    #####                        #####
 
     def on_text(self,evt):
         id = evt.GetId()
@@ -377,11 +455,20 @@ class listbox_handler(node_handler):
     """
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
-        self.list = self.xml.find('list')
-        self.options = self.list.findall('option')
+        self.list_reload()
+        #print xml
+        #print self.tree.GetItemParent(tree_node)
         if self.list.get("send_button") == "": self.list.set("send_button","0")
         if self.list.get("hide_title") == "": self.list.set("hide_title","0")
         if self.list.get("raw_mode") == "": self.list.set("raw_mode","0")
+
+    def list_reload(self):
+        self.list = self.xml.find('list')
+        self.options = self.list.findall('option')
+        self.captions = []
+        for opt in self.options:
+            if opt.get('caption') == None: opt.set('caption', '')
+            self.captions.append(opt.get('caption'))
 
     def get_design_panel(self,parent):
         return listbox_edit_panel(parent,self)
@@ -454,23 +541,38 @@ class listbox_handler(node_handler):
         for opt in self.options: opts.append(opt.text)
         return opts
 
-    def get_option(self,index):
+    def get_captions(self):
+        captions = []
+        for opt in self.options: captions.append(opt.get("caption"))
+        self.captions = captions
+        return captions
+
+    def get_option(self, index):
         return self.options[index].text
 
-    def add_option(self,opt):
+    def get_caption(self, index):
+        captions = self.get_captions()
+        return captions[index] or ''
+
+    def add_option(self, caption, value):
         elem = Element('option')
         elem.set("value","0")
+        elem.set('caption', caption)
         elem.set("selected","0")
-        elem.text = opt
+        elem.text = value
         self.list.append(elem)
-        self.options = self.list.findall('option')
+        self.list_reload()
 
     def remove_option(self,index):
         self.list.remove(self.options[index])
-        self.options = self.list.findall('option')
+        self.list_reload()
 
-    def edit_option(self,index,value):
+    def edit_option(self, index, value):
         self.options[index].text = value
+
+    def edit_caption(self, index, value):
+        self.options[index].set('caption', value)
+        self.captions[index] = value
 
     def has_send_button(self):
         if self.list.get("send_button") == '0': return False
@@ -494,12 +596,14 @@ class listbox_handler(node_handler):
     def on_send_to_chat(self, evt):
         txt = self.get_selected_text()
         txt = self.chat.ParseMap(txt, self.xml)
+        txt = self.chat.ParseParent(txt, self.xml.get('map'))
         if not self.is_raw_send():
             self.chat.ParsePost(self.tohtml(), True, True)
             return 1
         actionlist = self.get_selections_text()
         for line in actionlist:
             line = self.chat.ParseMap(line, self.xml)
+            line = self.chat.ParseParent(line, self.xml.get('map'))
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
                     self.chat.ParsePost(line, True, True)
@@ -518,7 +622,12 @@ class listbox_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         self.chat = handler.chat
-        opts = handler.get_options()
+        opts = []
+        values = handler.get_options()
+        captions = handler.get_captions()
+        for value in values:
+            if captions[values.index(value)] != '': opts.append(captions[values.index(value)])
+            else: opts.append(value)
         cur_opt = handler.get_selected_text()
         type = handler.get_type()
         label = handler.xml.get('name')
@@ -571,20 +680,27 @@ class listbox_panel(wx.Panel):
 
 BUT_ADD = wx.NewId()
 BUT_REM = wx.NewId()
+BUT_REF = wx.NewId()
 BUT_EDIT = wx.NewId()
 F_TYPE = wx.NewId()
 F_NO_TITLE = wx.NewId()
+LIST_CTRL = wx.NewId()
 
 class listbox_edit_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
+        self.parent = parent
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "List Box Properties"), wx.VERTICAL)
 
         self.text = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
+        self.listbox = wx.ListCtrl(self, LIST_CTRL, style=wx.LC_REPORT)
+        self.listbox.InsertColumn(0, 'Caption')
+        self.listbox.InsertColumn(1, 'Value')
+        self.listbox.SetColumnWidth(0, 75)
+        self.listbox.SetColumnWidth(1, 300)
+        self.reload_options()
 
-        opts = handler.get_options()
-        self.listbox = wx.ListBox(self, F_LIST, choices=opts, style=wx.LB_HSCROLL|wx.LB_SINGLE|wx.LB_NEEDED_SB)
         opts = ['Drop Down', 'List Box', 'Radio Box', 'Check List']
         self.type_radios = wx.RadioBox(self,F_TYPE,"List Type",choices=opts)
         self.type_radios.SetSelection(handler.get_type())
@@ -636,32 +752,154 @@ class listbox_edit_panel(wx.Panel):
         self.handler.set_type(evt.GetInt())
 
     def on_add(self,evt):
-        dlg = wx.TextEntryDialog(self, 'Enter option?','Add Option', '')
-        if dlg.ShowModal() == wx.ID_OK:
-            self.handler.add_option(dlg.GetValue())
-        dlg.Destroy()
+        self.dlg = wx.Frame(self, -1, 'Text', size=(300,150))
+        edit_panel = wx.Panel(self.dlg, -1)
+        sizer = wx.GridBagSizer(1, 2)
+        edit_panel.SetSizer(sizer)
+        caption_text = wx.StaticText(edit_panel, -1, 'Caption')
+        self.caption_entry = wx.TextCtrl(edit_panel, -1, '')
+        value_text = wx.StaticText(edit_panel, -1, 'Value') 
+        self.value_entry = wx.TextCtrl(edit_panel, -1, '')
+        button_ok = wx.Button(edit_panel, wx.ID_OK)
+        button_cancel = wx.Button(edit_panel, wx.ID_CANCEL)
+        button_ref = wx.Button(edit_panel, BUT_REF, "Reference")
+        sizer.Add(caption_text, (0,0))
+        sizer.Add(self.caption_entry, (0,1), span=(1,3), flag=wx.EXPAND)
+        sizer.Add(value_text, (1,0))
+        sizer.Add(self.value_entry, (1,1), span=(1,3), flag=wx.EXPAND)
+        sizer.Add(button_ok, (3,0))
+        sizer.Add(button_cancel, (3,1))
+        sizer.Add(button_ref, (3,2), flag=wx.EXPAND)
+        self.Bind(wx.EVT_BUTTON, self.on_reference, id=BUT_REF)
+        self.Bind(wx.EVT_BUTTON, self.on_add_option, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.on_edit_cancel, id=wx.ID_CANCEL)
+        self.dlg.Show()
+
+    def on_add_option(self, evt):
+        self.handler.add_option(self.caption_entry.GetValue(), self.value_entry.GetValue())
         self.reload_options()
+        self.dlg.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
+        return
+
+    ## EZ_Tree Core TaS - Prof.Ebral ##
+    def on_reference(self, evt, car=None):
+        self.do_tree = wx.Frame(self, -1, 'EZ Tree')
+        self.ez_tree = orpg.gametree.gametree
+        self.temp_wnd = self.ez_tree.game_tree(self.do_tree, self.ez_tree.EZ_REF)
+        self.temp_wnd.Bind(wx.EVT_LEFT_DCLICK, self.on_ldclick)
+        component.get('tree_fs').save_tree(settings.get("gametree"))
+        self.temp_wnd.load_tree(settings.get("gametree"))
+        self.do_tree.Show()
+
+    def get_grid_ref(self, obj, complete):
+        self.temp_wnd.Freeze()
+        self.grid_ref = complete
+        self.mini_grid = wx.Frame(self, -1, 'EZ Tree Grid')
+        self.temp_grid = obj.get_use_panel(self.mini_grid)
+        self.temp_grid.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_grid_ldclick)
+        self.mini_grid.Show()
+
+    def on_grid_ldclick(self, evt):
+        complete = self.grid_ref
+        row = str(evt.GetRow()+1)
+        col = str(evt.GetCol()+1)
+        complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
+        self.value_entry.AppendText(complete)
+        self.mini_grid.Destroy()
+
+    def on_ldclick(self, evt):
+        self.rename_flag = 0
+        pt = evt.GetPosition()
+        (item, flag) = self.temp_wnd.HitTest(pt)
+        if item.IsOk():
+            obj = self.temp_wnd.GetPyData(item)
+            self.temp_wnd.SelectItem(item)
+            start = self.handler.xml.get('map').split('::')
+            end = obj.xml.get('map').split('::')
+            if obj.xml.get('class') not in ['rpg_grid_handler', 'textctrl_handler']: do = 'None'
+            elif end[0] == '' or start[0] != end[0]: do = 'Root'
+            elif start == end: do = 'Child'
+            elif start != end: do = 'Parent'
+            if do == 'Root':
+                complete = "!@"
+                for e in end: 
+                    if e != '': complete += e +'::'
+                complete = complete + obj.xml.get('name') + '@!'
+            elif do == 'Parent':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!#"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '#!'
+            elif do == 'Child':
+                while start[0] == end[0]:
+                    del end[0], start[0]
+                    if len(start) == 0 or len(end) == 0: break
+                complete = "!!"
+                for e in end: complete += e +'::'
+                complete = complete + obj.xml.get('name') + '!!'
+            if do != 'None': 
+                if obj.xml.get('class') == 'rpg_grid_handler': 
+                    self.get_grid_ref(obj, complete)
+                else: self.value_entry.AppendText(complete); self.reload_options()
+        self.do_tree.Destroy()
+        if do == 'None':
+            wx.MessageBox('Invalid Reference', 'Error')
+    #####                        #####
+
+    def on_edit_ok(self, evt):
+        self.handler.edit_caption(self.index, self.caption_entry.GetValue())
+        self.handler.edit_option(self.index, self.value_entry.GetValue())
+        self.reload_options()
+        self.dlg.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
+        return
+
+    def on_edit_cancel(self, evt):
+        self.dlg.Destroy()
+        component.add('tree', component.get('tree_fs')) ## Backup
+        return
 
     def on_remove(self,evt):
-        index = self.listbox.GetSelection()
+        index = self.listbox.GetFocusedItem()
         if index >= 0:
             self.handler.remove_option(index)
             self.reload_options()
 
     def on_edit(self,evt):
-        index = self.listbox.GetSelection()
-        if index >= 0:
-            txt = self.handler.get_option(index)
-            dlg = wx.TextEntryDialog(self, 'Enter option?','Edit Option', txt)
-            if dlg.ShowModal() == wx.ID_OK:
-                self.handler.edit_option(index,dlg.GetValue())
-            dlg.Destroy()
-            self.reload_options()
+        self.index = self.listbox.GetFocusedItem()
+        if self.index >= 0:
+            self.dlg = wx.Frame(self, -1, 'Text', size=(300,150))
+            edit_panel = wx.Panel(self.dlg, -1)
+            sizer = wx.GridBagSizer(1, 2)
+            edit_panel.SetSizer(sizer)
+            caption_text = wx.StaticText(edit_panel, -1, 'Caption')
+            self.caption_entry = wx.TextCtrl(edit_panel, -1, self.handler.get_caption(self.index))
+            value_text = wx.StaticText(edit_panel, -1, 'Value') 
+            self.value_entry = wx.TextCtrl(edit_panel, -1, self.handler.get_option(self.index))
+            button_ok = wx.Button(edit_panel, wx.ID_OK)
+            button_cancel = wx.Button(edit_panel, wx.ID_CANCEL)
+            button_ref = wx.Button(edit_panel, BUT_REF, "Reference")
+            sizer.Add(caption_text, (0,0))
+            sizer.Add(self.caption_entry, (0,1), span=(1,3), flag=wx.EXPAND)
+            sizer.Add(value_text, (1,0))
+            sizer.Add(self.value_entry, (1,1), span=(1,3), flag=wx.EXPAND)
+            sizer.Add(button_ok, (3,0))
+            sizer.Add(button_cancel, (3,1))
+            sizer.Add(button_ref, (3,2), flag=wx.EXPAND)
+            self.Bind(wx.EVT_BUTTON, self.on_reference, id=BUT_REF)
+            self.Bind(wx.EVT_BUTTON, self.on_edit_ok, id=wx.ID_OK)
+            self.Bind(wx.EVT_BUTTON, self.on_edit_cancel, id=wx.ID_CANCEL)
+            self.dlg.Show()
 
     def reload_options(self):
-        self.listbox.Clear()
-        for opt in self.handler.get_options():
-            self.listbox.Append(opt)
+        self.listbox.DeleteAllItems()
+        values = self.handler.get_options()
+        captions = self.handler.get_captions()
+        for index in range(len(values)):
+            self.listbox.Append((captions[index], values[index]))
 
     def on_text(self,evt):
         id = evt.GetId()

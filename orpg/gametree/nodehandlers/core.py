@@ -54,6 +54,7 @@ class node_handler:
         self.xml = xml
         self.mytree_node = tree_node
         self.tree = component.get('tree')
+        #self.tree = component.get('tree_fs')
         self.frame = component.get('frame')
         self.chat = component.get('chat')
         self.drag = True
@@ -132,7 +133,7 @@ class node_handler:
         self.myeditor.Thaw()
         return True
 
-    def on_use(self,evt):
+    def on_use(self, evt):
         try:
             self.mywindow.Show()
             self.mywindow.Raise()
@@ -423,7 +424,6 @@ class url_loader(node_handler):
 
     def on_design(self,evt):
         tlist = ['Title','URL']
-        print "design filename",self.xml.get('name')
         vlist = [self.xml.get("name"),
                  self.file_node.get("url")]
         dlg = orpgMultiTextEntry(self.tree.GetParent(),tlist,vlist,"File Loader Edit")

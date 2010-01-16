@@ -1,4 +1,4 @@
-<nodehandler class="tabber_handler" frame="987,495,14,101" icon="tabber" module="containers" name="Die Roller Notes" version="1.0">
+<nodehandler class="tabber_handler" frame="987,495,14,101" icon="tabber" map="" module="containers" name="Die Roller Notes" version="1.0">
   <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="Basics" version="1.0">
     <text multiline="1" send_button="1">The new dieroller is design with expansion in mind. While there are a number of new dieroller options in the base roller, the new design facilitates the building of new rollers that can be loaded at any time.  In this test build three are 3 rollers: std, d20, and wod.  The std roller is the generic roller.  It has generic dice options and is the base for all other dierollers. The d20 and wod rollers are game specific rollers and have game specific options.  They also serve as examples for how to create your own rollers in python.
 
@@ -52,7 +52,7 @@ each - apply X value to all dice
 </text>
   </nodehandler>
   <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Die Roller Notes" module="forms" name="7th Sea" version="1.0">
-    <text multiline="1" send_button="1">The 7th Sea roller is part of the Standard rollers in Traipse.
+    <text multiline="1" send_button="1">Remember, to use the 7th Sea roller type: "/dieroller 7sea"
 
 The 7th Sea roller includes a truncated version that allows you to roll quickly.
 
@@ -71,7 +71,7 @@ attack(AC,mod,critical) - make an attack roll.
 </text>
   </nodehandler>
   <nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="WoD roller" version="1.0">
-    <text multiline="1" send_button="1">Remember, to use the wod roller type: "/dieroller wod"
+    <text multiline="1" send_button="1">Remember, to use the WoD roller type: "/dieroller wod"
 
 vs(target) - vs roll against target
 
@@ -98,7 +98,7 @@ The letters in the die rolls indicate what type of damage is dealt.
 'w' = Wound
 'm' = Mortal</text>
   </nodehandler><nodehandler class="textctrl_handler" icon="note" map="Die Roller Notes" module="forms" name="Mythos roller" version="1.0">
-    <text multiline="1" send_button="1">Remember, to use the mythos roller type: "/dieroller mythos"
+    <text multiline="1" send_button="1">Remember, to use the Mythos roller type: "/dieroller mythos"
 
 The mythos roller is a roller designed by community request. The roller uses a new style of versus similar to the wod roller.
 
@@ -117,8 +117,26 @@ vs(target) - vs roll against target
 The mythos roller also works with the new shortened vs. roll
 
 [3v3] = [3d12.vs(3)] - vs roll against 3, 6, 9, 12</text>
+  </nodehandler><nodehandler class="textctrl_handler" frame="400,400,308,51" icon="note" map="Die Roller Notes" module="forms" name="Warhammer FRPG" version="1.0">
+    <text multiline="1" send_button="0">Remember, to use the Warhammer FRPG roller type: "/dieroller wfrpg"
+
+*Special thanks goes to Puu-san who purchase a support ticket for this awesome die roller. Be sure and thank Puu-san.*
+
+The Warhammer FRPG die roller is the first of it's kind and is used when playing the Warhammer Fantasy Role-Playing Game. Unlike standard dice the WFRPG roller has pictures on it's facets. When rolling the WFRPG die, you will return text that corrosponds to the facet one the die.
+
+Die Types &amp; Syntax:
+
+Below you will see the die types and how to roll 1 of each die type.
+
+Reckless:               [1rec]
+Conservative:       [1con]
+Characteristic:      [1cha]
+Challenge:             [1chr]
+Fortune:                [1for]
+Mistfortune:         [1mis]
+Expertise:             [1exp]</text>
   </nodehandler><nodehandler class="textctrl_handler" frame="400,400,308,51" icon="note" map="Die Roller Notes" module="forms" name="Hero Roller" version="1.0">
-    <text multiline="1" send_button="0">Remember, to use the hero roller type: "/dieroller hero"
+    <text multiline="1" send_button="0">Remember, to use the Hero roller type: "/dieroller hero"
 
 Skill Roller, example [3d6.sk(11,0)]
 Make a SKill roll.  The first number of the two modifiers is the rating in the skill, 11 meaning 11 or less.  The second number is any penalty or bonus you have for the roll.  A positive number is a bonus, a negative number is a penalty.  As with many Hero system rolls, the only die choice that makes sense is 3d6

@@ -1,0 +1,8 @@
+The following images are Copyright Sekkyumu and released to the Public Domain
+add.png
+add_button.png
+check_button.png
+(from) failed.png
+(from) fetching.png
+spotlight.png
+star.png
