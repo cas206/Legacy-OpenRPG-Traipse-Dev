@@ -19,7 +19,7 @@
 # Permission was granted by Pinnacle to reprint the result descriptions from their tables on Apr 20, 2006 by Simon Lucas
 #
 
-__version__ = "$Id: savage.py,v 1.2 2007/05/06 16:42:55 digitalxero Exp $"
+__version__ = "$Id: savage.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import string
 from random import *

@@ -21,16 +21,14 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: mplay_client.py,v 1.71 2007/05/12 20:41:54 digitalxero Exp $
+#   $Id: mplay_client.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains the code for the client stubs of the multiplayer
 # features in the orpg project.
 #
 
-__version__ = "$Id: mplay_client.py,v 1.71 2007/05/12 20:41:54 digitalxero Exp $"
+__version__ = "$Id: mplay_client.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
-### Alpha ### 
-##import orpg.minidom ## Deprecated. xml.parseXml calls minidom.parseString so it was superfluous and wasteful.
 import socket, Queue, thread, traceback, errno, os, time
 
 from threading import Event, Lock
@@ -123,7 +121,7 @@ class client_base:
         self.ROLE_LURKER = "Lurker"
         ## --TaS
         try: self.ip = socket.gethostbyname(socket.gethostname())
-	except: self.ip = socket.gethostbyname('localhost')
+        except: self.ip = socket.gethostbyname('localhost')
         self.remote_ip = None
         self.version = VERSION
         self.protocol_version = PROTOCOL_VERSION
@@ -625,7 +623,6 @@ class mplay_client(client_base):
         el.set('from', self.id)
         el.set('pwd', pwd)
         el.set('group_id', str(group_id))
-
         self.outbox.put(tostring(el))
 
     def poll(self, evt=None):
@@ -766,7 +763,6 @@ class mplay_client(client_base):
             self.on_player_event(mplay_event(PLAYER_DEL, self.players[id]))
             if self.players.has_key(id): del self.players[id]
             if id == self.id: self.do_disconnect()
-        #  the next two cases handle the events that are used to let you know when others are typing
         elif act == "update":
             if id == self.id:
                 self.players[id] = player
@@ -842,7 +838,7 @@ class mplay_client(client_base):
         outgoing = self.toxml('del')
         if iselement(outgoing): outgoing = tostring(outgoing)
         self.outbox.put(outgoing)
-        ## Client Side Disconect Forced -- Snowdog 10-09-2003
+        ## Client Side Disconnect Forced -- Snowdog 10-09-2003
         #pause to allow GUI events time to sync.
         time.sleep(1)
         self.do_disconnect()
@@ -862,3 +858,4 @@ class mplay_client(client_base):
         self.unique_cookie += 1
         return_str = self.id + "-" + str(self.unique_cookie)
         return return_str
+

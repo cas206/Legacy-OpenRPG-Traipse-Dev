@@ -1,11 +1,3 @@
-# file: config_files.py
-#
-# Author: Todd Faris (Snowdog)
-# Date:   5/10/2005
-#
-# Misc. config file service methods
-#
-
 from orpg.dirpath import dir_struct
 import os
 from orpg.orpgCore import component

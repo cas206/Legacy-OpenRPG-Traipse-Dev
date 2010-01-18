@@ -21,7 +21,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: min_dialogs.py,v 1.27 2006/11/13 02:23:16 digitalxero Exp $
+#   $Id: min_dialogs.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
@@ -146,10 +146,8 @@ class min_list_panel(wx.Dialog):
              #############
                 min_xml = sel_rmin.toxml(action="new")
                 node_begin = "<nodehandler module='map_miniature_nodehandler' class='map_miniature_handler' name='"
-
                 if sel_rmin.label: node_begin += sel_rmin.label + "'"
                 else: node_begin += "Unnamed Miniature'"
-
                 node_begin += ">"
                 gametree = component.get('tree')
                 node_xml = node_begin + min_xml + '</nodehandler>'
@@ -308,14 +306,11 @@ class min_list_edit_panel(wx.Panel):
         positionbox.Add(poschoicebox,0,0)
         listsizer.Add(positionbox,0, 0)
         self.listsizer = listsizer
-        #self.outline = wx.StaticBox(self,-1,"Miniature list properties")
-        #listsizer.Add(self.outline,0, wx.EXPAND)
         self.SetSizer(listsizer)
         self.SetAutoLayout(True)
         self.Fit()
         self.Bind(wx.EVT_SPINCTRL, self.on_spin, id=POS_SPIN)
         self.Bind(wx.EVT_TEXT, self.on_combo_box, id=POS_COMB)
-        #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_TEXT, self.on_text, id=MIN_LABEL)
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=MIN_HEADING)
         self.Bind(wx.EVT_RADIOBOX, self.on_radio_box, id=MIN_FACE)
@@ -500,12 +495,10 @@ class min_edit_panel(wx.Panel):
 
 class min_edit_dialog(wx.Dialog):
     def __init__(self,parent,min):
-        #520,265
         wx.Dialog.__init__(self,parent,-1,"Miniature",wx.DefaultPosition,wx.Size(520,350))
         (w,h) = self.GetClientSizeTuple()
         mastersizer = wx.BoxSizer(wx.VERTICAL)
         editor = min_edit_panel(self,min)
-        #editor.SetDimensions(0,0,w,h-25)
         self.editor = editor
         mastersizer.Add(editor, 1, wx.EXPAND)
         mastersizer.Add(wx.Size(10,10))
@@ -513,7 +506,6 @@ class min_edit_dialog(wx.Dialog):
         sizer.Add(wx.Button(self, wx.ID_OK, "OK"), 1, wx.EXPAND)
         sizer.Add(wx.Size(10,10))
         sizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"), 1, wx.EXPAND)
-        #sizer.SetDimension(0,h-25,w,25)
         mastersizer.Add(sizer, 0, wx.EXPAND)
         self.SetSizer(mastersizer)
         self.SetAutoLayout(True)
@@ -523,3 +515,4 @@ class min_edit_dialog(wx.Dialog):
     def on_ok(self,evt):
         self.editor.update_min()
         self.EndModal(wx.ID_OK)
+

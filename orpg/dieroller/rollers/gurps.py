@@ -51,10 +51,8 @@
 
 from time import time, clock
 import random
-
 from std import std
 from orpg.dieroller.base import *
-
 
 __version__ = "$Id: gurps.py,v 1.5 2007/05/06 16:42:55 digitalxero Exp $"
 
@@ -66,9 +64,6 @@ class gurps(std):
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-# these methods return new die objects for specific options
-
-# Original msk roll renamed to be easier to understand/remember
     def skill(self,skill,mod):
         return gurpsskill(self,skill,mod)
 
@@ -133,8 +128,6 @@ class gurpsskill(std):
         else:
             if self.sum() == 18:
                 myStr += " or less <font color='#ff0000'><b>Critical Failure!</b></font> [B556]"
-#            elif self.sum() == 17 and (self.skill+self.mod < 16):
-#                myStr += " or less <font color='#ff0000'><b>Critical Failure!</b></font> [B556]"
             elif self.sum() == 17:
                 if (self.skill+self.mod) < 16:
                     myStr += " or less <font color='#ff0000'><b>Critical Failure!</b></font> [B556]"
@@ -279,13 +272,12 @@ class gurpscrit_hit(std):
         std.__init__(self,source)
 
     def __str__(self):
-        myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
-        for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
-            myStr += ","                  #Adds a comma after each die
-            myStr += str(a)           #Adds the value of each die.
-        myStr += "] = "                 #Adds ] = to the end of the string (note the += means append to whatever is already stored in the variable
-        myStr += str(self.sum())          #Finally we add the actual result of the roll and myStr contains something like [3,2,1] = 6
-
+        myStr = "[" + str(self.data[0]) 
+        for a in self.data[1:]:
+            myStr += "," 
+            myStr += str(a)
+        myStr += "] = " 
+        myStr += str(self.sum()) 
         if self.sum() > 8 and self.sum() < 12:
             myStr += " <font color='#ff0000'>The blow inflicts normal damage.</font> [B556]"
         elif self.sum() == 12:
@@ -310,13 +302,12 @@ class gurpscrit_headblow(std):
         std.__init__(self,source)
 
     def __str__(self):
-        myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
-        for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
-            myStr += ","                  #Adds a comma after each die
-            myStr += str(a)           #Adds the value of each die.
-        myStr += "] = "                 #Adds ] = to the end of the string (note the += means append to whatever is already stored in the variable
-        myStr += str(self.sum())          #Finally we add the actual result of the roll and myStr contains something like [3,2,1] = 6
-
+        myStr = "[" + str(self.data[0]) 
+        for a in self.data[1:]:
+            myStr += ","
+            myStr += str(a)
+        myStr += "] = "
+        myStr += str(self.sum())
         if self.sum() > 8 and self.sum() < 12:
             myStr += " <font color='#ff0000'>The blow inflicts normal damage.</font> [B556]"
         elif self.sum() == 12 or self.sum() == 13:
@@ -347,13 +338,12 @@ class gurpscrit_miss(std):
         std.__init__(self,source)
 
     def __str__(self):
-        myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
-        for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
-            myStr += ","                  #Adds a comma after each die
-            myStr += str(a)           #Adds the value of each die.
-        myStr += "] = "                 #Adds ] = to the end of the string (note the += means append to whatever is already stored in the variable
-        myStr += str(self.sum())          #Finally we add the actual result of the roll and myStr contains something like [3,2,1] = 6
-
+        myStr = "[" + str(self.data[0])
+        for a in self.data[1:]: 
+            myStr += ","
+            myStr += str(a) 
+        myStr += "] = "
+        myStr += str(self.sum())
         if self.sum() > 8 and self.sum() < 12:
             myStr += " <font color='#ff0000'>You drop your weapon (& a <i>cheap</i> weapon breaks).</font> [B556]"
         elif self.sum() == 12 or self.sum() == 8:
@@ -386,13 +376,12 @@ class gurpscrit_unarm(std):
         std.__init__(self,source)
 
     def __str__(self):
-        myStr = "[" + str(self.data[0]) #Variable myStr holds text and first we put a [ into it and then adds the first die rolled
-        for a in self.data[1:]:             #This is a for loop.  It will do the next two lines of code for every die (except the first die which we handled in the line above) in the roll.
-            myStr += ","                  #Adds a comma after each die
-            myStr += str(a)           #Adds the value of each die.
-        myStr += "] = "                 #Adds ] = to the end of the string (note the += means append to whatever is already stored in the variable
-        myStr += str(self.sum())          #Finally we add the actual result of the roll and myStr contains something like [3,2,1] = 6
-
+        myStr = "[" + str(self.data[0])
+        for a in self.data[1:]:
+            myStr += "," 
+            myStr += str(a)
+        myStr += "] = " 
+        myStr += str(self.sum())
         if self.sum() > 8 and self.sum() < 12:
             myStr += " <font color='#ff0000'>You lose your balance;  you can do nothing else (not even free actions) until next turn, and all defenses -2 until next turn.</font> [B557]"
         elif self.sum() == 12:

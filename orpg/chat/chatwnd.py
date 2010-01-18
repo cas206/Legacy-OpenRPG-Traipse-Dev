@@ -21,7 +21,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: chatwnd.py,v 1.177 2007/12/07 20:39:48 digitalxero Exp $
+#   $Id: chatwnd.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
@@ -37,7 +37,7 @@
 #   + Added simple_html_repair() to post() to fix malformed html in the chat window
 #
 
-__version__ = "$Id: chatwnd.py,v 1.177 2007/12/07 20:39:48 digitalxero Exp $"
+__version__ = "$Id: chatwnd.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 
 ##
@@ -49,7 +49,6 @@ from orpg.orpg_version import VERSION
 from orpg.orpg_windows import *
 from orpg.player_list import WG_LIST
 from orpg.dirpath import dir_struct
-#from orpg.tools.metamenus import MenuEx #Needed?
 from string import *
 
 import cStringIO # for reading inline imagedata as a stream
@@ -65,8 +64,7 @@ from orpg.tools.orpg_log import logger, debug
 from orpg.orpgCore import component
 from xml.etree.ElementTree import tostring
 
-from orpg.networking.mplay_client import MPLAY_CONNECTED  # needed to only send typing/not_typing messages while connected
-
+from orpg.networking.mplay_client import MPLAY_CONNECTED  
 NEWCHAT = False
 try:
     import wx.webview
@@ -83,10 +81,10 @@ class HTMLStripper(HTMLParser):
         self.accum = ""
         self.special_tags = ['hr', 'br', 'img']
     
-    def handle_data(self, data):  # quote cdata literally
+    def handle_data(self, data):  
         self.accum += data
     
-    def handle_entityref(self, name): # entities must be preserved exactly
+    def handle_entityref(self, name): 
         self.accum += "&" + name + ";"
     
     def handle_starttag(self, tag, attrs):
@@ -95,11 +93,10 @@ class HTMLStripper(HTMLParser):
             for attrib in attrs: self.accum += ' ' + attrib[0] + '="' + attrib[1] + '"'
             self.accum += '>'
     
-    def handle_charref(self, name):  # charrefs too
+    def handle_charref(self, name):
         self.accum += "&#" + name + ";"
 htmlstripper = HTMLStripper()
 
-# utility function;  see Post().
 
 def strip_html(string):
     "Return string tripped of html tags."
@@ -114,7 +111,6 @@ def log( settings, c, text ):
     filename = settings.get_setting('GameLogPrefix')
     if filename > '' and filename[0] != commands.ANTI_LOG_CHAR:
         filename = filename + time.strftime( '-%Y-%m-%d.html', time.localtime( time.time() ) )
-        #filename = time.strftime( filename, time.localtime( time.time() ) )
         timestamp = time.ctime(time.time())
         header = '[%s] : ' % ( timestamp );
         if settings.get_setting('TimeStampGameLog') != '1': header = ''
@@ -136,12 +132,7 @@ def log( settings, c, text ):
 #
 class chat_html_window(wx.html.HtmlWindow):
     """ a wxHTMLwindow that will load links  """
-    # initialization subroutine
-    #
-    # !self : instance of self
-    # !parent :
-    # !id :
-    
+
     def __init__(self, parent, id):
         wx.html.HtmlWindow.__init__(self, parent, id, 
                                     style=wx.SUNKEN_BORDER|wx.html.HW_SCROLLBAR_AUTO|wx.NO_FULL_REPAINT_ON_RESIZE)
@@ -150,18 +141,14 @@ class chat_html_window(wx.html.HtmlWindow):
         self.Bind(wx.EVT_LEFT_UP, self.LeftUp)
         self.Bind(wx.EVT_RIGHT_DOWN, self.onPopup)
         if "gtk2" in wx.PlatformInfo: self.SetStandardFonts()
-        # def __init__ - end
 
-    
     def onPopup(self, evt):
         self.PopupMenu(self.menu)
 
-    
     def LeftUp(self, event):
         event.Skip()
         wx.CallAfter(self.parent.set_chat_text_focus, None)
 
-    
     def build_menu(self):
         self.menu = wx.Menu()
         item = wx.MenuItem(self.menu, wx.ID_ANY, "Copy", "Copy")
@@ -174,13 +161,11 @@ class chat_html_window(wx.html.HtmlWindow):
         wx.TheClipboard.SetData(wx.TextDataObject(self.SelectionToText()))
         wx.TheClipboard.Close()
 
-    
     def scroll_down(self):
         maxrange = self.GetScrollRange(wx.VERTICAL)
         pagesize = self.GetScrollPageSize(wx.VERTICAL)
         self.Scroll(-1, maxrange-pagesize)
 
-    
     def mouse_wheel(self, event):
         amt = event.GetWheelRotation()
         units = amt/(-(event.GetWheelDelta()))
@@ -197,19 +182,12 @@ class chat_html_window(wx.html.HtmlWindow):
     
     def GetPageSource(self):
         return self.GetParser().GetSource()
-
-    # This subroutine fires up the webbrowser when a link is clicked.
-    #
-    # !self : instance of self
-    # !linkinfo : instance of a class that contains the link information
     
     def OnLinkClicked(self, linkinfo):
         href = linkinfo.GetHref()
         wb = webbrowser.get()
         wb.open(href)
-    # def OnLinkClicked - end
 
-    
     def CalculateAllFonts(self, defaultsize):
         return [int(defaultsize * 0.4),
                 int(defaultsize * 0.7),
@@ -219,7 +197,6 @@ class chat_html_window(wx.html.HtmlWindow):
                 int(defaultsize * 2),
                 int(defaultsize * 2.5)]
 
-    
     def SetDefaultFontAndSize(self, fontname, fontsize):
         """Set 'fontname' to the default chat font.
            Returns current font settings in a (fontname, fontsize) tuple."""
@@ -239,7 +216,6 @@ if NEWCHAT:
             self.Bind(wx.EVT_RIGHT_DOWN, self.onPopup)
             self.Bind(wx.webview.EVT_WEBVIEW_BEFORE_LOAD, self.OnLinkClicked)
 
-        #Wrapers so I dont have to add special Code
         def SetPage(self, htmlstring):
             self.SetPageSource(htmlstring)
 
@@ -450,7 +426,6 @@ class chat_notebook(orpgTabberWnd):
         selected_idx = event.GetSelection()
         self.SetPageImage(selected_idx, 1)
         page = self.GetPage(selected_idx)
-        #wx.CallAfter(page.set_chat_text_focus, 0)
         event.Skip()
 
 """
@@ -505,10 +480,6 @@ class chat_panel(wx.Panel):
         # who receives outbound messages, either "all" or "playerid" string
         self.sendtarget = sendtarget
         self.type = tab_type
-        #self.sound_player = component.get('sound') #Removing!
-        # create die roller manager
-        #self.DiceManager = component.get('DiceManager') #Removing!
-        # create rpghex tool
         self.r_h = orpg.tools.rgbhex.RGBHex()
         self.h = 0
         self.set_colors()
@@ -536,7 +507,7 @@ class chat_panel(wx.Panel):
         self.lastSend = 0         #  this is used to help implement the player typing indicator
         self.lastPress = 0        #  this is used to help implement the player typing indicator
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(EVT_ETC_LAYOUT_NEEDED, self.OnSize) #require to keep text at bottom of chat when text entry expands --SD
+        self.Bind(EVT_ETC_LAYOUT_NEEDED, self.OnSize) 
         self.build_ctrls()
         StartupFont = self.settings.get_setting("defaultfont")
         StartupFontSize = self.settings.get_setting("defaultfontsize")
@@ -778,7 +749,6 @@ class chat_panel(wx.Panel):
         self.build_menu()
         entries = []
         entries.append((wx.ACCEL_CTRL, ord('H'), self.setChatFocusMenu.GetId()))
-        #entries.append((wx.ACCEL_CTRL, wx.WXK_TAB, SWAP_TABS))
         return entries
 
     
@@ -788,10 +758,6 @@ class chat_panel(wx.Panel):
     def back_tabs(self, evt):
         self.parent.AdvanceSelection(False)
 
-    # This subroutine builds the controls for the chat frame
-    #
-    # !self : instance of self
-    
     def build_ctrls(self):
         self.chatwnd = chat_html_window(self,-1)
         self.set_colors()
@@ -799,7 +765,6 @@ class chat_panel(wx.Panel):
         if (self.sendtarget == "all"):
             wx.CallAfter(self.Post, self.colorize(self.syscolor, 
                 "<b>Welcome to <a href='http://www.openrpg.com'>OpenRPG</a> version " + self.version + "...  </b>"))
-            #self.chat_cmds.on_help()
         self.chattxt = orpg.tools.predTextCtrl.predTextCtrl(self, -1, "", 
                         style=wx.TE_PROCESS_ENTER |wx.TE_PROCESS_TAB|wx.TE_LINEWRAP, 
                         keyHook = self.myKeyHook, validator=None )
@@ -838,7 +803,6 @@ class chat_panel(wx.Panel):
         self.chattxt.Bind(wx.EVT_CHAR, self.chattxt.OnChar)
         self.chattxt.Bind(wx.EVT_KEY_DOWN, self.on_chat_key_down)
         self.chattxt.Bind(wx.EVT_TEXT_COPY, self.chatwnd.OnM_EditCopy)
-    # def build_ctrls - end
 
     def build_bar(self):
         self.toolbar_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -855,11 +819,9 @@ class chat_panel(wx.Panel):
             self.build_formating()
             self.build_colorbutton()
 
-    
     def build_scroll(self):
         self.scroll_lock = wx.Button( self, wx.ID_ANY, "Scroll ON",size= wx.Size(80,25))
 
-    
     def build_alias(self):
         self.aliasSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.aliasList = wx.Choice(self, wx.ID_ANY, size=(100, 25), choices=[self.defaultAliasName])
@@ -949,8 +911,6 @@ class chat_panel(wx.Panel):
         else: self.toolbar_sizer.Show(self.formatSizer, True)
         self.toolbar_sizer.Layout()
 
-    # Heroman - Ideally, we would use static labels...
-    
     def build_colorbutton(self):
         self.color_button = createMaskedButton(self, dir_struct["icon"]+'textcolor.gif', 
                                                     'Text Color', wx.ID_ANY, '#bdbdbd', 
@@ -983,13 +943,6 @@ class chat_panel(wx.Panel):
         else: logger.general("Error, self.chatwnd.GetInternalRepresentation() return None")
         evt.Skip()
 
-    #  This subroutine is registered with predTextCtrl to be run for every OnChar event
-    #  It checks if we need to send a typing message
-
-    #
-    #  self:  duh
-    #  event:  raw KeyEvent from OnChar()
-    
     def myKeyHook(self, event):
         if self.session.get_status() == MPLAY_CONNECTED:   #  only do if we're connected
             thisPress = time.time()                #  thisPress is local temp variable
@@ -1005,11 +958,6 @@ class chat_panel(wx.Panel):
             logger.debug("Exit chat_panel->myKeyHook(self, event) return 0")
             return 0
 
-    #  This subroutine gets called once a second by the typing Timer
-    #  It checks if we need to send a not_typing message
-    #
-    #  self:  duh
-    
     def typingTimerFunc(self, event):
         #following added by mDuo13
         ##############refresh_counter()##############
@@ -1027,12 +975,7 @@ class chat_panel(wx.Panel):
                                                    #  If we're not already typing, then self.lastSend will be 0
 
                 self.sendTyping(0)                 #  send a typing event here (0 for False)
-    #  This subroutine actually takes care of sending the messages for typing/not_typing events
-    #
-    #  self:  duh
-    #  typing:  boolean
 
-    
     def sendTyping(self, typing):
         if typing:
             self.lastSend = time.time()  #  remember our send time for use in myKeyHook()
@@ -1047,11 +990,6 @@ class chat_panel(wx.Panel):
             if status_text == "" or status_text == None: status_text = "Idle"
             self.session.set_text_status(status_text)
 
-    # This subroutine sets the colors of the chat based on the settings in the
-    # self instance.
-    #
-    # !self : instance of self
-    
     def set_colors(self):
         # chat window backround color
         self.bgcolor = self.settings.get_setting('bgcolor')
@@ -1067,18 +1005,11 @@ class chat_panel(wx.Panel):
         self.emotecolor = self.settings.get_setting('emotecolor')
         # color of whispers
         self.whispercolor = self.settings.get_setting('whispercolor')
-    # def set_colors - end
-
-    # This subroutine will insert text into the chat window
-    #
-    # !self : instance of self
-    # !txt : text to be inserted into the chat window
     
     def set_chat_text(self, txt):
         self.chattxt.SetValue(txt)
         self.chattxt.SetFocus()
         self.chattxt.SetInsertionPointEnd()
-    # def set_chat_text - end
 
     
     def get_chat_text(self):
@@ -1088,22 +1019,11 @@ class chat_panel(wx.Panel):
     
     def set_chat_text_focus(self, event):
         wx.CallAfter(self.chattxt.SetFocus)
-    # def set_chat_text_focus - end
-
-    # This subrtouine grabs the user input and make the special keys and
-    # modifiers work.
-    #
-    # !self : instance of self
-    # !event :
-    #
-    # Note:  self.chattxt now handles it's own Key events.  It does, however still
-    #        call it's parent's (self) OnChar to handle "default" behavior.
 
     def submit_chat_text(self, s):
         self.histidx = -1
         self.temptext = ""
         self.history = [s] + self.history 
-        #if not len(macroText): self.chattxt.SetValue("")
 
         # play sound
         sound_file = self.settings.get_setting("SendSound")
@@ -1144,17 +1064,12 @@ class chat_panel(wx.Panel):
         elif event.GetKeyCode() == wx.WXK_UP:
             logger.debug("event.GetKeyCode() == wx.WXK_UP")
             if self.histidx < len(self.history)-1:
-                #text that's not in history but also hasn't been sent to chat gets stored in self.temptext
-                #this way if someone presses the up key, they don't lose their current message permanently
-                #(unless they also press enter at the time)
                 if self.histidx is -1: self.temptext = self.chattxt.GetValue()
                 self.histidx += 1
                 self.chattxt.SetValue(self.history[self.histidx])
                 self.chattxt.SetInsertionPointEnd()
             else:
-                self.histidx = len(self.history) -1#in case it got too high somehow, this should fix it
-                #self.InfoPost("**Going up? I don't think so.**")
-            #print self.histidx, "in",self.history
+                self.histidx = len(self.history) -1
 
         ## DOWN KEY
         elif event.GetKeyCode() == wx.WXK_DOWN:
@@ -1166,9 +1081,7 @@ class chat_panel(wx.Panel):
                     self.chattxt.SetValue(self.temptext)
                 else: self.chattxt.SetValue(self.history[self.histidx])
                 self.chattxt.SetInsertionPointEnd()
-            else: self.histidx = -1 #just in case it somehow got below -1, this should fix it
-                #self.InfoPost("**Going down? I don't think so.**")
-            #print self.histidx, "in",self.history
+            else: self.histidx = -1 
 
         ## TAB KEY
         elif  event.GetKeyCode() == wx.WXK_TAB:
@@ -1242,8 +1155,6 @@ class chat_panel(wx.Panel):
         ## NOTHING
         else: event.Skip()
         logger.debug("Exit chat_panel->OnChar(self, event)")
-    # def OnChar - end
-
     
     def onDieRoll(self, evt):
         """Roll the dice based on the button pressed and the die modifiers entered, if any."""
@@ -1260,12 +1171,6 @@ class chat_panel(wx.Panel):
         self.ParsePost(dieText, 1, 1)
         self.chattxt.SetFocus()
 
-    # This subroutine saves a chat buffer as html to a file chosen via a
-    # FileDialog.
-    #
-    # !self : instance of self
-    # !evt :
-    
     def on_chat_save(self, evt):
         f = wx.FileDialog(self,"Save Chat Buffer",".","","HTM* (*.htm*)|*.htm*|HTML (*.html)|*.html|HTM (*.htm)|*.htm",wx.SAVE)
         if f.ShowModal() == wx.ID_OK:
@@ -1274,9 +1179,7 @@ class chat_panel(wx.Panel):
             file.close()
         f.Destroy()
         os.chdir(dir_struct["home"])
-    # def on_chat_save - end
 
-    
     def ResetPage(self):
         self.set_colors()
         buffertext = self.chatwnd.Header() + "\n"
@@ -1286,9 +1189,6 @@ class chat_panel(wx.Panel):
                                                                             "<br />\n").replace("\n\n", '')
         return buffertext
 
-    # This subroutine sets the color of selected text, or base text color if
-    # nothing is selected
-    
     def on_text_color(self, event):
         hexcolor = self.r_h.do_hex_color_dlg(self)
         if hexcolor != None:
@@ -1305,25 +1205,11 @@ class chat_panel(wx.Panel):
                 self.settings.set_setting('mytextcolor',hexcolor)
                 self.set_colors()
                 self.Post()
-    # def on_text_color - end
 
-    # This subroutine take a color and a text string and formats it into html.
-    #
-    # !self : instance of self
-    # !color : color for the text to be set
-    # !text : text string to be included in the html.
-    
     def colorize(self, color, text):
         """Puts font tags of 'color' around 'text' value, and returns the string"""
         return "<font color='" + color + "'>" + text + "</font>"
-    # def colorize - end
 
-    # This subroutine takes and event and inserts text with the basic format
-    # tags included.
-    #
-    # !self : instance of self
-    # !event :
-    
     def on_text_format(self, event):
         id = event.GetId()
         txt = self.chattxt.GetValue()
@@ -1338,9 +1224,7 @@ class chat_panel(wx.Panel):
         self.chattxt.SetValue(txt)
         self.chattxt.SetInsertionPointEnd()
         self.chattxt.SetFocus()
-    # def on_text_format - end
 
-    
     def lock_scroll(self, event):
         if self.lockscroll:
             self.lockscroll = False
@@ -1353,28 +1237,16 @@ class chat_panel(wx.Panel):
             self.lockscroll = True
             self.scroll_lock.SetLabel("Scroll OFF")
 
-    # This subroutine will popup a text window with the chatbuffer contents
-    #
-    # !self : instance of self
-    # !event :
-    
     def pop_textpop(self, event):
         """searchable popup text view of chatbuffer"""
         h_buffertext = self.ResetPage()
         h_dlg = orpgScrolledMessageFrameEditor(self, h_buffertext, "Text View of Chat Window", None, (500,300))
         h_dlg.Show(True)
 
-    # This subroutine will change the dimension of the window
-    #
-    # !self : instance of self
-    # !event :
-    
     def OnSize(self, event=None):
         event.Skip()
         wx.CallAfter(self.scroll_down)
-    # def OnSize - end
 
-    
     def scroll_down(self):
         self.Freeze()
         self.chatwnd.scroll_down()
@@ -1386,17 +1258,14 @@ class chat_panel(wx.Panel):
         self.set_colors()
         self.chatwnd.SetPage(self.chatwnd.Header())
 
-    
     def system_message(self, text):
         self.send_chat_message(text,chat_msg.SYSTEM_MESSAGE)
         self.SystemPost(text)
 
-    
     def info_message(self, text):
         self.send_chat_message(text,chat_msg.INFO_MESSAGE)
         self.InfoPost(text)
 
-    
     def get_gms(self):
         the_gms = []
         for playerid in self.session.players:
@@ -1404,7 +1273,6 @@ class chat_panel(wx.Panel):
                 if self.session.players[playerid][7]=="GM" and self.session.group_id != '0': the_gms += [playerid]
         return the_gms
 
-    
     def GetName(self):
         self.AliasLib = component.get('alias')
         player = self.session.get_my_info()
@@ -1415,7 +1283,6 @@ class chat_panel(wx.Panel):
                 return [self.chat_display_name([self.AliasLib.alias[0], player[1], player[2]]), self.AliasLib.alias[1]]
         return [self.chat_display_name(player), "Default"]
 
-    
     def GetFilteredText(self, text):
         advregex = re.compile('\"(.*?)\"', re.I)
         self.AliasLib = component.get('alias')
@@ -1430,11 +1297,9 @@ class chat_panel(wx.Panel):
                         text = text.replace(match, newmatch)
         return text
 
-    
     def emote_message(self, text):
         text = self.NormalizeParse(text)
         text = self.colorize(self.emotecolor, text)
-
         if self.type == MAIN_TAB and self.sendtarget == 'all': self.send_chat_message(text,chat_msg.EMOTE_MESSAGE)
         elif self.type == MAIN_TAB and self.sendtarget == "gm":
             msg_type = chat_msg.WHISPER_EMOTE_MESSAGE
@@ -1449,13 +1314,10 @@ class chat_panel(wx.Panel):
         text = "** " + name + " " + text + " **"
         self.EmotePost(text)
 
-    
     def whisper_to_players(self, text, player_ids):
         tabbed_whispers_p = self.settings.get_setting("tabbedwhispers")
-        # Heroman - apply any filtering selected
         text = self.NormalizeParse(text)
         player_names = ""
-        # post to our chat before we colorize
         for m in player_ids:
             id = m.strip()
             if self.session.is_valid_id(id):
@@ -1469,7 +1331,6 @@ class chat_panel(wx.Panel):
         comma.join(player_ids)
         if (self.sendtarget == "all"):
             self.InfoPost("<i>whispering to "+ player_names + " " + text + "</i> ")
-        # colorize and loop, sending whisper messages to all valid clients
         text = self.colorize(self.mytextcolor, text)
         for id in player_ids:
             id = id.strip()
@@ -1501,11 +1362,7 @@ class chat_panel(wx.Panel):
         if send: self.session.send(msg.toxml(),player_id)
         del msg
 
-    #### incoming chat message handler #####
-    
     def post_incoming_msg(self, msg, player):
-
-        # pull data
         type = msg.get_type()
         text = msg.get_text()
         alias = msg.get_alias()
@@ -1522,12 +1379,8 @@ class chat_panel(wx.Panel):
                 if str(e) != "'module' object has no attribute 'receive_msg'":
                     logger.general(traceback.format_exc())
                     logger.general("EXCEPTION: " + str(e))
-        #end mDuo13 added code
-        #image stripping for players' names
         strip_img = self.settings.get_setting("Show_Images_In_Chat")
         if (strip_img == "0"): display_name = chat_util.strip_img_tags(display_name)
-        #end image stripping. --mDuo13, July 11th, 2005
-        # default sound
         recvSound = "RecvSound"
         # act on the type of messsage
         if (type == chat_msg.CHAT_MESSAGE):
@@ -1624,17 +1477,15 @@ class chat_panel(wx.Panel):
         sound_file = self.settings.get_setting(recvSound)
         if sound_file != '':
             component.get('sound').play(sound_file)
+
     #### Posting helpers #####
 
-    
     def InfoPost(self, s):
         self.Post(self.colorize(self.infocolor, s), c='info')
 
-    
     def SystemPost(self, s):
         self.Post(self.colorize(self.syscolor, s), c='system')
 
-    
     def EmotePost(self, s):
         self.Post(self.colorize(self.emotecolor, s), c='emote')
 
@@ -1675,15 +1526,9 @@ class chat_panel(wx.Panel):
         if aliasInfo[1] != 'Default':
             self.settings.set_setting("mytextcolor", defaultcolor)
             self.set_colors()
-        #following line based on sourceforge patch #880403 from mDuo
-        # EDIT: Had to rework blank line check to handle malformed HTML throwing error.
-        #       this limits the effectiveness of this check -SD
         lineHasText = 1
         try: lineHasText = strip_html(s).replace("&nbsp;","").replace(" ","").strip()!=""
         except:
-            # HTML parser has errored out (most likely). Being as all we are doing is
-            # scanning for empty/blank lines anyway there is no harm in letting a
-            # troublesome message though. Worst case is a blank line to chat.
             lineHasText = 1
         if lineHasText:
             #following added by mDuo13
@@ -1731,12 +1576,6 @@ class chat_panel(wx.Panel):
             else: self.InfoPost("Failed to send message, unknown send type for this tab")
         self.parsed=0
 
-    #
-    # TimeIndexString()
-    #
-    # time indexing for chat display only (don't log time indexing)
-    # added by Snowdog 4/04
-    
     def TimeIndexString(self):
         try:
             mtime = ""
@@ -1854,8 +1693,8 @@ class chat_panel(wx.Panel):
         else:
             dlg.Destroy()
             return None
-    # def get_color - end
 
+    # def get_color - end
     def replace_quotes(self, s):
         in_tag = 0
         i = 0
@@ -1942,7 +1781,6 @@ class chat_panel(wx.Panel):
             newstr = '::'.join(new_map)
             newstr = '!@'+ newstr +'@!'
             s = s.replace(matches[i][0], newstr, 1)
-            #s = self.ParseMap(s, node) ## Needs to be added
             s = self.ParseNode(s)
         return s
 
@@ -2045,3 +1883,4 @@ class chat_panel(wx.Panel):
             elif path[step+1].title() == 'Mod': self.data = pc_stats[path[step].title()][1]
             elif path[step+1].title() == 'Check': self.data = '<b>'+path[step].title()+' Check:</b> [1d20+'+str(pc_stats[path[step].title()][1])+']'
             return
+

@@ -34,7 +34,7 @@
 from std import std
 from orpg.dieroller.base import *
 
-__version__ = "$Id: wodex.py,v 1.9 2007/05/06 16:42:55 digitalxero Exp $"
+__version__ = "$Id: wodex.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 class wodex(std):
     name = "wodex"

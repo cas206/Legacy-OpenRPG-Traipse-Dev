@@ -23,7 +23,7 @@
 # Author: OpenRPG Dev Team
 # Maintainer:
 # Version:
-#   $Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $
+#   $Id: wod.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: WOD die roller
 #
@@ -31,7 +31,7 @@
 # for compatibility with Mage die rolls.
 # Threshhold addition by robert t childers
 
-__version__ = "$Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $"
+__version__ = "$Id: wod.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from std import std
 from orpg.dieroller.base import *

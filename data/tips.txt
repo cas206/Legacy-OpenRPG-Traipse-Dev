@@ -18,7 +18,7 @@ OpenRPG servers are maintained by private individuals. When you connect to a new
 
 OpenRPG images are hosted in one of three ways: by a URL to any image hosting site such as Photobucket or Imageshack, by a URL to an image served by your own client program (CherryPy) or by a file uploaded to OpenRPG's dedicated image server from your local file system.
 
-You can drag an image file straight from your file system to OpenRPG's map using the Remote Image Server. In Pious Paladin this feature will be added to CherryPy so will be able to drag and drop locally as well.
+You can drag an image file straight from your file system to OpenRPG's map using the Remote Image Server. In Pious Paladin this feature will be added to Traipse using CherryPy so will be able to drag and drop locally as well.
 
 If you want to create a large background image for your map you can make it using OpenRPG's whiteboard features or by loading many dungeon "tile" images and then save the entire map as a .jpg file. 
 
@@ -29,6 +29,8 @@ Hold down Ctrl to select or right-click a locked miniature on the map. On a Mac 
 OpenRPG's main four windows are all sizeable, movable and dockable. In addition by editing the layout.xml file you can put two or more of them on a tab.
 
 You can customise OpenRPG's behaviour in four ways: plugins, custom die rollers, game system specific nodes and by using filters.
+
+The Traipse EZ Tree is a quick way to create node references.
 
 OpenRPG is not written for any one role playing system, but custom features have been written to aid game play for about a dozen systems. Ask around to see what might be availble, and if nothing is, consider creating your own.
 

@@ -129,9 +129,7 @@ class Updater(wx.Panel):
         ignore.close()
 
     def Finish(self, evt=None):
-        try: component.get('upmana-win').OnClose(None)
-        except Exception, e:
-            print 'Fail', e; exit()
+        component.get('upmana-win').OnClose(None)
 
     def ChooseBranch(self, evt=None):
         dlg = wx.Dialog(self, wx.ID_ANY, "Package Selector", style=wx.DEFAULT_DIALOG_STYLE)
@@ -593,7 +591,7 @@ class Control(wx.Panel):
         ignore.close()
 
     def get_packages(self, type=None):
-        #Fixed and ready for Test. Can be cleaner
+        #Can be cleaner
         self.package_list = []
         b = self.repo.branchtags()
         heads = dict.fromkeys(self.repo.heads(), 1) #The code below looks superfluous but there is good info inside

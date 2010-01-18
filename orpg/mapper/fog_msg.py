@@ -21,9 +21,9 @@
 # Author: Mark Tarrabain
 # Maintainer:
 # Version:
-#   $Id: fog_msg.py,v 1.16 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: fog_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
-__version__ = "$Id: fog_msg.py,v 1.16 2006/11/04 21:24:21 digitalxero Exp $"
+__version__ = "$Id: fog_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_msg import *
 from region import *

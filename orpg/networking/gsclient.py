@@ -21,13 +21,13 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $
+#   $Id: gsclient.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the game server browser
 #
 
 from __future__ import with_statement
-__version__ = "$Id: gsclient.py,v 1.53 2007/10/25 21:49:34 digitalxero Exp $"
+__version__ = "$Id: gsclient.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import meta_server_lib
 import orpg.tools.rgbhex
@@ -269,7 +269,6 @@ class game_server_panel(wx.Panel):
         address = self.svrList[item].addy
         port = self.svrList[item].port
         self.server_list.SetItemImage(item, 1)
-
         for server in self.bookmarks.findall('server'):
             if server.get('name') == name:
                 self.bookmarks_menu.Remove(
@@ -298,8 +297,8 @@ class game_server_panel(wx.Panel):
         except: pass
         address = self.texts["address"].GetValue()
         if self.session.is_connected():
-            if self.session.host_server == address : return #currently connected to address. Do nothing.
-            else: self.frame.kill_mplay_session() #address differs, disconnect.
+            if self.session.host_server == address : return 
+            else: self.frame.kill_mplay_session()
         self.do_connect(address)
 
     def on_room_dbclick(self, evt=None):
@@ -307,13 +306,11 @@ class game_server_panel(wx.Panel):
         try: self.on_select(evt)
         except: pass
         group_id = str(self.room_list.GetItemData(self.cur_room_index))
-
         if self.NoGroups:
             self.NoGroups = False
             self.session.group_id = group_id
             self.on_server_dbclick()
             return
-
         if self.cur_room_index >= 0:
             if self.cur_room_index != 0: self.set_lobbybutton(1);
             else: self.set_lobbybutton(0);
@@ -345,7 +342,6 @@ class game_server_panel(wx.Panel):
     def on_text(self, evt):
         id = evt.GetId()
         if (id == self.texts["address"].GetValue()) and (self.cur_server_index >= 0):
-            #print "ADDRESS id = ", id, "index = ", self.cur_server_index
             self.cur_server_index = -1
         evt.Skip()
 
@@ -526,17 +522,13 @@ class game_server_panel(wx.Panel):
                 self.texts["address"].SetValue("127.0.0.1:6774")
                 self.serverNameSet = 1
             else: pass
-            #  Allow xml_dom to be collected
         except Exception, e:
             print "Server List not available."
             traceback.print_exc()
-
-                
+            
     def failed_connection(self):
         if(self.cur_server_index >= 0):
             server_index = self.servers[self.cur_server_index]
-            #  post_failed_connection will return a non-zero if the server
-            #  was removed.  If it was, refresh the display
             if(meta_server_lib.post_failed_connection(server_index.get('id'), 
                 meta=server_index.get('meta'), address=server_index.get('address'),
                 port=server_index.get('port'))):
@@ -613,11 +605,9 @@ class game_server_panel(wx.Panel):
             msg = "%s is creating room \'%s.\'" % (self.session.name, name)
             self.session.send(msg)
             self.session.send_create_group(name, pwd, boot_pwd, minversion)
-            self.set_lobbybutton(1); #enable the Lobby quickbutton
+            self.set_lobbybutton(1); 
 
     def on_size(self, evt):
-        # set column widths for room list
-        # set column widths for server list
         pass
 
     def colorize_group_list(self, groups):

@@ -21,7 +21,7 @@
 # Author: Todd "Snowdog" Faris
 # Maintainer:
 # Version:
-#   $Id: passtool.py,v 1.9 2006/11/04 21:24:22 digitalxero Exp $
+#   $Id: passtool.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: password helper. remembers passwords so user
 #              doesn't have to type passwords over and over

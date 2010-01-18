@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $
+#   $Id: rpg_grid.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the grid nodehanlers
 #
 
-__version__ = "$Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $"
+__version__ = "$Id: rpg_grid.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 from forms import *

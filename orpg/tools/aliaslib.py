@@ -21,12 +21,12 @@
 # Author: Dj Gilcrease
 # Maintainer:
 # Version:
-#   $Id: aliaslib.py,v 1.20 2007/08/09 05:23:21 digitalxero Exp $
+#   $Id: aliaslib.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: nodehandler for alias.
 #
 
-__version__ = "$Id: aliaslib.py,v 1.20 2007/08/09 05:23:21 digitalxero Exp $"
+__version__ = "$Id: aliaslib.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from orpg.orpg_wx import *
 from orpg.orpgCore import component
@@ -174,7 +174,6 @@ class AliasLib(wx.Frame):
         f.close()
 
     def OnMB_FileExportToTree(self, event):
-        #tree = component.get("tree")
         xml = '<nodehandler class="voxchat_handler" '
         xml += 'icon="player" '
         xml += 'module="voxchat" '
@@ -689,8 +688,6 @@ class AliasLib(wx.Frame):
         self.regExList[self.filterIdx] = list
 
     def FormatText(self, event):
-        #self.textColorBtn = wx.Button(self, wx.ID_ANY, "Color")
-        #self.textColorBtn.SetForegroundColour(wx.BLACK)
         id = event.GetId()
         txt = self.textWnd.GetValue()
         (beg, end) = self.textWnd.GetSelection()

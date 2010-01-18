@@ -6,17 +6,15 @@
 
 __appname__=' OpenRPG GUI Server v0.7 '
 __version__='$Revision: 1.26 $'[11:-2]
-__cvsinfo__='$Id: mplay_server_gui.py,v 1.26 2007/11/06 00:32:39 digitalxero Exp $'[5:-2]
+__cvsinfo__="$Id: mplay_server_gui.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"[5:-2]
 __doc__="""OpenRPG Server Graphical Interface"""
 
-import os, sys, time, types
+import os, sys, time, types, webbrowser
 
 from orpg.dirpath import dir_struct
 from orpg.tools.validate import validate
 from orpg.orpg_wx import *
 from threading import Thread
-
-import webbrowser
 
 from meta_server_lib import post_server_data, remove_server
 from mplay_server import mplay_server, server
@@ -32,11 +30,7 @@ from xml.etree.ElementTree import fromstring, tostring, parse
 # Constants ######################################
 SERVER_RUNNING = 1
 SERVER_STOPPED = 0
-
-### Alpha ###
 MENU_MODIFY_BANLIST = wx.NewId()
-#############
-
 MENU_PLAYER_CREATE_ROOM = wx.NewId()
 
 # Our new event type that gets posted from one
@@ -268,7 +262,6 @@ class Connections(wx.ListCtrl):
             self.SetItem(item)
 
     def update(self, player):
-        #try: int(player); i = self.FindItemData( -1, int(player) )
         i = self.FindItemData( -1, int(player["id"]) )
         if i > -1:
             self.SetStringItem(i, 1, self.stripHtml(player["name"]))

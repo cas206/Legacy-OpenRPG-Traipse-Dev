@@ -21,24 +21,20 @@
 # Author: Dj Gilcrease
 # Maintainer:
 # Version:
-#   $Id: mplay_messaging.py,v 1.5 2007/05/06 16:42:59 digitalxero Exp $
+#   $Id: mplay_messaging.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains the code for the client / server messaging
 #
 
-__version__ = "$Id: mplay_messaging.py,v 1.5 2007/05/06 16:42:59 digitalxero Exp $"
+__version__ = "$Id: mplay_messaging.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
-import socket
-import Queue
-import thread
-import traceback
+import socket, Queue, thread, traceback, os, time
+
 from threading import Event, Lock
 from xml.sax.saxutils import escape
 from struct import pack, unpack, calcsize
 from string import *
 from orpg.orpg_version import VERSION, PROTOCOL_VERSION, CLIENT_STRING, SERVER_MIN_CLIENT_VERSION
-import os
-import time
 
 from orpg.tools.orpg_log import logger
 from orpg.orpgCore import component
@@ -90,20 +86,6 @@ class messenger:
         self.ignorelist = {}
         self.players = {}
         self.groups = {}
-
-        #Setup Stuff from the Server
-        """
-        if kwargs.has_key('inbox'): self.inbox = kwargs['inbox']
-        if kwargs.has_key('sock'): self.sock = kwargs['sock']
-        if kwargs.has_key('ip'): self.ip = kwargs['ip']
-        if kwargs.has_key('role'): self.role = kwargs['role']
-        if kwargs.has_key('id'): self.id = kwargs['id']
-        if kwargs.has_key('group_id'): self.group_id = kwargs['group_id']
-        if kwargs.has_key('name'): self.name = kwargs['name']
-        if kwargs.has_key('version'): self.version = kwargs['version']
-        if kwargs.has_key('protocol_version'): self.protocol_version = kwargs['protocol_version']
-        if kwargs.has_key('client_string'): self.client_string = kwargs['client_string']
-        """
 
         ### Alpha ###
         self.inbox = kwargs['inbox'] or pass
@@ -207,7 +189,6 @@ class messenger:
     def __str__(self):
         return "%s(%s)\nIP:%s\ngroup_id:%s\n%s (%s)" % (self.name, self.id, self.ip, self.group_id, self.idle_time(), self.connected_time())
 
-    # idle time functions added by snowdog 3/31/04
     def update_idle_time(self):
         self.lastmessagetime = time.time()
 
@@ -326,7 +307,6 @@ class messenger:
         #Message Action thread expires and closes here.
         return
 
-    #Privet functions
     def sendThread( self, arg ):
         "Sending thread.  This thread reads from the data queue and writes to the socket."
         # Wait to be told it's okay to start running
@@ -352,11 +332,7 @@ class messenger:
     def sendMsg( self, sock, msg ):
         """Very simple function that will properly encode and send a message to te
         remote on the specified socket."""
-
-        # Calculate our message length
         length = len( msg )
-
-        # Encode the message length into network byte order
         lp = pack( 'i', socket.htonl( length ) )
 
         try:
@@ -434,13 +410,11 @@ class messenger:
         msgData = ""
         try:
             lenData = self.recvData( sock, self.lensize )
-
             # Now, convert to a usable form
             (length,) = unpack( 'i', lenData )
             length = socket.ntohl( length )
             # Read exactly the remaining amount of data
             msgData = self.recvData( sock, length )
-
             if self.isServer: logger.debug("('data_recv', " + str(length+4) + ")")
         except: logger.exception("Exception: messenger->recvMsg():\n" + traceback.format_exc())
         return msgData
@@ -448,3 +422,4 @@ class messenger:
 if __name__ == "__main__":
     test = messenger(None)
     print test.build_message('hello', "This is a test message", attrib1="hello world", attrib2="hello world2", attrib3="hello world3")
+

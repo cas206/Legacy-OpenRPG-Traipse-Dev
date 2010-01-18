@@ -21,7 +21,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: rgbhex.py,v 1.10 2007/02/19 16:33:20 digitalxero Exp $
+#   $Id: rgbhex.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: rgb to hex utility
 

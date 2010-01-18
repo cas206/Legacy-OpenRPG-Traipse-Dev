@@ -21,7 +21,7 @@
 # Author: Andrew Bennett
 # Maintainer:
 # Version:
-#   $Id: map_miniature_nodehandler.py,v 1.17 2007/12/07 20:39:48 digitalxero Exp $
+#   $Id: map_miniature_nodehandler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: nodehandler for miniature images
 #

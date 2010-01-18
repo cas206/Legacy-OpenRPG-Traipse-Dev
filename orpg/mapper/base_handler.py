@@ -21,12 +21,12 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: base_handler.py,v 1.20 2007/11/04 17:32:25 digitalxero Exp $
+#   $Id: base_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: base layer handler.
 #   layer handlers are responsible for the GUI elements of the layer
 #
-__version__ = "$Id: base_handler.py,v 1.20 2007/11/04 17:32:25 digitalxero Exp $"
+__version__ = "$Id: base_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 
 from orpg.orpg_windows import *
@@ -42,14 +42,12 @@ class base_layer_handler(wx.Panel):
         self.chat = component.get("chat")
         self.build_ctrls()
         self.build_menu()
-        #self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_LEFT_DCLICK, self.on_left_dclick)
 
     def build_ctrls(self):
         self.basesizer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.buttonsizer = wx.BoxSizer(wx.HORIZONTAL)
-
         self.zoom_in_button = createMaskedButton( self, 
             dir_struct["icon"]+'zoom_in.gif', "Zoom in from x1.0", wx.ID_ANY )
         self.zoom_out_button = createMaskedButton( self, 

@@ -21,12 +21,12 @@
 # Author: Ted Berg
 # Maintainer:
 # Version:
-#   $Id: minilib.py,v 1.28 2007/04/22 22:00:18 digitalxero Exp $
+#   $Id: minilib.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: nodehandler for a collection of miniatures.
 #
 
-__version__ = "$Id: minilib.py,v 1.28 2007/04/22 22:00:18 digitalxero Exp $"
+__version__ = "$Id: minilib.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 """Nodehandler for collections of miniatures.  User can add, delete, edit
 miniatures as sending them to the map singly or in batches.

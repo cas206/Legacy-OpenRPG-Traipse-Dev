@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $
+#   $Id: core.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the core nodehanlers
 #
 
-__version__ = "$Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $"
+__version__ = "$Id: core.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from nodehandler_version import NODEHANDLER_VERSION
 
@@ -54,7 +54,6 @@ class node_handler:
         self.xml = xml
         self.mytree_node = tree_node
         self.tree = component.get('tree')
-        #self.tree = component.get('tree_fs')
         self.frame = component.get('frame')
         self.chat = component.get('chat')
         self.drag = True
@@ -386,7 +385,8 @@ class file_loader(node_handler):
 
     def on_ldclick(self,evt):
         file_name = self.file_node.get("name")
-        self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        try: self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        except: wx.MessageBox('Invalid File', 'Error')
         return 1
 
     def on_design(self,evt):

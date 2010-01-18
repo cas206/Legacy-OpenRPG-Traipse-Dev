@@ -21,13 +21,13 @@
 # File: main.py
 # Author: Chris Davis
 # Maintainer:
-# Version:
-#   $Id: main.py,v 1.153 2008/01/24 03:52:03 digitalxero Exp $
+# Version: Traipse 'Ornery-Orc'
+#   $Id: main.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This is the main entry point of the oprg application
 #
 
-__version__ = "$Id: main.py,v 1.154 2009/07/19 03:52:03 madmathlabs Exp $"
+__version__ = "$Id: main.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from orpg.orpg_wx import *
 from orpg.orpgCore import *
@@ -50,13 +50,10 @@ import orpg.mapper.map
 import orpg.mapper.images
 
 import orpg.dieroller.utils
-
-#Update Manager# Un remark if you have Mercurial installed
 import upmana.updatemana
-import upmana.manifest as manifest
+from upmana.manifest import manifest
 
 from orpg.dirpath import dir_struct
-#from orpg.dieroller.utils import DiceManager
 from orpg.tools.settings import settings
 from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
@@ -65,9 +62,6 @@ from orpg.tools.metamenus import MenuBarEx
 
 from xml.etree.ElementTree import ElementTree, Element, parse
 from xml.etree.ElementTree import fromstring, tostring
-## Element Tree usage will require users to convert to and from string data quite often until users of older versions update.
-## This is a problem that users of older versions will need to cross as it is both Core and Traipse that will make the change.
-## Older versions have a problem with correct XML.
 from orpg.orpg_xml import xml #to be replaced by etree
 
 
@@ -77,7 +71,7 @@ from orpg.orpg_xml import xml #to be replaced by etree
 
 
 class orpgFrame(wx.Frame):
-    
+
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, wx.Point(100, 100), wx.Size(600,420), style=wx.DEFAULT_FRAME_STYLE)
         self.validate = component.get("validate")
@@ -374,18 +368,15 @@ class orpgFrame(wx.Frame):
             if textColor != None: wnd.SetNonActiveTabTextColour(textColor)
             wnd.Refresh()
 
-    
     def OnMB_OpenRPGNewMap(self):
         pass #Not Implemented yet!
 
-    
     def OnMB_OpenRPGTabStylesSlantedColorful(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedColorful"):
             settings.change('TabTheme', 'slanted&colorful')
             self.SetTabStyles("OpenRPGTabStylesSlantedColorful", FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedColorful", True)
 
-    
     def OnMB_OpenRPGTabStylesSlantedBlackandWhite(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedBlackandWhite"):
             settings.change('TabTheme', 'slanted&bw')
@@ -393,7 +384,6 @@ class orpgFrame(wx.Frame):
                 FNB.FNB_VC8, graidentTo=wx.WHITE, graidentFrom=wx.WHITE, textColor=wx.BLACK)
         else: self.mainmenu.SetMenuState("OpenRPGTabStylesSlantedBlackandWhite", True)
 
-    
     def OnMB_OpenRPGTabStylesSlantedAqua(self):
         if self.mainmenu.GetMenuState("OpenRPGTabStylesSlantedAqua"):
             settings.change('TabTheme', 'slanted&aqua')
@@ -505,7 +495,7 @@ class orpgFrame(wx.Frame):
         else: self.updateMana.Show()
 
     def OnMB_DebugConsole(self, evt):
-        self.TraipseSuiteWarnCleanup('debug') ### Beta ###
+        self.TraipseSuiteWarnCleanup('debug')
         if self.debugger.IsShown() == True: self.debugger.Hide()
         else: self.debugger.Show()
 
@@ -514,28 +504,28 @@ class orpgFrame(wx.Frame):
         if self.mainmenu.GetMenuState("ToolsLoggingLevelDebug"): lvl |= ORPG_DEBUG
         else: lvl &= ~ORPG_DEBUG
         logger.log_level = lvl
-        settings.set('LoggingLevel', lvl)
+        settings.change('LoggingLevel', lvl)
 
     def OnMB_ToolsLoggingLevelNote(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelNote"): lvl |= ORPG_DEBUG
         else: lvl &= ~ORPG_DEBUG
         logger.log_level = lvl
-        settings.set('LoggingLevel', lvl)
+        settings.change('LoggingLevel', lvl)
 
     def OnMB_ToolsLoggingLevelInfo(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelInfo"): lvl |= ORPG_INFO
         else: lvl &= ~ORPG_INFO
         logger.log_level = lvl
-        settings.set('LoggingLevel', lvl)
+        settings.change('LoggingLevel', lvl)
 
     def OnMB_ToolsLoggingLevelGeneral(self):
         lvl = logger.log_level
         if self.mainmenu.GetMenuState("ToolsLoggingLevelGeneral"): lvl |= ORPG_GENERAL
         else: lvl &= ~ORPG_GENERAL
         logger.log_level = lvl
-        settings.set('LoggingLevel', lvl)
+        settings.change('LoggingLevel', lvl)
 
     def OnMB_ToolsPasswordManager(self):
         if self.mainmenu.GetMenuState("ToolsPasswordManager"): self.password_manager.Enable()
@@ -631,9 +621,7 @@ class orpgFrame(wx.Frame):
         #self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
             "OpenRPG Update Manager 1.0", component, manifest, True)
-        print component.get('upmana-win')
         component.add('upmana-win', self.updateMana)
-        print component.get('upmana-win')
         logger.debug("Menu Created")
         h = int(xml_dom.get("height"))
         w = int(xml_dom.get("width"))
@@ -950,7 +938,6 @@ class orpgFrame(wx.Frame):
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if dlg.ShowModal() == wx.ID_YES:
                   dlg.Destroy()
-                  debug(child)
                   self.tree.on_receive_data(tostring(child))
                   self.chat.InfoPost(display_name + " has sent you a tree node...")
             elif child.tag == 'map':

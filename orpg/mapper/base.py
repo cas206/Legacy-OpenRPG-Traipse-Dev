@@ -21,11 +21,11 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: base.py,v 1.18 2007/02/12 02:29:08 digitalxero Exp $
+#   $Id: base.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: base.py,v 1.18 2007/02/12 02:29:08 digitalxero Exp $"
+__version__ = "$Id: base.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from images import ImageHandler
 from orpg.tools.rgbhex import *

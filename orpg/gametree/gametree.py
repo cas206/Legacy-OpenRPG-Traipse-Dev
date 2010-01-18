@@ -21,18 +21,11 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: gametree.py,v 1.68 2007/12/07 20:39:48 digitalxero Exp $
+#   $Id: gametree.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code fore the game tree shell
 #
-# Traipse EZ_Tree Reference System (TaS - Prof.Ebral):
-#
-# The new EZ_Tree Reference System being implemented takes full advantage of 
-# Python's OOP Language. The entire tree code is being reused, but a new ID is 
-# being created which 'shuts off' some of the features of the tree and adds new ones.
-# This new feature will allow users to quickly add a Reference button to new node
-# handlers. The button will show a faximile of the tree and users can then create a
-# node reference with ease!
+# Traipse EZ_Tree Reference System (TaS - Prof.Ebral): v Traipse 'Ornery-Orc' prof.ebral Exp
 #
 
 from __future__ import with_statement

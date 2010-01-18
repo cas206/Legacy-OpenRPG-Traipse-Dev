@@ -29,11 +29,10 @@
 #
 # v.1 original release DJM
 
-__version__ = "$Id: hero.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
+__version__ = "$Id: hero.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from time import time, clock
 import random
-
 from std import std
 from orpg.dieroller.base import *
 
@@ -45,7 +44,6 @@ class hero(std):
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-# these methods return new die objects for specific options
 
     def k(self,mod):
         return herok(self,mod)
@@ -72,7 +70,6 @@ class herocv(std):
         std.__init__(self,source)
         self.cv = cv
         self.mod = mod
-
 
     def __str__(self):
         myStr = "[" + str(self.data[0])
@@ -110,15 +107,10 @@ class herosk(std):
         modSum = self.sum()-self.mod
         myStr += " = (" + str(modSum) + ")"
         myStr += " vs " + str(self.sk)
-
-        if self.is_success():
-            myStr += " or less <font color='#ff0000'>Success!"
-        else:
-            myStr += " or less <font color='#ff0000'>Failure!"
-
+        if self.is_success(): myStr += " or less <font color='#ff0000'>Success!"
+        else: myStr += " or less <font color='#ff0000'>Failure!"
         Diff = self.sk - modSum
         myStr += " by " + str(Diff) +" </font>"
-
         return myStr
 
 class herok(std):
@@ -230,3 +222,4 @@ class heron(std):
         myStr += " <b>Body</b> and "
         myStr += "(<font color='#ff0000'><b>" + str(int(round(self.sum()))) + "</b></font>) <b>Stun</b>"
         return myStr
+

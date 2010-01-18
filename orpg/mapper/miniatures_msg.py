@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: miniatures_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: miniatures_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
 #
-__version__ = "$Id: miniatures_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $"
+__version__ = "$Id: miniatures_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_msg import *
 

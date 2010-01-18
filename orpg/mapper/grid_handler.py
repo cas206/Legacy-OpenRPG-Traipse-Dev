@@ -20,11 +20,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: grid_handler.py,v 1.20 2007/04/03 00:14:35 digitalxero Exp $
+#   $Id: grid_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: grid layer handler
 #
-__version__ = "$Id: grid_handler.py,v 1.20 2007/04/03 00:14:35 digitalxero Exp $"
+__version__ = "$Id: grid_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from grid import *
 from base_handler import *

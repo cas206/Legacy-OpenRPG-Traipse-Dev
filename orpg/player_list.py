@@ -22,12 +22,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: player_list.py,v 1.29 2007/03/30 19:12:06 digitalxero Exp $
+#   $Id: player_list.py,v Traipse 'Ornery-Orc' prof.ebral Exp  $
 #
 # Description: This is the main entry point of the oprg application
 #
 
-__version__ = "$Id: player_list.py,v 1.29 2007/03/30 19:12:06 digitalxero Exp $"
+__version__ = "$Id: player_list.py,v Traipse 'Ornery-Orc' prof.ebral Exp  $"
 
 from orpg.orpg_windows import *
 from orpg.dirpath import dir_struct

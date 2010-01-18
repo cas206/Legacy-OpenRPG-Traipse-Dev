@@ -21,11 +21,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: background_handler.py,v 1.23 2007/03/09 14:17:15 digitalxero Exp $
+#   $Id: background_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Background layer handler
 #
-__version__ = "$Id: background_handler.py,v 1.23 2007/03/09 14:17:15 digitalxero Exp $"
+__version__ = "$Id: background_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import thread, mimetypes, os
 from threading import Lock

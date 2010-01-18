@@ -21,12 +21,12 @@
 # Author: Ted Berg
 # Maintainer:
 # Version:
-#   $Id: voxchat.py,v 1.37 2007/05/06 16:42:55 digitalxero Exp $
+#   $Id: voxchat.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: nodehandler for alias.
 #
 
-__version__ = "$Id: voxchat.py,v 1.37 2007/05/06 16:42:55 digitalxero Exp $"
+__version__ = "$Id: voxchat.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import re, os, string, core
 
@@ -53,7 +53,7 @@ class voxchat_handler(core.node_handler):
     def __init__(self, xml_dom, tree_node):
         core.node_handler.__init__( self, xml_dom, tree_node)
         self.node = xml_dom
-        self.xml = component.get('xml')
+        #self.xml = component.get('xml')
 
     def get_design_panel( self, parent ):
         aliasLib = component.get('alias')

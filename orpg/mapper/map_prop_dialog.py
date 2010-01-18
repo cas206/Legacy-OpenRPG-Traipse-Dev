@@ -21,11 +21,11 @@
 # Author: OpenRPG
 # Maintainer:
 # Version:
-#   $Id: map_prop_dialog.py,v 1.16 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: map_prop_dialog.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: map_prop_dialog.py,v 1.16 2006/11/04 21:24:21 digitalxero Exp $"
+__version__ = "$Id: map_prop_dialog.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from orpg.orpg_windows import *
 from background import *

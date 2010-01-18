@@ -21,18 +21,17 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: orpg_xml.py,v 1.12 2007/07/19 20:33:10 digitalxero Exp $
+#   $Id: orpg_xml.py,v Traipse 'Ornery-Orc' prof.ebral Exp  $
 #
 # Description: xml utilies
 #
 
 from orpg import minidom
 import string
-
 from orpg.tools.orpg_log import logger, debug
 
 class xml:
-    debug('Deprecated call to orpg_xml!!')
+    debug('Developers note. Deprecated call to orpg_xml!!')
     def __init__(self):
         pass
 

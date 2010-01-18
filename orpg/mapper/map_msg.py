@@ -21,13 +21,12 @@
 # Author: OpenRPG
 # Maintainer:
 # Version:
-#   $Id: map_msg.py,v 1.16 2007/03/09 14:11:55 digitalxero Exp $
+#   $Id: map_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: map_msg.py,v 1.16 2007/03/09 14:11:55 digitalxero Exp $"
+__version__ = "$Id: map_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
-#from base import *
 from base_msg import *
 from background_msg import *
 from grid_msg import *

@@ -24,7 +24,7 @@ access the instance via the Publisher object available from the module::
 
 :Author:      Oliver Schoenborn
 :Since:       Apr 2004
-:Version:     $Id: pubsub.py,v 1.8 2006/06/11 00:12:59 RD Exp $
+:Version:     $Id: pubsub.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 :Copyright:   \(c) 2004 Oliver Schoenborn
 :License:     wxWidgets
 """

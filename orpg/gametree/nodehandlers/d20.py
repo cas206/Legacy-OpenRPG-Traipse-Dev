@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: d20.py,v 1.30 2007/05/22 00:50:57 digitalxero Exp $
+#   $Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the d20 nodehanlers
 #
 
-__version__ = "$Id: d20.py,v 1.30 2007/05/22 00:50:57 digitalxero Exp $"
+__version__ = "$Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 from containers import *

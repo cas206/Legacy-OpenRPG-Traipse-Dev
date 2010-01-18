@@ -21,11 +21,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: whiteboard_handler.py,v 1.37 2007/03/09 14:11:56 digitalxero Exp $
+#   $Id: whiteboard_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Whiteboard layer handler
 #
-__version__ = "$Id: whiteboard_handler.py,v 1.37 2007/03/09 14:11:56 digitalxero Exp $"
+__version__ = "$Id: whiteboard_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_handler import *
 from math import floor, sqrt

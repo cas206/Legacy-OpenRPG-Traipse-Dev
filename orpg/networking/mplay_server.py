@@ -22,7 +22,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: mplay_server.py,v 1.155 2008/01/24 03:52:03 digitalxero Exp $
+#   $Id: mplay_server.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains the code for the server of the multiplayer
 # features in the orpg project.
@@ -33,7 +33,7 @@
 
 from __future__ import with_statement
 
-__version__ = "$Id: mplay_server.py,v 1.155 2008/01/24 03:52:03 digitalxero Exp $"
+__version__ = "$Id: mplay_server.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 #!/usr/bin/env python
 """
@@ -2145,7 +2145,6 @@ class mplay_server:
         except: pass
 
     def send(self,msg,player,group):
-        debug(msg)
         self.players[player].send(msg,player,group)
 
     def send_to_all(self,from_id,data):
@@ -2162,7 +2161,6 @@ class mplay_server:
     def send_to_group(self, from_id, group_id, data):
         #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"' /><font color='#FF0000'>" + data + "</font>")
         data = ServerPlugins.postParseIncoming(data) #Function breaks here.
-        debug(data)
         try:
             self.p_lock.acquire()
             keys = self.groups[group_id].get_player_ids()

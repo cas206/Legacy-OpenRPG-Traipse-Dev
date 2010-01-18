@@ -21,7 +21,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: containers.py,v 1.43 2007/08/08 19:17:17 digitalxero Exp $
+#   $Id: containers.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the container nodehandlers
 #

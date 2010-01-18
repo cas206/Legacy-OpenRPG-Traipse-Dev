@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $
+#   $Id: forms.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the form based nodehanlers
 #
 
-__version__ = "$Id: forms.py,v 1.53 2007/04/21 23:00:51 digitalxero Exp $"
+__version__ = "$Id: forms.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from containers import *
 import orpg.minidom as minidom
@@ -754,7 +754,7 @@ class listbox_edit_panel(wx.Panel):
     def on_add(self,evt):
         self.dlg = wx.Frame(self, -1, 'Text', size=(300,150))
         edit_panel = wx.Panel(self.dlg, -1)
-        sizer = wx.GridBagSizer(1, 2)
+        sizer = wx.GridBagSizer(1, 1)
         edit_panel.SetSizer(sizer)
         caption_text = wx.StaticText(edit_panel, -1, 'Caption')
         self.caption_entry = wx.TextCtrl(edit_panel, -1, '')
@@ -764,12 +764,17 @@ class listbox_edit_panel(wx.Panel):
         button_cancel = wx.Button(edit_panel, wx.ID_CANCEL)
         button_ref = wx.Button(edit_panel, BUT_REF, "Reference")
         sizer.Add(caption_text, (0,0))
-        sizer.Add(self.caption_entry, (0,1), span=(1,3), flag=wx.EXPAND)
+        sizer.Add(self.caption_entry, (0,1), span=(1,4), flag=wx.EXPAND)
         sizer.Add(value_text, (1,0))
-        sizer.Add(self.value_entry, (1,1), span=(1,3), flag=wx.EXPAND)
+        sizer.Add(self.value_entry, (1,1), span=(1,4), flag=wx.EXPAND)
         sizer.Add(button_ok, (3,0))
         sizer.Add(button_cancel, (3,1))
         sizer.Add(button_ref, (3,2), flag=wx.EXPAND)
+        sizer.AddGrowableCol(3)
+        sizer.AddGrowableRow(2)
+        self.dlg.SetSize((275, 125))
+        self.dlg.SetMinSize((275, 125))
+        self.dlg.Layout()
         self.Bind(wx.EVT_BUTTON, self.on_reference, id=BUT_REF)
         self.Bind(wx.EVT_BUTTON, self.on_add_option, id=wx.ID_OK)
         self.Bind(wx.EVT_BUTTON, self.on_edit_cancel, id=wx.ID_CANCEL)
@@ -883,12 +888,17 @@ class listbox_edit_panel(wx.Panel):
             button_cancel = wx.Button(edit_panel, wx.ID_CANCEL)
             button_ref = wx.Button(edit_panel, BUT_REF, "Reference")
             sizer.Add(caption_text, (0,0))
-            sizer.Add(self.caption_entry, (0,1), span=(1,3), flag=wx.EXPAND)
+            sizer.Add(self.caption_entry, (0,1), span=(1,4), flag=wx.EXPAND)
             sizer.Add(value_text, (1,0))
-            sizer.Add(self.value_entry, (1,1), span=(1,3), flag=wx.EXPAND)
+            sizer.Add(self.value_entry, (1,1), span=(1,4), flag=wx.EXPAND)
             sizer.Add(button_ok, (3,0))
             sizer.Add(button_cancel, (3,1))
             sizer.Add(button_ref, (3,2), flag=wx.EXPAND)
+            sizer.AddGrowableCol(3)
+            sizer.AddGrowableRow(2)
+            self.dlg.SetSize((275, 125))
+            self.dlg.SetMinSize((275, 125))
+            self.dlg.Layout()
             self.Bind(wx.EVT_BUTTON, self.on_reference, id=BUT_REF)
             self.Bind(wx.EVT_BUTTON, self.on_edit_ok, id=wx.ID_OK)
             self.Bind(wx.EVT_BUTTON, self.on_edit_cancel, id=wx.ID_CANCEL)

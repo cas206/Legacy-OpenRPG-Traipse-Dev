@@ -22,7 +22,7 @@
 # Author: Ric Soard
 # Maintainer:
 # Version:
-#   $Id: hackmaster.py,v 0.4 2003/08/12
+#   $Id: hackmaster.py,v Traipse 'Ornery-Orc' prof.ebral Exp
 #
 # Description: special die roller for HackMaster(C)(TM) RPG
 #               has penetration damage - .damage(bonus,honor)
@@ -32,7 +32,7 @@
 #
 #
 
-__version__ = "$Id: hackmaster.py,v 1.8 2006/11/15 12:11:22 digitalxero Exp $"
+__version__ = "$Id: hackmaster.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import random
 from std import std
@@ -120,7 +120,6 @@ class HMattack(std):
         #this is a static die that adds honor, we want high rolls so it's +1
         self.append(static_di(self.hon))
 
-
     def check_crit(self):
         if self.data[0] == self.data[0].sides:
             self.crit = 1
@@ -170,7 +169,6 @@ class HMhelp(std):
         myStr += " Example [1d8.severity(1)] <br />"
         myStr += " .help() : <br />"
         myStr += " displays this message <br />"
-
         return myStr
 
 # the severity roll is for critical resolution. The die is rerolled and added
@@ -184,7 +182,6 @@ class HMSeverity(std):
         self.append(di(8))
         self.CheckReroll()
         self.append(static_di(self.hon))
-
 
     def __str__(self):
         myStr = "[Severity Dice, Honor]" + " [" + str(self.data[0])
@@ -205,7 +202,6 @@ class HMSeverity(std):
         result = int(random.uniform(1,self.data[num].sides+1))
         self.data[num].value += (((result - 1) * neg) + self.hon)
         self.data[num].history.append(((result - 1) * neg) + self.hon)
-        if result >= self.data[num].sides:
-            self.crit_chain(num,1)
-        if result == 1:
-            self.crit_chain(num,-1)
+        if result >= self.data[num].sides: self.crit_chain(num,1)
+        if result == 1: self.crit_chain(num,-1)
+

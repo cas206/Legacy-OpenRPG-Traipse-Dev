@@ -25,14 +25,12 @@
 # between the source and the intrepretor. IF, ELIF statements have been replaced with dictionaries,
 # unused objects have been replace with re-usable objects, and the code has been condensed.
 
-
 import re
-
 from std import std
 from time import time, clock
 from orpg.dieroller.base import di, die_base, die_rollers
 
-__version__ = "$Id: alternity.py,v 0.1 2003/01/02 12:00:00 cchriss Exp $"
+__version__ = "$Id: alternity.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 # Alternity stands for "Alternity system" 20 sided die plus mods
 
@@ -42,7 +40,6 @@ class alternity(std):
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-    # these methods return new die objects for specific options
     def sk(self,score,mod):
       return sk(self,score,mod)
 

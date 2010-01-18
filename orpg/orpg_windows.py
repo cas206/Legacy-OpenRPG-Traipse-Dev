@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: orpg_windows.py,v 1.42 2007/12/07 20:59:16 digitalxero Exp $
+#   $Id: orpg_windows.py,v Traipse 'Ornery-Orc' prof.ebral Exp  $
 #
 # Description: orpg custom windows
 #
 
-__version__ = "$Id: orpg_windows.py,v 1.42 2007/12/07 20:59:16 digitalxero Exp $"
+__version__ = "$Id: orpg_windows.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from orpg.orpg_wx import *
 from orpg.orpgCore import *

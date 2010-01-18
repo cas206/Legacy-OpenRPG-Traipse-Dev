@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: miniatures.py,v 1.46 2007/12/07 20:39:50 digitalxero Exp $
+#   $Id: miniatures.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
 #
-__version__ = "$Id: miniatures.py,v 1.46 2007/12/07 20:39:50 digitalxero Exp $"
+__version__ = "$Id: miniatures.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base import *
 import thread, time, urllib, os.path, mimetypes
@@ -196,7 +196,6 @@ class BmpMiniature:
             self.right = self.bmp.GetWidth()
             self.top = 0
             self.bottom = self.bmp.GetHeight()
-        
             # Draw the facing marker if needed
             if self.face != 0:
                 x_mid = self.pos.x + (self.bmp.GetWidth()/2)
@@ -206,7 +205,6 @@ class BmpMiniature:
                 dc.SetPen(wx.WHITE_PEN)
                 dc.SetBrush(wx.RED_BRUSH)
                 triangle = []
-        
                 # Figure out which direction to draw the marker!!
                 tri_list = {
                 FACE_WEST: [cmpPoint(self.pos.x, self.pos.y), cmpPoint(self.pos.x-5, y_mid), cmpPoint(self.pos.x, y_bottom)], 
@@ -225,7 +223,6 @@ class BmpMiniature:
                 dc.DrawPolygon(triangle)
                 dc.SetBrush(wx.NullBrush)
                 dc.SetPen(wx.NullPen)
-        
             # Draw the heading if needed
             if self.heading:
                 x_adjust = 0
@@ -343,7 +340,7 @@ class BmpMiniature:
         xml_str += " />"
         if (action == "update" and self.isUpdated) or action == "new":
             self.isUpdated = False
-            print xml_str; return xml_str
+            return xml_str
         else: return ''
 
     def takedom(self, xml_dom):
@@ -376,7 +373,7 @@ class miniature_layer(layer_base):
     def __init__(self, canvas):
         self.canvas = canvas
         layer_base.__init__(self)
-        self.id = -1 #added.
+        self.id = -1 
         self.miniatures = []
         self.serial_number = 0
         self.show_labels = True
