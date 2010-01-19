@@ -133,7 +133,8 @@ class LetterTreeClass(object):
 
         if cur.children.has_key(k) : 
             cur = cur.children[k] 
-            backtrace = cur.mostCommon 
+            backtrace = cur.mostCommon
+            returnText = ''
             while cur is not backtrace: 
                 returnText = backtrace.asciiChar + returnText
                 backtrace = backtrace.parentNode 
