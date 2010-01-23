@@ -24,13 +24,41 @@
 # The changes made in the Traipe release are intended to create a more direct connection
 # between the source and the intrepretor. IF, ELIF statements have been replaced with dictionaries,
 # unused objects have been replace with re-usable objects, and the code has been condensed.
+#
+# SEG: JAN 21 2010 - v.1.2 O'Flux Release:
+# Edits & Additions: fixed a few minor bugs; Damage roll & Display Issues.
+# Added Secondary Damage Calculation and Display. Fix all errors.
+# Tested for Traipse on Win 7
+#
+#  Skill Check Example:
+#  [1d20.sk(12,-2)]
+#  OUTPUT Example:
+#  => [6,-3] = (3) AMAZING Success
+#
+#  Pistol, Laser; 0 step -- Attack Example:
+#  [1d20.at(12,0,(1d4+1,"w"),(1d6+1,"w"),(1d4,"m"))]
+#  OUTPUT Example:
+#  => [1,0] = (1) CRITICAL SUCCESS AMAZING HIT
+#  ===> Damage [4] = (4) mortal ======> Secondary Damage (2) stun / (2) wound
+#
+#  Action Check Example:
+#  [1d20.ac(14,-1)]
+#  OUTPUT Example:
+#   => ACTION CHECK : [18,-3] = (15) Marginal failure
+#   -1 Step make up bonus next Action Check
+#
+#
 
 import re
+
 from std import std
 from time import time, clock
 from orpg.dieroller.base import di, die_base, die_rollers
 
-__version__ = "$Id: alternity.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
+## from orpg.tools.orpg_log import debug
+
+
+__version__ = "$Id: alternity.py,v 0.1 2003/01/02 12:00:00 cchriss Exp $"
 
 # Alternity stands for "Alternity system" 20 sided die plus mods
 
@@ -40,11 +68,15 @@ class alternity(std):
     def __init__(self,source=[]):
         std.__init__(self,source)
 
+    # these methods return new die objects for specific options
     def sk(self,score,mod):
       return sk(self,score,mod)
 
     def at(self,score,mod,dmgo,dmgg,dmga):
       return at(self,score,mod,dmgo,dmgg,dmga)
+
+    def ac(self,score,mod):
+        return ac(self,score,mod)
 
 die_rollers.register(alternity)
 
@@ -57,8 +89,8 @@ class sk(std):
 
     def getMod(self,mod=0):
         m=0
-        mods = { -4: -di(12), -3: -di(8), -2:  -di(6), -1: -di(4), 1: -di(4),
-                2: di(6), 3: di(8), 4: di(12), 5: di(20)}
+        mods = { -4: -di(12), -3: -di(8), -2:  -di(6), -1: -di(4), 1: di(4),
+                2: di(6), 3: di(8), 4: di(12), 5: di(20)} # SEG fix 1: di(4) #
         if mod in mods.keys(): m = mods[mod].value
         elif mod <= -5: m=-di(20).value
         elif mod == 6:  m=di(20).value + di(20).value
@@ -74,7 +106,7 @@ class sk(std):
             myStr += ","
             myStr += str(a)
         myStr += "," + str(amod) + "] = (" + str(self.dieRoll) + ")"
-        if ( self.d20 == 1 ): self.success = 'CS'
+##        if ( self.d20 == 1 ): self.success = 'CS' # seg - removed - unneeded ** #
         if ( self.dieRoll <= self.score / 4 ): self.success = 'A'
         elif ( self.dieRoll <= self.score / 2 ): self.success = 'G'
         elif ( self.dieRoll <= self.score ): self.success = 'O'
@@ -86,10 +118,11 @@ class sk(std):
         myStr = self.getRolLStr()
         successes = {'CS': " <b><font color='#00aa00'>CRITICAL SUCCESS</font></b>",
                     'CF': " <b><font color='#ff0000'>CRITICAL FAILURE</font></b>",
-                    'A': " <b>AMAZING Success</b>",
+                    'A': " <b><font color='#00aa00'>AMAZING Success</b>",
                     'G': " <b>Good Success</b>",
                     'O': " <b>Ordinary Success</b>",
                     'F': " <b>failure</b>"}
+        if ( self.d20 == 1 ):  myStr += successes['CS'] # SEG Dec 19 2009
         myStr += successes[self.success]
         return myStr
 
@@ -99,8 +132,9 @@ class at(sk):
     ## sliced from it, and with the letter attached it created an error.
     ##
     ## The Traipse method puts the damage type and the damage roll into a Tuple, ie (1d6, 's').
-    ## When uing this method you must include single or double quoutes around the damage type or the
+    ## When using this method you must include single or double quoutes around the damage type or the
     ## software will treat it as an object.
+
     def __init__(self,source=[],sc=10, mod=0, dmgo="(1d6, 's')",dmgg="(1d6, 'w')",dmga="(1d6, 'm')"):
         sk.__init__(self,source,sc,mod)
         self.dmgo = dmgo
@@ -108,26 +142,80 @@ class at(sk):
         self.dmga = dmga
 
     def getdmg(self,dmgroll):
-        astr = "===> Damage "
+        astr = "<b>===></b> Damage "
         droll = str(dmgroll[0])
+        xyz = droll.split('(')
+        secD = (int(xyz[1][:-1])/2)   ## SEG* Calculate Secondary Damage
+##  debug(secD)  ## seg added debug output
         dtype = dmgroll[1]
         astr += droll
-        if dtype=="s": astr += " stun"
-        elif dtype=="w": astr += " wound"
-        elif dtype=="m":astr += " mortal"
+        if dtype=="s": astr += " <b><font size=2 color='#52D017'>stun</font></b><BR>"
+        elif dtype=="w":
+            astr += " <b><font size=2 color='#C11B17'>wound</font></b>"+" <b>======></b> Secondary Damage ("+str(secD) \
+                    +") <b><font size=2 color='#52D017'>stun</font></b><BR>"  # SEG* Display Secondary Damage
+        elif dtype=="m":
+            astr += " <b><font size=2 color='#FF0000'>mortal</font></b>"+" <b>======></b> Secondary Damage ("+str(secD) \
+                    +") <b><font size=2 color='#52D017'>stun</font></b>"+" <b>/</b> ("+str(secD)+") <b><font size=2 color='#C11B17'>wound</font></b><BR>"  # SEG* Display Secondary Damage
         return astr
 
     def __str__(self):
         myStr = self.getRolLStr()
-        successes = {'CS': " <b><font color='#00aa00'>CRITICAL SUCCESS</font></b>",
-                    'CF': " <b><font color='#ff0000'>CRITICAL FAILURE</font></b>",
-                    'A': " <b><font color='#00aa00'>AMAZING HIT</font></b> ",
-                    'G': " <b>Good HIT</b> ",
-                    'O': " <b>Ordinary HIT</b> ",
-                    'F': " <b>miss</b>"}
+        successes = {'CS': " <b><font size=2 color='#8D38C9'>CRITICAL SUCCESS</font></b>",
+                    'CF': " <b><font size=2 color='#151B54'>CRITICAL FAILURE</font></b>",
+                    'A': " <b><font size=2 color='#E42217'>AMAZING HIT</font></b><BR> ",
+                    'G': " <b><font size=2 color='#306EFF'>Good HIT</font></b><BR> ",
+                    'O': " <b><font size=2 color='#52D017'>Ordinary HIT</font></b><BR> ",
+                    'F': " <b><font size=2 color='#41627E'>miss</font></b>"}
+        if ( self.d20 == 1 ):  myStr += successes['CS'] # SEG Dec 19 2009 
         myStr += successes[self.success]
         if self.success == 'A': myStr += self.getdmg(self.dmga)
         elif self.success == 'G': myStr += self.getdmg(self.dmgg)
         elif self.success == 'O': myStr += self.getdmg(self.dmgo)
         return myStr
+
+class ac(sk):
+    def __init__(self,source=[],sc=10,mod=0):
+        sk.__init__(self,source,sc,mod)
+
+    def GetRoLLStr(self):
+        myStr = "[" + str(self.data[0])
+        self.d20 = self.sum()
+        amod = self.getMod(self.mod)
+        self.dieRoll = self.d20 + amod
+        for a in self.data[1:]:
+            myStr += ","
+            myStr += str(a)
+        myStr += "," + str(amod) + "] = (" + str(self.dieRoll) + ")"
+        if ( self.dieRoll <= self.score / 4 ): self.success = 'A'
+        elif ( self.dieRoll <= self.score / 2 ): self.success = 'G'
+        elif ( self.dieRoll <= self.score ): self.success = 'O'
+        else: self.success = 'F'
+        if ( self.d20 == 20 ): self.success = 'CF'
+        return myStr
+
+    def __str__(self):
+        myStr = self.GetRoLLStr()
+        myStr = " <b><font color='#E42217'>ACTION CHECK : </font></b>"+myStr
+        successes = {'CS': " <b><font color='#00aa00'>CRITICAL SUCCESS</font></b>",
+                    'CF': " <b><font color='#ff0000'>CRITICAL FAILURE</font></b><BR> -2 Step make up bonus next Action Check",
+                    'A': " <b><font color='#00aa00'>AMAZING Success</b>",
+                    'G': " <b>Good Success</b>",
+                    'O': " <b>Ordinary Success</b>",
+                    'F': " <b>Marginal failure</b><BR> -1 Step make up bonus next Action Check"}
+        if ( self.d20 == 1 ):  myStr += successes['CS'] # SEG Dec 19 2009
+        myStr += successes[self.success]
+        return myStr
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
