@@ -556,24 +556,22 @@ class ServerGUI(wx.Frame):
     def OnStart(self, event = None):
         """ Start server. """
         if self.STATUS == SERVER_STOPPED:
-            # see if we already have name specified 
+            ## Set name and admin password as empty
+            self.serverName = ''
+            self.bootPwd = ''
+            # see if we already have serverName and bootPwd specified
             try:
                 validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
                 configDoc = parse(dir_struct["user"] + 'server_ini.xml').getroot()
-                if configDoc.get("name"): self.serverName = configDoc.get("name")
+                self.serverName = configDoc.get("name")
+                if configDoc.get("admin"): self.bootPwd = configDoc.get("admin") 
+                elif configDoc.get("boot"): self.bootPwd = configDoc.get("boot") 
             except: pass 
             if self.serverName == '':
                 self.serverName = 'Server Name'
                 serverNameEntry = wx.TextEntryDialog(self, "Please Enter The Server Name You Wish To Use:",
                                                  "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
-            # see if we already have password specified 
-            try: 
-                validate.config_file( "server_ini.xml", "default_server_ini.xml" ) 
-                configDoc = parse(dir_struct["user"] + 'server_ini.xml').getroot()
-                if configDoc.get("admin"): self.bootPwd = configDoc.get("admin") 
-                elif configDoc.get("boot"): self.bootPwd = configDoc.get("boot") 
-            except: pass 
             if self.bootPwd == '': 
                 serverPasswordEntry = wx.TextEntryDialog(self, 
                                             "Please Enter The Server Admin Password:", "Server's Password", 
