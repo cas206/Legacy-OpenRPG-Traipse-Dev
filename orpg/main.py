@@ -293,7 +293,8 @@ class orpgFrame(wx.Frame):
         self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite!")
         if menuitem == 'debug':
             if self.debugger.IsShown() == True:
-                self.mainmenu.Replace(8, self.traipseSuite, '&Traipse Suite')
+                self.mainmenu.Remove(8)
+                self.mainmenu.Insert(8, self.traipseSuite, "&Traipse Suite")
             else:
                 self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
                 self.traipseSuite.RemoveItem(self.debugConsole)
@@ -1099,7 +1100,8 @@ class AboutORPG(wx.Frame):
 		'Bernhard Bergbauer', 'Chris Blocher', 'David Byron', 'Ben Collins-Sussman', 'Robin Cook', 'Greg Copeland',
 		'Chris Davis', 'Michael Edwards', 'Andrew Ettinger', 'Todd Faris', 'Dj Gilcrease',
         'Christopher Hickman', 'Paul Hosking', 'Brian Manning', 'Scott Mackay', 'Jesse McConnell', 
-		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain']
+		'Brian Osman', 'Rome Reginelli', 'Christopher Rouse', 'Dave Sanders', 'Tyler Starke', 'Mark Tarrabain',
+        'David Vrabel']
         for dev in orpg_devs:
             self.About.AppendText(dev+'\n')
 
