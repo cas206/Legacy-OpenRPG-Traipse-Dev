@@ -327,6 +327,7 @@ class rpg_grid(wx.grid.Grid):
                 cells[i].text = text
             if self.mode == 0:
                 s = component.get('chat').ParseMap(text, self.handler.xml)
+                s = component.get('chat').ParseParent(s, self.handler.xml.get('map'))
                 try: text = str(eval(s))
                 except: text = s
             self.SetCellValue(rowi,i,text)

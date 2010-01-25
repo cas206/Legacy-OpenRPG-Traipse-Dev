@@ -1,5 +1,4 @@
-import os
-import re
+import os, re, wx
 import orpg.pluginhandler
 
 class Plugin(orpg.pluginhandler.PluginHandler):
@@ -23,32 +22,39 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.hiddenrolls = []
         self.dicere = "\{([0-9]*d[0-9]*.+)\}"
 
+    def plugin_menu(self):
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
+        self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
+        self.toggle.Check(True)
+
+    def plugin_toggle(self, evt):
+        pass
 
     def plugin_enabled(self):
         pass
 
-
     def plugin_disabled(self):
         pass
 
-
     def pre_parse(self, text):
-        m = re.search(self.dicere, text)
-        while m:
-            roll = "[" + m.group(1) + "]"
-            self.hiddenrolls += [self.chat.ParseDice(roll)]
-            text = text[:m.start()] + "(hidden roll)" + text[m.end():]
+        if self.toggle.IsChecked() == True:
             m = re.search(self.dicere, text)
+            while m:
+                roll = "[" + m.group(1) + "]"
+                self.hiddenrolls += [self.chat.ParseDice(roll)]
+                text = text[:m.start()] + "(hidden roll)" + text[m.end():]
+                m = re.search(self.dicere, text)
         return text
 
     def post_msg(self, text, myself):
-        c = 0
-        a = text.find("(hidden roll)")
-
-        while len(self.hiddenrolls) > c and a > -1:
-            text = text[:a+14].replace("(hidden roll)", self.hiddenrolls[c]) + text[a+14:]
+        if self.toggle.IsChecked() == True:
+            c = 0
             a = text.find("(hidden roll)")
-            c += 1
-        if c > 0:
-            self.hiddenrolls = []
+            while len(self.hiddenrolls) > c and a > -1:
+                text = text[:a+14].replace("(hidden roll)", self.hiddenrolls[c]) + text[a+14:]
+                a = text.find("(hidden roll)")
+                c += 1
+            if c > 0:
+                self.hiddenrolls = []
         return text

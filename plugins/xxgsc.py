@@ -1,8 +1,6 @@
-import os
-from orpg.orpg_wx import *
+import os, wx
 import random
 import orpg.pluginhandler
-
 
 ID_ROLL = wx.NewId()
 
@@ -29,9 +27,11 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.frame = RollerFrame(None, -1, "Game Status Controller (GSC)", self)
         self.frame.Hide()
 
-        item = wx.MenuItem(self.menu, wx.ID_ANY, "GSC Window", "GSC Window", wx.ITEM_CHECK)
-        self.topframe.Bind(wx.EVT_MENU, self._toggleWindow, item)
-        self.menu.AppendItem(item)
+    def plugin_menu(self):
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'GSC Window')
+        self.topframe.Bind(wx.EVT_MENU, self._toggleWindow, self.toggle)
+        self.toggle.Check(False)
 
     def plugin_disabled(self):
         self.plugin_removecmd('/gsc')
@@ -48,14 +48,12 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     #Events
     def _toggleWindow(self, evt):
-        id = evt.GetId()
-        item = self.menu.FindItemById(id)
         if self.frame.IsShown():
             self.frame.Hide()
-            item.Check(False)
+            self.toggle.Check(False)
         else:
             self.frame.Show()
-            item.Check(True)
+            self.toggle.Check(True)
 
 
 class RollerFrame(wx.Frame):
