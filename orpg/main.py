@@ -59,6 +59,7 @@ from orpg.tools.validate import validate
 from orpg.tools.passtool import PassTool
 from orpg.tools.orpg_log import logger, crash, debug
 from orpg.tools.metamenus import MenuBarEx
+from orpg.tools.InterParse import Parse
 
 from xml.etree.ElementTree import ElementTree, Element, parse
 from xml.etree.ElementTree import fromstring, tostring
@@ -674,7 +675,7 @@ class orpgFrame(wx.Frame):
         logger.debug("Status Window Created")
 
         # Create and show the floating dice toolbar
-        self.dieToolBar = orpg.tools.toolBars.DiceToolBar(self, callBack = self.chat.ParsePost)
+        self.dieToolBar = orpg.tools.toolBars.DiceToolBar(self, callBack = Parse.Post)
         wndinfo = AUI.AuiPaneInfo()
         menuid = wx.NewId()
         self.mainwindows[menuid] = "Dice Tool Bar"

@@ -31,6 +31,7 @@ __version__ = "$Id: rpg_grid.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 from core import *
 from forms import *
 from orpg.tools.orpg_log import debug
+from orpg.tools.InterParse import Parse
 
 class rpg_grid_handler(node_handler):
     """ Node handler for rpg grid tool
@@ -88,8 +89,8 @@ class rpg_grid_handler(node_handler):
                 html_str += "<td >"
                 text = c.text
                 if text == None or text == '': text = '<br />'
-                s = component.get('chat').ParseMap(text, self.xml)
-                s = component.get('chat').NormalizeParse(s)
+                s = Parse.NodeMap(text, self.xml)
+                s = Parse.Normalize(s)
                 try: text = str(eval(s))
                 except: text = s
                 html_str += text + "</td>"
@@ -326,8 +327,8 @@ class rpg_grid(wx.grid.Grid):
                 text = ''
                 cells[i].text = text
             if self.mode == 0:
-                s = component.get('chat').ParseMap(text, self.handler.xml)
-                s = component.get('chat').ParseParent(s, self.handler.xml.get('map'))
+                s = Parse.NodeMap(text, self.handler.xml)
+                s = Parse.NodeParent(s, self.handler.xml.get('map'))
                 try: text = str(eval(s))
                 except: text = s
             self.SetCellValue(rowi,i,text)

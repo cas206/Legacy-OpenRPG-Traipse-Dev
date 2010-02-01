@@ -37,7 +37,7 @@ from orpg.orpg_windows import *
 from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from nodehandlers import core
-import string, urllib, time, os
+import string, urllib, time, os, shutil
 
 from orpg.orpg_xml import xml
 from orpg.tools.validate import validate
@@ -81,6 +81,12 @@ TOP_SAVE_TREE_AS = wx.NewId()
 TOP_TREE_PROP = wx.NewId()
 TOP_FEATURES = wx.NewId()
 EZ_REF = wx.NewId()
+
+def exists(path):
+    try:
+        os.stat(path)
+        return True
+    except: return False
 
 class game_tree(wx.TreeCtrl):
     
@@ -233,11 +239,14 @@ class game_tree(wx.TreeCtrl):
             self.xml_root = None
 
         if not self.xml_root:
-            os.rename(filename,filename+".corrupt")
+            count = 1
+            while exists(filename[:len(filename)-4]+'-bad-'+str(count)+'.xml'): count += 1
+            shutil.copy(filename, filename[:len(filename)-4]+'-bad-'+str(count)+'.xml')
+            shutil.copyfile(dir_struct["template"]+'default_tree.xml', filename)
             emsg = "Your gametree is being regenerated.\n\n"\
                  "To salvage a recent version of your gametree\n"\
                  "exit OpenRPG and copy the lastgood.xml file in\n"\
-                 "your myfiles directory to "+filename+ "\n"\
+                 "your myfiles directory to "+filename[:len(filename)-4]+'-bad-'+str(count)+'.xml'+ "\n"\
                  "in your myfiles directory.\n\n"\
                  "lastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.\n\n"\
                  "Would you like to select a different gametree file to use?\n"\
@@ -279,8 +288,11 @@ class game_tree(wx.TreeCtrl):
 
         except Exception, e:
             logger.exception(traceback.format_exc())
+            count = 1
+            while exists(filename[:len(filename)-4]+'-bad-'+str(count)+'.xml'): count += 1
+            shutil.copy(filename, filename[:len(filename)-4]+'-bad-'+str(count)+'.xml')
+            shutil.copyfile(dir_struct["template"]+'default_tree.xml', filename)
             wx.MessageBox("Corrupt Tree!\nYour game tree is being regenerated. To\nsalvage a recent version of your gametree\nexit OpenRPG and copy the lastgood.xml\nfile in your myfiles directory\nto "+filename+ "\nin your myfiles directory.\nlastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.")
-            os.rename(filename,filename+".corrupt")
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
     

@@ -61,6 +61,7 @@ from orpg.tools.validate import validate
 from orpg.tools.orpg_settings import settings
 import orpg.tools.predTextCtrl
 from orpg.tools.orpg_log import logger, debug
+from orpg.tools.InterParse import Parse
 from orpg.orpgCore import component
 from xml.etree.ElementTree import tostring
 
@@ -1029,7 +1030,7 @@ class chat_panel(wx.Panel):
         sound_file = self.settings.get_setting("SendSound")
         if sound_file != '': component.get('sound').play(sound_file)
         if s[0] != "/": ## it's not a slash command
-            s = self.ParsePost( s, True, True )
+            s = Parse.Post( s, True, True )
         else: self.chat_cmds.docmd(s) # emote is in chatutils.py
 
     def on_chat_key_down(self, event):
@@ -1168,7 +1169,7 @@ class chat_panel(wx.Panel):
         if len(dieMod) and dieMod[0] not in "*/-+": dieMod = "+" + dieMod
         dieText += dieMod
         dieText = "[" + dieText + "]"
-        self.ParsePost(dieText, 1, 1)
+        Parse.Post(dieText, 1, 1)
         self.chattxt.SetFocus()
 
     def on_chat_save(self, evt):
@@ -1298,7 +1299,7 @@ class chat_panel(wx.Panel):
         return text
 
     def emote_message(self, text):
-        text = self.NormalizeParse(text)
+        text = Parse.Normalize(text)
         text = self.colorize(self.emotecolor, text)
         if self.type == MAIN_TAB and self.sendtarget == 'all': self.send_chat_message(text,chat_msg.EMOTE_MESSAGE)
         elif self.type == MAIN_TAB and self.sendtarget == "gm":
@@ -1316,7 +1317,7 @@ class chat_panel(wx.Panel):
 
     def whisper_to_players(self, text, player_ids):
         tabbed_whispers_p = self.settings.get_setting("tabbedwhispers")
-        text = self.NormalizeParse(text)
+        text = Parse.Normalize(text)
         player_names = ""
         for m in player_ids:
             id = m.strip()
@@ -1588,86 +1589,6 @@ class chat_panel(wx.Panel):
             logger.general("EXCEPTION: " + str(e))
             return "[ERROR]"
 
-    ####  Post with parsing dice ####
-    
-    def ParsePost(self, s, send=False, myself=False):
-        s = self.NormalizeParse(s)
-        self.set_colors()
-        self.Post(s,send,myself)
-    
-    def NormalizeParse(self, s):
-        for plugin_fname in self.activeplugins.keys():
-            plugin = self.activeplugins[plugin_fname]
-            try: s = plugin.pre_parse(s)
-            except Exception, e:
-                if str(e) != "'module' object has no attribute 'post_msg'":
-                    logger.general(traceback.format_exc())
-                    logger.general("EXCEPTION: " + str(e))
-        if self.parsed == 0:
-            s = self.ParseNode(s)
-            s = self.ParseDice(s)
-            s = self.ParseFilter(s)
-            self.parsed = 1
-        return s
-    
-    def ParseFilter(self, s):
-        s = self.GetFilteredText(s)
-        return s
-    
-    def ParseNode(self, s):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        #[a-zA-Z0-9 _\-\.]
-        reg = re.compile("(!@(.*?)@!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            newstr = self.ParseNode(self.resolve_nodes(matches[i][1]))
-            s = s.replace(matches[i][0], newstr, 1)
-        return s
-    
-    def ParseDice(self, s):
-        """Parses player input for embedded dice rolls"""
-        reg = re.compile("\[([^]]*?)\]")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            newstr = self.PraseUnknowns(matches[i])
-            qmode = 0
-            newstr1 = newstr
-            if newstr[0].lower() == 'q':
-                newstr = newstr[1:]
-                qmode = 1
-            if newstr[0].lower() == '#':
-                newstr = newstr[1:]
-                qmode = 2
-            try: newstr = component.get('DiceManager').proccessRoll(newstr)
-            except: pass
-            if qmode == 1:
-                s = s.replace("[" + matches[i] + "]", 
-                            "<!-- Official Roll [" + newstr1 + "] => " + newstr + "-->" + newstr, 1)
-            elif qmode == 2:
-                s = s.replace("[" + matches[i] + "]", newstr[len(newstr)-2:-1], 1)
-            else: s = s.replace("[" + matches[i] + "]", 
-                            "[" + newstr1 + "<!-- Official Roll -->] => " + newstr, 1)
-        return s
-    
-    def PraseUnknowns(self, s):
-	# Uses a tuple. Usage: ?Label}dY. If no Label is assigned then use ?}DY
-        newstr = "0"
-        reg = re.compile("(\?\{*)([a-zA-Z ]*)(\}*)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            lb = "Replace '?' with: "
-            if len(matches[i][0]):
-                lb = matches[i][1] + "?: "
-            dlg = wx.TextEntryDialog(self, lb, "Missing Value?")
-            dlg.SetValue('')
-            if matches[i][0] != '':
-                dlg.SetTitle("Enter Value for " + matches[i][1])
-            if dlg.ShowModal() == wx.ID_OK: newstr = dlg.GetValue()
-            if newstr == '': newstr = '0'
-            s = s.replace(matches[i][0], newstr, 1).replace(matches[i][1], '', 1).replace(matches[i][2], '', 1)
-            dlg.Destroy()
-        return s
 
     # This subroutine builds a chat display name.
     #
@@ -1707,180 +1628,4 @@ class chat_panel(wx.Panel):
                 if in_tag: rs = rs[:i] + "'" + rs[i+1:]
             i += 1
         return rs
-
-    def resolve_loop(self, node, path, step, depth):
-        if step == depth:
-            return self.resolution(node)
-        else:
-            child_list = node.findall('nodehandler')
-            for child in child_list:
-                if step == depth: break
-                if child.get('name') == path[step]:
-                    node = child
-                    step += 1
-                    if node.get('class') in ('dnd35char_handler', 
-                                            "SWd20char_handler", 
-                                            "d20char_handler", 
-                                            "dnd3echar_handler"): self.resolve_cust_loop(node, path, step, depth)
-                    elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, step, depth)
-                    else: self.resolve_loop(node, path, step, depth)
-
-    def resolve_grid(self, node, path, step, depth):
-        if step == depth:
-            self.data = 'Invalid Grid Reference!'
-            return
-        cell = tuple(path[step].strip('(').strip(')').split(','))
-        grid = node.find('grid')
-        rows = grid.findall('row')
-        col = rows[int(self.ParseDice(cell[0]))-1].findall('cell')
-        try: self.data = self.ParseMap(col[int(self.ParseDice(cell[1]))-1].text, node) or 'No Cell Data'
-        except: self.data = 'Invalid Grid Reference!'
-        return
-
-    def resolution(self, node):
-        if self.passed == False:
-            self.passed = True
-            if node.get('class') == 'textctrl_handler': 
-                s = str(node.find('text').text)
-            else: s = 'Nodehandler for '+ node.get('class') + ' not done!' or 'Invalid Reference!'
-        else:
-            s = ''
-        s = self.ParseMap(s, node)
-        s = self.ParseParent(s, node.get('map'))
-        self.data = s
-
-    def ParseMap(self, s, node):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!!(.*?)!!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            tree_map = node.get('map')
-            tree_map = tree_map + '::' + matches[i][1]
-            newstr = '!@'+ tree_map +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-            s = self.ParseParent(s, tree_map)
-        return s
-
-    def ParseParent(self, s, tree_map):
-        """Parses player input for embedded nodes rolls"""
-        cur_loc = 0
-        reg = re.compile("(!#(.*?)#!)")
-        matches = reg.findall(s)
-        for i in xrange(0,len(matches)):
-            ## Build the new tree_map
-            new_map = tree_map.split('::')
-            del new_map[len(new_map)-1]
-            parent_map = matches[i][1].split('::')
-            ## Find an index or use 1 for ease of use.
-            try: index = new_map.index(parent_map[0])
-            except: index = 1
-            ## Just replace the old tree_map from the index.
-            new_map[index:len(new_map)] = parent_map
-            newstr = '::'.join(new_map)
-            newstr = '!@'+ newstr +'@!'
-            s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseNode(s)
-        return s
-
-    def resolve_nodes(self, s):
-        self.passed = False
-        self.data = 'Invalid Reference!'
-        value = ""
-        path = s.split('::')
-        depth = len(path)
-        self.gametree = component.get('tree')
-        try: node = self.gametree.tree_map[path[0]]['node']
-        except Exception, e: return self.data
-        if node.get('class') in ('dnd35char_handler', 
-                                "SWd20char_handler", 
-                                "d20char_handler", 
-                                "dnd3echar_handler"): self.resolve_cust_loop(node, path, 1, depth)
-        elif node.get('class') == 'rpg_grid_handler': self.resolve_grid(node, path, 1, depth)
-        else: self.resolve_loop(node, path, 1, depth)
-        return self.data
-
-    def resolve_cust_loop(self, node, path, step, depth):
-        node_class = node.get('class')
-        ## Code needs clean up. Either choose .lower() or .title(), then reset the path list's content ##
-        if step == depth: self.resolution(node)
-        ##Build Abilities dictionary##
-        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('abilities')
-        else: ab = node.find('abilities')
-        ab_list = ab.findall('stat'); pc_stats = {}
-
-        for ability in ab_list:
-            pc_stats[ability.get('name')] = ( 
-                    str(ability.get('base')), 
-                    str((int(ability.get('base'))-10)/2) )
-            pc_stats[ability.get('abbr')] = ( 
-                    str(ability.get('base')), 
-                    str((int(ability.get('base'))-10)/2) )
-
-        if node_class not in ('d20char_handler', "SWd20char_handler"): ab = node.find('character').find('saves')
-        else: ab = node.find('saves')
-        ab_list = ab.findall('save')
-        for save in ab_list:
-            pc_stats[save.get('name')] = (str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
-            if save.get('name') == 'Fortitude': abbr = 'Fort'
-            if save.get('name') == 'Reflex': abbr = 'Ref'
-            if save.get('name') == 'Will': abbr = 'Will'
-            pc_stats[abbr] = ( str(save.get('base')), str(int(save.get('magmod')) + int(save.get('miscmod')) + int(pc_stats[save.get('stat')][1]) ) )
-
-        if path[step].lower() == 'skill':
-            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
-            node = node.find('skills')
-            child_list = node.findall('skill')
-            for child in child_list:
-                if path[step+1].lower() == child.get('name').lower():
-                    if step+2 == depth: self.data = child.get('rank')
-                    elif path[step+2].lower() == 'check':
-                        self.data = '<b>Skill Check:</b> ' + child.get('name') + ' [1d20+'+str( int(child.get('rank')) + int(pc_stats[child.get('stat')][1]) )+']'
-            return
-
-        if path[step].lower() == 'feat':
-            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snf')
-            node = node.find('feats')
-            child_list = node.findall('feat')
-            for child in child_list:
-                if path[step+1].lower() == child.get('name').lower():
-                    if step+2 == depth: self.data = '<b>'+child.get('name')+'</b>'+': '+child.get('desc')
-            return
-        if path[step].lower() == 'cast':
-            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('snp')
-            node = node.find('spells')
-            child_list = node.findall('spell')
-            for child in child_list:
-                if path[step+1].lower() == child.get('name').lower():
-                    if step+2 == depth: self.data = '<b>'+child.get('name')+'</b>'+': '+child.get('desc')
-            return
-        if path[step].lower() == 'attack':
-            if node_class not in ('d20char_handler', "SWd20char_handler"): node = node.find('combat')
-            if path[step+1].lower() == 'melee' or path[step+1].lower() == 'm':
-                bonus_text = '(Melee)'
-                bonus = node.find('attacks')
-                bonus = bonus.find('melee')
-                bonus = bonus.attrib; d = int(pc_stats['Str'][1])
-            elif path[step+1].lower() == 'ranged' or path[step+1].lower() == 'r':
-                bonus_text = '(Ranged)'
-                bonus = node.find('attacks')
-                bonus = bonus.find('ranged')
-                bonus = bonus.attrib; d = int(pc_stats['Dex'][1])
-            for b in bonus:
-                d += int(bonus[b])
-            bonus = str(d)
-            if path[step+2] == None: self.data = bonus
-            else:
-                weapons = node.find('attacks')
-                weapons = weapons.findall('weapon')
-                for child in weapons:
-                    if path[step+2].lower() == child.get('name').lower():
-                        self.data = '<b>Attack: '+bonus_text+'</b> '+child.get('name')+' [1d20+'+bonus+'] ' + 'Damage: ['+child.get('damage')+']'
-            return
-        elif pc_stats.has_key(path[step].title()):
-            if step+1 == depth: self.data = pc_stats[path[step].title()][0] + ' +('+pc_stats[path[step].title()][1]+')'
-            elif path[step+1].title() == 'Mod': self.data = pc_stats[path[step].title()][1]
-            elif path[step+1].title() == 'Check': self.data = '<b>'+path[step].title()+' Check:</b> [1d20+'+str(pc_stats[path[step].title()][1])+']'
-            return
 

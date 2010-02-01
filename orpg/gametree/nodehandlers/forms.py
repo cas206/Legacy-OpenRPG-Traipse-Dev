@@ -33,6 +33,7 @@ import orpg.minidom as minidom
 from orpg.orpg_xml import xml
 from wx.lib.scrolledpanel import ScrolledPanel
 from orpg.tools.settings import settings
+from orpg.tools.InterParse import Parse
 
 def bool2int(b):
     #in wxPython 2.5+, evt.Checked() returns True or False instead of 1.0 or 0.
@@ -262,16 +263,16 @@ class text_panel(wx.Panel):
 
     def on_send(self, evt):
         txt = self.text.GetValue()
-        txt = self.chat.ParseMap(txt, self.handler.xml)
-        txt = self.chat.ParseParent(txt, self.handler.xml.get('map'))
+        txt = Parse.NodeMap(txt, self.handler.xml)
+        txt = Parse.NodeParent(txt, self.handler.xml.get('map'))
         if not self.handler.is_raw_send():
-            self.chat.ParsePost(self.handler.tohtml(), True, True)
+            Parse.Post(self.handler.tohtml(), True, True)
             return 1
         actionlist = txt.split("\n")
         for line in actionlist:
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    self.chat.ParsePost(line, True, True)
+                    Parse.Post(line, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
@@ -595,18 +596,18 @@ class listbox_handler(node_handler):
 
     def on_send_to_chat(self, evt):
         txt = self.get_selected_text()
-        txt = self.chat.ParseMap(txt, self.xml)
-        txt = self.chat.ParseParent(txt, self.xml.get('map'))
+        txt = Parse.NodeMap(txt, self.xml)
+        txt = Parse.NodeParent(txt, self.xml.get('map'))
         if not self.is_raw_send():
-            self.chat.ParsePost(self.tohtml(), True, True)
+            Parse.Post(self.tohtml(), True, True)
             return 1
         actionlist = self.get_selections_text()
         for line in actionlist:
-            line = self.chat.ParseMap(line, self.xml)
-            line = self.chat.ParseParent(line, self.xml.get('map'))
+            line = Parse.NodeMap(line, self.xml)
+            line = Parse.NodeParent(line, self.xml.get('map'))
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    self.chat.ParsePost(line, True, True)
+                    Parse.Post(line, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
