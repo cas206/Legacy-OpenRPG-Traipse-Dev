@@ -10,7 +10,7 @@ class InterParse():
     def Post(self, s, send=False, myself=False):
         s = self.Normalize(s)
         component.get('chat').set_colors()
-        component.get('chat').Post(s,send,myself)
+        component.get('chat').Post(s, send, myself)
 
     def Normalize(self, s):
         for plugin_fname in component.get('chat').activeplugins.keys():
@@ -248,7 +248,6 @@ class InterParse():
                     if step+2 == depth: s = child.get('rank')
                     elif path[step+2].lower() == 'check':
                         s = '<b>Skill Check:</b> ' + child.get('name') + ' [1d20+'+str( int(child.get('rank')) + int(pc_stats[child.get('stat')][1]) )+']'
-                    print s
             return s
 
         if path[step].lower() == 'feat':

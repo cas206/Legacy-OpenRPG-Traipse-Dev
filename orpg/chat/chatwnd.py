@@ -119,8 +119,9 @@ def log( settings, c, text ):
             f = open( dir_struct["user"] + filename, 'a' )
             f.write( '<div class="'+c+'">%s%s</div>\n' % ( header, text ) )
             f.close()
-        except:
+        except Exception, e:
             print "could not open " + dir_struct["user"] + filename + ", ignoring..."
+            print 'Error given', e
             pass
 
 # This class displayes the chat information in html?
@@ -343,7 +344,6 @@ class chat_notebook(orpgTabberWnd):
 
     def get_tab_index(self, chatpanel):
         "Return the index of a chatpanel in the wxNotebook."
-
         for i in xrange(self.GetPageCount()):
             if (self.GetPage(i) == chatpanel):
                 return i
@@ -1030,7 +1030,7 @@ class chat_panel(wx.Panel):
         sound_file = self.settings.get_setting("SendSound")
         if sound_file != '': component.get('sound').play(sound_file)
         if s[0] != "/": ## it's not a slash command
-            s = Parse.Post( s, True, True )
+            s = self.ParsePost( s, True, True )
         else: self.chat_cmds.docmd(s) # emote is in chatutils.py
 
     def on_chat_key_down(self, event):
@@ -1169,7 +1169,7 @@ class chat_panel(wx.Panel):
         if len(dieMod) and dieMod[0] not in "*/-+": dieMod = "+" + dieMod
         dieText += dieMod
         dieText = "[" + dieText + "]"
-        Parse.Post(dieText, 1, 1)
+        self.ParsePost(dieText, 1, 1)
         self.chattxt.SetFocus()
 
     def on_chat_save(self, evt):
@@ -1589,6 +1589,10 @@ class chat_panel(wx.Panel):
             logger.general("EXCEPTION: " + str(e))
             return "[ERROR]"
 
+    def ParsePost(self, s, send=False, myself=False):
+        s = Parse.Normalize(s)
+        self.set_colors()
+        self.Post(s,send,myself)
 
     # This subroutine builds a chat display name.
     #
