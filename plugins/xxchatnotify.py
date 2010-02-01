@@ -126,14 +126,15 @@ class Plugin(orpg.pluginhandler.PluginHandler): #Attempting to pass the orpgFram
 
 
     def plugin_incoming_msg(self, text, type, name, player):
-        if (self.notify == 'beep' or self.notify == 'both') and (self.type == 'all' or type == 2):
-            if self.soundfile == 'None':
-                wx.CallAfter(wx.Bell)
-                wx.CallAfter(wx.Bell)
-            else:
-                wx.CallAfter(self.sound_player.play, self.soundfile, self.soundloc)
-        if (self.notify == 'flash' or self.notify == 'both') and (self.type == 'all' or type == 2):
-            wx.CallAfter(self.mainframe.RequestUserAttention)
+        if not self.topframe.IsActive():
+            if (self.notify == 'beep' or self.notify == 'both') and (self.type == 'all' or type == 2):
+                if self.soundfile == 'None':
+                    wx.CallAfter(wx.Bell)
+                    wx.CallAfter(wx.Bell)
+                else:
+                    wx.CallAfter(self.sound_player.play, self.soundfile, self.soundloc)
+            if (self.notify == 'flash' or self.notify == 'both') and (self.type == 'all' or type == 2):
+                wx.CallAfter(self.mainframe.RequestUserAttention)
         return text, type, name
 
 

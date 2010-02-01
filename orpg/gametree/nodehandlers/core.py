@@ -29,6 +29,7 @@
 __version__ = "$Id: core.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from nodehandler_version import NODEHANDLER_VERSION
+from orpg.tools.InterParse import Parse
 
 try:
     from orpg.orpg_windows import *
@@ -281,7 +282,7 @@ class node_handler:
     def get_html_panel(self,parent):
         html_str = "<html><body bgcolor=\"#FFFFFF\" >"+self.tohtml()+"</body></html>"
         wnd = wx.html.HtmlWindow(parent,-1)
-        html_str = self.chat.ParseDice(html_str)
+        html_str = Parse.Dice(html_str)
         wnd.SetPage(html_str)
         return wnd
 
