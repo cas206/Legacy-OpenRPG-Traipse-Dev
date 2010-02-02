@@ -1,6 +1,7 @@
 from orpg.orpgCore import component
 import re
 from orpg.tools.orpg_log import logger
+from wx import TextEntryDialog, ID_OK
 
 class InterParse():
 
@@ -76,11 +77,11 @@ class InterParse():
             lb = "Replace '?' with: "
             if len(matches[i][0]):
                 lb = matches[i][1] + "?: "
-            dlg = wx.TextEntryDialog(self, lb, "Missing Value?")
+            dlg = TextEntryDialog(self, lb, "Missing Value?")
             dlg.SetValue('')
             if matches[i][0] != '':
                 dlg.SetTitle("Enter Value for " + matches[i][1])
-            if dlg.ShowModal() == wx.ID_OK: newstr = dlg.GetValue()
+            if dlg.ShowModal() == ID_OK: newstr = dlg.GetValue()
             if newstr == '': newstr = '0'
             s = s.replace(matches[i][0], newstr, 1).replace(matches[i][1], '', 1).replace(matches[i][2], '', 1)
             dlg.Destroy()
