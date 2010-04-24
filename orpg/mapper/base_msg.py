@@ -21,11 +21,11 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: base_msg.py,v 1.9 2007/03/09 14:11:55 digitalxero Exp $
+#   $Id: base_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: base_msg.py,v 1.9 2007/03/09 14:11:55 digitalxero Exp $"
+__version__ = "$Id: base_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from threading import RLock
 from orpg.networking.mplay_client import *
@@ -38,7 +38,6 @@ class map_element_msg_base:
 
         if not hasattr(self,"tagname"):
             raise Exception, "This is a virtual class that cannot be directly instantiated.  Set self.tagname in derived class."
-
         self._props = {}
         #  This is a dictionary that holds (value,changed) 2-tuples, indexed by attribute
         #  Avoid manipulating these values directly.  Instead, use the provided accessor methods.

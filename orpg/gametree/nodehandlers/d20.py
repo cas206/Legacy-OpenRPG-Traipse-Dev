@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: d20.py,v 1.30 2007/05/22 00:50:57 digitalxero Exp $
+#   $Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the d20 nodehanlers
 #
 
-__version__ = "$Id: d20.py,v 1.30 2007/05/22 00:50:57 digitalxero Exp $"
+__version__ = "$Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 from containers import *
@@ -34,6 +34,7 @@ import re
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring, parse, XML
 from orpg.tools.orpg_log import debug
+from orpg.tools.InterParse import Parse
 
 D20_EXPORT = wx.NewId()
 ############################
@@ -991,9 +992,9 @@ class d20attacks(d20_char_child):
             for i in range( 0, len( bab ) ):
                 if bab[i] > 0 or i == 0:
                     attack_roll_str = '[1d20%+d]' % (bab[i] + attack_mod)
-                    attack_roll_parsed = self.chat.ParseDice( attack_roll_str )
+                    attack_roll_parsed = Parse.Dice( attack_roll_str )
                     damage_roll_str = '[%dd%d%+d%s]' % (num_damage_dice, damage_die, damage_mod, extra_damage)
-                    damage_roll_parsed = self.chat.ParseDice( damage_roll_str )
+                    damage_roll_parsed = Parse.Dice( damage_roll_str )
                     txt = '%s (%s): %s ===> Damage: %s' \
                           % (name, bab_attributes[i], attack_roll_parsed, damage_roll_parsed)
                     self.chat.Post( txt, True, True )

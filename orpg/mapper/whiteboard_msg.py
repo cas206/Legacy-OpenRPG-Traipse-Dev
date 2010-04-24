@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: whiteboard_msg.py,v 1.12 2007/03/09 14:11:56 digitalxero Exp $
+#   $Id: whiteboard_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
 #
-__version__ = "$Id: whiteboard_msg.py,v 1.12 2007/03/09 14:11:56 digitalxero Exp $"
+__version__ = "$Id: whiteboard_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_msg import *
 

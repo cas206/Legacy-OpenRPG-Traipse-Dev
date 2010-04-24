@@ -21,13 +21,13 @@
 # Author: Ted Berg
 # Maintainer:
 # Version:
-#   $Id: chat_msg.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $
+#   $Id: chat_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Contains class definitions for manipulating <chat/> messages
 #
 #
 
-__version__ = "$Id: chat_msg.py,v 1.15 2006/11/04 21:24:19 digitalxero Exp $"
+__version__ = "$Id: chat_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from orpg.orpgCore import *
 from chat_version import CHAT_VERSION
@@ -48,8 +48,7 @@ class chat_msg:
         self.takexml(xml_text)
 
     def __del__(self):
-        if self.chat_dom:
-            self.chat_dom.unlink()
+        if self.chat_dom: self.chat_dom.unlink()
 
     def toxml(self):
         return tostring(self.chat_dom)

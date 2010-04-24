@@ -23,13 +23,13 @@
 # Author: Prof. Ebral, TaS (Traipse)
 # Maintainer:
 # Version:
-#   $Id: wfrpg.py,v 1.00 Jan/13/2010 prof.ebral Exp $
+#   $Id: wfrpg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Warhammer Fantasy Roleplay Dice Roller die roller
 # Comissioned by Puu-san
 #
 
-__version__ = "$Id: wfrpg.py,v 1.00 Jan/13/2010 prof.ebral Exp $"
+__version__ = "$Id: wfrpg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from std import std
 import random

@@ -23,7 +23,7 @@
 # Author: Jacob Matthew, Talisan Creations
 # Maintainer:
 # Version:
-#   $Id: trinity.py,v 1.2 2007/05/05 05:30:10 digitalxero Exp $
+#   $Id: trinity.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Aeon Trinity die roller
 # Modified from the WoD dieroller "$Id: trinity.py,v 1.2 2007/05/05 05:30:10 digitalxero Exp $"
@@ -32,7 +32,7 @@
 # Threshhold addition by robert t childers
 # Threshhold functionality removed, some tags remain in code.
 
-__version__ = "$Id: trinity.py,v 1.2 2007/05/05 05:30:10 digitalxero Exp $"
+__version__ = "$Id: trinity.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from std import std
 from orpg.dieroller.base import *

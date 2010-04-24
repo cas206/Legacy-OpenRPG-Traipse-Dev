@@ -21,7 +21,7 @@
 # Author: Ted Berg
 # Maintainer:
 # Version:
-#   $Id: scriptkit.py,v 1.15 2006/11/04 21:24:22 digitalxero Exp $
+#   $Id: scriptkit.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Class that contains convenience methods for various operations.  Was created with the purpose
 #       of exposing a simple API to users of an as yet uncreated scripting interface.

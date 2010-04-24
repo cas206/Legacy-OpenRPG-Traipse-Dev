@@ -7,7 +7,6 @@
 #   on_whisper(self,text)
 #
 
-
 import string, time
 import orpg.orpg_version
 import orpg.orpg_windows
@@ -26,63 +25,41 @@ from orpg.tools.orpg_log import logger
 try:
     import cmd_ext
     print "Importing Developer Extended Command Set"
-except:
-    pass
+except: pass
 ##----------------------------------------------------------------
 
 ANTI_LOG_CHAR = '!'
 
 class chat_commands:
 
-    # Initialization subroutine.
-    #
-    # !self : instance of self
-    # !chat : instance of the chat window to write to
-    
     def __init__(self,chat):
         self.post = chat.Post
         self.colorize = chat.colorize
         self.session = chat.session
-        #self.send = chat.session.send
         self.settings = chat.settings
         self.chat = chat
         self.cmdlist = {}
         self.shortcmdlist = {}
         self.defaultcmds()
         self.defaultcmdalias()
-        # def __init__ - end
         self.previous_whisper = []
 
-
-        # This subroutine will take a text string and attempt to match to a series
-        # of implemented emotions.
-        #
-        # !self : instance of self
-        # !text : string of text matching an implemented emotion
-    
     def addcommand(self, cmd, function, helpmsg):
         if not self.cmdlist.has_key(cmd) and not self.shortcmdlist.has_key(cmd):
             self.cmdlist[cmd] = {}
             self.cmdlist[cmd]['function'] = function
             self.cmdlist[cmd]['help'] = helpmsg
-            #print 'Command Added: ' + cmd
 
-    
     def addshortcmd(self, shortcmd, longcmd):
         if not self.shortcmdlist.has_key(shortcmd) and not self.cmdlist.has_key(shortcmd):
             self.shortcmdlist[shortcmd] = longcmd
 
-    
     def removecmd(self, cmd):
         if self.cmdlist.has_key(cmd):
             del self.cmdlist[cmd]
         elif self.shortcmdlist.has_key(cmd):
             del self.shortcmdlist[cmd]
 
-        #print 'Command Removed: ' + cmd
-
-
-    
     def defaultcmds(self):
         self.addcommand('/help', self.on_help, '- Displays this help message')
         self.addcommand('/version', self.on_version, ' - Displays current version of OpenRPG.')
@@ -112,7 +89,6 @@ class chat_commands:
         self.addcommand('/purge', self.on_purge, 'This will clear the entire chat window')
         self.addcommand('/advfilter', self.on_filter, 'This will toggle the Advanced Filter')
 
-    
     def defaultcmdalias(self):
         self.addshortcmd('/?', '/help')
         self.addshortcmd('/he', '/me')
@@ -123,18 +99,14 @@ class chat_commands:
         self.addshortcmd('/date', '/time')
         self.addshortcmd('/desc', '/description')
         self.addshortcmd('/d', '/description')
-
-        #This is just an example or a differant way the shorcmd can be used
         self.addshortcmd('/sleep', '/me falls asleep')
 
-    
     def docmd(self,text):
         cmdsearch = string.split(text,None,1)
         cmd = string.lower(cmdsearch[0])
         start = len(cmd)
         end = len(text)
         cmdargs = text[start+1:end]
-
         if self.cmdlist.has_key(cmd):
             self.cmdlist[cmd]['function'](cmdargs)
         elif self.shortcmdlist.has_key(cmd):
@@ -143,37 +115,26 @@ class chat_commands:
             msg = "Sorry I don't know what %s is!" % (cmd)
             self.chat.InfoPost(msg)
 
-    
     def on_filter(self, cmdargs):
-        #print self.chat.advancedFilter
         test = not self.chat.advancedFilter
-        #print test
-
         for tab in self.chat.parent.whisper_tabs:
             tab.advancedFilter = not self.chat.advancedFilter
-
         for tab in self.chat.parent.null_tabs:
             tab.advancedFilter = not self.chat.advancedFilter
-
         for tab in self.chat.parent.group_tabs:
             tab.advancedFilter = not self.chat.advancedFilter
-
         if self.chat.parent.GMChatPanel != None:
             self.chat.parent.GMChatPanel.advancedFilter = not self.chat.advancedFilter
-
         self.chat.advancedFilter = not self.chat.advancedFilter
-
         if self.chat.advancedFilter:
             self.chat.InfoPost("Advanced Filtering has been turned On")
         else:
             self.chat.InfoPost("Advanced Filtering has been turned Off")
 
-    
     def on_purge(self, cmdargs):
         self.chat.PurgeChat()
         self.chat.InfoPost('Chat Buffer has been Purged!')
 
-    
     def on_sound(self, cmdargs):
         if len(cmdargs) < 8:
             self.chat.InfoPost("You must provide a URL for the file name, it does not work for just local sound files")
@@ -186,9 +147,7 @@ class chat_commands:
         else:
             snd = cmdargs.replace('&', '&amp;')
             loop = ''
-
         type = 'remote'
-
         (name, ip, id, text_status, version, protocol_version, client_string, role) = self.session.get_my_info()
         group_id = self.session.group_id
         if (role != 'Lurker' and group_id != '0') or self.session.get_status() != 1:
@@ -207,11 +166,9 @@ class chat_commands:
         else:
             self.chat.InfoPost("Something dun fuckered up Frank!")
 
-    
     def on_version(self, cmdargs=""):
         self.chat.InfoPost("Version is OpenRPG " + self.chat.version)
 
-    
     def on_load(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         try:
@@ -222,14 +179,12 @@ class chat_commands:
             print e
             self.chat.InfoPost("ERROR Loading settings")
 
-    
     def on_font(self, cmdargs):
         try:
             fontsettings = self.chat.set_default_font(fontname=cmdargs, fontsize=None)
         except:
             self.chat.InfoPost("ERROR setting default font")
 
-    
     def on_fontsize(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         try:
@@ -238,7 +193,6 @@ class chat_commands:
             print e
             self.chat.InfoPost("ERROR setting default font size")
 
-    
     def on_close(self, cmdargs):
         try:
             chatpanel = self.chat
@@ -250,7 +204,6 @@ class chat_commands:
         except:
             self.chat.InfoPost("Error:  cannot close private chat tab.")
 
-    
     def on_time(self, cmdargs):
         local_time = time.localtime()
         gmt_time = time.gmtime()
@@ -258,30 +211,29 @@ class chat_commands:
         self.chat.InfoPost("<br />Local: " + time.strftime(format_string)+\
                            "<br />GMT: "+time.strftime(format_string,gmt_time))
 
-    
     def on_dieroller(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         rm = component.get('DiceManager')
+        cur_die = rm.getRoller()
         try:
             rm.setRoller(args[0])
-            self.chat.SystemPost("You have changed your die roller to the <b>\"" + args[0] + "\"</b> roller.")
-            self.settings.set_setting('dieroller',args[0])
+            self.chat.SystemPost('You have changed your die roller to the <b>"' +rm.getRoller()+ '"</b> roller.')
+            self.settings.change('dieroller', rm.getRoller())
         except Exception, e:
-            print e
-            self.chat.InfoPost("Available die rollers: " + str(rm.listRollers()))
-            self.chat.InfoPost("You are using the <b>\"" + rm.getRoller() + "\"</b> die roller.")
+            rm.setRoller(cur_die)
+            self.settings.change('dieroller', str(cur_die))
+            if args[0] != '': self.chat.SystemPost(args[0]+ ' is an invalid roller.')
+            self.chat.InfoPost('Available die rollers: ' +str(rm.listRollers()) )
+            self.chat.InfoPost('You are using the <b>"' +cur_die+ '"</b> die roller.')
 
-    
     def on_ping(self, cmdargs):
         ct = time.clock()
         msg = "<ping player='"+self.session.id+"' time='"+str(ct)+"' />"
         self.session.outbox.put(msg)
 
-    
     def on_log(self,cmdargs):
         args = string.split(cmdargs,None,-1)
         logfile = self.settings.get_setting( 'GameLogPrefix' )
-
         if len( args ) == 0:
             self.postLoggingState()
         elif args[0] == "on" and logfile != '':
@@ -309,7 +261,6 @@ class chat_commands:
         else:
             self.chat.InfoPost("Unknown logging command, use 'on' or 'off'"  )
 
-    
     def postLoggingState( self ):
         logfile = self.settings.get_setting( 'GameLogPrefix' )
         try:
@@ -319,39 +270,23 @@ class chat_commands:
         suffix = time.strftime( '-%d-%m-%y.html', time.localtime( time.time() ) )
         self.chat.InfoPost('Log filename is "%s%s", system is %s logging.' % (logfile, suffix, comment) )
 
-        # This subroutine will set the players netork status.
-        #
-        #!self : instance of self
-
-    
     def on_name(self, cmdargs):
-        #only 20 chars no more! :)
         if cmdargs == "":
             self.chat.InfoPost("**Incorrect syntax for name.")
         else:
-            #txt = txt[:50]
             self.settings.set_setting('player', cmdargs)
             self.session.set_name(str(cmdargs))
 
-    # def on_status - end
-        # This subroutine will set the players netork status.
-        #
-        # !self : instance of self
-    
     def on_status(self, cmdargs):
         if cmdargs ==  "":
             self.chat.InfoPost("Incorrect synatx for status.")
         else:
-        #only 20 chars no more! :)
             txt = cmdargs[:20]
             self.session.set_text_status(str(txt))
-    # def on_status - end
 
-    
     def on_set(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         keys = self.settings.get_setting_keys()
-        #print keys
         if len(args) == 0:
             line = "<table border='2'>"
             for m in keys:
@@ -378,11 +313,6 @@ class chat_commands:
                         self.chat.set_colors()
                         self.chat.set_buffersize()
 
-        # This subroutine will display the correct usage of the different emotions.
-        #
-        #!self : instance of self
-
-    
     def on_help(self, cmdargs=""):
         cmds = self.cmdlist.keys()
         cmds.sort()
@@ -400,11 +330,6 @@ class chat_commands:
             msg += ' %s' % (self.cmdlist[cmd]['help'])
         self.chat.InfoPost(msg)
 
-        # This subroutine will either show the list of currently ignored users
-        # !self : instance of self
-        # !text : string that is comprised of a list of users to toggle the ignore flag
-
-    
     def on_ignore(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         (ignore_list, ignore_name) = self.session.get_ignore_list()
@@ -431,7 +356,6 @@ class chat_commands:
                     self.chat.InfoPost(m + " was ignored because it is an invalid player ID")
                     traceback.print_exc()
 
-    
     def on_role(self, cmdargs):
         if cmdargs == "":
             self.session.display_roles()
@@ -453,16 +377,7 @@ class chat_commands:
                     for m in player_ids:
                         self.session.set_role(m.strip(),role,role_pwd)
             except:  traceback.print_exc()
-#        return
 
-        # This subroutine implements the whisper functionality that enables a user
-        # to whisper to another user.
-        #
-        # !self : instance of self
-        # !text : string that is comprised of a list of users and the message to
-        #whisper.
-
-    
     def on_whisper(self, cmdargs):
         delim = cmdargs.find("=")
 
@@ -476,10 +391,6 @@ class chat_commands:
         mesg = string.strip(cmdargs[delim+1:])
         self.chat.whisper_to_players(mesg,player_ids)
 
-#---------------------------------------------------------
-# [START] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
-    
     def on_groupwhisper(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         delim = cmdargs.find("=")
@@ -533,11 +444,6 @@ class chat_commands:
                 else: idList = str(n) + ", " + idList
             self.on_whisper(idList + "=" + self.settings.get_setting("gwtext") + msg)
 
-#---------------------------------------------------------
-# [END] Digitalxero Multi Whisper Group 1/1/05
-#---------------------------------------------------------
-
-    
     def on_gmwhisper(self, cmdargs):
         if cmdargs == "":
             self.chat.InfoPost("**Incorrect syntax for GM Whisper.")
@@ -551,7 +457,6 @@ class chat_commands:
                 self.on_whisper(gmstring + "=" + cmdargs)
             else: self.chat.InfoPost("**No GMs to Whisper to.")
 
-    
     def on_moderate(self, cmdargs):
         if cmdargs != "":
             pos = cmdargs.find("=")
@@ -584,11 +489,9 @@ class chat_commands:
             self.session.outbox.put(msg)
         self.session.update()
 
-    
     def on_update(self, cmdargs):
         self.chat.InfoPost("This command is no longer valid")
 
-    
     def on_description(self, cmdargs):
         if len(cmdargs) <= 0:
             self.chat.InfoPost("**No description text to display." + str(delim))
@@ -599,13 +502,10 @@ class chat_commands:
         self.chat.Post(mesg)
         self.chat.send_chat_message(mesg)
 
-    
     def invoke_tab(self, cmdargs):
-        ######START mDuo13's Tab Initiator########
         try:
             int(cmdargs)
             playerid = cmdargs.strip()
-            # Check to see if parent notebook already has a private tab for player
             for panel in self.chat.parent.whisper_tabs:
                 if (panel.sendtarget == playerid):
                     self.chat.Post("Cannot invoke tab: Tab already exists.")
@@ -622,30 +522,22 @@ class chat_commands:
             nidx = self.chat.parent.get_tab_index(displaypanel)
             self.chat.parent.newMsg(nidx)
             return
-        #######END mDuo13's Tab Initiator#########
 
-
-    
     def on_remote_admin(self, cmdargs):
         args = string.split(cmdargs,None,-1)
-        #handles remote administration commands
         try:
             pass_state = 0
             pwd = self.session.orpgFrame_callback.password_manager.GetSilentPassword("server")
             if  pwd != None:
                 pass_state = 1
             else: pwd = "<i>[NONE]</i>"
-
             if len( args ) == 0:
-                #raw command return state info
                 msg = "<br /><b>Remote Administrator Config:</b>"
                 if pass_state != 1 : msg += " Password not set. Remote admin functions disabled<br />"
                 else: msg += " Enabled. Using password '"+pwd+"'<br />"
                 self.chat.SystemPost(msg)
                 return
-
             if pass_state != 1 and args[0] != "set":
-                #no commands under this point will execute unless an admin password has been previously set
                 self.chat.SystemPost("Command ignored. No remote administrator password set!!")
                 return
             msgbase = "<admin id='"+self.session.id+"' group_id='"+self.session.group_id+"' pwd='"+pwd+"'"
@@ -690,14 +582,12 @@ class chat_commands:
                     self.session.outbox.put(msg)
 
             elif args[0] == "banip":
-                #Ban a player from the server
                 try: bname = str(args[2])
                 except: bname = 'Unknown'
                 msg = msgbase + ' cmd="banip" bip="' + str(args[1]) + '" bname="' + bname + '"/>'
                 self.session.outbox.put(msg)
 
             elif args[0] == "createroom":
-                #request creation of a (temporary) persistant room
                 if len(args) < 2:
                     self.chat.SystemPost( "You must supply a name and boot password at least. <br />/admin createroom &lt;name&gt; &lt;boot password&gt; [password]" )
                     return
@@ -709,7 +599,6 @@ class chat_commands:
                 self.session.outbox.put(msg)
 
             else: self.chat.InfoPost("Unknown administrator command"  )
-            #command_function = {'banip': self.admin.r_admin_banip, 'createroom': self.r_admin_createroom,}
         except:
             self.chat.InfoPost("An error has occured while processing a Remote Administrator command!")
             traceback.print_exc()

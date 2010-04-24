@@ -21,12 +21,12 @@
 # Author: Chris Davis; Mark Twombley
 # Maintainer: Mark Twombley
 # Version:
-#   $Id: StarWarsd20.py,v 1.18 2006/11/15 12:11:23 digitalxero Exp $
+#   $Id: StarWarsd20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the StarWarsd20 nodehanlers
 #
 
-__version__ = "$Id: StarWarsd20.py,v 1.18 2006/11/15 12:11:23 digitalxero Exp $"
+__version__ = "$Id: StarWarsd20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 from containers import *

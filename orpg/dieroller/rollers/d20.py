@@ -14,10 +14,10 @@
 # Author: OpenRPG Dev Team
 # Maintainer:
 # Version:
-#   $Id: d20.py,v 1.9 2006/11/04 21:24:19 digitalxero Exp $
+#   $Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: d20 die roller
-__version__ = "$Id: d20.py,v 1.9 2006/11/04 21:24:19 digitalxero Exp $"
+__version__ = "$Id: d20.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 # d20 stands for "d20 system" not 20 sided die :)
 
@@ -29,8 +29,6 @@ class d20(std):
 
     def __init__(self,source=[]):
         std.__init__(self,source)
-
-# these methods return new die objects for specific options
 
     def attack(self,AC,mod,critical):
         return d20attack(self,AC,mod,critical)
@@ -56,14 +54,9 @@ class d20dc(std):
             myStr += ","
             myStr += str(a)
         myStr += "] = (" + str(self.sum()) + ")"
-
         myStr += " vs DC " + str(self.DC)
-
-        if self.is_success():
-            myStr += " Success!"
-        else:
-            myStr += " Failure!"
-
+        if self.is_success(): myStr += " Success!"
+        else: myStr += " Failure!"
         return myStr
 
 
@@ -86,8 +79,7 @@ class d20attack(std):
         self.critical_roll = 0
         if self.data[0] >= self.critical and self.is_hit():
             self.critical_roll = die_base(20) + self.mod
-            if self.critical_roll.sum() >= self.AC:
-                self.critical_result = 1
+            if self.critical_roll.sum() >= self.AC: self.critical_result = 1
 
     def is_critical(self):
         return self.critical_result
@@ -101,15 +93,9 @@ class d20attack(std):
             myStr += ","
             myStr += str(a)
         myStr += "] = (" + str(self.sum()) + ")"
-
         myStr += " vs AC " + str(self.AC)
-
-        if self.is_critical():
-            myStr += " Critical"
-
-        if self.is_hit():
-            myStr += " Hit!"
-        else:
-            myStr += " Miss!"
-
+        if self.is_critical(): myStr += " Critical"
+        if self.is_hit(): myStr += " Hit!"
+        else: myStr += " Miss!"
         return myStr
+

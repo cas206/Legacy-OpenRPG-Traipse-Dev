@@ -21,9 +21,9 @@
 # Author: Mark Tarrabain
 # Maintainer:
 # Version:
-#   $Id: region.py,v 1.10 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: region.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
-__version__ = "$Id: region.py,v 1.10 2006/11/04 21:24:21 digitalxero Exp $"
+__version__ = "$Id: region.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 import sys
 

@@ -19,6 +19,17 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.help += 'wheel and the map will zoom in or out.  And FAST too! \n'
         self.help += 'This plugin is designed for Grumpy Goblin and Ornery Orc.'
 
+    def plugin_menu(self):
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
+        self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
+        self.toggle.Check(True)
+
+    def plugin_toggle(self, evt):
+        if self.toggle.IsChecked() == False: self.canvas.Disconnect(-1, -1, wx.wxEVT_MOUSEWHEEL)
+        if self.toggle.IsChecked() == True:
+            self.canvas.Bind(wx.EVT_MOUSEWHEEL, self.MouseWheel)
+
     def plugin_enabled(self):
         try: self.canvas = component.get('map').canvas
         except: self.canvas = open_rpg.get_component('map').canvas
@@ -26,12 +37,12 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     def MouseWheel(self, evt):
         if evt.CmdDown():
-            print evt.GetWheelRotation()
             if evt.GetWheelRotation() > 0: self.canvas.on_zoom_in(None)
             elif evt.GetWheelRotation() < 0: self.canvas.on_zoom_out(None)
             else: pass
         else: self.canvas.on_scroll(evt)
 
     def plugin_disabled(self):
-        self.canvas.Disconnect(-1, -1, wx.wxEVT_MOUSEWHEEL)
+        try: self.canvas.Disconnect(-1, -1, wx.wxEVT_MOUSEWHEEL)
+        except: pass
 

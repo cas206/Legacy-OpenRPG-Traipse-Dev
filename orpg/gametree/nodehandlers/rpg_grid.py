@@ -21,15 +21,17 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $
+#   $Id: rpg_grid.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the grid nodehanlers
 #
 
-__version__ = "$Id: rpg_grid.py,v 1.20 2006/11/15 12:11:24 digitalxero Exp $"
+__version__ = "$Id: rpg_grid.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 from forms import *
+from orpg.tools.orpg_log import debug
+from orpg.tools.InterParse import Parse
 
 class rpg_grid_handler(node_handler):
     """ Node handler for rpg grid tool
@@ -87,16 +89,20 @@ class rpg_grid_handler(node_handler):
                 html_str += "<td >"
                 text = c.text
                 if text == None or text == '': text = '<br />'
+                s = Parse.ParseLogic(text, self.xml)
+                s = Parse.Normalize(s)
+                try: text = str(eval(s))
+                except: text = s
                 html_str += text + "</td>"
             html_str += "</tr>"
         html_str += "</table>"
         return html_str
 
     def get_design_panel(self,parent):
-        return rpg_grid_edit_panel(parent,self)
+        return rpg_grid_edit_panel(parent, self)
 
     def get_use_panel(self,parent):
-        return rpg_grid_panel(parent,self)
+        return rpg_grid_panel(parent, self)
 
     def get_size_constraint(self):
         return 1
@@ -194,7 +200,8 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         to begin editing.  Set the focus to the edit control.
         *Must Override*
         """
-        self.startValue = grid.GetTable().GetValue(row, col)
+        #self.startValue = grid.GetTable().GetValue(row, col)
+        self.startValue = grid.get_value(row, col)
         self._tc.SetValue(self.startValue)
         self._tc.SetInsertionPointEnd()
         self._tc.SetFocus()
@@ -213,7 +220,6 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
         if val != self.startValue:
             changed = True
             grid.GetTable().SetValue(row, col, val) # update the table
-
         self.startValue = ''
         self._tc.SetValue('')
         return changed
@@ -265,11 +271,11 @@ class MyCellEditor(wx.grid.PyGridCellEditor):
 
 class rpg_grid(wx.grid.Grid):
     """grid for attacks"""
-    def __init__(self, parent, handler):
+    def __init__(self, parent, handler, mode):
         wx.grid.Grid.__init__(self, parent, -1, style=wx.SUNKEN_BORDER | wx.WANTS_CHARS)
         self.parent = parent
         self.handler = handler
-
+        self.mode = mode
         self.RegisterDataType(wx.grid.GRID_VALUE_STRING, wx.grid.GridCellStringRenderer(),MyCellEditor())
 
         self.rows = handler.grid.findall('row')
@@ -285,7 +291,6 @@ class rpg_grid(wx.grid.Grid):
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
         self.Bind(wx.grid.EVT_GRID_COL_SIZE, self.on_col_size)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.on_leftdclick)
-
 
     def on_leftdclick(self,evt):
         if self.CanEnableCellControl(): self.EnableCellEditControl()
@@ -304,6 +309,7 @@ class rpg_grid(wx.grid.Grid):
         cells = self.rows[row].findall('cell')
         cells[col].text = value
         if col == 0: self.handler.refresh_rows()
+        for i in range(0,len(self.rows)): self.refresh_row(i)
 
     def set_col_widths(self):
         cells = self.rows[0].findall('cell')
@@ -313,13 +319,17 @@ class rpg_grid(wx.grid.Grid):
                 self.SetColSize(i,size)
             except: continue
 
-    def refresh_row(self,rowi):
+    def refresh_row(self, rowi):
         cells = self.rows[rowi].findall('cell')
         for i in range(0,len(cells)):
             text = cells[i].text
             if text == None or text == '':
                 text = ''
                 cells[i].text = text
+            if self.mode == 0:
+                s = Parse.ParseLogic(text, self.handler.xml)
+                try: text = str(eval(s))
+                except: text = s
             self.SetCellValue(rowi,i,text)
 
     def add_row(self,evt=None):
@@ -359,6 +369,10 @@ class rpg_grid(wx.grid.Grid):
         self.DeleteCols(num-1,1)
         self.set_col_widths()
 
+    def get_value(self, row, col):
+        cells = self.rows[row].findall('cell')
+        return cells[col].text
+
 
 G_TITLE = wx.NewId()
 GRID_BOR = wx.NewId()
@@ -366,7 +380,7 @@ class rpg_grid_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
-        self.grid = rpg_grid(self, handler)
+        self.grid = rpg_grid(self, handler, mode=0)
         label = handler.xml.get('name')
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
@@ -388,7 +402,7 @@ class rpg_grid_edit_panel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
         self.parent = parent
-        self.grid = rpg_grid(self,handler)
+        self.grid = rpg_grid(self,handler, mode=1)
         self.main_sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Grid"), wx.VERTICAL)
 
         self.title = wx.TextCtrl(self, G_TITLE, handler.xml.get('name'))
@@ -462,6 +476,8 @@ class rpg_grid_edit_panel(wx.Panel):
         complete = complete[:len(complete)-2] + '::'+'('+row+','+col+')'+complete[len(complete)-2:]
         col = self.grid.GetGridCursorCol()
         row = self.grid.GetGridCursorRow()
+        temp_value = self.grid.GetCellValue(row, col)
+        complete = temp_value + complete
         self.grid.SetCellValue(row, col, complete)
         cells = self.grid.rows[row].findall('cell')
         cells[col].text = complete
@@ -505,6 +521,8 @@ class rpg_grid_edit_panel(wx.Panel):
                 else:
                     col = self.grid.GetGridCursorCol()
                     row = self.grid.GetGridCursorRow()
+                    temp_value = self.grid.GetCellValue(row, col)
+                    complete = temp_value + complete
                     self.grid.SetCellValue(row, col, complete)
                     cells = self.grid.rows[row].findall('cell')
                     cells[col].text = complete
@@ -527,3 +545,15 @@ class rpg_grid_edit_panel(wx.Panel):
         if txt != "":
             self.handler.xml.set('name',txt)
             self.handler.rename(txt)
+
+    def refresh_row(self,rowi):
+        cells = self.rows[rowi].findall('cell')
+        for i in range(0,len(cells)):
+            text = cells[i].text
+            #s = component.get('chat').ParseMap(s, self.handler.xml)
+            #try: text = str(eval(s))
+            #except: text = s
+            if text == None or text == '':
+                text = ''
+                cells[i].text = text
+            self.SetCellValue(rowi,i,text)

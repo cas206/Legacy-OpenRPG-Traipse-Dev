@@ -21,11 +21,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: grid_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: grid_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: grid_msg.py,v 1.8 2006/11/04 21:24:21 digitalxero Exp $"
+__version__ = "$Id: grid_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_msg import map_element_msg_base
 #from base_msg import * ## ?? import all? Deprecated!?

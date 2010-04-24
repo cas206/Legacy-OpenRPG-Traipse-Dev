@@ -21,14 +21,15 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $
+#   $Id: core.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the core nodehanlers
 #
 
-__version__ = "$Id: core.py,v 1.49 2007/12/07 20:39:48 digitalxero Exp $"
+__version__ = "$Id: core.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from nodehandler_version import NODEHANDLER_VERSION
+from orpg.tools.InterParse import Parse
 
 try:
     from orpg.orpg_windows import *
@@ -54,7 +55,6 @@ class node_handler:
         self.xml = xml
         self.mytree_node = tree_node
         self.tree = component.get('tree')
-        #self.tree = component.get('tree_fs')
         self.frame = component.get('frame')
         self.chat = component.get('chat')
         self.drag = True
@@ -282,7 +282,7 @@ class node_handler:
     def get_html_panel(self,parent):
         html_str = "<html><body bgcolor=\"#FFFFFF\" >"+self.tohtml()+"</body></html>"
         wnd = wx.html.HtmlWindow(parent,-1)
-        html_str = self.chat.ParseDice(html_str)
+        html_str = Parse.Dice(html_str)
         wnd.SetPage(html_str)
         return wnd
 
@@ -386,7 +386,8 @@ class file_loader(node_handler):
 
     def on_ldclick(self,evt):
         file_name = self.file_node.get("name")
-        self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        try: self.tree.insert_xml(open(orpg.dirpath.dir_struct["nodes"] + file_name,"r").read())
+        except: wx.MessageBox('Invalid File', 'Error')
         return 1
 
     def on_design(self,evt):

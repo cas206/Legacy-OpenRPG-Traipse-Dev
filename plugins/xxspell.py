@@ -1,4 +1,4 @@
-import os
+import os, wx
 import orpg.pluginhandler
 
 class Plugin(orpg.pluginhandler.PluginHandler):
@@ -17,6 +17,15 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.help += "even corrects other people's spelling."
         self.checklist = {}
 
+    def plugin_menu(self):
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
+        self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
+        self.toggle.Check(True)
+
+    def plugin_toggle(self, evt):
+        pass
+
     def plugin_enabled(self):
         #This is where you set any variables that need to be initalized when your plugin starts
         #You can add new /commands like
@@ -34,11 +43,13 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         return text
 
     def plugin_incoming_msg(self, text, type, name, player):
-        text = self.replace(text)
+        if self.toggle.IsChecked() == True:
+            text = self.replace(text)
         return text, type, name
 
     def pre_parse(self, text):
-        text = self.replace(text)
+        if self.toggle.IsChecked() == True:
+            text = self.replace(text)
         return text
 
     def on_spell(self, cmdargs):

@@ -20,11 +20,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: map_handler.py,v 1.14 2007/04/03 00:14:35 digitalxero Exp $
+#   $Id: map_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: map layer handler
 #
-__version__ = "$Id: map_handler.py,v 1.14 2007/04/03 00:14:35 digitalxero Exp $"
+__version__ = "$Id: map_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_handler import *
 

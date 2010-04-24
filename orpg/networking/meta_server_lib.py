@@ -22,7 +22,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: meta_server_lib.py,v 1.40 2007/04/04 01:18:42 digitalxero Exp $
+#   $Id: meta_server_lib.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: A collection of functions to communicate with the meta server.
 #
@@ -39,7 +39,6 @@ from orpg.tools.validate import validate
 from orpg.dirpath import dir_struct
 
 import urllib, time, sys, traceback, re
-#import orpg.minidom
 
 from threading import *
 from random import uniform
@@ -47,7 +46,6 @@ from urllib import urlopen, urlencode
 from orpg.tools.orpg_log import debug
 
 from xml.etree.ElementTree import Element, fromstring
-
 metacache_lock = RLock()
 
 def get_server_dom(data=None,path=None, string=False):
@@ -314,7 +312,7 @@ def getMetaServers(versions = None, pick_random=0):
 
 def getMetaServerBaseURL():
     # get meta server URL
-    url = "http://www.openrpg.com/openrpg_servers.php"
+    url = "http://orpgmeta.appspot.com/"
     try:
         component.get('validate').config_file("settings.xml","default_settings.xml")
         ini = open(dir_struct["user"]+"settings.xml","r")
@@ -325,6 +323,7 @@ def getMetaServerBaseURL():
         node_list = tree.getElementsByTagName("MetaServerBaseURL")
         if node_list:
             url = node_list[0].getAttribute("value")
+        print url
         # allow tree to be collected
         try: tree.unlink()
         except: pass

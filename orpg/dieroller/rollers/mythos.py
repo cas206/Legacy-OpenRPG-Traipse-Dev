@@ -23,9 +23,9 @@
 # Author: OpenRPG Dev Team
 # Maintainer:
 # Version:
-#   $Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $
+#   $Id: wod.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
-# Description: WOD die roller
+# Description: Mythos die roller
 #
 # Targetthr is the Threshhold target
 # for compatibility with Mage die rolls.
@@ -34,7 +34,7 @@
 from std import std
 from orpg.dieroller.base import *
 
-__version__ = "$Id: wod.py,v 1.14 2007/05/09 19:57:00 digitalxero Exp $"
+__version__ = "$Id: wod.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 
 class mythos(std):
@@ -85,7 +85,7 @@ class mythos(std):
             else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
 
-    def non_stdDie(self, s): ## Puu-san
+    def non_stdDie(self, s):
         num_sides = s.split('v')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]

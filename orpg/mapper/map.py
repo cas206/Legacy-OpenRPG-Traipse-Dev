@@ -21,11 +21,11 @@
 # Author: OpenRPG
 # Maintainer:
 # Version:
-#   $Id: map.py,v 1.73 2007/12/07 20:39:49 digitalxero Exp $
+#   $Id: map.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #
-__version__ = "$Id: map.py,v 1.73 2007/12/07 20:39:49 digitalxero Exp $"
+__version__ = "$Id: map.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from map_version import MAP_VERSION
 from map_msg import *
@@ -367,8 +367,6 @@ class MapCanvas(wx.ScrolledWindow):
             dc.SetUserScale(self.layers['grid'].mapscale,self.layers['grid'].mapscale)
             # Grab the current map position
             pos = self.snapMarker( evt.GetLogicalPosition( dc ) )
-            # Enable brush optimizations
-            # dc.SetOptimization( True )
             # Set up the pen used for drawing our marker
             dc.SetPen( wx.Pen(wx.RED, 1, wx.LONG_DASH) )
             # Now, based on the marker mode, draw the right thing
@@ -386,8 +384,6 @@ class MapCanvas(wx.ScrolledWindow):
                 # As long as we are in marker mode, we ned to update the stop point
                 self.markerStop = pos
             dc.SetPen(wx.NullPen)
-            # Disable brush optimizations
-            #dc.SetOptimization( False )
             del dc
 
     def on_tape_down(self, evt):
@@ -403,8 +399,6 @@ class MapCanvas(wx.ScrolledWindow):
         self.markerMode = MARKER_MODE_MEASURE
         # Erase the old line if her have one
         if self.markerStart.x != -1 and self.markerStart.y != -1:
-            # Enable brush optimizations
-            #dc.SetOptimization( True )
             # Set up the pen used for drawing our marker
             dc.SetPen( wx.Pen(wx.RED, 1, wx.LONG_DASH) )
             # Set the DC function that we need
@@ -416,8 +410,6 @@ class MapCanvas(wx.ScrolledWindow):
             # Restore the default DC function and pen
             dc.SetLogicalFunction(wx.COPY)
             dc.SetPen(wx.NullPen)
-            # Disable brush optimizations
-            #dc.SetOptimization( False )
         # Save our current start and reset the stop value
         self.markerStart = pos
         self.markerStop = pos

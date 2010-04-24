@@ -21,11 +21,11 @@
 # Author: OpenRPG Team
 # Maintainer:
 # Version:
-#   $Id: miniatures_handler.py,v 1.43 2007/12/07 20:39:50 digitalxero Exp $
+#   $Id: miniatures_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: Miniature layer handler
 #
-__version__ = "$Id: miniatures_handler.py,v 1.43 2007/12/07 20:39:50 digitalxero Exp $"
+__version__ = "$Id: miniatures_handler.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_handler import *
 from min_dialogs import *
@@ -36,7 +36,6 @@ from grid import GRID_HEXAGON
 from grid import GRID_ISOMETRIC
 
 from orpg.tools.orpg_settings import settings
-
 from xml.etree.ElementTree import ElementTree, Element
 from xml.etree.ElementTree import fromstring, tostring
 
@@ -118,7 +117,6 @@ class miniatures_handler(base_layer_handler):
         dt = myFileDropTarget(self)
         self.canvas.SetDropTarget(dt)
         self.tooltip = wx.ToolTip('')
-        #wxInitAllImageHandlers()
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)

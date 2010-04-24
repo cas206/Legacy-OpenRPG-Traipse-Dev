@@ -21,7 +21,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: containers.py,v 1.43 2007/08/08 19:17:17 digitalxero Exp $
+#   $Id: containers.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the container nodehandlers
 #
@@ -282,7 +282,7 @@ class splitter_handler(container_handler):
 
     def build_splitter_wnd(self, parent, mode):
         self.split = self.xml.get("horizontal")
-        self.pane = splitter_panel(parent, self)
+        self.pane = splitter_panel(parent, self, mode)
         self.splitter = MultiSplitterWindow(self.pane, -1, 
                         style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
         if self.split == '1': self.splitter.SetOrientation(wx.VERTICAL)
@@ -291,7 +291,6 @@ class splitter_handler(container_handler):
         self.bestSizey = -1
         self.tree.traverse(self.mytree_node, self.doSplit, mode, False) 
         self.pane.sizer.Add(self.splitter, 1, wx.EXPAND)
-        if mode != 1: self.pane.hozCheck.Hide()
         self.pane.SetSize((self.bestSizex, self.bestSizey))
         self.pane.Layout()
         parent.SetSize(self.pane.GetSize())
@@ -314,28 +313,29 @@ class splitter_handler(container_handler):
         return 1
 
 class splitter_panel(wx.Panel):
-    def __init__(self, parent, handler):
+    def __init__(self, parent, handler, mode):
         wx.Panel.__init__(self, parent, -1)
         self.handler = handler
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        if mode == 0: self.title = wx.StaticText(self, 1, handler.xml.get('name'))
+        elif mode == 1: self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
+        #self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
 
-        self.hozCheck = wx.CheckBox(self, -1, "Horizontal Split")
-        hoz = self.handler.xml.get("horizontal")
+        if mode == 1:
+            self.hozCheck = wx.CheckBox(self, -1, "Horizontal Split")
+            hoz = self.handler.xml.get("horizontal")
+            if hoz == '1': self.hozCheck.SetValue(True)
+            else: self.hozCheck.SetValue(False)
 
-        if hoz == '1': self.hozCheck.SetValue(True)
-        else: self.hozCheck.SetValue(False)
+        if mode == 1: self.sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
+        self.sizer.Add(self.title, 0)
+        if mode == 1: self.sizer.Add(self.hozCheck, 0, wx.EXPAND)
+        self.sizer.Add(wx.Size(10,0))
 
-        sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
-        sizer.Add(self.title, 0)
-        sizer.Add(self.hozCheck, 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,0))
-
-        self.sizer = sizer
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.Bind(wx.EVT_TEXT, self.on_text, id=1)
-        self.Bind(wx.EVT_CHECKBOX, self.on_check_box, id=self.hozCheck.GetId())
+        if mode == 1: self.Bind(wx.EVT_CHECKBOX, self.on_check_box, id=self.hozCheck.GetId())
 
     def on_check_box(self,evt):
         state = self.hozCheck.GetValue()

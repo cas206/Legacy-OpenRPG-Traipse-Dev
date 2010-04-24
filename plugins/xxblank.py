@@ -1,4 +1,4 @@
-import os
+import os, wx
 import orpg.pluginhandler
 
 class Plugin(orpg.pluginhandler.PluginHandler):
@@ -17,6 +17,16 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         #You can set variables below here. Always set them to a blank value in this section. Use plugin_enabled
         #to set their proper values.
         self.sample_variable = {}
+
+    def plugin_menu(self):
+        ## This is a standardized Menu item.  It connects to plugin_toggle where you can set events.
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
+        self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
+        self.toggle.Check(True)
+
+    def plugin_toggle(self, evt):
+        pass
 
 
     def plugin_enabled(self):

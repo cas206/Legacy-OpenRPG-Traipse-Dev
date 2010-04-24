@@ -1,4 +1,4 @@
 
 <nodehandler class="textctrl_handler" icon="note" module="forms" name="Text" version="1.0">
-  <text multiline="0" send_button="0">text</text>
+  <text multiline="1" send_button="0">text</text>
 </nodehandler>

@@ -21,7 +21,7 @@
 # Author: OpenRPG
 # Maintainer:
 # Version:
-#   $Id: images.py,v 1.21 2007/12/11 04:07:15 digitalxero Exp $
+#   $Id: images.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description:
 #

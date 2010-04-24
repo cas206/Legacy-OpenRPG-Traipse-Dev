@@ -21,7 +21,7 @@
 # Author: Chris Davis & Digitalxero
 # Maintainer: leadb
 # Version:
-#   $Id: dnd3e.py,v 1.33 2006/11/04 21:24:21 digitalxero Exp $
+#   $Id: dnd3e.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the dnd3e nodehanlers
 #
@@ -261,7 +261,6 @@ class dnd3egeneral(dnd3e_char_child):
         n_list = self.xml.getchildren()
         html_str = "<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 ><th>General Information</th></tr><tr><td>"
         for n in n_list:
-            debug(n)
             html_str += "<B>"+n.tag.capitalize() +":</B> "
             html_str += n.text + ", "
         html_str = html_str[:len(html_str)-2] + "</td></tr></table>"
@@ -377,12 +376,10 @@ class inventory_pane(wx.Panel):
             value = self.lang.GetValue()
         for node in self.n_list:
             if node.tag == nodeName:
-                debug(node)
                 node.text = value
 
     def saveMoney(self, row, col):
         value = self.grid.GetCellValue(row, col)
-        debug(self.n_list[row])
         self.n_list[row].text = value
 
     def on_cell_change(self, evt):
@@ -2271,12 +2268,10 @@ class spells_panel(wx.Panel):
                 self.xml.remove(self.n_list[i])
 
     def on_add(self,evt):
-        debug()
         if not self.temp_dom:
             tree = parse(dir_struct["dnd3e"]+"dnd3espells.xml")
             xml_dom = tree.getroot()
             self.temp_dom = xml_dom
-        debug(self.temp_dom)
         f_list = self.temp_dom.findall('spell')
         opts = []
         #lvl = int(dnd3e_char_child.get_char_lvl('level'))
@@ -2667,12 +2662,10 @@ class power_panel(wx.Panel):
                 self.xml.remove(self.n_list[i])
 
     def on_add(self,evt):
-        debug()
         if not self.temp_dom:
             tree = parse(dir_struct["dnd3e"]+"dnd3epowers.xml")
             xml_dom = tree.getroot()
             self.temp_dom = xml_dom
-        debug(self.temp)
         f_list = self.temp_dom.findall('power')
         opts = []
         for f in f_list:

@@ -1,0 +1,3 @@
+<nodehandler class="file_loader" icon="d20" map="" module="core" name="File Loader" version="1.0">
+  <file name="file_loader.xml" />
+</nodehandler>

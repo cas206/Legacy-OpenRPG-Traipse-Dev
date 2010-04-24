@@ -21,7 +21,7 @@
 # Author: Dj Gilcrease
 # Maintainer:
 # Version:
-#   $Id: orpg_log.py,v 1.9 2007/05/06 16:43:02 digitalxero Exp $
+#   $Id: orpg_log.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: classes for orpg log messages
 #
@@ -102,13 +102,15 @@ class DebugConsole(wx.Frame):
         self.report = wx.Button(self, wx.ID_ANY, 'Bug Report')
         sizer = wx.GridBagSizer(hgap=1, vgap=1)
         sizer.Add(self.console, (0,0), span=(1,2), flag=wx.EXPAND)
-        sizer.Add(self.bt_clear, (1,0), flag=wx.ALIGN_LEFT)
-        sizer.Add(self.report, (1,1), flag=wx.ALIGN_LEFT)
+        sizer.Add(self.bt_clear, (1,0), span=(1,1), flag=wx.ALIGN_LEFT)
+        sizer.Add(self.report, (1,1), span=(1,1), flag=wx.ALIGN_RIGHT|wx.EXPAND)
         sizer.AddGrowableCol(0)
         sizer.AddGrowableRow(0)
         self.SetSizer(sizer)
+        #self.Layout()
         self.SetAutoLayout(True)
-        self.SetSize((450, 175))
+        self.SetSize((450, 275))
+        self.SetMinSize((450, 275))
         self.Bind(wx.EVT_CLOSE, self.Min) 
         self.Bind(wx.EVT_BUTTON, self.clear, self.bt_clear)
         self.Bind(wx.EVT_BUTTON, self.bug_report, self.report)

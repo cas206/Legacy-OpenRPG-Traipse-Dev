@@ -25,7 +25,7 @@
 # user input generated text.
 #
 
-__version__ = "$Id: inputValidator.py,v 1.11 2006/11/04 21:24:22 digitalxero Exp $"
+__version__ = "$Id: inputValidator.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 
 ##

@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: background.py,v 1.29 2007/03/09 14:11:55 digitalxero Exp $
+#   $Id: background.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This file contains some of the basic definitions for the chat
 # utilities in the orpg project.
 #
-__version__ = "$Id: background.py,v 1.29 2007/03/09 14:11:55 digitalxero Exp $"
+__version__ = "$Id: background.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base import *
 import thread, urllib, os.path, time, mimetypes

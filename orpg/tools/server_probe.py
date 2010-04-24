@@ -23,7 +23,7 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: server_probe.py,v 1.10 2006/11/04 21:24:22 digitalxero Exp $
+#   $Id: server_probe.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: This is a periodic maintenance script for removing
 # Unresponsive servers from the meta list.

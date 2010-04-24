@@ -25,7 +25,7 @@
 #
 #
 
-__version__ = "$Id: toolBars.py,v 1.13 2006/11/04 21:24:22 digitalxero Exp $"
+__version__ = "$Id: toolBars.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 
 ##

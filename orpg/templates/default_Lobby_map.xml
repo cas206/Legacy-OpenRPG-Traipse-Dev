@@ -1,7 +1,7 @@
 <nodehandler class="min_map" icon="compass" module="core" name="miniature Map">
 <map version='1.0' sizex='650' sizey='384' action='new'>
 <grid size='50'  mode='0' line='0' snap='1' color='#000000'/>
-<bg path='http://www.knowledgearcana.com/arcane-art/Traipse_Skeleton.png' type='2'/>
+<bg path='http://www.knowledgearcana.com/arcane-art/ornery-orc-small.png' type='2'/>
 <miniatures serial='2'/>
 </map>
 </nodehandler>

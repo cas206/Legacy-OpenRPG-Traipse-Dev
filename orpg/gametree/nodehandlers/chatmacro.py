@@ -21,12 +21,12 @@
 # Author: Chris Davis
 # Maintainer:
 # Version:
-#   $Id: chatmacro.py,v 1.15 2006/11/15 12:11:23 digitalxero Exp $
+#   $Id: chatmacro.py,v Traipse 'Ornery-Orc' prof.ebral Exp $
 #
 # Description: The file contains code for the form based nodehanlers
 #
 
-__version__ = "$Id: chatmacro.py,v 1.15 2006/11/15 12:11:23 digitalxero Exp $"
+__version__ = "$Id: chatmacro.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from core import *
 

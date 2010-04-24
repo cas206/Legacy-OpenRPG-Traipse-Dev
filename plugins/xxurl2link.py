@@ -1,6 +1,5 @@
-import os
+import os, re, wx
 import orpg.pluginhandler
-import re
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -19,6 +18,15 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.url_regex = None
         self.mailto_regex = None
 
+    def plugin_menu(self):
+        self.menu = wx.Menu()
+        self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
+        self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
+        self.toggle.Check(True)
+
+    def plugin_toggle(self, evt):
+        pass
+
     def plugin_enabled(self):
         #This is where you set any variables that need to be initalized when your plugin starts
         self.url_regex = re.compile("(?<![\[=\"a-z0-9:/.])((?:http|ftp|gopher)://)?(?<![@a-z])((?:[a-z0-9\-]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4})(?:[a-z0-9_=\?\#\&~\%\.\-/\:\+;]*))", re.I)
@@ -31,13 +39,15 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         pass
 
     def pre_parse(self, text):
-        text = self.mailto_regex.sub(self.regmailsub, text)
-        text = self.url_regex.sub(self.regurlsub, text)
+        if self.toggle.IsChecked() == True:
+            text = self.mailto_regex.sub(self.regmailsub, text)
+            text = self.url_regex.sub(self.regurlsub, text)
         return text
 
     def plugin_incoming_msg(self, text, type, name, player):
-        text = self.mailto_regex.sub(self.regmailsub, text)
-        text = self.url_regex.sub(self.regurlsub, text)
+        if self.toggle.IsChecked() == True:
+            text = self.mailto_regex.sub(self.regmailsub, text)
+            text = self.url_regex.sub(self.regurlsub, text)
         return text, type, name
 
     def regmailsub(self, m):
