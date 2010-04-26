@@ -127,6 +127,18 @@ class InterParse():
             dlg.Destroy()
         return s
 
+    def LocationCheck(self, x, roots, root_list, tree_map):
+        roots.append(tree_map[x])
+        root_list.append(self.get_node(roots))
+        namespace = root_list[x].getiterator('nodehandler')
+        return namespace
+
+    def FutureCheck(self, node, next):
+        future = node.getiterator('nodehandler')
+        for advance in future:
+            if next == advance.get('name'): return True
+        return False
+
     def NameSpaceI(self, s, node):
         reg = re.compile("(!=(.*?)=!)")
         matches = reg.findall(s)
@@ -135,17 +147,22 @@ class InterParse():
             tree_map = node.get('map').split('::')
             roots = []; root_list = []
             find = matches[i][1].split('::')
+            node = self.get_node([tree_map[0]])
             for x in xrange(0, len(tree_map)):
-                roots.append(tree_map[x])
-                root_list.append(self.get_node(roots))
-                namespace = root_list[x].getiterator('nodehandler')
-                for node in namespace:
-                    if find[0] == node.get('name'):
-                        if node.get('class') == 'rpg_grid_handler': 
-                            newstr = self.NameSpaceGrid(find[1], node); break
-                        else: 
-                            newstr = str(node.find('text').text); break
-            if not newstr: newstr = 'Invalid Reference!'; break
+                namespace = self.LocationCheck(x, roots, root_list, tree_map)
+                for x in xrange(0, len(find)):
+                    namespace = node.getiterator('nodehandler')
+                    for node in namespace:
+                        if find[x] == node.get('name'):
+                            if node.get('class') == 'rpg_grid_handler': 
+                                newstr = self.NameSpaceGrid(find[x+1], node); break
+                            try:
+                                if self.FutureCheck(node, find[x+1]): break
+                                else: continue
+                            except:
+                                if x == len(find)-1: newstr = str(node.find('text').text); break
+                                else: break
+                    if not newstr: newstr = 'Invalid Reference!'; break
             s = s.replace(matches[i][0], newstr, 1)
             s = self.ParseLogic(s, node)
         return s
@@ -153,25 +170,27 @@ class InterParse():
     def NameSpaceE(self, s):
         reg = re.compile("(!&(.*?)&!)")
         matches = reg.findall(s)
-        newstr = 'False'; x = 0
+        newstr = False
         for i in xrange(0,len(matches)):
             find = matches[i][1].split('::')
-            node = self.get_node([find[0]])
-            last = find[len(find)-1]
+            node = component.get('tree').xml_root
             if not iselement(node): 
                 s = s.replace(matches[i][0], 'Invalid Reference!', 1); 
                 s = self.NameSpaceE(s)
                 return s
-            while newstr == 'False':
-                namespace = node.getiterator('nodehandler'); x += 1
+            for x in xrange(0, len(find)):
+                namespace = node.getiterator('nodehandler')
                 for node in namespace:
                     if find[x] == node.get('name'):
-                        if node.get('class') == 'map_miniature_handler': continue
-                        elif node.get('class') == 'rpg_grid_handler': 
-                            newstr = self.NameSpaceGrid(last, node); break
-                        elif x == len(find)-1: newstr = str(node.find('text').text); break
-                        else: break
-                else: newstr = 'Invalid Reference!'; break
+                        if node.get('class') == 'rpg_grid_handler': 
+                            newstr = self.NameSpaceGrid(find[x+1], node); break
+                        try:
+                            if self.FutureCheck(node, find[x+1]): break
+                            else: continue
+                        except:
+                            if x == len(find)-1: newstr = str(node.find('text').text); break
+                            else: break
+            if not newstr: newstr = 'Invalid Reference!'
             s = s.replace(matches[i][0], newstr, 1)
             s = self.ParseLogic(s, node)
         return s
