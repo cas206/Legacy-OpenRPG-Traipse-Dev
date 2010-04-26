@@ -98,6 +98,6 @@ class macro_edit_panel(wx.Panel):
         txt = self.text[id].GetValue()
         if txt == "": return
         if id == P_TITLE:
-            self.handler.xml.setAttribute('name',txt)
+            self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == P_BODY: self.handler.set_text(txt)

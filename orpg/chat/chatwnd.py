@@ -1032,7 +1032,7 @@ class chat_panel(wx.Panel):
         sound_file = self.settings.get_setting("SendSound")
         if sound_file != '': component.get('sound').play(sound_file)
         if s[0] != "/": ## it's not a slash command
-            s = self.ParsePost( s, True, True )
+            s = Parse.Post(s, self, True, True)
         else: self.chat_cmds.docmd(s) # emote is in chatutils.py
 
     def on_chat_key_down(self, event):
@@ -1171,7 +1171,7 @@ class chat_panel(wx.Panel):
         if len(dieMod) and dieMod[0] not in "*/-+": dieMod = "+" + dieMod
         dieText += dieMod
         dieText = "[" + dieText + "]"
-        self.ParsePost(dieText, 1, 1)
+        Parse.Post(dieText, self, 1, 1)
         self.chattxt.SetFocus()
 
     def on_chat_save(self, evt):
@@ -1301,7 +1301,7 @@ class chat_panel(wx.Panel):
         return text
 
     def emote_message(self, text):
-        text = Parse.Normalize(text)
+        text = Parse.Normalize(text, self)
         text = self.colorize(self.emotecolor, text)
         if self.type == MAIN_TAB and self.sendtarget == 'all': self.send_chat_message(text,chat_msg.EMOTE_MESSAGE)
         elif self.type == MAIN_TAB and self.sendtarget == "gm":
@@ -1319,7 +1319,7 @@ class chat_panel(wx.Panel):
 
     def whisper_to_players(self, text, player_ids):
         tabbed_whispers_p = self.settings.get_setting("tabbedwhispers")
-        text = Parse.Normalize(text)
+        text = Parse.Normalize(text, self)
         player_names = ""
         for m in player_ids:
             id = m.strip()
@@ -1386,6 +1386,7 @@ class chat_panel(wx.Panel):
         if (strip_img == "0"): display_name = chat_util.strip_img_tags(display_name)
         recvSound = "RecvSound"
         # act on the type of messsage
+
         if (type == chat_msg.CHAT_MESSAGE):
             text = "<b>" + display_name + "</b>: " + text
             self.Post(text)
@@ -1590,11 +1591,6 @@ class chat_panel(wx.Panel):
             logger.general(traceback.format_exc())
             logger.general("EXCEPTION: " + str(e))
             return "[ERROR]"
-
-    def ParsePost(self, s, send=False, myself=False):
-        s = Parse.Normalize(s)
-        self.set_colors()
-        self.Post(s,send,myself)
 
     # This subroutine builds a chat display name.
     #

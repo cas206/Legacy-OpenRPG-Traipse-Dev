@@ -790,7 +790,7 @@ class orpgFrame(wx.Frame):
             temp_wnd = orpg.chat.chatwnd.chat_notebook(parent_wnd, wx.DefaultSize)
             self.chattabs = temp_wnd
             self.chat = temp_wnd.MainChatPanel
-            component.add("chat",self.chat)
+            component.add("chat", self.chat)
 
         elif name == "player":
             temp_wnd = orpg.player_list.player_list(parent_wnd)

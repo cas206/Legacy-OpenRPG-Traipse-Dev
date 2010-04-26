@@ -31,16 +31,18 @@ from orpg.orpgCore import component
 import re
 from orpg.tools.orpg_log import logger
 from wx import TextEntryDialog, ID_OK
+from xml.etree.ElementTree import iselement
 
 class InterParse():
 
     def __init__(self):
         pass
 
-    def Post(self, s, send=False, myself=False):
-        s = self.Normalize(s)
-        component.get('chat').set_colors()
-        component.get('chat').Post(s, send, myself)
+    def Post(self, s, tab=True, send=False, myself=False):
+        if tab: tab = component.get('chat')
+        s = self.Normalize(s, tab)
+        tab.set_colors()
+        tab.Post(s, send, myself)
 
     def ParseLogic(self, s, node):
         'Nodes now parse through ParsLogic. Easily add new parse rules right here!!'
@@ -50,24 +52,24 @@ class InterParse():
         s = self.NodeParent(s, node.get('map'))
         return s
 
-    def Normalize(self, s):
-        for plugin_fname in component.get('chat').activeplugins.keys():
-            plugin = component.get('chat').activeplugins[plugin_fname]
+    def Normalize(self, s, tab):
+        for plugin_fname in tab.activeplugins.keys():
+            plugin = tab.activeplugins[plugin_fname]
             try: s = plugin.pre_parse(s)
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'post_msg'":
                     logger.general(traceback.format_exc())
                     logger.general("EXCEPTION: " + str(e))
-        if component.get('chat').parsed == 0:
+        if tab.parsed == 0:
             s = self.NameSpaceE(s)
             s = self.Node(s)
             s = self.Dice(s)
-            s = self.Filter(s)
-            component.get('chat').parsed = 1
+            s = self.Filter(s, tab)
+            tab.parsed = 1
         return s
     
-    def Filter(self, s):
-        s = component.get('chat').GetFilteredText(s)
+    def Filter(self, s, tab):
+        s = tab.GetFilteredText(s)
         return s
 
     def Node(self, s):
@@ -128,45 +130,59 @@ class InterParse():
     def NameSpaceI(self, s, node):
         reg = re.compile("(!=(.*?)=!)")
         matches = reg.findall(s)
+        newstr = False
         for i in xrange(0,len(matches)):
             tree_map = node.get('map').split('::')
-            root = self.get_node(tree_map[0])
+            roots = []; root_list = []
             find = matches[i][1].split('::')
-            names = root.getiterator('nodehandler')
-            for name in names:
-                if find[0] == name.get('name'):
-                    if name.get('class') == 'rpg_grid_handler': 
-                        newstr = self.NameSpaceGrid(find, name); break
-                    else: newstr = str(name.find('text').text); break
-                else: newstr = 'Invalid Reference!'
+            for x in xrange(0, len(tree_map)):
+                roots.append(tree_map[x])
+                root_list.append(self.get_node(roots))
+                namespace = root_list[x].getiterator('nodehandler')
+                for node in namespace:
+                    if find[0] == node.get('name'):
+                        if node.get('class') == 'rpg_grid_handler': 
+                            newstr = self.NameSpaceGrid(find[1], node); break
+                        else: 
+                            newstr = str(node.find('text').text); break
+            if not newstr: newstr = 'Invalid Reference!'; break
             s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseLogic(s, name)
+            s = self.ParseLogic(s, node)
         return s
 
     def NameSpaceE(self, s):
         reg = re.compile("(!&(.*?)&!)")
         matches = reg.findall(s)
+        newstr = 'False'; x = 0
         for i in xrange(0,len(matches)):
             find = matches[i][1].split('::')
-            root = find[0]
-            root = self.get_node(root)
-            names = root.getiterator('nodehandler')
-            for name in names:
-                if find[1] == name.get('name'):
-                    if name.get('class') == 'rpg_grid_handler': 
-                        newstr = self.NameSpaceGrid([find[1], find[2]], name); break
-                    else: newstr = str(name.find('text').text); break
-                else: newstr = 'Invalid Reference!'
+            node = self.get_node([find[0]])
+            last = find[len(find)-1]
+            if not iselement(node): 
+                s = s.replace(matches[i][0], 'Invalid Reference!', 1); 
+                s = self.NameSpaceE(s)
+                return s
+            while newstr == 'False':
+                namespace = node.getiterator('nodehandler'); x += 1
+                for node in namespace:
+                    if find[x] == node.get('name'):
+                        if node.get('class') == 'map_miniature_handler': continue
+                        elif node.get('class') == 'rpg_grid_handler': 
+                            newstr = self.NameSpaceGrid(last, node); break
+                        elif x == len(find)-1: newstr = str(node.find('text').text); break
+                        else: break
+                else: newstr = 'Invalid Reference!'; break
             s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseLogic(s, name)
+            s = self.ParseLogic(s, node)
         return s
 
     def NameSpaceGrid(self, s, node):
-        cell = tuple(s[1].strip('(').strip(')').split(','))
+        cell = tuple(s.strip('(').strip(')').split(','))
         grid = node.find('grid')
         rows = grid.findall('row')
-        col = rows[int(self.Dice(cell[0]))-1].findall('cell')
-        try: s = self.ParseLogic(col[int(self.Dice(cell[1]))-1].text, node) or 'No Cell Data'
+        try:
+            col = rows[int(self.Dice(cell[0]))-1].findall('cell')
+            s = self.ParseLogic(col[int(self.Dice(cell[1]))-1].text, node) or 'No Cell Data'
         except: s = 'Invalid Grid Reference!'
         return s
 
@@ -195,7 +211,7 @@ class InterParse():
             del new_map[len(new_map)-1]
             parent_map = matches[i][1].split('::')
             ## Backwards Reference the Parent Children
-            child_node = self.get_node('::'.join(new_map))
+            child_node = self.get_node(new_map)
             newstr = self.get_root(child_node, tree_map, new_map, parent_map)
             s = s.replace(matches[i][0], newstr, 1)
             s = self.Node(s)
@@ -213,14 +229,13 @@ class InterParse():
         if newstr != '': return newstr
         else:
             del new_map[len(new_map)-1]
-            child_node = self.get_node('::'.join(new_map))
+            child_node = self.get_node(new_map)
             newstr = self.get_root(child_node, tree_map, new_map, parent_map)
             return newstr
 
-    def get_node(self, s):
+    def get_node(self, path):
         return_node = 'Invalid Reference!'
         value = ""
-        path = s.split('::')
         depth = len(path)
         try: node = component.get('tree').tree_map[path[0]]['node']
         except Exception, e: return return_node
@@ -230,7 +245,7 @@ class InterParse():
     def resolve_get_loop(self, node, path, step, depth):
         if step == depth: return node
         else:
-            child_list = node.findall('nodehandler')
+            child_list = node.getiterator('nodehandler')
             for child in child_list:
                 if step == depth: break
                 if child.get('name') == path[step]:

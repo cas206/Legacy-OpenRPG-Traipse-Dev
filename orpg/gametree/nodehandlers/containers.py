@@ -245,7 +245,6 @@ class tabbed_edit_panel(wx.Panel):
         parent.SetSize(self.GetBestSize())
         self.Bind(wx.EVT_TEXT, self.on_text, id=1)
 
-
     def on_text(self,evt):
         txt = self.title.GetValue()
         if txt != "":
@@ -281,18 +280,19 @@ class splitter_handler(container_handler):
         container_handler.on_drop(self,evt)
 
     def build_splitter_wnd(self, parent, mode):
+        self.parent = parent
         self.split = self.xml.get("horizontal")
         self.pane = splitter_panel(parent, self, mode)
+        self.frame = self.pane.frame
         self.splitter = MultiSplitterWindow(self.pane, -1, 
                         style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH|wx.SP_NO_XP_THEME)
+        self.splitter.parent = self
         if self.split == '1': self.splitter.SetOrientation(wx.VERTICAL)
         else: self.splitter.SetOrientation(wx.HORIZONTAL)
-        self.bestSizex = -1
-        self.bestSizey = -1
         self.tree.traverse(self.mytree_node, self.doSplit, mode, False) 
-        self.pane.sizer.Add(self.splitter, 1, wx.EXPAND)
-        self.pane.SetSize((self.bestSizex, self.bestSizey))
-        self.pane.Layout()
+        self.pane.sizer.Add(self.splitter, -1, wx.EXPAND)
+        self.pane.SetAutoLayout(True)
+        self.pane.Fit()
         parent.SetSize(self.pane.GetSize())
         return self.pane
 
@@ -300,26 +300,24 @@ class splitter_handler(container_handler):
         node = self.tree.GetPyData(treenode)
         if mode == 1: tmp = node.get_design_panel(self.splitter)
         else: tmp = node.get_use_panel(self.splitter)
-        if self.split == '1':
-            sash = tmp.GetBestSize()[1]+1
-            self.bestSizey += sash+11
-            if self.bestSizex < tmp.GetBestSize()[0]: self.bestSizex = tmp.GetBestSize()[0]+10
-        else:
-            sash = tmp.GetBestSize()[0]+1
-            self.bestSizex += sash
-            if self.bestSizey < tmp.GetBestSize()[1]: self.bestSizey = tmp.GetBestSize()[1]+31
+        if self.split == '1': sash = self.frame.GetSize()[1]/len(self.xml.findall('nodehandler'))
+        else: sash = self.frame.GetSize()[0]/len(self.xml.findall('nodehandler'))
         self.splitter.AppendWindow(tmp, sash)
+
     def get_size_constraint(self):
         return 1
 
 class splitter_panel(wx.Panel):
     def __init__(self, parent, handler, mode):
         wx.Panel.__init__(self, parent, -1)
+        self.parent = parent
         self.handler = handler
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         if mode == 0: self.title = wx.StaticText(self, 1, handler.xml.get('name'))
         elif mode == 1: self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
-        #self.title = wx.TextCtrl(self, 1, handler.xml.get('name'))
+        self.frame = self.GetParent()
+        while self.frame.GetName() != 'frame':
+            self.frame = self.frame.GetParent()
 
         if mode == 1:
             self.hozCheck = wx.CheckBox(self, -1, "Horizontal Split")

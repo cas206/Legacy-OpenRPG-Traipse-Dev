@@ -22,9 +22,10 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.menu = wx.Menu()
         self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
         self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
-        self.toggle.Check(True)
 
     def plugin_toggle(self, evt):
+        if self.toggle.IsChecked() == True: self.plugindb.SetString('xxurl2link', 'url2link', 'True')
+        if self.toggle.IsChecked() == False: self.plugindb.SetString('xxurl2link', 'url2link', 'False')
         pass
 
     def plugin_enabled(self):
@@ -32,6 +33,9 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.url_regex = re.compile("(?<![\[=\"a-z0-9:/.])((?:http|ftp|gopher)://)?(?<![@a-z])((?:[a-z0-9\-]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4})(?:[a-z0-9_=\?\#\&~\%\.\-/\:\+;]*))", re.I)
 
         self.mailto_regex = re.compile("(?<![=\"a-z0-9:/.])((?:[a-z0-9]+[_]?[a-z0-9]*)+@{1}(?:[a-z0-9]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4}))", re.I)
+
+        self.link = self.plugindb.GetString('xxurl2link', 'url2link', '') or 'False'
+        self.toggle.Check(True) if self.link == 'True' else self.toggle.Check(False)
 
     def plugin_disabled(self):
         #Here you need to remove any commands you added, and anything else you want to happen when you disable the plugin
