@@ -130,8 +130,8 @@ class InterParse():
     def LocationCheck(self, x, roots, root_list, tree_map):
         roots.append(tree_map[x])
         root_list.append(self.get_node(roots))
-        namespace = root_list[x].getiterator('nodehandler')
-        return namespace
+        node = root_list[x]
+        return node, roots, root_list
 
     def FutureCheck(self, node, next):
         future = node.getiterator('nodehandler')
@@ -143,17 +143,21 @@ class InterParse():
         reg = re.compile("(!=(.*?)=!)")
         matches = reg.findall(s)
         newstr = False
+        nodeable = ['rpg_grid_handler', 'container_handler', 
+                    'group_handler', 'tabber_handler', 
+                    'splitter_handler', 'form_handler', 'textctrl_handler']
         for i in xrange(0,len(matches)):
             tree_map = node.get('map').split('::')
             roots = []; root_list = []
             find = matches[i][1].split('::')
             node = self.get_node([tree_map[0]])
             for x in xrange(0, len(tree_map)):
-                namespace = self.LocationCheck(x, roots, root_list, tree_map)
+                (node, roots, root_list) = self.LocationCheck(x, roots, root_list, tree_map)
                 for x in xrange(0, len(find)):
                     namespace = node.getiterator('nodehandler')
                     for node in namespace:
                         if find[x] == node.get('name'):
+                            if node.get('class') not in nodeable: continue
                             if node.get('class') == 'rpg_grid_handler': 
                                 newstr = self.NameSpaceGrid(find[x+1], node); break
                             try:
@@ -171,6 +175,9 @@ class InterParse():
         reg = re.compile("(!&(.*?)&!)")
         matches = reg.findall(s)
         newstr = False
+        nodeable = ['rpg_grid_handler', 'container_handler', 
+                    'group_handler', 'tabber_handler', 
+                    'splitter_handler', 'form_handler', 'textctrl_handler']
         for i in xrange(0,len(matches)):
             find = matches[i][1].split('::')
             node = component.get('tree').xml_root
@@ -182,6 +189,7 @@ class InterParse():
                 namespace = node.getiterator('nodehandler')
                 for node in namespace:
                     if find[x] == node.get('name'):
+                        if node.get('class') not in nodeable: continue
                         if node.get('class') == 'rpg_grid_handler': 
                             newstr = self.NameSpaceGrid(find[x+1], node); break
                         try:
@@ -264,7 +272,7 @@ class InterParse():
     def resolve_get_loop(self, node, path, step, depth):
         if step == depth: return node
         else:
-            child_list = node.getiterator('nodehandler')
+            child_list = node.getchildren()
             for child in child_list:
                 if step == depth: break
                 if child.get('name') == path[step]:
