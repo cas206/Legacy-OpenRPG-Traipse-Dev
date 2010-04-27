@@ -275,14 +275,14 @@ class text_panel(wx.Panel):
         txt = self.text.GetValue()
         txt = Parse.ParseLogic(txt, self.handler.xml)
         if not self.handler.is_raw_send():
-            Parse.Post(self.handler.tohtml(), True, True)
+            Parse.Post(self.handler.tohtml(), self.chat, True, True)
             return 1
         actionlist = txt.split("\n")
         for line in actionlist:
             line = Parse.ParseLogic(line, self.handler.xml)
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    Parse.Post(line, True, True)
+                    Parse.Post(line, self.chat, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
@@ -608,14 +608,14 @@ class listbox_handler(node_handler):
         txt = self.get_selected_text()
         txt = Parse.ParseLogic(txt, self.xml)
         if not self.is_raw_send():
-            Parse.Post(self.tohtml(), True, True)
+            Parse.Post(self.tohtml(), self.chat, True, True)
             return 1
         actionlist = self.get_selections_text()
         for line in actionlist:
             line = Parse.ParseLogic(line, self.xml)
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    Parse.Post(line, True, True)
+                    Parse.Post(line, self.chat, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
