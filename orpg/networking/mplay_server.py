@@ -1236,7 +1236,7 @@ class mplay_server:
         #  prepend this server's version string to the the lobby message
         """
         try:
-            lobbyMsg = "You have connected to a <a href='http://www.knowledgearcana.com//content/view/199/128/'>"
+            lobbyMsg = "You have connected to a <a href='http://www.knowledgearcana.com/traipse-openrpg'>"
             lobbyMsg += DISTRO +'</a> '+ DIS_VER +' {'+ BUILD+'}'
             lobbyMsg += " server, built on OpenRPG version '" + VERSION + "'"
 
