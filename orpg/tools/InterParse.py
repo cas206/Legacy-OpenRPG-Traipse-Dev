@@ -38,8 +38,8 @@ class InterParse():
     def __init__(self):
         pass
 
-    def Post(self, s, tab=True, send=False, myself=False):
-        if tab: tab = component.get('chat')
+    def Post(self, s, tab=False, send=False, myself=False):
+        if not tab: tab = component.get('chat')
         s = self.Normalize(s, tab)
         tab.set_colors()
         tab.Post(s, send, myself)

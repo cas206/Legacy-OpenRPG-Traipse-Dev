@@ -9,14 +9,10 @@ class Plugin(orpg.pluginhandler.PluginHandler):
     def __init__(self, plugindb, parent):
         orpg.pluginhandler.PluginHandler.__init__(self, plugindb, parent)
 
-        # The Following code should be edited to contain the proper information
         self.name = 'URL to link conversion'
         self.author = 'tdb30 tbaleno@wrathof.com'
         self.help = "This plugin automaticaly wraps urls in link tags\n"
         self.help += "making them clickable."
-
-        self.url_regex = None
-        self.mailto_regex = None
 
     def plugin_menu(self):
         self.menu = wx.Menu()
@@ -29,17 +25,12 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         pass
 
     def plugin_enabled(self):
-        #This is where you set any variables that need to be initalized when your plugin starts
-        self.url_regex = re.compile("(?<![\[=\"a-z0-9:/.])((?:http|ftp|gopher)://)?(?<![@a-z])((?:[a-z0-9\-]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4})(?:[a-z0-9_=\?\#\&~\%\.\-/\:\+;]*))", re.I)
-
-        self.mailto_regex = re.compile("(?<![=\"a-z0-9:/.])((?:[a-z0-9]+[_]?[a-z0-9]*)+@{1}(?:[a-z0-9]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4}))", re.I)
-
+        self.url_regex = re.compile("((?:http|ftp|gopher)://(.*?).\com)", re.I)
+        self.mailto_regex = re.compile("(.*?(@).*?(.\com))", re.I)
         self.link = self.plugindb.GetString('xxurl2link', 'url2link', '') or 'False'
         self.toggle.Check(True) if self.link == 'True' else self.toggle.Check(False)
 
     def plugin_disabled(self):
-        #Here you need to remove any commands you added, and anything else you want to happen when you disable the plugin
-        #such as closing windows created by the plugin
         pass
 
     def pre_parse(self, text):
@@ -60,7 +51,5 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     def regurlsub(self, m):
         link = m.group(2)
-        if m.group(1) != None:
-            return '<a href="' + m.group(1).lower() + link + '">' + m.group(0) + '</a>'
-        else:
-            return '<a href="http://' + link + '">' + link + '</a>'
+        if m.group(1) != None: return '<a href="' + m.group(1).lower() + '">' + m.group(0) + '</a>'
+        else: return '<a href="http://' + link + '">' + link + '</a>'
