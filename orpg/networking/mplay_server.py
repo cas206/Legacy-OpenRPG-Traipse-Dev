@@ -1396,13 +1396,16 @@ class mplay_server:
         self.incoming_event.set()
 
     def parse_incoming_dom(self, data):
-        end = data.find(">") #locate end of first element of message
+        end = data.find(">")
         head = data[:end+1]
-        xml_dom = None
+        msg = data[end+1:]
+        ### This if statement should help close invalid messages. ###
+        if head[end:] != '/':
+            if head[end:] != '>': head = head[:end] + '/>'
         try:
-            xml_dom = XML(head)
+            try: xml_dom = fromstring(head)
+            except: xml_dom = fromstring(head[:end] +'/>')
             self.message_action(xml_dom, data)
-
         except Exception, e:
             print "Error in parse of inbound message. Ignoring message."
             print "  Offending data(" + str(len(data)) + "bytes)=" + data
