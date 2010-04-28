@@ -12,16 +12,21 @@ from mercurial import ui, hg, commands, repo, revlog, cmdutil, util
 class Term2Win(object):
     # A stdout redirector.  Allows the messages from Mercurial to be seen in the Install Window
     def write(self, text):
+        self.closed = sys.__stdout__.closed
+        self.flush = sys.__stdout__.flush
         statbar.SetStatusText(text)
         wx.Yield()
-        sys.__stdout__.write(text)
+        #sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
     def __init__(self, parent, component):
         wx.Panel.__init__(self, parent)
         ### Status Bar ###
         #statbar.SetStatusText('Select a Package and Update')
-        statbar.SetStatusText('New Status Bar')
+        #statbar.SetStatusText('New Status Bar')
+
+        self.timer = wx.Timer(self, 1)
+        self.count = 0
 
         ### Update Manager
         self.ui = ui.ui()
@@ -76,6 +81,29 @@ class Updater(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.ChooseBranch, self.buttons['advanced'])
         self.Bind(wx.EVT_CHECKBOX, self.ToggleAutoUpdate, self.buttons['auto_check'])
         self.Bind(wx.EVT_CHECKBOX, self.ToggleNoUpdate, self.buttons['no_check'])
+        self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
+
+    def OnTimer(self, event):
+        self.count = self.count + 1
+        self.buttons['progress_bar'].SetValue(self.count)
+        if self.count == 100:
+            self.timer.Stop()
+            statbar.SetStatusText('Checking For Updates')
+
+    def UpdateCheck(self):
+        self.timer.Start(100)
+        self.count = 3
+        self.buttons['progress_bar'].SetValue(3)
+        doUpdate = commands.incoming(self.ui, self.repo, 
+                    'http://hg.assembla.com/openrpg', force=True, bundle=False)
+        if doUpdate:
+            statbar.SetStatusText('No Updates Available')
+            self.buttons['progress_bar'].SetValue(100)
+            self.timer.Stop()
+        else:
+            statbar.SetStatusText('Refresh Repo For Updated Source')
+            self.buttons['progress_bar'].SetValue(100)
+            self.timer.Stop()
 
     def ToggleAutoUpdate(self, event):
         if self.buttons['auto_check'].GetValue() == True:
@@ -687,17 +715,18 @@ class updaterFrame(wx.Frame):
 
         global statbar
         statbar = self.CreateStatusBar()
+        sys.stdout = Term2Win()
         self.Centre()
 
         # create the page windows as children of the notebook
-        page1 = Updater(nb, openrpg)
+        self.page1 = Updater(nb, openrpg)
         page2 = Repos(nb, openrpg)
         page3 = Manifest(nb)
         page4 = Control(nb)
         page5 = Help(nb)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(page1, "Updater")
+        nb.AddPage(self.page1, "Updater")
         nb.AddPage(page2, "Repos")
         nb.AddPage(page3, "Manifest")
         nb.AddPage(page4, "Control")
@@ -720,7 +749,7 @@ class updaterFrame(wx.Frame):
 class updateApp(wx.App):
     def OnInit(self):
         self.main = False
-        sys.stdout = Term2Win()
+
         logger._set_log_to_console(False)
         logger.note("Updater Start")
         component.add('validate', validate)
@@ -736,6 +765,7 @@ class updateApp(wx.App):
             self.updater.Show()
             self.updater.Fit()
         except: pass
+        if not self.main: self.updater.page1.UpdateCheck()
         return True
 
     def AutoUpdate(self):
