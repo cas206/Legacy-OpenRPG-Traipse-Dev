@@ -127,11 +127,23 @@ class InterParse():
             dlg.Destroy()
         return s
 
-    def LocationCheck(self, x, roots, root_list, tree_map):
-        roots.append(tree_map[x])
-        root_list.append(self.get_node(roots))
-        node = root_list[x]
-        return node, roots, root_list
+    def LocationCheck(self, node, tree_map, new_map, find):
+        if node == 'Invalid Reference!': return node
+        namespace = node.getiterator('nodehandler'); tr = tree_map.split('::')
+        newstr = ''
+        for name in namespace:
+            try: t = new_map.index(name.get('name'))-1
+            except: t = 1
+            if find[0] == name.get('name'):
+                s = '::'.join(new_map[:len(tr)-t])+'::'+'::'.join(find)
+                newstr = self.NameSpaceE('!&' +s+ '&!')
+                break
+        if newstr != '': return newstr
+        else:
+            del new_map[len(new_map)-1]
+            node = self.get_node(new_map)
+            newstr = self.LocationCheck(node, tree_map, new_map, find)
+            return newstr
 
     def FutureCheck(self, node, next):
         future = node.getiterator('nodehandler')
@@ -142,35 +154,15 @@ class InterParse():
     def NameSpaceI(self, s, node):
         reg = re.compile("(!=(.*?)=!)")
         matches = reg.findall(s)
-        newstr = False
-        nodeable = ['rpg_grid_handler', 'container_handler', 
-                    'group_handler', 'tabber_handler', 
-                    'splitter_handler', 'form_handler', 'textctrl_handler']
+        tree_map = node.get('map')
         for i in xrange(0,len(matches)):
-            tree_map = node.get('map').split('::')
-            roots = []; root_list = []
+            ## Build the new tree_map
+            new_map = tree_map.split('::')
             find = matches[i][1].split('::')
-            node = self.get_node([tree_map[0]])
-            for x in xrange(0, len(tree_map)):
-                (node, roots, root_list) = self.LocationCheck(x, roots, root_list, tree_map)
-                for x in xrange(0, len(find)):
-                    namespace = node.getiterator('nodehandler')
-                    for node in namespace:
-                        if find[x] == node.get('name'):
-                            if node.get('class') not in nodeable: continue
-                            if node.get('class') == 'rpg_grid_handler': 
-                                newstr = self.NameSpaceGrid(find[x+1], node); break
-                            try:
-                                if self.FutureCheck(node, find[x+1]): break
-                                else: continue
-                            except:
-                                if x == len(find)-1:
-                                    if node.find('text') != None: newstr = str(node.find('text').text) 
-                                    else: newstr = 'Invalid Reference!'
-                                    break
-                    if not newstr: newstr = 'Invalid Reference!'; break
+            ## Backwards Reference the Parent Children
+            node = self.get_node(new_map)
+            newstr = self.LocationCheck(node, tree_map, new_map, find)
             s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseLogic(s, node)
         return s
 
     def NameSpaceE(self, s):
@@ -192,8 +184,9 @@ class InterParse():
                 for node in namespace:
                     if find[x] == node.get('name'):
                         if node.get('class') not in nodeable: continue
-                        if node.get('class') == 'rpg_grid_handler': 
-                            newstr = self.NameSpaceGrid(find[x+1], node); break
+                        if node.get('class') == 'rpg_grid_handler':
+                            try: newstr = self.NameSpaceGrid(find[x+1], node); break
+                            except: newstr = 'Invalid Grid Reference!'
                         try:
                             if self.FutureCheck(node, find[x+1]): break
                             else: continue
