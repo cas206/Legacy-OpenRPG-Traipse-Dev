@@ -95,7 +95,7 @@ class Updater(wx.Panel):
         self.count = 3
         self.buttons['progress_bar'].SetValue(3)
         doUpdate = commands.incoming(self.ui, self.repo, 
-                    'http://hg.assembla.com/openrpg', force=True, bundle=False)
+                    manifest.GetString('updaterepo', 'default', ''), force=True, bundle=False)
         if doUpdate:
             statbar.SetStatusText('No Updates Available')
             self.buttons['progress_bar'].SetValue(100)
