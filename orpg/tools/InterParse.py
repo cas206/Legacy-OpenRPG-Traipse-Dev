@@ -58,7 +58,7 @@ class InterParse():
             try: s = plugin.pre_parse(s)
             except Exception, e:
                 if str(e) != "'module' object has no attribute 'post_msg'":
-                    logger.general(traceback.format_exc())
+                    #logger.general(traceback.format_exc())
                     logger.general("EXCEPTION: " + str(e))
         if tab.parsed == 0:
             s = self.NameSpaceE(s)

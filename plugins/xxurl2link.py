@@ -25,8 +25,12 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         pass
 
     def plugin_enabled(self):
-        self.url_regex = re.compile("((?:http|ftp|gopher)://(.*?).\com)", re.I)
-        self.mailto_regex = re.compile("(.*?(@).*?(.\com))", re.I)
+        self.url_regex = re.compile( #from Paul Hayman of geekzilla
+                    "((https?|ftp|gopher|telnet|file|notes|ms-help):((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.I)
+        self.mailto_regex = re.compile( #Taken from Django
+                    r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"  # dot-atom
+                    r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
+                    r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)
         self.link = self.plugindb.GetString('xxurl2link', 'url2link', '') or 'False'
         self.toggle.Check(True) if self.link == 'True' else self.toggle.Check(False)
 
@@ -34,6 +38,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         pass
 
     def pre_parse(self, text):
+        text2 = text
         if self.toggle.IsChecked() == True:
             text = self.mailto_regex.sub(self.regmailsub, text)
             text = self.url_regex.sub(self.regurlsub, text)
