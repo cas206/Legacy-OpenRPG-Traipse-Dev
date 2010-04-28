@@ -622,7 +622,7 @@ class orpgFrame(wx.Frame):
         # Update Manager 
         #self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager 1.0", component, manifest, True)
+            "OpenRPG Update Manager 1.2", component, manifest, True)
         component.add('upmana-win', self.updateMana)
         logger.debug("Menu Created")
         h = int(xml_dom.get("height"))

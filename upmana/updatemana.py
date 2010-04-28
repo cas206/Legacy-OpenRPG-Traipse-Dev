@@ -48,7 +48,7 @@ class Updater(wx.Panel):
         self.buttons['update'] = wx.Button(self, wx.ID_ANY, "Update Now")
         self.buttons['finish'] = wx.Button(self, wx.ID_ANY, "Finish")
 
-        self.sizer.Add(self.changelog, (0,0), span=(4,1), flag=wx.EXPAND)
+        self.sizer.Add(self.changelog, (0,0), span=(5,1), flag=wx.EXPAND)
         self.sizer.Add(self.filelist, (0,1), span=(1,3), flag=wx.EXPAND)
 
         self.sizer.Add(self.buttons['progress_bar'], (1,1), span=(1,3), flag=wx.EXPAND)
@@ -59,7 +59,7 @@ class Updater(wx.Panel):
         self.sizer.Add(self.buttons['advanced'], (2,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['update'], (3,3), flag=wx.EXPAND)
         self.sizer.Add(self.buttons['finish'], (4,3), flag=wx.EXPAND)
-        #self.buttons['finish'].Disable()
+        self.buttons['progress_bar'].SetValue(100)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
         self.SetSizer(self.sizer)
@@ -752,7 +752,7 @@ class updateApp(wx.App):
         logger._set_log_to_console(False)
         logger.note("Updater Start")
         component.add('validate', validate)
-        self.updater = updaterFrame(self, "OpenRPG Update Manager 1.0", 
+        self.updater = updaterFrame(self, "OpenRPG Update Manager 1.2", 
                                 component, manifest, self.main)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
             self.AutoUpdate(); self.OnExit()

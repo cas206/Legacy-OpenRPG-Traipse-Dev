@@ -133,7 +133,8 @@ class InterParse():
         newstr = ''
         for name in namespace:
             try: t = new_map.index(name.get('name'))-1
-            except: t = 1
+            except: t = 0
+            print new_map, new_map[t]
             if find[0] == name.get('name'):
                 s = '::'.join(new_map[:len(tr)-t])+'::'+'::'.join(find)
                 newstr = self.NameSpaceE('!&' +s+ '&!')
