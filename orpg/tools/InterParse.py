@@ -136,8 +136,7 @@ class InterParse():
     def FutureCheck(self, node, next):
         future = node.getiterator('nodehandler')
         for advance in future:
-            print next, advance.get('name')
-            if next == advance.get('name'): print True; return True
+            if next == advance.get('name'): return True
         return False
 
     def NameSpaceI(self, s, node):

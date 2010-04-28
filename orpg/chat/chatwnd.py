@@ -763,7 +763,7 @@ class chat_panel(wx.Panel):
         self.chatwnd = chat_html_window(self,-1)
         self.set_colors()
         wx.CallAfter(self.chatwnd.SetPage, self.chatwnd.Header())
-        welcome = "<b>Welcome to <a href='http://www.knowledgearcana.com//content/view/199/128/'>"
+        welcome = "<b>Welcome to <a href='http://www.knowledgearcana.com/traipse-openrpg/'>"
         welcome += DISTRO +'</a> '+ DIS_VER +' {'+BUILD+'},'
         welcome += ' built on OpenRPG '+ VERSION +'</b>'
         if (self.sendtarget == "all"):
