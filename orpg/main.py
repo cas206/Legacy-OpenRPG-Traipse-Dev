@@ -622,7 +622,7 @@ class orpgFrame(wx.Frame):
         # Update Manager 
         #self.manifest = manifest.ManifestChanges()
         self.updateMana = upmana.updatemana.updaterFrame(self, 
-            "OpenRPG Update Manager 1.0", component, manifest, True)
+            "OpenRPG Update Manager 1.2", component, manifest, True)
         component.add('upmana-win', self.updateMana)
         logger.debug("Menu Created")
         h = int(xml_dom.get("height"))
@@ -790,7 +790,7 @@ class orpgFrame(wx.Frame):
             temp_wnd = orpg.chat.chatwnd.chat_notebook(parent_wnd, wx.DefaultSize)
             self.chattabs = temp_wnd
             self.chat = temp_wnd.MainChatPanel
-            component.add("chat",self.chat)
+            component.add("chat", self.chat)
 
         elif name == "player":
             temp_wnd = orpg.player_list.player_list(parent_wnd)

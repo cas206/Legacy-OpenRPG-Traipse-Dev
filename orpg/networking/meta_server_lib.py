@@ -312,7 +312,7 @@ def getMetaServers(versions = None, pick_random=0):
 
 def getMetaServerBaseURL():
     # get meta server URL
-    url = "http://www.openrpg.com/openrpg_servers.php"
+    url = "http://orpgmeta.appspot.com/"
     try:
         component.get('validate').config_file("settings.xml","default_settings.xml")
         ini = open(dir_struct["user"]+"settings.xml","r")
@@ -323,6 +323,7 @@ def getMetaServerBaseURL():
         node_list = tree.getElementsByTagName("MetaServerBaseURL")
         if node_list:
             url = node_list[0].getAttribute("value")
+        print url
         # allow tree to be collected
         try: tree.unlink()
         except: pass

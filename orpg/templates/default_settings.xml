@@ -2,9 +2,8 @@
     <tab name="General" type="tab">
         <tab name="Networking" type="grid">
             <Heartbeat options="bool" value="1" help="This sends a message to the server to keep alive your connection when idle." />
-            <MetaServerBaseURL help="This is the URL that contains the server list." options="URL" value="http://www.openrpg.com/openrpg_servers.php"/>
+            <MetaServerBaseURL help="This is the URL that contains the server list." options="URL" value="http://orpgmeta.appspot.com/"/>
             <ImageServerBaseURL help="This is the URL that contains the server list." options="URL" value="http://openrpg.digitalxero.net/imgupload/index.php"/>
-            <LocalImageBaseURL help="This is the URL that contains the server list." options="URL" value="http://127.0.0.1:6774/webfiles/"/>
             <LocalorRemote help="Decide to load files locally or remotely. CherryPy must be running for local files." options="Local | Remote" value="Local"/>
         </tab>
         <tab name="Sound" type="grid">

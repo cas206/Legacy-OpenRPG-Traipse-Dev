@@ -214,14 +214,17 @@ class chat_commands:
     def on_dieroller(self, cmdargs):
         args = string.split(cmdargs,None,-1)
         rm = component.get('DiceManager')
+        cur_die = rm.getRoller()
         try:
             rm.setRoller(args[0])
-            self.chat.SystemPost("You have changed your die roller to the <b>\"" + args[0] + "\"</b> roller.")
-            self.settings.set_setting('dieroller',args[0])
+            self.chat.SystemPost('You have changed your die roller to the <b>"' +rm.getRoller()+ '"</b> roller.')
+            self.settings.change('dieroller', rm.getRoller())
         except Exception, e:
-            print e
-            self.chat.InfoPost("Available die rollers: " + str(rm.listRollers()))
-            self.chat.InfoPost("You are using the <b>\"" + rm.getRoller() + "\"</b> die roller.")
+            rm.setRoller(cur_die)
+            self.settings.change('dieroller', str(cur_die))
+            if args[0] != '': self.chat.SystemPost(args[0]+ ' is an invalid roller.')
+            self.chat.InfoPost('Available die rollers: ' +str(rm.listRollers()) )
+            self.chat.InfoPost('You are using the <b>"' +cur_die+ '"</b> die roller.')
 
     def on_ping(self, cmdargs):
         ct = time.clock()

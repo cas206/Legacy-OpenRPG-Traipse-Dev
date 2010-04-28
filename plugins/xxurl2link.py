@@ -9,36 +9,36 @@ class Plugin(orpg.pluginhandler.PluginHandler):
     def __init__(self, plugindb, parent):
         orpg.pluginhandler.PluginHandler.__init__(self, plugindb, parent)
 
-        # The Following code should be edited to contain the proper information
         self.name = 'URL to link conversion'
         self.author = 'tdb30 tbaleno@wrathof.com'
         self.help = "This plugin automaticaly wraps urls in link tags\n"
         self.help += "making them clickable."
 
-        self.url_regex = None
-        self.mailto_regex = None
-
     def plugin_menu(self):
         self.menu = wx.Menu()
         self.toggle = self.menu.AppendCheckItem(wx.ID_ANY, 'On')
         self.topframe.Bind(wx.EVT_MENU, self.plugin_toggle, self.toggle)
-        self.toggle.Check(True)
 
     def plugin_toggle(self, evt):
+        if self.toggle.IsChecked() == True: self.plugindb.SetString('xxurl2link', 'url2link', 'True')
+        if self.toggle.IsChecked() == False: self.plugindb.SetString('xxurl2link', 'url2link', 'False')
         pass
 
     def plugin_enabled(self):
-        #This is where you set any variables that need to be initalized when your plugin starts
-        self.url_regex = re.compile("(?<![\[=\"a-z0-9:/.])((?:http|ftp|gopher)://)?(?<![@a-z])((?:[a-z0-9\-]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4})(?:[a-z0-9_=\?\#\&~\%\.\-/\:\+;]*))", re.I)
-
-        self.mailto_regex = re.compile("(?<![=\"a-z0-9:/.])((?:[a-z0-9]+[_]?[a-z0-9]*)+@{1}(?:[a-z0-9]+[-.]?[a-z0-9]+)*\.(?:[a-z]{2,4}))", re.I)
+        self.url_regex = re.compile( #from Paul Hayman of geekzilla
+                    "((https?|ftp|gopher|telnet|file|notes|ms-help):((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.I)
+        self.mailto_regex = re.compile( #Taken from Django
+                    r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"  # dot-atom
+                    r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
+                    r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)
+        self.link = self.plugindb.GetString('xxurl2link', 'url2link', '') or 'False'
+        self.toggle.Check(True) if self.link == 'True' else self.toggle.Check(False)
 
     def plugin_disabled(self):
-        #Here you need to remove any commands you added, and anything else you want to happen when you disable the plugin
-        #such as closing windows created by the plugin
         pass
 
     def pre_parse(self, text):
+        text2 = text
         if self.toggle.IsChecked() == True:
             text = self.mailto_regex.sub(self.regmailsub, text)
             text = self.url_regex.sub(self.regurlsub, text)
@@ -56,7 +56,5 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     def regurlsub(self, m):
         link = m.group(2)
-        if m.group(1) != None:
-            return '<a href="' + m.group(1).lower() + link + '">' + m.group(0) + '</a>'
-        else:
-            return '<a href="http://' + link + '">' + link + '</a>'
+        if m.group(1) != None: return '<a href="' + m.group(1).lower() + '">' + m.group(0) + '</a>'
+        else: return '<a href="http://' + link + '">' + link + '</a>'

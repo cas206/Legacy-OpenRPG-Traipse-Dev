@@ -109,11 +109,11 @@ class form_panel(ScrolledPanel):
 
 F_HEIGHT = wx.NewId()
 F_WIDTH = wx.NewId()
-class form_edit_panel(wx.Panel):
+class form_edit_panel(ScrolledPanel):
     def __init__(self, parent, handler):
-        wx.Panel.__init__(self, parent, -1)
+        ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
         self.handler = handler
-        sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Form Properties"), wx.VERTICAL)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         wh_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.text = {   P_TITLE : wx.TextCtrl(self, P_TITLE, handler.xml.get('name')),
                         F_HEIGHT : wx.TextCtrl(self, F_HEIGHT, handler.xml.get('height')),
@@ -128,15 +128,17 @@ class form_edit_panel(wx.Panel):
         wh_sizer.Add(wx.Size(10,10))
         wh_sizer.Add(self.text[F_HEIGHT], 0, wx.EXPAND)
 
-        sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
-        sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
-        sizer.Add(wx.Size(10,10))
-        sizer.Add(wh_sizer,0,wx.EXPAND)
+        self.main_sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
+        self.main_sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
+        self.main_sizer.Add(wx.Size(10,10))
+        self.main_sizer.Add(wh_sizer,0,wx.EXPAND)
+        handler.tree.traverse(handler.mytree_node, self.create_child_wnd, None, False)
 
-        self.SetSizer(sizer)
+        self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
+        self.SetupScrolling()
+        parent.SetSize(self.GetSize())
         self.Fit()
-        parent.SetSize(self.GetBestSize())
 
         self.Bind(wx.EVT_TEXT, self.on_text, id=P_TITLE)
         self.Bind(wx.EVT_TEXT, self.on_text, id=F_HEIGHT)
@@ -154,6 +156,14 @@ class form_edit_panel(wx.Panel):
             except: return 0
             if id == F_HEIGHT: self.handler.xml.set("height",txt)
             elif id == F_WIDTH: self.handler.xml.set("width",txt)
+
+    def create_child_wnd(self, treenode, evt):
+        node = self.handler.tree.GetPyData(treenode)
+        panel = node.get_design_panel(self)
+        size = node.get_size_constraint()
+        if panel:
+            self.main_sizer.Add(panel, size, wx.EXPAND)
+            self.main_sizer.Add(wx.Size(10,10))
 
 ##########################
 ## control handler
@@ -263,16 +273,16 @@ class text_panel(wx.Panel):
 
     def on_send(self, evt):
         txt = self.text.GetValue()
-        txt = Parse.NodeMap(txt, self.handler.xml)
-        txt = Parse.NodeParent(txt, self.handler.xml.get('map'))
+        txt = Parse.ParseLogic(txt, self.handler.xml)
         if not self.handler.is_raw_send():
-            Parse.Post(self.handler.tohtml(), True, True)
+            Parse.Post(self.handler.tohtml(), self.chat, True, True)
             return 1
         actionlist = txt.split("\n")
         for line in actionlist:
+            line = Parse.ParseLogic(line, self.handler.xml)
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    Parse.Post(line, True, True)
+                    Parse.Post(line, self.chat, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
@@ -320,7 +330,7 @@ class textctrl_edit_panel(wx.Panel):
             sizer_style=wx.EXPAND
             text_style = 0
             multi = 0
-        self.text = wx.TextCtrl(self, F_TEXT, handler.get_value(),style=text_style)
+        self.text = wx.TextCtrl(self, F_TEXT, handler.get_value() or '',style=text_style)
         sizer.Add(wx.Size(5,0))
         sizer.Add(self.text, multi, sizer_style)
         self.SetSizer(sizer)
@@ -596,18 +606,16 @@ class listbox_handler(node_handler):
 
     def on_send_to_chat(self, evt):
         txt = self.get_selected_text()
-        txt = Parse.NodeMap(txt, self.xml)
-        txt = Parse.NodeParent(txt, self.xml.get('map'))
+        txt = Parse.ParseLogic(txt, self.xml)
         if not self.is_raw_send():
-            Parse.Post(self.tohtml(), True, True)
+            Parse.Post(self.tohtml(), self.chat, True, True)
             return 1
         actionlist = self.get_selections_text()
         for line in actionlist:
-            line = Parse.NodeMap(line, self.xml)
-            line = Parse.NodeParent(line, self.xml.get('map'))
+            line = Parse.ParseLogic(line, self.xml)
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
-                    Parse.Post(line, True, True)
+                    Parse.Post(line, self.chat, True, True)
                 else:
                     action = line
                     self.chat.chat_cmds.docmd(action)
@@ -621,6 +629,7 @@ F_SEND = wx.NewId()
 class listbox_panel(wx.Panel):
     def __init__(self, parent, handler):
         wx.Panel.__init__(self, parent, -1)
+        #ScrolledPanel.__init__(self, parent, wx.ID_ANY, style=wx.NO_BORDER|wx.VSCROLL|wx.HSCROLL)
         self.handler = handler
         self.chat = handler.chat
         opts = []
@@ -638,8 +647,8 @@ class listbox_panel(wx.Panel):
             if self.list.GetSize()[0] > 200:
                 self.list.Destroy()
                 self.list = wx.ComboBox(self, F_LIST, cur_opt, size=(200, -1), choices=opts, style=wx.CB_READONLY)
-        elif type == L_LIST: self.list = wx.ListBox(self,F_LIST,choices=opts)
-        elif type == L_RADIO: self.list = wx.RadioBox(self,F_LIST,label,choices=opts,majorDimension=3)
+        elif type == L_LIST: self.list = wx.ListBox(self, F_LIST, choices=opts)
+        elif type == L_RADIO: self.list = wx.RadioBox(self, F_LIST, label, choices=opts, majorDimension=3)
         elif type == L_CHECK:
             self.list = wx.CheckListBox(self,F_LIST,choices=opts)
             self.set_checks()
@@ -651,17 +660,17 @@ class listbox_panel(wx.Panel):
         else: sizer = wx.BoxSizer(wx.VERTICAL)
 
         if type != L_RADIO:
-            sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND)
-            sizer.Add(wx.Size(5,0))
-        sizer.Add(self.list, 1, wx.EXPAND)
+            sizer.Add(wx.StaticText(self, -1, label+": "), 0, wx.EXPAND|wx.ALL)
+        sizer.Add(self.list, 1, wx.EXPAND|wx.ALL)
         if handler.has_send_button():
-            sizer.Add(wx.Button(self, F_SEND, "Send"), 0, wx.EXPAND)
+            sizer.Add(wx.Button(self, F_SEND, "Send"), 0, wx.EXPAND|wx.ALL)
             self.Bind(wx.EVT_BUTTON, self.handler.on_send_to_chat, id=F_SEND)
         self.sizer = sizer
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
+        #self.SetupScrolling()
+        #parent.SetSize(self.GetBestSize())
         self.Fit()
-        parent.SetSize(self.GetBestSize())
 
         if type == L_DROP: self.Bind(wx.EVT_COMBOBOX, self.on_change, id=F_LIST)
         elif type == L_LIST: self.Bind(wx.EVT_LISTBOX, self.on_change, id=F_LIST)

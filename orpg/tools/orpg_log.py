@@ -62,7 +62,7 @@ class Term2Win(object):
     def write(self, text):
         logger.stdout(text)
         wx.Yield()
-        #sys.__stdout__.write(text)
+        sys.__stdout__.write(text)
 
 class TrueDebug(object):
     """A simple debugger. Add debug() to a function and it prints the function name and any objects included. Add an object or a group of objects in ()'s.

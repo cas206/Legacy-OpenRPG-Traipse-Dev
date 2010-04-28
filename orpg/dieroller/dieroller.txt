@@ -1,0 +1,309 @@
+The New Dicing System:  A Proposal for OpenRPG
+----------------------------------------------
+
+The current dice system for OpenRPG has several limitations.  Foremost
+among these are the fact that adding a new, non-standard dicing mechanism
+requires editing of the basic dice code.  There are several secondary 
+limitations, such as the fact that while the dice system can handle math,
+it cannot be used as a calculator -- it will not allow expressions that do
+not involve dice.
+
+This proposal is for a new dicing system to replace the current one in
+OpenRPG.  Since the dicing system is something that users will interact
+with frequently, a new system needs to be considered carefully.  This
+document attempts to describe the new dicing system so that such 
+consideration can be given to it.  It is expected that this document will
+grow and change as it is scrutinized.
+
+
+Design goals for this dicing system:
+
+ 1. Should be easy for new users to get started with, based on knowing
+    standard RPG dice notation (NdX) and basic math.
+
+ 2. Should, as far as practical, maintain compatibility with existing
+    character sheets, etc., that use the current dice system.
+
+ 3. Should allow users to create new dice types and new ways of 
+    counting dice.  Ideally, this should not require programming, except
+    in exceptional cases.
+
+ 4. The dice system should be usable for doing basic math that does
+    not involve dice.
+
+ 5. The dice system should be able to handle most current RPG dicing
+    systems.
+
+Things this dicing system is designed to NOT do:
+
+ 1. Be a programming language.  There are no facilities in it for 
+    user input, output formatting, loops, if-then-else, or similar
+    things.  If these are desired for something involving dice, an
+    appropriate node and nodehandler can be created.
+
+ 2. Handle all theoretically possible dicing systems without the
+    need for programming plugins.  First off, this is impossible.  
+    Second, even making an attempt to would require supporting 
+    dicing methods that don't actually turn up in any real game.
+
+ 3. Handle floating-point math.  I don't know of any systems that
+    use it in their dice schemes right now.  If there are some,
+    we might have to consider adding it.
+
+
+Syntax Specification 
+
+What follows is a BNF specification for the proposed dicing system, with
+explanatory text interleaved.  At the end of this document is a copy of
+the BNF with no explanations, for those who would like to look at it "all
+together".  Note that BNF describes only syntax, and not semantics; thus,
+while anything generated with this grammar should be syntactically correct,
+that doesn't mean it will make sense or be allowed.
+
+
+dice string ::= <expression>
+                <expression> of <comparison> | <comparison>
+
+This is the top level.  The major thing of note here is that comparisons
+only occur at this level.  This is intentional; the result of a comparison
+is a boolean true/false flag rather than a number.  Thus, it makes no 
+sense to allow people to perform further numerical operations on the 
+result of a comparison.  Systems where dice are triggered by the results 
+of other dice are left for the realm of plugins.
+
+                
+comparison ::= <expression> <relation> <expression>
+
+expression ::= <factor> | <factor> <low-op> <factor>
+
+The separation into "low-op" and "high-op" of the operators is to allow
+order of operations to be handled more easily.  Syntactically, it's not
+really necessary, but it should be helpful in implementation.
+
+
+factor :: = <term> | <term> <high-op> <term> |
+            <multi-dice> | <multi-dice> <high-op> <term> |
+            <term> <high-op> <multi-dice>
+
+Here we start to hit some complication.  The intent of the different 
+entries for multi-dice is that we don't want to allow things like
+[3d6 each * 2d6 each].  We are *not* doing vector multiplication!
+The "expression" level doesn't have any such limitation on syntax; 
+things like [3d6 each + 2d6 each] we'll have to either think of a 
+logical way to handle, or disallow on a semantic level.  (Well... I 
+suppose it could be handled in the BNF, but I think it would get
+kind of messy.)
+
+
+term ::= <dice> | <unit>
+
+unit ::= <number> | ( <expression> )
+
+Dice are not considered a unit.  This means that things like [3d6d10] can't
+be done without using parentheses.  I consider that to be a win for 
+clarity.
+
+
+dice ::= <unit>d<unit> | <unit>d<name> | <dice> <flag> | lastroll
+
+The <name> entry here allows for user-created dice (in the syntax, at 
+least...).
+
+
+multi-dice ::= ( <dice>, <dice>+ ) |               # (1d6,1d8)
+               <dice> each |                       # 3d6 each
+               ( <expression> of <expression> ) |  # (3 of 2d6)
+               lastroll |                          # lastroll
+               <multi-dice> <flag>                 # (3 of 2d6) best 2
+
+"lastroll" by itself can be either dice or multi-dice.  I'm thinking that it
+ 
+should be whatever type the last roll was.
+
+
+flag ::= reroll <condition> |          # repeats
+         reroll <slice> |              # once only
+         grow <condition> |            # reroll and add
+         shrink <condition> |          # reroll and subtract
+         drop <condition> |
+         drop <slice> |
+         take <condition> |
+         take <slice> |
+         <slice> |                     # implied "take"
+         <name> <condition> |          # user-created
+         <name>                        # user-created
+
+Technically, we don't need both "drop" and "take" -- one implies the 
+other.  However, having both should make the language easier to use.
+
+"reroll" will work differently depending on whether a condition or a 
+slice is given.  If a condition is given, it will reroll until none of
+the dice in the set meet the reroll condition (or until it hits a maximum
+allowed number of rerolls).  If a slice is given, it will reroll those
+dice once.  IMHO, this behavior makes the most sense.
+
+The <name> entries here are to allow for user-created flags.  Note that
+as I've specified things right now, a user-created flag can have a
+ condition,
+but not a slice.  That's mostly because I couldn't think of a case where
+a slice would be useful... should we add it anyways?
+
+
+slice ::= highest | lowest | highest <number> | lowest <number>
+
+"highest" and "lowest" without a number are equivalent to doing them with
+1 as the number.  This is to simplify things like [4d6 drop lowest].
+
+
+condition ::= <relation> <unit>
+
+This is for conditions on flags.  Note that it can take a unit, so you could
+
+use dice in a condition; however, I think the unit should only be evaluated 
+
+once, to make things faster.  Anyone for repetitive evaluation?
+
+
+low-op ::= + | - | min | max
+
+"min" takes two values and returns the highest of them, and "max"
+returns the lowest of them.  This might seem counterintuitive, but
+it's meant to be used with dice, like so:
+
+  3d6 min 8   - always returns 8 or higher
+
+  3d6 max 15  - always returns 15 or lower
+
+I decided to put min and max as having the same precedence as + and -,
+because if they had higher precedence, then:
+
+  3d6+2 min 10 
+
+would be equivalent to 3d6+10.  (It would take the max of 2 and 10, then
+add that to 3d6).  One problem that does arise here is with multiplication 
+and division:  [1d6 min 5 * 2] will be equivalent to [1d6 min 10], since
+multiplication has higher precedence.  We may just want to warn people 
+that min and max can be screwy unless you parenthesize, unless someone can
+think of a better way to handle them.
+
+
+high-op ::= * | / | mod
+
+The / is integer division, of course, since we're doing integer math.  
+
+
+number ::= <digit>+ | -<digit>+
+
+Positive and negative numbers are allowed.  This means that, syntactically,
+[-2d-4] is legal.  Do we want to modify the BNF to disallow this, or handle
+it on a semantic level?
+
+
+name ::= <letter>[<letter>|<digit>]*
+
+We may want to expand to allow underscores and dashes in user-created names.
+
+
+
+letter ::= A-Z | a-z
+
+digit ::= 0-9
+
+relation ::= < | > | <= | >= | => | =< | = | ==
+
+
+
+Well, that's the BNF.  Again, at the end is a copy without all the running
+commentary.
+
+
+Thoughts on Implementation:
+
+First, I think a sort of "dice library" of common functions needs to be
+created.  This would include rolling a set of dice, getting the highest
+of a group of dice, growing and shrinking dice from a set based on 
+conditions, and so on.  These functions should be available for use by
+custom-written dice types.
+
+Next, that library should be used as a tool in implementing a dice-string
+interpreter.  That will require creating a parser for the dice-string 
+'language'.  This could be either a custom-written parser, or possibly
+one created with some of the Python parser generators.  A custom-written
+parser may take longer to do and be a bit more finicky to maintain, but
+it would remove a dependency from the code.
+
+User-created flags and dice types could be supported in two ways:
+
+ - First, by allowing users to specify strings in the dice language
+   that the flags/expressions would expand to -- basically, allowing
+   dice macros.
+
+ - Second, by adding hooks for python modules to be associated with
+   user-created dice or flag types.  This is likely to be the more
+   complicated of the two solutions, but it would also be more 
+   flexible.
+
+Personally, I think both are desirable -- the first, so that 
+non-programming users can create simple die and flag types.  The
+second, because by design, there are some things this dice system 
+just won't do.
+
+
+Further work needed:
+
+ - specs for the "dice library"
+
+ - specs on an interface for python modules meant to be dice and
+   flag types.
+
+----------------------------------------------------------------
+
+start ::= <expression> |
+          <comparison>
+
+comparison ::= <expression> <condition>
+
+expression ::= <term> | <term> <low-op> <factor>
+
+term ::= <factor> | <factor> <high-op> <unit>
+
+factor ::= <atom> | <dice_set>
+
+atom ::= <number> | ( <expression> )
+
+dice_set ::= <dice> <dice_set>, <dice> | <expr> of <dice> | <dice> each |
+             lastroll
+
+dice ::= <atom>d<atom> | <atom>d<name> | <dice> <flag>
+
+flag ::= reroll <condition> |
+         reroll <slice> |
+         grow <condition> |  
+         shrink <condition> |        
+         drop <condition> |
+         drop <slice> |
+         take <condition> |
+         take <slice> |
+         <slice> |         
+         <name> <condition> |
+	 <name> <slice> |
+         <name>
+
+slice ::= highest | lowest | highest <number> | lowest <number>
+
+condition ::= <relation> <unit>
+
+low-op ::= + | -
+
+high-op ::= * | / | mod| max | min
+
+number ::= <digit>+ | -<digit>+
+
+name ::= <letter>[<letter>|<digit>]*
+
+letter ::= A-Z | a-z
+
+digit ::= 0-9
+
+relation ::= < | > | <= | >= | => | =< | = | ==
+

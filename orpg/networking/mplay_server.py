@@ -64,7 +64,7 @@ from orpg.tools.orpg_log import logger, crash, debug
 from orpg.tools.decorators import debugging
 
 # Snag the version number
-from orpg.orpg_version import VERSION, PROTOCOL_VERSION, CLIENT_STRING, SERVER_MIN_CLIENT_VERSION
+from orpg.orpg_version import VERSION, DISTRO, DIS_VER, BUILD, PROTOCOL_VERSION, CLIENT_STRING, SERVER_MIN_CLIENT_VERSION
 
 #Plugins
 from server_plugins import ServerPlugins
@@ -253,7 +253,7 @@ class mplay_server:
         self.allowRemoteKill = False
         self.allowRemoteAdmin = True
         self.sendLobbySound = False
-        self.lobbySound = 'http://www.digitalxero.net/music/mus_tavern1.bmu' ##used?
+        #self.lobbySound = 'http://www.digitalxero.net/music/mus_tavern1.bmu' ##used?
 
     def initServer(self, **kwargs):
         for atter, value in kwargs.iteritems(): setattr(self, atter, value)
@@ -1069,7 +1069,7 @@ class mplay_server:
             msg = self.groups[group_id].game_map.get_all_xml()
             self.send(msg,id,group_id)
 
-    def new_request(self,newsock, xml_dom, LOBBY_ID='0'):
+    def new_request(self, newsock, xml_dom, LOBBY_ID='0'):
         #build client stub
         props = {}
         # Don't trust what the client tells us...trust what they connected as!
@@ -1101,14 +1101,15 @@ class mplay_server:
 
         # send confirmation
         data = self.recvMsg(newsock, new_stub.useCompression, new_stub.compressionType)
-        try: xml_dom = XML(data)
+        try: 
+            xml_dom = XML(data)
         except Exception, e:
             print e
             (remote_host,remote_port) = newsock.getpeername()
             bad_xml_string =  "Your client sent an illegal message to the server and will be disconnected. "
             bad_xml_string += "Please report this bug to the development team at:<br /> "
-            bad_xml_string += "<a href=\"http://sourceforge.net/tracker/?group_id=2237&atid=102237\">OpenRPG bugs "
-            bad_xml_string += "(http://sourceforge.net/tracker/?group_id=2237&atid=102237)</a><br />"
+            bad_xml_string += "<a href='http://www.assembla.com/spaces/traipse_dev/tickets/'>Traipse-Dev "
+            bad_xml_string += "(http://www.assembla.com/spaces/traipse_dev/tickets/)</a><br />"
             self.sendMsg( newsock, "<msg to='" + props['id'] + "' from='" + props['id'] + "' group_id='0' />" + bad_xml_string, 
                             new_stub.useCompression, new_stub.compressionType)
 
@@ -1214,7 +1215,8 @@ class mplay_server:
             newsock.close()
 
         #  Display the lobby message
-        self.SendLobbyMessage(newsock,props['id'])
+        print 'lobby message'
+        self.SendLobbyMessage(newsock, props['id'])
 
     def checkClientVersion(self, clientversion):
         minv = self.minClientVersion.split('.')
@@ -1234,8 +1236,9 @@ class mplay_server:
         #  prepend this server's version string to the the lobby message
         """
         try:
-            lobbyMsg = "You have connected to an <a href=\"http://www.openrpg.com\">OpenRPG</a> "
-            lobbyMsg += "server, version '" + VERSION + "'"
+            lobbyMsg = "You have connected to a <a href='http://www.knowledgearcana.com/traipse-openrpg'>"
+            lobbyMsg += DISTRO +'</a> '+ DIS_VER +' {'+ BUILD+'}'
+            lobbyMsg += " server, built on OpenRPG version '" + VERSION + "'"
 
             # See if we have a server name to report!
             if len(self.serverName): lobbyMsg += ", named '" + self.serverName + "'."
@@ -1250,7 +1253,6 @@ class mplay_server:
                 open_msg = open( self.userPath + "LobbyMessage.html", "r" )
                 lobbyMsg += open_msg.read()
                 open_msg.close()
-
             # Send the server's lobby message to the client no matter what
             self.sendMsg(socket, "<msg to='" + player_id + "' from='0' group_id='0' />" + lobbyMsg, 
                         self.players[player_id].useCompression, self.players[player_id].compressionType)
@@ -1394,13 +1396,16 @@ class mplay_server:
         self.incoming_event.set()
 
     def parse_incoming_dom(self, data):
-        end = data.find(">") #locate end of first element of message
+        end = data.find(">")
         head = data[:end+1]
-        xml_dom = None
+        msg = data[end+1:]
+        ### This if statement should help close invalid messages. ###
+        if head[end:] != '/':
+            if head[end:] != '>': head = head[:end] + '/>'
         try:
-            xml_dom = XML(head)
+            try: xml_dom = fromstring(head)
+            except: xml_dom = fromstring(head[:end] +'/>')
             self.message_action(xml_dom, data)
-
         except Exception, e:
             print "Error in parse of inbound message. Ignoring message."
             print "  Offending data(" + str(len(data)) + "bytes)=" + data
@@ -1603,6 +1608,7 @@ class mplay_server:
             #notify user about others in the room
             self.return_room_roles(from_id,group_id)
             self.log_msg(("join_group", (self.groups[group_id].name, group_id, from_id)))
+            self.log_msg(("update_group", (self.groups[old_group_id].name, old_group_id, len(self.groups[old_group_id].players) )))
             self.log_msg(("update_group", (self.groups[group_id].name, group_id, len(self.groups[group_id].players) )))
             self.handle_role("set", from_id, self.players[from_id].role, self.groups[group_id].boot_pwd, group_id)
         except Exception, e:
@@ -1632,7 +1638,7 @@ class mplay_server:
         if persist !=0: ins="Persistant "
         lmsg = "Creating " + ins + "Group... (" + str(group_id) + ") " + str(name)
         self.log_msg( lmsg )
-        self.log_msg(("create_group", (str(name), int(group_id), pwd, 0) ))
+        self.log_msg(("create_group", (str(name), int(group_id), 0, 'No' if pwd == '' else 'Yes') ))
 
     def change_group_name(self, gid, name, pid):
         "Change the name of a group"
@@ -2184,10 +2190,8 @@ class mplay_server:
 
     def send_group_list(self, to_id, action="new"):
         try:
-            print self.groups
             for key in self.groups:
                 xml = self.groups[key].toxml(action)
-                print xml, key
                 self.players[to_id].outbox.put(xml)
         except Exception, e:
             self.log_msg("Exception: send_group_list(): (client #"+to_id+") : " + str(e))

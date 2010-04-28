@@ -151,8 +151,8 @@ class Groups(wx.ListCtrl):
         (room, room_id, players, passworded) = data
         i = self.InsertStringItem(0, str(room_id))
         self.SetStringItem(i, 1, room)
-        self.SetStringItem(i, 2, players)
-        self.SetStringItem(i, 3, str(passworded))
+        self.SetStringItem(i, 2, str(players))
+        self.SetStringItem(i, 3, passworded)
 
     def DeleteGroup(self, data):
         i = self.FindItem(-1, str(data))
@@ -162,7 +162,7 @@ class Groups(wx.ListCtrl):
         (room, room_id, players) = data
         i = self.FindItem( -1, str(room_id))
         self.SetStringItem( i, 1, room )
-        if players: self.SetStringItem(i, 2, str(players))
+        self.SetStringItem(i, 2, str(players))
         ### Need to add room for Password Updates ###
 
 class Connections(wx.ListCtrl):
@@ -354,8 +354,8 @@ class ServerGUI(wx.Frame):
     STATUS = SERVER_STOPPED
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size = (760, 560) )
-        if wx.Platform == '__WXMSW__': icon = wx.Icon( dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO )
-        else: icon = wx.Icon( dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF )
+        if wx.Platform == '__WXMSW__': icon = wx.Icon(dir_struct["icon"]+'WAmisc9.ico', wx.BITMAP_TYPE_ICO)
+        else: icon = wx.Icon(dir_struct["icon"]+'connect.gif', wx.BITMAP_TYPE_GIF)
         self.SetIcon(icon)
         self.serverName = "Server Name"
         self.bootPwd = ""
@@ -401,10 +401,10 @@ class ServerGUI(wx.Frame):
 
         # File Menu
         menu = wx.Menu()
-        menu.Append( 1, 'Start', 'Start server.')
-        menu.Append( 2, 'Stop', 'Shutdown server.')
+        menu.Append(1, 'Start', 'Start server.')
+        menu.Append(2, 'Stop', 'Shutdown server.')
         menu.AppendSeparator()
-        menu.Append( 3, 'E&xit', 'Exit application.')
+        menu.Append(3, 'E&xit', 'Exit application.')
         self.Bind(wx.EVT_MENU, self.OnStart, id=1)
         self.Bind(wx.EVT_MENU, self.OnStop, id=2)
         self.Bind(wx.EVT_MENU, self.OnExit, id=3)
@@ -412,23 +412,24 @@ class ServerGUI(wx.Frame):
 
         # Registration Menu
         menu = wx.Menu()
-        menu.Append( 4, 'Register', 'Register with OpenRPG server directory.')
-        menu.Append( 5, 'Unregister', 'Unregister from OpenRPG server directory.')
+        menu.Append(4, 'Register', 'Register with OpenRPG server directory.')
+        menu.Append(5, 'Unregister', 'Unregister from OpenRPG server directory.')
         self.Bind(wx.EVT_MENU, self.OnRegister, id=4)
         self.Bind(wx.EVT_MENU, self.OnUnregister, id=5)
         self.mainMenu.Append( menu, '&Registration' )
 
         # Server Configuration Menu
         menu = wx.Menu()
-        menu.Append( 6, 'Ban List', 'Modify Ban List.')
+        menu.Append(6, 'Ban List', 'Modify Ban List.')
         menu.Append(11, 'Zombies', 'Set auto-kick time for zombie clients')
         menu.Append(14, 'Send Size', 'Adjust the send size limit')
         menu.AppendSeparator()
-        menu.Append( 7, 'Start Ping', 'Ping players to validate remote connection.' )
-        menu.Append( 8, 'Stop Ping', 'Stop validating player connections.' )
-        menu.Append( 9, 'Ping Interval', 'Change the ping interval.' )
+        menu.Append(7, 'Start Ping', 'Ping players to validate remote connection.' )
+        menu.Append(8, 'Stop Ping', 'Stop validating player connections.' )
+        menu.Append(9, 'Ping Interval', 'Change the ping interval.' )
         menu.AppendSeparator()
-        menu.AppendCheckItem( 10, 'Server Logging', 'Turn on or off the Server GUI Log').Check(self.do_log)
+        menu.AppendCheckItem(10, 'Server Logging', 
+                                'Turn on or off the Server GUI Log').Check(self.do_log)
         menu.AppendCheckItem(12, 'Room Passwords', 'Allow or Deny Room Passwords').Check(False)
         menu.AppendCheckItem(13, 'Remote Admin', 'Allow or Deny Remote Admin').Check(False)
         menu.AppendCheckItem(15, 'Remote Kill', 'Allow or Deny Remote Admin Server Kill').Check(False)
@@ -437,37 +438,38 @@ class ServerGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.StopPingPlayers, id=8)
         self.Bind(wx.EVT_MENU, self.ConfigPingInterval, id=9)
         self.Bind(wx.EVT_MENU, self.LogToggle, id=10)
-        self.mainMenu.Append( menu, '&Configuration' )
-        self.SetMenuBar( self.mainMenu )
+        self.mainMenu.Append( menu, '&Configuration')
+        self.SetMenuBar(self.mainMenu)
 
-        self.mainMenu.Enable( 2, False )
-        self.mainMenu.Enable( 4, False )
-        self.mainMenu.Enable( 5, False )
+        self.mainMenu.Enable(2, False)
+        self.mainMenu.Enable(4, False)
+        self.mainMenu.Enable(5, False)
 
         # Disable the ping menu items
-        self.mainMenu.Enable( 7, False )
-        self.mainMenu.Enable( 8, False )
-        self.mainMenu.Enable( 9, False )
+        self.mainMenu.Enable(7, False)
+        self.mainMenu.Enable(8, False)
+        self.mainMenu.Enable(9, False)
 
         # Disable placeholders
-        self.mainMenu.Enable( 11, False )
-        self.mainMenu.Enable( 14, False )
-        self.mainMenu.Enable( 12, False )
-        self.mainMenu.Enable( 13, False )
-        self.mainMenu.Enable( 15, False )
+        self.mainMenu.Enable(11, False)
+        self.mainMenu.Enable(14, False)
+        self.mainMenu.Enable(12, False)
+        self.mainMenu.Enable(13, False)
+        self.mainMenu.Enable(15, False)
+
     def build_body(self):
         """ Create the ViewNotebook and logger. """
         splitter = wx.SplitterWindow(self, -1, style=wx.NO_3D | wx.SP_3D)
-        nb = wx.Notebook( splitter, -1 )
+        nb = wx.Notebook(splitter, -1)
         self.conns = Connections(nb, self)
         self.groups = Groups(nb, self)
-        self.msgWindow = HTMLMessageWindow( nb )
+        self.msgWindow = HTMLMessageWindow(nb)
         nb.AddPage(self.conns, "Players")
         nb.AddPage(self.groups, 'Rooms')
-        nb.AddPage( self.msgWindow, "Messages" )
+        nb.AddPage(self.msgWindow, "Messages")
 
         log = wx.TextCtrl(splitter, -1, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
-        wx.Log.SetActiveTarget( wx.LogTextCtrl(log) )
+        wx.Log.SetActiveTarget(wx.LogTextCtrl(log))
         splitter.SplitHorizontally(nb, log, 400)
         splitter.SetMinimumPaneSize(40)
         self.nb = nb
@@ -522,12 +524,14 @@ class ServerGUI(wx.Frame):
     def OnDataSent(self, bytes):
         self.total_messages_sent += 1
         self.total_data_sent += bytes
-        self.sb.SetStatusText("Sent: %s (%d)" % (format_bytes(self.total_data_sent), self.total_messages_sent), 1)
+        self.sb.SetStatusText("Sent: %s (%d)" % (format_bytes(self.total_data_sent), 
+                                self.total_messages_sent), 1)
 
     def OnDataRecv(self, bytes):
         self.total_messages_received += 1
         self.total_data_received += bytes
-        self.sb.SetStatusText("Recv: %s (%d)" % (format_bytes(self.total_data_received), self.total_messages_received), 2)
+        self.sb.SetStatusText("Recv: %s (%d)" % (format_bytes(self.total_data_received), 
+                                self.total_messages_received), 2)
 
     def OnCreateGroup( self, data ):
         (room, room_id, player, pwd) = data
@@ -545,7 +549,7 @@ class ServerGUI(wx.Frame):
         self.conns.updateRoom(data)
 
     def OnUpdateGroup(self, data):
-        (room, room_id, players) = data
+        (room, room_id, players) = data; print 'update group', data
         self.groups.UpdateGroup(data)
 
     def OnSetRole( self, data ):
@@ -569,13 +573,16 @@ class ServerGUI(wx.Frame):
             except: pass 
             if self.serverName == '':
                 self.serverName = 'Server Name'
-                serverNameEntry = wx.TextEntryDialog(self, "Please Enter The Server Name You Wish To Use:",
-                                                 "Server's Name", self.serverName, wx.OK|wx.CANCEL|wx.CENTRE )
+                serverNameEntry = wx.TextEntryDialog(self, 
+                                    "Please Enter The Server Name You Wish To Use:",
+                                    "Server's Name", 
+                                    self.serverName, wx.OK|wx.CANCEL|wx.CENTRE)
                 if serverNameEntry.ShowModal() == wx.ID_OK: self.serverName = serverNameEntry.GetValue()
             if self.bootPwd == '': 
                 serverPasswordEntry = wx.TextEntryDialog(self, 
-                                            "Please Enter The Server Admin Password:", "Server's Password", 
-                                            self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
+                                    "Please Enter The Server Admin Password:", 
+                                    "Server's Password", 
+                                    self.bootPwd, wx.OK|wx.CANCEL|wx.CENTRE)
                 if serverPasswordEntry.ShowModal() == wx.ID_OK: self.bootPwd = serverPasswordEntry.GetValue()
             if len(self.serverName):
                 wx.BeginBusyCursor()
@@ -584,9 +591,9 @@ class ServerGUI(wx.Frame):
                 self.STATUS = SERVER_RUNNING
                 self.sb.SetStatusText("Running", 3)
                 self.SetTitle(__appname__ + "- (running) - (unregistered)")
-                self.mainMenu.Enable( 1, False )
-                self.mainMenu.Enable( 2, True )
-                self.mainMenu.Enable( 4, True )
+                self.mainMenu.Enable(1, False)
+                self.mainMenu.Enable(2, True)
+                self.mainMenu.Enable(4, True)
                 wx.EndBusyCursor()
             else: self.show_error("Server is already running.", "Error Starting Server")
 
@@ -598,10 +605,10 @@ class ServerGUI(wx.Frame):
             self.STATUS = SERVER_STOPPED
             self.sb.SetStatusText("Stopped", 3)
             self.SetTitle(__appname__ + "- (stopped) - (unregistered)")
-            self.mainMenu.Enable( 1, True )
-            self.mainMenu.Enable( 2, False )
-            self.mainMenu.Enable( 4, False )
-            self.mainMenu.Enable( 5, False )
+            self.mainMenu.Enable(1, True)
+            self.mainMenu.Enable(2, False)
+            self.mainMenu.Enable(4, False)
+            self.mainMenu.Enable(5, False)
             self.conns.DeleteAllItems()
 
     def OnRegister(self, event = None):
@@ -613,8 +620,8 @@ class ServerGUI(wx.Frame):
             wx.BeginBusyCursor()
             self.server.server.register(self.serverName)
             self.sb.SetStatusText( ("%s" % (self.serverName)), 4 )
-            self.mainMenu.Enable( 4, False )
-            self.mainMenu.Enable( 5, True )
+            self.mainMenu.Enable(4, False)
+            self.mainMenu.Enable(5, True)
             #self.mainMenu.Enable( 2, False )
             self.SetTitle(__appname__ + "- (running) - (registered)")
             wx.EndBusyCursor()
@@ -627,9 +634,9 @@ class ServerGUI(wx.Frame):
         """
         wx.BeginBusyCursor()
         self.server.server.unregister()
-        self.sb.SetStatusText( "Unregistered", 4 )
-        self.mainMenu.Enable( 5, False )
-        self.mainMenu.Enable( 4, True )
+        self.sb.SetStatusText("Unregistered", 4)
+        self.mainMenu.Enable(5, False)
+        self.mainMenu.Enable(4, True)
         #self.mainMenu.Enable( 2, True )
         self.SetTitle(__appname__ + "- (running) - (unregistered)")
         wx.EndBusyCursor()

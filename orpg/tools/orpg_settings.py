@@ -183,14 +183,17 @@ class orpgSettingsWnd(wx.Dialog):
 
     def dieroller_ok(self, changes):
         rm = component.get('DiceManager')
+        cur_die = rm.getRoller()
         try:
             rm.setRoller(changes)
             self.chat.SystemPost('You have changed your die roller to the <b>"' + rm.getRoller() + '"</b> roller.')
         except Exception, e:
-            print e
             rm.setRoller('std')
-            self.settings.change('dieroller', 'std')
-            self.chat.SystemPost('<b>"' + changes + '"</b> is an invalid roller. Setting roller to <b>"std"</b>')
+            rm.setRoller(cur_die)
+            self.settings.change('dieroller', cur_die)
+            self.chat.SystemPost('<b>"' + changes + '"</b> is an invalid roller.')
+            self.chat.InfoPost('Available die rollers: ' +str(rm.listRollers()) )
+            self.chat.InfoPost('You are using the <b>"' +cur_die+ '"</b> die roller.')
 
     def colortree_ok(self, changes):
         top_frame = component.get('frame')

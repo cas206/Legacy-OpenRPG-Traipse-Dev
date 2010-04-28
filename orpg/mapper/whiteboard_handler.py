@@ -754,9 +754,9 @@ class whiteboard_handler(base_layer_handler):
         pos = self.get_snapped_to_logical_pos(evt)
         size = self.canvas.layers['grid'].unit_size #60
         radius = int(int(self.radius.GetValue())/5)
-        center = wx.Point(pos.x, pos.y+size*radius)
+        center = wx.Point(pos.x, pos.y)
         curve  = self.calculate_circle(center, radius, size)
-        if(self.temp_circle):
+        if self.temp_circle:
             self.canvas.layers['whiteboard'].del_temp_line(self.temp_circle)
             self.selected = None
         self.temp_circle = self.canvas.layers['whiteboard'].add_temp_line(curve)

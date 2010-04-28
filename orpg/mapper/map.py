@@ -156,7 +156,8 @@ class MapCanvas(wx.ScrolledWindow):
             else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
-            if path == 'failed': img = wx.Image(dir_struct["icon"] + "failed.png", wx.BITMAP_TYPE_PNG)
+            if (path == 'failed' or path == dir_struct["icon"] + "failed.png"): 
+                img = wx.Image(dir_struct["icon"] + "failed.png", wx.BITMAP_TYPE_PNG)
             else: img = wx.ImageFromMime(path[1], path[2])
             try:
                 # Now, apply the image to the proper object
@@ -250,8 +251,9 @@ class MapCanvas(wx.ScrolledWindow):
         topleft1 = self.GetViewStart()
         topleft = [topleft1[0]*scrollsize[0], topleft1[1]*scrollsize[1]]
         if (clientsize[0] > 1) and (clientsize[1] > 1):
-            self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
-            dc = wx.AutoBufferedPaintDC(self)
+            dc = wx.MemoryDC()
+            bmp = wx.EmptyBitmap(clientsize[0]+1, clientsize[1]+1)
+            dc.SelectObject(bmp)
             dc.SetPen(wx.TRANSPARENT_PEN)
             dc.SetBrush(wx.Brush(self.GetBackgroundColour(), wx.SOLID))
             dc.DrawRectangle(0,0,clientsize[0]+1,clientsize[1]+1)
@@ -266,10 +268,21 @@ class MapCanvas(wx.ScrolledWindow):
             self.layers['fog'].layerDraw(dc, topleft, clientsize)
             dc.SetPen(wx.NullPen)
             dc.SetBrush(wx.NullBrush)
+
+            dc.SelectObject(wx.NullBitmap)
+            del dc
+            wdc = self.preppaint()
+            wdc.DrawBitmap(bmp, topleft[0], topleft[1])
+
             if settings.get_setting("AlwaysShowMapScale") == "1":
-                self.showmapscale(dc)
+                self.showmapscale(wdc)
         try: evt.Skip()
         except: pass
+
+    def preppaint(self):
+        dc = wx.PaintDC(self)
+        self.PrepareDC(dc)
+        return (dc)
 
     def showmapscale(self, dc):
         scalestring = "Scale x" + `self.layers['grid'].mapscale`[:3]

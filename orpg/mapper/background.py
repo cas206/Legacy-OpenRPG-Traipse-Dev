@@ -34,6 +34,7 @@ import thread, urllib, os.path, time, mimetypes
 from orpg.orpgCore import component
 from orpg.tools.orpg_log import logger
 from orpg.tools.orpg_settings import settings
+from xml.etree.ElementTree import fromstring
 
 ##-----------------------------
 ## background layer
@@ -244,22 +245,21 @@ class layer_back_ground(layer_base):
     def upload(self, postdata, filename, type):
         self.lock.acquire()
         if type == 'Image' or type == 'Texture':
-            url = component.get('settings').get_setting('ImageServerBaseURL')
+            url = settings.get_setting('ImageServerBaseURL')
             file = urllib.urlopen(url, postdata)
             recvdata = file.read()
             file.close()
             try:
-                xml_dom = minidom.parseString(recvdata)._get_documentElement()
-                if xml_dom.nodeName == 'path':
-                    path = xml_dom.getAttribute('url')
+                xml_dom = fromstring(recvdata)
+                if xml_dom.tag == 'path':
+                    path = xml_dom.get('url')
                     path = urllib.unquote(path)
                     if type == 'Image': self.set_image(path, 1)
                     else: self.set_texture(path)
                     self.localPath = filename
                     self.local = True
                     self.localTime = time.time()
-                else:
-                    print xml_dom.getAttribute('msg')
+                else: print xml_dom.get('msg')
             except Exception, e:
                 print e
                 print recvdata

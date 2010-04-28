@@ -1,0 +1,72 @@
+HOW TO CREATE A NEW DIE ROLLER
+
+So you want a make a new roller or add a new option? here's a short guide.
+
+
+Step 1:  Create a new die roller sub class.
+
+You need to derive a new die roller class from an existing die roller class.  
+Most likely, this will be the std die roller class. 
+
+The basics would look like this:
+
+class new_roller(std):
+    def __init__(self,source=[]):
+        std.__init__(self,source)
+        .....
+
+    ....
+
+Step 2: Implement new methods and/or override existing ones.
+
+Now, you just need to implement any new die options and override any 
+existing ones that you want to act differently.  The most common options 
+to override are the sum and __str__ functions.  Sum is used to determine 
+the result of the rolls and __str__ is used to display the results in 
+a user friendly string.
+
+For example:
+
+class new_roller(std):
+    def __init__(self,source=[]):
+        std.__init__(self,source)
+        .....
+
+    def myoption(self,param):
+        ....
+
+    def sum(self):
+        ....
+
+    def __str__(self):
+        ....
+
+REMEMBER!
+Always return an instance of your die roller for each option expect str and sum.
+
+
+Step 3:
+
+Modify Utils.py
+
+You need to make some minor modifications to utils.py to facilitate 
+your new roller.  You need to a) add an import call for your roller, 
+and b) add your roller to the list of available rollers. 
+
+For example:
+
+from die import *
+# add addtional rollers here
+from myroller import *
+....
+
+rollers = ['std','wod','d20','myroller']
+
+Step 4:  You're done! 
+
+Test it and make sure it works.  When you think its done, send it to 
+the openrpg developers and they might include it in future releases.
+
+-Chris Davis
+
+

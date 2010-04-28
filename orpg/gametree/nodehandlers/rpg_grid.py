@@ -89,7 +89,7 @@ class rpg_grid_handler(node_handler):
                 html_str += "<td >"
                 text = c.text
                 if text == None or text == '': text = '<br />'
-                s = Parse.NodeMap(text, self.xml)
+                s = Parse.ParseLogic(text, self.xml)
                 s = Parse.Normalize(s)
                 try: text = str(eval(s))
                 except: text = s
@@ -327,8 +327,7 @@ class rpg_grid(wx.grid.Grid):
                 text = ''
                 cells[i].text = text
             if self.mode == 0:
-                s = Parse.NodeMap(text, self.handler.xml)
-                s = Parse.NodeParent(s, self.handler.xml.get('map'))
+                s = Parse.ParseLogic(text, self.handler.xml)
                 try: text = str(eval(s))
                 except: text = s
             self.SetCellValue(rowi,i,text)

@@ -35,6 +35,7 @@ from orpg.tools.rgbhex import RGBHex
 from orpg.dirpath import dir_struct
 from orpg.tools.validate import validate
 from orpg.tools.orpg_settings import settings
+from xml.etree.ElementTree import tostring, parse
 import re
 
 class AliasLib(wx.Frame):
@@ -458,36 +459,30 @@ class AliasLib(wx.Frame):
         self.Fit()
 
     def loadFile(self):
-        f = open(dir_struct["user"] + self.filename, "r")
-        data = f.read()
-        f.close()
-        self.alias = -1
-        self.filter = -1
-        xml_dom = component.get('xml').parseXml(data)
-        del data
-        aliases = xml_dom.getElementsByTagName("alias")
+        data = parse(dir_struct["user"] + self.filename)
+        xml_dom = data.getroot()
+        aliases = xml_dom.findall("alias")
         alist = []
         for alias in aliases:
-            if alias.hasAttribute("color"): color = alias.getAttribute("color")
+            if alias.get("color"): color = alias.get("color")
             else: color = 'Default'
-            aname = self.MakeSafeHTML(alias.getAttribute("name"))
+            aname = self.MakeSafeHTML(alias.get("name"))
             alist.append([aname, color])
         alist.sort()
         self.aliasList = alist
-        filters = xml_dom.getElementsByTagName("filter")
+        filters = xml_dom.findall("filter")
         flist = []
         self.regExList = []
         for filter in filters:
-            flist.append(filter.getAttribute("name"))
-            rules = filter.getElementsByTagName("rule")
+            flist.append(filter.get("name"))
+            rules = filter.findall("rule")
             sub = []
-            for rule in rules: sub.append([self.MakeSafeHTML(rule.getAttribute("match")), 
-                                        self.MakeSafeHTML(rule.getAttribute("sub"))])
+            for rule in rules: sub.append([self.MakeSafeHTML(rule.get("match")), 
+                                        self.MakeSafeHTML(rule.get("sub"))])
             self.regExList.append(sub)
         self.filterList = flist
-        xml_dom.unlink()
-        self.alias = -1
-        self.filter = -1
+        self.alias = 0
+        self.filter = 0
 
     def MakeSafeHTML(self, str):
         return str.replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">").replace("&#39;", "'")
@@ -495,7 +490,7 @@ class AliasLib(wx.Frame):
         return str.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;").replace("'", "&#39;")
     def ImportFromTree(self, xml_dom):
         oldfilename = self.filename
-        if xml_dom.getAttribute('name') == 'Alias Library':
+        if xml_dom.get('name') == 'Alias Library':
             dlg = wx.TextEntryDialog(self, "Please Name This Alias Lib", "New Alias Lib")
             if dlg.ShowModal() == wx.ID_OK:
                 self.filename = dlg.GetValue() + '.alias'
@@ -503,11 +498,11 @@ class AliasLib(wx.Frame):
             else:
                 dlg.Destroy()
                 return
-        else: self.filename = xml_dom.getAttribute('name') + '.alias'
+        else: self.filename = xml_dom.get('name') + '.alias'
         settings.set_setting('aliasfile', self.filename[:-6])
         if oldfilename != self.filename: self.OnMB_FileSave(None, oldfilename)
         f = open(dir_struct["user"] + self.filename, "w")
-        f.write(xml_dom.toxml().replace('nodehandler', 'aliaslib').replace('voxchat.', ''))
+        f.write(tostring(xml_dom).replace('nodehandler', 'aliaslib').replace('voxchat.', ''))
         f.close()
         wx.CallAfter(self.loadFile)
 
