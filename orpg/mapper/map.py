@@ -156,7 +156,7 @@ class MapCanvas(wx.ScrolledWindow):
             else: pass
         if not ImageHandler.Queue.empty():
             (path, image_type, imageId) = ImageHandler.Queue.get()
-            if path == 'failed' or dir_struct["icon"] + "failed.png": 
+            if (path == 'failed' or path == dir_struct["icon"] + "failed.png"): 
                 img = wx.Image(dir_struct["icon"] + "failed.png", wx.BITMAP_TYPE_PNG)
             else: img = wx.ImageFromMime(path[1], path[2])
             try:
