@@ -14,9 +14,8 @@ class Term2Win(object):
     def write(self, text):
         self.closed = sys.__stdout__.closed
         self.flush = sys.__stdout__.flush
-        statbar.SetStatusText(text)
-        wx.Yield()
-        #sys.__stdout__.write(text)
+        statbar.SetStatusText(text.replace('\n', ''))
+        sys.__stdout__.write(text)
 
 class Updater(wx.Panel):
     def __init__(self, parent, component):
@@ -95,7 +94,7 @@ class Updater(wx.Panel):
         self.count = 3
         self.buttons['progress_bar'].SetValue(3)
         doUpdate = commands.incoming(self.ui, self.repo, 
-                    manifest.GetString('updaterepo', 'default', ''), force=True, bundle=False)
+                    manifest.GetString('default', 'repo', ''), force=True, bundle=False)
         if doUpdate:
             statbar.SetStatusText('No Updates Available')
             self.buttons['progress_bar'].SetValue(100)

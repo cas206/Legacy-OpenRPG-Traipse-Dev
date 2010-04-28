@@ -136,7 +136,8 @@ class InterParse():
     def FutureCheck(self, node, next):
         future = node.getiterator('nodehandler')
         for advance in future:
-            if next == advance.get('name'): return True
+            print next, advance.get('name')
+            if next == advance.get('name'): print True; return True
         return False
 
     def NameSpaceI(self, s, node):
@@ -164,8 +165,10 @@ class InterParse():
                                 if self.FutureCheck(node, find[x+1]): break
                                 else: continue
                             except:
-                                if x == len(find)-1: newstr = str(node.find('text').text); break
-                                else: break
+                                if x == len(find)-1:
+                                    if node.find('text') != None: newstr = str(node.find('text').text) 
+                                    else: newstr = 'Invalid Reference!'
+                                    break
                     if not newstr: newstr = 'Invalid Reference!'; break
             s = s.replace(matches[i][0], newstr, 1)
             s = self.ParseLogic(s, node)
@@ -196,7 +199,10 @@ class InterParse():
                             if self.FutureCheck(node, find[x+1]): break
                             else: continue
                         except:
-                            if x == len(find)-1: newstr = str(node.find('text').text); break
+                            if x == len(find)-1:
+                                if node.find('text') != None: newstr = str(node.find('text').text) 
+                                else: newstr = 'Invalid Reference!'
+                                break
                             else: break
             if not newstr: newstr = 'Invalid Reference!'
             s = s.replace(matches[i][0], newstr, 1)
