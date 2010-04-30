@@ -675,7 +675,7 @@ class game_tree(wx.TreeCtrl):
             family_tree.append(parent)
         return family_tree
     
-    def load_xml(self, xml_element, parent_node, prev_node=None):
+    def load_xml(self, xml_element, parent_node, prev_node=None, drag_drop=False):
         if parent_node == self.root:
             self.tree_map[xml_element.get('name')] = {}
             self.tree_map[xml_element.get('name')]['node'] = xml_element
@@ -698,6 +698,8 @@ class game_tree(wx.TreeCtrl):
         if prev_node:
             if prev_node == parent_node: new_tree_node = self.PrependItem(parent_node, name, i, i)
             else: new_tree_node = self.InsertItem(parent_node, prev_node, name, i, i)
+        elif drag_drop:
+            new_tree_node = self.InsertItemBefore(parent_node, 0, name, i)
         else: new_tree_node = self.AppendItem(parent_node, name, i, i)
 
         logger.debug("Node Added to tree")
@@ -804,7 +806,7 @@ class game_tree(wx.TreeCtrl):
         self.rename_flag = 0
         if txt != "":
             obj = self.GetPyData(item)
-            obj.xml.set('name',txt)
+            obj.xml_root.set('name',txt)
         else: evt.Veto()
     
     def on_label_begin(self, evt):
