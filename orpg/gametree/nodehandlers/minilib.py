@@ -142,7 +142,7 @@ class minilib_handler( node_handler ):
         mini = Element( TAG_MINIATURE )
         for key in data.keys(): mini.set( key, data[ key ] )
         for key in CORE_ATTRIBUTES:
-            if mini.get( key ) == '': mini.set( key, '0' )
+            if mini.get( key ) == ('' or None): mini.set( key, '0' )
         if add:
             self.add_mini( mini )
             self.add_leaf( mini )
@@ -314,6 +314,11 @@ class minpedit(wx.Panel):
         self.frame = frame
 
         self.sizer = wx.BoxSizer( wx.VERTICAL )
+
+        self.text = wx.TextCtrl(self, 3, handler.xml.get('name'))
+        self.sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
+        self.sizer.Add(self.text, 0, wx.EXPAND)
+
         self.grid = minilib_grid( self, handler )
 
         bbox = wx.BoxSizer( wx.HORIZONTAL )
@@ -333,6 +338,7 @@ class minpedit(wx.Panel):
         self.SetAutoLayout(True)
         self.Fit()
 
+        self.Bind(wx.EVT_TEXT, self.on_text, id=3)
         self.Bind(wx.EVT_BUTTON, self.add_mini, newMiniBtn)
         self.Bind(wx.EVT_BUTTON, self.del_mini, delMiniBtn)
         self.Bind(wx.EVT_BUTTON, self.send_to_map, addMiniBtn)
@@ -354,7 +360,7 @@ class minpedit(wx.Panel):
         """Event handler for the 'Add 1' button.  Sends the
         miniature defined by the currently selected row to the map, once.
         """
-        index = self.grid.GetGridCursorRow()
+        index = self.grid.GetSelectedRows()[0] if len(self.grid.GetSelectedRows()) > 0 else 0
         self.handler.send_mini_to_map( self.handler.get_mini( index ) )
 
     def send_group_to_map( self, evt=None ):
@@ -370,9 +376,15 @@ class minpedit(wx.Panel):
                 try: value = eval( dlg.GetValue() )
                 except: value = 0
                 print 'getting selected index for batch send'
-                index = self.grid.GetGridCursorRow()
+                index = self.grid.GetSelectedRows()[0] if len(self.grid.GetSelectedRows()) > 0 else 0
                 print 'sending batch to map'
                 self.handler.send_mini_to_map( self.handler.get_mini( index ), value )
+
+    def on_text(self, evt):
+        txt = self.text.GetValue()
+        if txt != "":
+            self.handler.xml.set('name',txt)
+            self.handler.rename(txt)
 
 class minilib_grid(wx.grid.Grid):
     """A wxGrid subclass designed for editing game tree miniature library
@@ -392,6 +404,7 @@ class minilib_grid(wx.grid.Grid):
         self.AutoSizeColumns()
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
         self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.select_cell)
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.select_cell)
 
     def update_cols( self ):
         for n in self.handler.xml.findall(TAG_MINIATURE):
@@ -436,8 +449,6 @@ class minilib_grid(wx.grid.Grid):
             list = self.handler.xml.findall(TAG_MINIATURE)
             self.handler.xml.remove( list[pos] )
             self.DeleteRows( pos, 1 )
-            list = self.getList()
-            del list[ pos ]
 
     def on_cell_change( self, evt ):
         """Event handler for cell selection changes. selected row is used

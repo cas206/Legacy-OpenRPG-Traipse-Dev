@@ -804,7 +804,7 @@ class game_tree(wx.TreeCtrl):
         self.rename_flag = 0
         if txt != "":
             obj = self.GetPyData(item)
-            obj.xml_root.set('name',txt)
+            obj.xml.set('name',txt)
         else: evt.Veto()
     
     def on_label_begin(self, evt):
