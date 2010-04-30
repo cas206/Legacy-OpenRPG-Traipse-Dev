@@ -1,7 +1,7 @@
-import os
+import os, wx
 import orpg.pluginhandler
 from orpg.orpgCore import *
-import wx
+from orpg.tools.InterParse import Parse
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -215,7 +215,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         for i in xrange(0, self.frame.initList.GetItemCount()):
             self.frame.currentInit = i
             if self.frame.currentInit.manual == 'No':
-                initRoll = self.chat.ParseDice('[1d20' + self.frame.currentInit.initMod + ']')
+                initRoll = Parse.Dice('[1d20' + self.frame.currentInit.initMod + ']')
 
                 initRoll = initRoll.split('(')
                 initRoll = initRoll[1].replace(')','')

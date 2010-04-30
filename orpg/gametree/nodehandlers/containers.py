@@ -67,11 +67,11 @@ class container_handler(node_handler):
         drag_obj = self.tree.drag_obj
         if drag_obj == self or self.tree.is_parent_node(self.mytree_node,drag_obj.mytree_node): return
         opt = wx.MessageBox("Add node as child?","Container Node",wx.YES_NO|wx.CANCEL)
+        prev_sib = self.tree.GetPrevSibling(drag_obj.mytree_node)
         if opt == wx.YES:
             drop_xml = self.tree.drag_obj.delete()
             self.xml.insert(0, drop_xml)
-            self.tree.load_xml(drop_xml, self.mytree_node)
-            self.tree.Expand(self.mytree_node)
+            self.tree.load_xml(drop_xml, self.mytree_node, drag_drop=True)
         elif opt == wx.NO: node_handler.on_drop(self,evt)
 
     def gen_html(self, treenode, evt):

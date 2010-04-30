@@ -1,5 +1,7 @@
 from orpg.orpg_wx import *
 from orpg.orpgCore import component
+from xml.etree.ElementTree import ElementTree, Element, parse
+from xml.etree.ElementTree import fromstring, tostring
 
 class PluginHandler:
     # Initialization subroutine.
@@ -82,22 +84,22 @@ class PluginHandler:
         self.settings.add_setting(self.name, setting, value, options, help)
 
     def plugin_send_msg(self, to, plugin_msg):
-        xml_dom = self.xml.parseXml(plugin_msg)
-        xml_dom = xml_dom._get_documentElement()
-        xml_dom.setAttribute('from', str(self.session.id))
-        xml_dom.setAttribute('to', str(to))
-        xml_dom.setAttribute('group_id', str(self.session.group_id))
-        tag_name = xml_dom._get_tagName()
+        xml_dom = fromstring(plugin_msg)
+        #xml_dom = xml_dom.getroot()
+        xml_dom.set('from', str(self.session.id))
+        xml_dom.set('to', str(to))
+        xml_dom.set('group_id', str(self.session.group_id))
+        tag_name = xml_dom.tag
         if not tag_name in self.session.core_msg_handlers:
             xml_msg = '<plugin to="' + str(to)
             xml_msg += '" from="' + str(self.session.id)
             xml_msg += '" group_id="' + str(self.session.group_id)
-            xml_msg += '" />' + xml_dom.toxml()
+            xml_msg += '" />' + tostring(xml_dom)
             self.session.outbox.put(xml_msg)
         else:
             #Spoofing attempt
             pass
-        xml_dom.unlink()
+        #xml_dom.unlink()
 
     def message(self, text):
         return text

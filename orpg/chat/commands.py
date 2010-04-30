@@ -215,6 +215,7 @@ class chat_commands:
         args = string.split(cmdargs,None,-1)
         rm = component.get('DiceManager')
         cur_die = rm.getRoller()
+        if len(args) == 0: self.chat.InfoPost('You are using the <b>"' +cur_die+ '"</b> die roller.'); return
         try:
             rm.setRoller(args[0])
             self.chat.SystemPost('You have changed your die roller to the <b>"' +rm.getRoller()+ '"</b> roller.')

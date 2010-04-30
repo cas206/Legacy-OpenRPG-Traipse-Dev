@@ -1,5 +1,6 @@
 import os, re, wx
 import orpg.pluginhandler
+from orpg.tools.InterParse import Parse
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -42,7 +43,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
             m = re.search(self.dicere, text)
             while m:
                 roll = "[" + m.group(1) + "]"
-                self.hiddenrolls += [self.chat.ParseDice(roll)]
+                self.hiddenrolls += [Parse.Dice(roll)]
                 text = text[:m.start()] + "(hidden roll)" + text[m.end():]
                 m = re.search(self.dicere, text)
         return text
