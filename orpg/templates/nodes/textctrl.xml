@@ -1,4 +1,1 @@
-
-<nodehandler class="textctrl_handler" icon="note" module="forms" name="Text" version="1.0">
-  <text multiline="1" send_button="0">text</text>
-</nodehandler>
+<nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="Form" module="forms" name="Text" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="1">Text</text></nodehandler>
