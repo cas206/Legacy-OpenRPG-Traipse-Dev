@@ -502,7 +502,7 @@ class chat_panel(wx.Panel):
                     wx.WXK_F9: 'event.GetKeyCode() == wx.WXK_F9', wx.WXK_F10: 'event.GetKeyCode() == wx.WXK_F10', 
                     wx.WXK_F11: 'event.GetKeyCode() == wx.WXK_F11', wx.WXK_F12: 'event.GetKeyCode() == wx.WXK_F12'}
         #Alias Lib stuff
-        self.defaultAliasName = 'Use Real Name'
+        self.defaultAliasName = 'Real Name'
         self.defaultFilterName = 'No Filter'
         self.advancedFilter = False
         self.lastSend = 0         #  this is used to help implement the player typing indicator
@@ -827,7 +827,7 @@ class chat_panel(wx.Panel):
 
     def build_alias(self):
         self.aliasSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.aliasList = wx.Choice(self, wx.ID_ANY, size=(100, 25), choices=[self.defaultAliasName])
+        self.aliasList = wx.Choice(self, wx.ID_ANY, size=(120, 25), choices=[self.defaultAliasName])
         self.aliasButton = createMaskedButton( self, dir_struct["icon"] + 'player.gif', 
                                             'Refresh list of aliases from Game Tree', 
                                             wx.ID_ANY, '#bdbdbd' )
