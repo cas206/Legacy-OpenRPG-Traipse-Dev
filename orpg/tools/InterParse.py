@@ -152,8 +152,13 @@ class InterParse():
         return False
 
     def NameSpaceI(self, s, node):
-        reg = re.compile("(!=(.*?)=!)")
-        matches = reg.findall(s)
+        reg1 = re.compile('(!"(.*?)"!)') ## Easter Egg!
+        """If you found this you found my first easter egg. I was tired of people telling me multiple
+        references syntax for the game tree is confusing, so I dropped this in there without telling
+        anyone. Using !" :: "! will allow you to use an internal namespace from within another internal 
+        namespace -- TaS, Prof. Ebral"""
+        reg2 = re.compile("(!=(.*?)=!)")
+        matches = reg1.findall(s) + reg2.findall(s)
         tree_map = node.get('map')
         for i in xrange(0,len(matches)):
             ## Build the new tree_map
@@ -163,6 +168,7 @@ class InterParse():
             node = self.get_node(new_map)
             newstr = self.LocationCheck(node, tree_map, new_map, find)
             s = s.replace(matches[i][0], newstr, 1)
+            s = self.ParseLogic(s, node)
         return s
 
     def NameSpaceE(self, s):
