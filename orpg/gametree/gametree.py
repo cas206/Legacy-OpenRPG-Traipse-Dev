@@ -45,6 +45,7 @@ from orpg.orpgCore import component
 from orpg.dirpath import dir_struct
 from nodehandlers import core
 import string, urllib, time, os
+from shutil import copytree, copystat, copy, copyfile
 
 from orpg.orpg_xml import xml
 from orpg.tools.validate import validate
@@ -59,6 +60,12 @@ from gametree_version import GAMETREE_VERSION
 from xml.etree.ElementTree import ElementTree, Element, parse
 from xml.etree.ElementTree import fromstring, tostring, XML, iselement
 from xml.parsers.expat import ExpatError
+
+def exists(path):
+    try:
+        os.stat(path)
+        return True
+    except: return False
 
 STD_MENU_DELETE = wx.NewId()
 STD_MENU_DESIGN = wx.NewId()
@@ -206,9 +213,9 @@ class game_tree(wx.TreeCtrl):
             self.EditLabel(curSelection)
         evt.Skip()
    
-    def locate_valid_tree(self, error, msg): ## --Snowdog 3/05
+    def locate_valid_tree(self, error, msg, filename): ## --Snowdog 3/05
         """prompts the user to locate a new tree file or create a new one"""
-        response = wx.MessageDialog(self, msg, error, wx.YES|wx.NO|wx.ICON_ERROR)
+        response = wx.MessageBox(msg, error, wx.YES|wx.NO|wx.ICON_ERROR)
         if response == wx.YES:
             file = None
             dlg = wx.FileDialog(self, "Locate Gametree file", dir_struct["user"],
@@ -221,6 +228,7 @@ class game_tree(wx.TreeCtrl):
             else: self.load_tree(file)
             return
         else:
+            copyfile(dir_struct['template']+'default_tree.xml', filename)
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
             return
@@ -234,24 +242,25 @@ class game_tree(wx.TreeCtrl):
             self.locate_valid_tree("Gametree Error", emsg)
             return
         try:
+            self.xml_root = False
             tree = parse(filename)
             self.xml_root = tree.getroot()
-        except:
-            self.xml_root = None
-
+        except: self.xml_root = False
         if not self.xml_root:
-            os.rename(filename,filename+".corrupt")
+            count = 1
+            while exists(filename[:len(filename)-4]+'-'+str(count)+'.xml'): count += 1
+            corrupt_tree = filename[:len(filename)-4]+'-'+str(count)+'.xml'
+            copyfile(filename, corrupt_tree)
             emsg = "Your gametree is being regenerated.\n\n"\
                  "To salvage a recent version of your gametree\n"\
-                 "exit OpenRPG and copy the lastgood.xml file in\n"\
+                 "exit OpenRPG and copy the one of the tree-# files in\n"\
                  "your myfiles directory to "+filename+ "\n"\
                  "in your myfiles directory.\n\n"\
                  "lastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.\n\n"\
                  "Would you like to select a different gametree file to use?\n"\
                  "(Selecting 'No' will cause a new default gametree to be generated)"
-            self.locate_valid_tree("Corrupt Gametree!", emsg)
+            self.locate_valid_tree("Corrupt Gametree!", emsg, filename)
             return
-
         if self.xml_root.tag != "gametree":
             emsg = filename+" does not appear to be a valid gametree file.\n\n"\
                  "Would you like to select a different gametree file to use?\n"\
@@ -286,8 +295,22 @@ class game_tree(wx.TreeCtrl):
 
         except Exception, e:
             logger.exception(traceback.format_exc())
-            wx.MessageBox("Corrupt Tree!\nYour game tree is being regenerated. To\nsalvage a recent version of your gametree\nexit OpenRPG and copy the lastgood.xml\nfile in your myfiles directory\nto "+filename+ "\nin your myfiles directory.\nlastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.")
-            os.rename(filename,filename+".corrupt")
+
+            count = 1
+            while exists(filename[:len(filename)-4]+'-'+str(count)+'.xml'): count += 1
+            corrupt_tree = filename[:len(filename)-4]+'-'+str(count)+'.xml'
+            copyfile(filename, corrupt_tree)
+            wx.MessageBox("Your gametree is being regenerated.\n\n"\
+                 "To salvage a recent version of your gametree\n"\
+                 "exit OpenRPG and copy the one of the tree-# files in\n"\
+                 "your myfiles directory to "+filename+ "\n"\
+                 "in your myfiles directory.\n\n"\
+                 "lastgood.xml WILL BE OVERWRITTEN NEXT TIME YOU RUN OPENRPG.\n\n")
+
+            count = 1
+            while exists(filename[:len(filename)-4]+'-'+str(count)+'.xml'): count += 1
+            corrupt_tree = filename[:len(filename)-4]+'-'+str(count)+'.xml'
+            copyfile(filename, corrupt_tree)
             validate.config_file("tree.xml","default_tree.xml")
             self.load_tree(error=1)
     

@@ -57,14 +57,16 @@ class whiteboard_handler(base_layer_handler):
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)
-        self.color_button = wx.Button(self, wx.ID_ANY, "Pen Color", style=wx.BU_EXACTFIT)
+        self.color_button = createMaskedButton(self, dir_struct["icon"]+'draw.gif', 
+                                                    'Pen Color', wx.ID_ANY, '#bdbdbd', 
+                                                    wx.BITMAP_TYPE_GIF)
         self.color_button.SetBackgroundColour(wx.BLACK)
         self.color_button.SetForegroundColour(wx.WHITE)
         self.drawmode_ctrl = wx.Choice(self, wx.ID_ANY, choices = ["Freeform", "Polyline","Text", "Cone", "Circle"])
         self.drawmode_ctrl.SetSelection(0) #always start showing "Freeform"
         self.radius = wx.TextCtrl(self, wx.ID_ANY, size=(32,-1) )
         self.radius.SetValue("15")
-        self.live_refresh = wx.CheckBox(self, wx.ID_ANY, " Live Refresh")
+        self.live_refresh = wx.CheckBox(self, wx.ID_ANY, " Dynamic")
         self.live_refresh.SetValue(True)
         self.widthList= wx.Choice(self, wx.ID_ANY, size= wx.Size(40, 20), 
                                         choices=['1','2','3','4','5','6','7','8','9','10'])
@@ -78,7 +80,7 @@ class whiteboard_handler(base_layer_handler):
         self.sizer.Add(self.radius, 0, wx.EXPAND|wx.ALL, 2)
         self.sizer.Add(wx.Size(10,25))
         self.sizer.Add(self.live_refresh, 0, wx.EXPAND)
-        self.sizer.Add(wx.Size(20,25))
+        self.sizer.Add(wx.Size(10,25))
         self.sizer.Add(self.color_button, 0, wx.EXPAND)
         self.sizer.Add(wx.Size(20,25))
         self.Bind(wx.EVT_MOTION, self.on_motion)

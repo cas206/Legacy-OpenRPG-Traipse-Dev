@@ -325,6 +325,7 @@ class mplay_server:
             self.saveBanList()
         except Exception, e:
             self.log_msg("Exception in initBanList() " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     # This method writes out the server's ban list added by Darren
     def saveBanList( self ):
@@ -343,6 +344,7 @@ class mplay_server:
             file.close()
         except Exception, e:
             self.log_msg("Exception in saveBanList() " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     # This method reads in the server's configuration file and reconfigs the server
     # as needed, over-riding any default values as requested.
@@ -526,6 +528,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception in initServerConfig() " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def makePersistentRooms(self):
         'Creates rooms on the server as defined in the server config file.'
@@ -571,6 +574,7 @@ class mplay_server:
             return pr
         except:
             self.log_msg("Exception occured in isPersistentRoom(self,id)")
+            self.log_msg( ('exception', str(e)) )
             return 0
 
     #-----------------------------------------------------
@@ -775,8 +779,8 @@ class mplay_server:
             try:
                 sentl = sock.send( lp ) # Send the encoded length
                 sentm = sock.send( msg ) # Now, send the message the the length was describing
-            except socket.error, e: self.log_msg( e )
-            except Exception, e: self.log_msg( e )
+            except socket.error, e: self.log_msg( ('exception', str(e)) ); self.log_msg( e )
+            except Exception, e: self.log_msg( e ); self.log_msg( ('exception', str(e)) )
 
 
     def recvData( self, sock, readSize ):
@@ -818,7 +822,7 @@ class mplay_server:
             try:
                 if useCompression and cmpType != None: msgData = cmpType.decompress(msgData)
             except: traceback.print_exc()
-        except Exception, e: self.log_msg( "Exception: recvMsg(): " + str(e) )
+        except Exception, e: self.log_msg( "Exception: recvMsg(): " + str(e) ); self.log_msg( ('exception', str(e)) )
         return msgData
 
     def kill_server(self):
@@ -910,6 +914,7 @@ class mplay_server:
             print
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
         self.p_lock.release()
 
     """
@@ -996,6 +1001,7 @@ class mplay_server:
             print
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
         self.p_lock.release()
 
     """
@@ -1028,6 +1034,7 @@ class mplay_server:
             print "\nStatistics: groups: " + str(len(self.groups)) + "  players: " +  str(len(self.players))
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
         self.p_lock.release()
 
 
@@ -1045,6 +1052,7 @@ class mplay_server:
                         print "Bad Player Ref (#" + id + ") in group"
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
         self.p_lock.release()
 
     def update_request(self,newsock, xml_dom):
@@ -1110,7 +1118,7 @@ class mplay_server:
             bad_xml_string += "Please report this bug to the development team at:<br /> "
             bad_xml_string += "<a href='http://www.assembla.com/spaces/traipse_dev/tickets/'>Traipse-Dev "
             bad_xml_string += "(http://www.assembla.com/spaces/traipse_dev/tickets/)</a><br />"
-            self.sendMsg( newsock, "<msg to='" + props['id'] + "' from='" + props['id'] + "' group_id='0' />" + bad_xml_string, 
+            self.sendMsg( newsock, "<msg to='" +props['id']+ "' from='" +props['id']+ "' group_id='0' />" +bad_xml_string, 
                             new_stub.useCompression, new_stub.compressionType)
 
             time.sleep(2)
@@ -1118,6 +1126,7 @@ class mplay_server:
             print "Error in parse found from " + str(remote_host) + ".  Disconnected."
             print "  Offending data(" + str(len(data)) + "bytes)=" + data
             print "Exception=" + str(e)
+            self.log_msg( ('exception', str(e)) )
             #if xml_dom: xml_dom.unlink()
             return
 
@@ -1277,6 +1286,7 @@ class mplay_server:
 
         except Exception, e:
             self.log_msg(("Error binding request socket!", e))
+            self.log_msg( ('exception', str(e)) )
             self.alive = 0
 
         while self.alive:
@@ -1293,9 +1303,10 @@ class mplay_server:
                 """
                 thread.start_new_thread(self.acceptedNewConnectionThread, ( newsock, addr ))
 
-            except:
+            except Exception, e:
                 print "The following exception caught accepting new connection:"
                 traceback.print_exc()
+                self.log_msg( ('exception', str(e)) )
 
         #  At this point, we're done and cleaning up.
         self.log_msg("server socket listening thread exiting...")
@@ -1316,6 +1327,7 @@ class mplay_server:
             try: newsock.close()
             except Exception, e:
                 self.log_msg( str(e) )
+                self.log_msg( ('exception', str(e)) )
                 print str(e)
             return #returning causes connection thread instance to terminate
         if data == "<system/>":
@@ -1337,10 +1349,11 @@ class mplay_server:
 
         except:
             try: newsock.close()
-            except: pass
+            except Exception, e: pass
             self.log_msg( "Error in parse found from " + str(addr) + ".  Disconnected.")
             self.log_msg("  Offending data(" + str(len(data)) + "bytes)=" + data)
             self.log_msg( "Exception:")
+            self.log_msg( ('exception', str(e)) )
             traceback.print_exc()
             return #returning causes connection thread instance to terminate
 
@@ -1358,6 +1371,7 @@ class mplay_server:
             print "The following  message: " + str(data)
             print "from " + str(addr) + " created the following exception: "
             traceback.print_exc()
+            self.log_msg( ('exception', str(e)) )
             return #returning causes connection thread instance to terminate
 
     """
@@ -1392,6 +1406,7 @@ class mplay_server:
                 data = None
             except Exception, e:
                 self.log_msg(str(e))
+                self.log_msg( ('exception', str(e)) )
         self.log_msg("message handler thread exiting...")
         self.incoming_event.set()
 
@@ -1410,11 +1425,14 @@ class mplay_server:
             print "Error in parse of inbound message. Ignoring message."
             print "  Offending data(" + str(len(data)) + "bytes)=" + data
             print "Exception=" + str(e)
+            self.log_msg( ('exception', str(e)) )
         
     def message_action(self, xml_dom, data):
         tag_name = xml_dom.tag
         if self.svrcmds.has_key(tag_name): self.svrcmds[tag_name]['function'](xml_dom, data)
-        else: raise Exception, "Not a valid header!"
+        else: 
+            raise Exception, "Not a valid header!"
+            self.log_msg( ('exception', 'Not a valid header!') )
         #Message Action thread expires and closes here.
         return
 
@@ -1518,6 +1536,7 @@ class mplay_server:
                 print "Bad input: " + data
         except Exception,e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def join_group(self, xml_dom, data):
         try:
@@ -1551,6 +1570,7 @@ class mplay_server:
             self.move_player(from_id, group_id)
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
 
     """
     # move_player function -- added by Snowdog 4/03
@@ -1568,6 +1588,7 @@ class mplay_server:
                 else: self.players[from_id].role = "Lurker"
             except Exception, e:
                 print "exception in move_player() "
+                self.log_msg( ('exception', str(e)) )
                 traceback.print_exc()
 
             old_group_id = self.players[from_id].change_group(group_id, self.groups)
@@ -1596,6 +1617,7 @@ class mplay_server:
                 except Exception, e:
                     roomMsg = ""
                     self.log_msg(str(e))
+                    self.log_msg( ('exception', str(e)) )
 
                 # Spit that darn message out now!
                 self.players[from_id].outbox.put("<msg to='" + from_id + "' from='0' group_id='" + group_id + "' />" + roomMsg)
@@ -1613,6 +1635,7 @@ class mplay_server:
             self.handle_role("set", from_id, self.players[from_id].role, self.groups[group_id].boot_pwd, group_id)
         except Exception, e:
             self.log_msg(str(e))
+            self.log_msg( ('exception', str(e)) )
         thread.start_new_thread(self.registerRooms,(0,))
 
     def return_room_roles(self, from_id, group_id):
@@ -1771,7 +1794,7 @@ class mplay_server:
             else: self.send_to_all("0",self.groups[group_id].toxml('update'))
             #The register Rooms thread
             thread.start_new_thread(self.registerRooms,(0,))
-        except Exception, e: self.log_msg(str(e))
+        except Exception, e: self.log_msg( ('exception', str(e)) )
 
     def del_player(self, id, group_id):
         try:
@@ -1789,7 +1812,7 @@ class mplay_server:
             """
             if self.be_registered:
                 self.register()
-        except Exception, e: self.log_msg(str(e))
+        except Exception, e: self.log_msg( ('exception', str(e)) )
         self.log_msg("Explicit garbage collection shows %s undeletable items." % str(gc.collect()))
 
     def incoming_player_handler(self, xml_dom, data):
@@ -1804,7 +1827,7 @@ class mplay_server:
             try:
                 self.send_player_list(id,group_id)
                 self.send_group_list(id)
-            except Exception, e: traceback.print_exc()
+            except Exception, e: self.log_msg( ('exception', str(e)) ); traceback.print_exc()
         elif act=="del":
             self.del_player(id,group_id)
             self.check_group(id, group_id)
@@ -1846,8 +1869,11 @@ class mplay_server:
         to_id = xml_dom.get("to")
         from_id = xml_dom.get("from")
         group_id = xml_dom.get("group_id")
+        ## Backwards compatibility with older clients
         end = data.find(">")
         msg = data[end+1:]
+        if msg[-6:] == '</msg>': msg = msg[:-6]
+        data = msg
 
         if from_id == "0" or len(from_id) == 0:
             print "WARNING!! Message received with an invalid from_id.  Message dropped."
@@ -1872,7 +1898,7 @@ class mplay_server:
             elif to_id.lower() == 'all':
                 #valid map for all players that is not the lobby.
                 self.send_to_group(from_id,group_id,data)
-                self.groups[group_id].game_map.init_from_xml(msg)
+                self.groups[group_id].game_map.init_from_xml(data)
             else:
                 #attempting to send map to specific individuals which is not supported.
                 self.players[from_id].self_message('Invalid map message. Message not sent to others.')
@@ -1943,6 +1969,7 @@ class mplay_server:
                 print "due to the following exception:"
                 traceback.print_exc()
                 print "Ignoring boot message"
+                self.log_msg( ('exception', str(e)) )
 
     def handle_boot(self,from_id,to_id,group_id,msg):
         xml_dom = None
@@ -1952,10 +1979,11 @@ class mplay_server:
                 xml_dom = XML(msg)
                 given_boot_pwd = xml_dom.get("boot_pwd")
 
-            except:
+            except Exception, e:
                 print "Error in parse of boot message, Ignoring."
                 print "Exception: "
                 traceback.print_exc()
+                self.log_msg( ('exception', str(e)) )
 
             try:
                 actual_boot_pwd = self.groups[group_id].boot_pwd
@@ -2008,6 +2036,7 @@ class mplay_server:
             except Exception, e:
                 traceback.print_exc()
                 self.log_msg('Exception in handle_boot() ' + str(e))
+                self.log_msg( ('exception', str(e)) )
 
         finally:
             try:
@@ -2015,6 +2044,7 @@ class mplay_server:
             except Exception, e:
                 traceback.print_exc()
                 self.log_msg('Exception in xml_dom.unlink() ' + str(e))
+                self.log_msg( ('exception', str(e)) )
 
     """
     # admin_kick function -- by Snowdog 4/03
@@ -2045,6 +2075,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg('Exception in admin_kick() ' + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     ### Alpha ### Addition added to assist in Un Banning users.
     def admin_build_banlist(self):
@@ -2071,6 +2102,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg('Exception in admin_banip() ' + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def admin_ban(self, id, message="", silent = 0):
         "Ban a player from a server from the console"
@@ -2102,6 +2134,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg('Exception in admin_ban() ' + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def admin_unban(self, ip):
         self.admin_build_banlist()
@@ -2112,6 +2145,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg('Exception in admin_unban() ' + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def admin_banlist(self):
         msg = []
@@ -2163,6 +2197,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: send_to_all(): " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def send_to_group(self, from_id, group_id, data):
         #data = ("<msg to='all' from='0' group_id='"+str(group_id)+"' /><font color='#FF0000'>" + data + "</font>")
@@ -2176,6 +2211,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: send_to_group(): " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def send_player_list(self,to_id,group_id):
         try:
@@ -2187,6 +2223,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: send_player_list(): " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     def send_group_list(self, to_id, action="new"):
         try:
@@ -2196,6 +2233,7 @@ class mplay_server:
         except Exception, e:
             self.log_msg("Exception: send_group_list(): (client #"+to_id+") : " + str(e))
             traceback.print_exc()
+            self.log_msg( ('exception', str(e)) )
 
     """
     # KICK_ALL_CLIENTS()
@@ -2213,6 +2251,7 @@ class mplay_server:
         except Exception, e:
             traceback.print_exc()
             self.log_msg("Exception: kick_all_clients(): " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
     """
     # This really has little value as it will only catch people that are hung
@@ -2238,6 +2277,7 @@ class mplay_server:
                         self.admin_kick(k,"Removing dead client", self.silent_auto_kick)
         except Exception, e:
             self.log_msg("Exception: check_group_members(): " + str(e))
+            self.log_msg( ('exception', str(e)) )
 
 
     def remote_admin_handler(self,xml_dom,data):
@@ -2387,6 +2427,7 @@ class mplay_server:
         except Exception, e:
             self.log_msg("Exception: Remote Admin Handler Error: " + str(e))
             traceback.print_exc()
+            self.log_msg( ('exception', str(e)) )
 
     def toggleRemoteKill(self):
         if self.allowRemoteKill: self.allowRemoteKill = False
@@ -2554,7 +2595,7 @@ class mplay_server:
             pl += "<tr><td colspan='4' bgcolor=" + COLOR1 + ">"
             pl += "<font color=" + COLOR4 + "><b><i>Statistics: groups: " + str(len(self.groups)) + "  "
             pl += "players: " +  str(len(self.players)) + "</i></b></font></td></tr></table>"
-        except Exception, e: self.log_msg(str(e))
+        except Exception, e: self.log_msg(str(e)); self.log_msg( ('exception', str(e)) )
         self.p_lock.release()
         return pl
 

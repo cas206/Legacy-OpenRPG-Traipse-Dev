@@ -1,4 +1,4 @@
-<nodehandler class="tabber_handler" frame="808,494,166,146" icon="tabber" map="" module="containers" name="4e PC Sheet" version="1.0"><nodehandler class="tabber_handler" frame="400,400,399,89" icon="tabber" map="4e PC Sheet-WIP" module="containers" name="Using the 4e PC Sheet" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Introduction" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This node is designed to be as generic as possible. It should contain the core basics for users to fill out with game information that is specific to their character.
+<nodehandler class="tabber_handler" frame="808,494,166,146" icon="tabber" map="" module="containers" name="4e PC Sheet" version="1.0"><nodehandler class="tabber_handler" frame="400,400,399,89" icon="tabber" map="4e PC Sheet" module="containers" name="Using the 4e PC Sheet" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Introduction" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This node is designed to be as generic as possible. It should contain the core basics for users to fill out with game information that is specific to their character.
 
 The node is also designed to be organized with speed of use in mind. Since the majority of nodes are inside Tabbers you can easily use the top node and find all of your data inside. In fact, that is how I am writing this.
 
@@ -13,7 +13,7 @@ Utilities: Here is a quick and dirty guide. If you want to add a new power, crea
 
 Combat: This contains grids so you can reference your weapon dice, armor bonuses, feat bonuses .. and they too can use references so if you change a number the software does the math.
 
-Inventory: You guess it.  It comes with a Back Pack text node that you can clone to make bags and other containers.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Rollers" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">Inside the Rollers tab you will find 5 lists. You can use these lists to add new references to nodes.  The Rollers tab is also a Tabber node itself, so you can just double click the Rollers node to get all of your rollers in one window.  You can also edit all of your rollers in one window when you enter into the Design mode of the Rollers tabber.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="General" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This form contains a some text nodes that hold basic information about your character. In some Powers the Level and Tier are used to calculate bonuses. You can reference those nodes to make the math easier</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Abilities" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">The Abilities Grid contains the 6 abilities all set at values of 8. The third column is the math calculation for the modifier. You can reference that grid column to assist in your math calculations.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Combat" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">The Combat Tabber contains a number of Grid nodes to assist in your combat calculations. Some grids contain a grid cell called Total.
+Inventory: You guess it.  It comes with a Back Pack text node that you can clone to make bags and other containers.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Rollers" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">Inside the Rollers tab you will find 5 lists. You can use these lists to add new references to nodes.  The Rollers tab is also a Tabber node itself, so you can just double click the Rollers node to get all of your rollers in one window.  You can also edit all of your rollers in one window when you enter into the Design mode of the Rollers tabber.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="General" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This form contains a some text nodes that hold basic information about your character. In some Powers the Level and Tier are used to calculate bonuses. You can reference those nodes to make the math easier</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Abilities" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">The Abilities Grid contains the 6 abilities all set at values of 8. The third column is the math calculation for the modifier. You can reference that grid column to assist in your math calculations.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Combat" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">The Combat Tabber contains a number of Grid nodes to assist in your combat calculations. Some grids contain a grid cell called Total.
 
 To Hit: The To Hit Bonus. This Grid contains a cell called Total. You can add new rows to the grid when you are granted bonuses and then add those references to the total. 
 
@@ -23,50 +23,50 @@ Weapons: This is a simple grid that contains a Weapon Name and a Weapon Die. Wit
 
 AC Bonus: This Grid contains a cell called Total. You can add new rows to the grid when you are granted bonuses and then add those references to the total. 
 
-Feats: Some feats add bonusus to hit or damage.  When these bonuses are calculated you can add them here and the math easier for you.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Utilities" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This Tabber contains a Tabber for At Will, Encounter and Daily.  Each tabber contains a node for levels 0 and 1.  You can add new tabbers when you reach higher levels.
+Feats: Some feats add bonusus to hit or damage.  When these bonuses are calculated you can add them here and the math easier for you.</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Utilities" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">This Tabber contains a Tabber for At Will, Encounter and Daily.  Each tabber contains a node for levels 0 and 1.  You can add new tabbers when you reach higher levels.
 
 Inside the 0 Level tabber for each Utility there is a text node that contains a an attack roll and a damage roll. 
 
-** I went with this format so users could create their Utility nodes and share with others. The nodes can contain Role Play information as well as attack and damage rolls. Also, the nodes can be completely genric, referencing the Name Text node and still look specific **</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet-WIP::Using the 4e PC Sheet" module="forms" name="Inventory" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">It's just a node to hold your Inventory
+** I went with this format so users could create their Utility nodes and share with others. The nodes can contain Role Play information as well as attack and damage rolls. Also, the nodes can be completely genric, referencing the Name Text node and still look specific **</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="4e PC Sheet::Using the 4e PC Sheet" module="forms" name="Inventory" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">It's just a node to hold your Inventory
 
 This bears repeating:
-It comes with a Back Pack text node that you can clone to make bags and other containers.</text></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="568,400,446,121" icon="tabber" map="4e PC Sheet-WIP" module="containers" name="Rollers" version="1.0"><nodehandler class="listbox_handler" frame="400,400,541,107" icon="gear" map="4e PC Sheet-WIP::Rollers" module="forms" name="Skills" version="1.0">
+It comes with a Back Pack text node that you can clone to make bags and other containers.</text></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="568,400,446,121" icon="tabber" map="4e PC Sheet" module="containers" name="Rollers" version="1.0"><nodehandler class="listbox_handler" frame="400,400,541,107" icon="gear" map="4e PC Sheet::Rollers" module="forms" name="Skills" version="1.0">
         <list raw_mode="1" send_button="1" type="2">
-          <option caption="Climb" selected="0" value="0">Climb [1d20+5+!#Abilities::(1,3)#!+(!#General::Level#!/2)]</option>
-          <option caption="Hide" selected="0" value="0">Hide [1d20+5+!#Abilities::(2,3)#!+(!#General::Level#!/2)]</option>
-          <option caption="Spot" selected="1" value="0">Spot [1d20+5+!#Abilities::(4,3)#!+(!#General::Level#!/2)]</option>
+          <option caption="Climb" selected="0" value="0">Climb [1d20+5+!=Abilities::(1,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Hide" selected="0" value="0">Hide [1d20+5+!=Abilities::(2,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Spot" selected="1" value="0">Spot [1d20+5+!=Abilities::(4,3)=!+(!=General::Level=!/2)]</option>
         </list>
       </nodehandler>
-      <nodehandler class="listbox_handler" frame="400,400,466,138" icon="gear" map="4e PC Sheet-WIP::Rollers" module="forms" name="Attacks" version="1.0">
+      <nodehandler class="listbox_handler" frame="400,400,466,138" icon="gear" map="4e PC Sheet::Rollers" module="forms" name="Attacks" version="1.0">
   <list raw_mode="1" send_button="1" type="1">
-    <option caption="Sword Attack" selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !#Combat::Weapons::(2,1)#! [1d20+!#Combat::To Hit::(2,2)#!] &lt;b&gt;Damage:&lt;/b&gt; [1!#Combat::Weapons::(2,2)#!+!#Abilities::(1,3)#!]</option>
-    <option caption="Mace Attack" selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !#Combat::Weapons::(3,1)#! [1d20+!#Combat::To Hit::(2,2)#!] &lt;b&gt;Damage:&lt;/b&gt; [1!#Combat::Weapons::(3,2)#!+!#Abilities::(1,3)#!]</option>
+    <option caption="Sword Attack" selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::2,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::2,2=!+!=Abilities::1,3!]</option>
+    <option caption="Mace Attack" selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::3,1=! [1d20+!Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::3,2=!+!=Abilities::1,3=!]</option>
     <option caption="Uncreated" selected="0" value="">Option Text III</option>
   </list>
-</nodehandler><nodehandler class="splitter_handler" frame="764,400,9,91" horizontal="0" icon="divider" map="4e PC Sheet-WIP::Rollers" module="containers" name="Powers" version="1.0">
-    <nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet-WIP::Rollers::Powers" module="forms" name="At Wills" version="1.0">
+</nodehandler><nodehandler class="splitter_handler" frame="764,400,9,91" horizontal="0" icon="divider" map="4e PC Sheet::Rollers" module="containers" name="Powers" version="1.0">
+    <nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="At Wills" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="At Will Power" selected="1" value="0">!#Utilities::At Will::0::At Will#!</option></list>
-</nodehandler><nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet-WIP::Rollers::Powers" module="forms" name="Encounters" version="1.0">
+    <option caption="At Will Power" selected="1" value="0">!=At Wills::At Will=!</option></list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="Encounters" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="Encounter" selected="1" value="0">!#Utilities::Encounter::0::Encounter#!</option></list>
-</nodehandler><nodehandler class="listbox_handler" frame="400,400,470,62" icon="gear" map="4e PC Sheet-WIP::Rollers::Powers" module="forms" name="Dailys" version="1.0">
+    <option caption="Encounter" selected="1" value="0">!=Encounters::Encounter=!</option></list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,470,62" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="Dailys" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="Daily" selected="1" value="0">!#Utilities::Daily::0::Daily#!</option></list>
-</nodehandler></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,307,186" height="600" icon="form" map="4e PC Sheet-WIP" module="forms" name="General" version="1.0" width="400">
-  <nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Name" version="1.0">
+    <option caption="Daily" selected="1" value="0">!=Dailys::Daily=!</option></list>
+</nodehandler></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,307,186" height="600" icon="form" map="4e PC Sheet" module="forms" name="General" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Name" version="1.0">
   <text multiline="0" raw_mode="1" send_button="0">text</text>
-</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Player" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Player" version="1.0">
   <text multiline="0" send_button="0">text</text>
-</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Race" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Race" version="1.0">
   <text multiline="0" send_button="0">text</text>
-</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Class" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Class" version="1.0">
   <text multiline="0" send_button="0">text</text>
-</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Level" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="4e PC Sheet::General" module="forms" name="Level" version="1.0">
   <text multiline="0" raw_mode="1" send_button="0">1</text>
-</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="4e PC Sheet-WIP::General" module="forms" name="Tier" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="4e PC Sheet::General" module="forms" name="Tier" version="1.0">
   <text multiline="0" raw_mode="1" send_button="0">1</text>
-</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet-WIP" module="containers" name="Combat" version="1.0"><nodehandler class="rpg_grid_handler" frame="400,400,269,110" icon="grid" map="4e PC Sheet-WIP::Combat" module="rpg_grid" name="Weapons" version="1.0">
+</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet" module="containers" name="Combat" version="1.0"><nodehandler class="rpg_grid_handler" frame="400,400,269,110" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="Weapons" version="1.0">
   <grid autosize="1" border="1">
     <row version="1.0">
       <cell>Weapon</cell>
@@ -80,7 +80,7 @@ It comes with a Back Pack text node that you can clone to make bags and other co
   <macros>
     <macro name="" />
   </macros>
-</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet-WIP::Combat" module="rpg_grid" name="To Hit" version="1.0">
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="To Hit" version="1.0">
   <grid autosize="1" border="1">
     <row version="1.0">
       <cell>Armor</cell>
@@ -88,13 +88,13 @@ It comes with a Back Pack text node that you can clone to make bags and other co
     </row>
     <row version="1.0">
       <cell>Total</cell>
-      <cell>!!To Hit::(3,2)!! + !!To Hit::(4,2)!!</cell>
+      <cell>!=To Hit::(3,2)=! + !=To Hit::(4,2)=!</cell>
     </row>
-  <row version="1.0"><cell>BAB</cell><cell>15</cell></row><row version="1.0"><cell>Str Mod</cell><cell>!#Abilities::(1,3)#!</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
+  <row version="1.0"><cell>BAB</cell><cell>15</cell></row><row version="1.0"><cell>Str Mod</cell><cell>!=Abilities::(1,3)=!</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>
-</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet-WIP::Combat" module="rpg_grid" name="AC Bonus" version="1.0">
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="AC Bonus" version="1.0">
   <grid autosize="1" border="1">
     <row version="1.0">
       <cell>Armor</cell>
@@ -102,13 +102,13 @@ It comes with a Back Pack text node that you can clone to make bags and other co
     </row>
     <row version="1.0">
       <cell>Total</cell>
-      <cell>!!AC Bonus::(3,2)!!+!!AC Bonus::(4,2)!!</cell>
+      <cell>!=AC Bonus::(3,2)=!+!=AC Bonus::(4,2)=!</cell>
     </row>
-  <row version="1.0"><cell>Armor</cell><cell>!!Armor::(2,2)!!</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
+  <row version="1.0"><cell>Armor</cell><cell>!!Armor::(2,2)!!</cell></row><row version="1.0"><cell>Misc</cell><cell>0</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>
-</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet-WIP::Combat" module="rpg_grid" name="Armor" version="1.0">
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="Armor" version="1.0">
   <grid autosize="1" border="1">
     <row version="1.0">
       <cell>Armor</cell>
@@ -116,74 +116,74 @@ It comes with a Back Pack text node that you can clone to make bags and other co
     </row>
     <row version="1.0">
       <cell>Total</cell>
-      <cell>!!Armor::(3,2)!!</cell>
+      <cell>!=Armor::(3,2)=!</cell>
     </row>
   <row version="1.0"><cell>Base</cell><cell>10</cell></row><row version="1.0"><cell>Armor</cell><cell /></row><row version="1.0"><cell>Shield</cell><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>
-</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet-WIP::Combat" module="rpg_grid" name="Feats" version="1.0">
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="4e PC Sheet::Combat" module="rpg_grid" name="Feats" version="1.0">
   <grid autosize="1" border="1">
     <row version="1.0">
       <cell>Armor</cell>
-      <cell>Bonus</cell>
+      <cell size="106">Bonus</cell>
     <cell>Descripton</cell></row>
     <row version="1.0">
       <cell>Total</cell>
-      <cell>!!Feats::(3,2)!!</cell>
+      <cell>!=Feats::(3,2)=!</cell>
     <cell /></row>
   <row version="1.0"><cell>Feat</cell><cell>0</cell><cell /></row><row version="1.0"><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>
-</nodehandler></nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,488,115" icon="grid" map="4e PC Sheet-WIP" module="rpg_grid" name="Abilities" version="1.0">
+</nodehandler></nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,488,115" icon="grid" map="4e PC Sheet" module="rpg_grid" name="Abilities" version="1.0">
         <grid autosize="1" border="1">
           <row version="1.0">
             <cell>Str</cell>
             <cell>12</cell>
-          <cell size="197">(!!Abilities::(1,2)!!-10)/2</cell></row>
+          <cell size="197">(!=Abilities::(1,2)=!-10)/2</cell></row>
           <row version="1.0">
             <cell>Dex</cell>
             <cell>8</cell>
-          <cell>(!!Abilities::(2,2)!!-10)/2</cell></row>
+          <cell>(!=Abilities::(2,2)=!-10)/2</cell></row>
           <row version="1.0">
             <cell>Con</cell>
             <cell>14</cell>
-          <cell>(!!Abilities::(3,2)!!-10)/2</cell></row>
+          <cell>(!=Abilities::(3,2)=!-10)/2</cell></row>
           <row version="1.0">
             <cell>Int</cell>
             <cell>18</cell>
-          <cell>(!!Abilities::(4,2)!!-10)/2</cell></row>
+          <cell>(!=Abilities::(4,2)=!-10)/2</cell></row>
           <row version="1.0">
             <cell>Wis</cell>
             <cell>8</cell>
-          <cell>(!!Abilities::(5,2)!!-10)/2</cell></row>
+          <cell>(!=Abilities::(5,2)=!-10)/2</cell></row>
           <row version="1.0">
             <cell>Cha</cell>
             <cell>8</cell>
-          <cell>(!!Abilities::(6,2)!!-10)/2</cell></row>
+          <cell>(!=Abilities::(6,2)=!-10)/2</cell></row>
         </grid>
         <macros>
           <macro name="" />
         </macros>
-      </nodehandler><nodehandler class="tabber_handler" frame="400,400,407,67" icon="tabber" map="4e PC Sheet-WIP" module="containers" name="Utilities" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities" module="containers" name="At Will" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::At Will" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet-WIP::Utilities::At Will::0" module="forms" name="At Will" version="1.0">
+      </nodehandler><nodehandler class="tabber_handler" frame="400,400,407,67" icon="tabber" map="4e PC Sheet" module="containers" name="Utilities" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities" module="containers" name="At Wills" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::At Wills" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet::Utilities::At Wills::0" module="forms" name="At Will" version="1.0">
   <text multiline="1" raw_mode="1" send_button="1">/me uses an At Will
 &lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
 &lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
-</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::At Will" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities" module="containers" name="Encounter" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::Encounter" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet-WIP::Utilities::Encounter::0" module="forms" name="Encounter" version="1.0">
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::At Wills" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities" module="containers" name="Encounters" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::Encounters" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet::Utilities::Encounters::0" module="forms" name="Encounter" version="1.0">
   <text multiline="1" raw_mode="1" send_button="1">/me uses an Encounter
 &lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
 &lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
-</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::Encounter" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet-WIP::Utilities" module="containers" name="Daily" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::Daily" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet-WIP::Utilities::Daily::0" module="forms" name="Daily" version="1.0">
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::Encounters" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet::Utilities" module="containers" name="Dailys" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::Dailys" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="4e PC Sheet::Utilities::Dailys::0" module="forms" name="Daily" version="1.0">
   <text multiline="1" raw_mode="1" send_button="1">/me uses an Daily
 &lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
 &lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
-</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet-WIP::Utilities::Daily" module="containers" name="1" version="1.0" /></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet-WIP" module="containers" name="Inventory" version="1.0"><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet-WIP::Inventory" module="containers" name="Back pack" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet-WIP::Inventory::Back pack" module="forms" name="Slot 1" version="1.0">
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="4e PC Sheet::Utilities::Dailys" module="containers" name="1" version="1.0" /></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet" module="containers" name="Inventory" version="1.0"><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet::Inventory" module="containers" name="Back pack" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet::Inventory::Back pack" module="forms" name="Slot 1" version="1.0">
   <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
-</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet-WIP::Inventory::Back pack" module="forms" name="Slot 2" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet::Inventory::Back pack" module="forms" name="Slot 2" version="1.0">
   <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
-</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet-WIP::Inventory" module="containers" name="Belt" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet-WIP::Inventory::Belt" module="forms" name="Slot 1" version="1.0">
+</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="4e PC Sheet::Inventory" module="containers" name="Belt" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet::Inventory::Belt" module="forms" name="Slot 1" version="1.0">
   <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
-</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet-WIP::Inventory::Belt" module="forms" name="Slot 2" version="1.0">
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="4e PC Sheet::Inventory::Belt" module="forms" name="Slot 2" version="1.0">
   <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
 </nodehandler></nodehandler></nodehandler></nodehandler>

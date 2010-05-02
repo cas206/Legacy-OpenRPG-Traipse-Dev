@@ -21,7 +21,7 @@ from mplay_server import mplay_server, server
 
 from xml.dom import minidom
 from orpg.orpgCore import component
-from orpg.tools.orpg_log import debug
+from orpg.tools.orpg_log import debug, DebugConsole
 from orpg.tools.orpg_settings import settings
 
 from xml.etree.ElementTree import ElementTree, Element, iselement
@@ -384,6 +384,7 @@ class ServerGUI(wx.Frame):
         cb["delete_group"] = self.OnDeleteGroup
         cb["join_group"] = self.OnJoinGroup
         cb['update_group'] = self.OnUpdateGroup
+        cb['exception'] = self.OnException
         cb["role"] = self.OnSetRole
         self.callbacks = cb
 
@@ -439,6 +440,17 @@ class ServerGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ConfigPingInterval, id=9)
         self.Bind(wx.EVT_MENU, self.LogToggle, id=10)
         self.mainMenu.Append( menu, '&Configuration')
+
+        # Traipse Suite of Additions.
+        self.traipseSuite = wx.Menu()
+        self.debugger = DebugConsole(self)
+        self.mainMenu.Insert(3, self.traipseSuite, "&Traipse Suite")
+
+        #Debugger Console
+        self.debugConsole = wx.MenuItem(self.traipseSuite, -1, "Debug Console", "Debug Console")
+        self.Bind(wx.EVT_MENU, self.OnMB_DebugConsole, self.debugConsole)
+        self.traipseSuite.AppendItem(self.debugConsole)
+
         self.SetMenuBar(self.mainMenu)
 
         self.mainMenu.Enable(2, False)
@@ -456,6 +468,40 @@ class ServerGUI(wx.Frame):
         self.mainMenu.Enable(12, False)
         self.mainMenu.Enable(13, False)
         self.mainMenu.Enable(15, False)
+
+    def OnException(self, error):
+        self.TraipseSuiteWarn('debug')
+        self.debugger.console.AppendText(".. " + str(error) +'\n')
+
+    def OnMB_DebugConsole(self, evt):
+        self.TraipseSuiteWarnCleanup('debug')
+        if self.debugger.IsShown() == True: self.debugger.Hide()
+        else: self.debugger.Show()
+
+    def TraipseSuiteWarn(self, menuitem):
+        print 'traipse warn' #logger.debug('traipse warn')
+        ### Allows for the reuse of the 'Attention' menu.
+        ### component.get('frame').TraipseSuiteWarn('item') ### Portable
+        self.mainMenu.Remove(3)
+        self.mainMenu.Insert(3, self.traipseSuite, "&Traipse Suite!")
+        if menuitem == 'debug':
+            if self.debugger.IsShown() == True:
+                self.mainMenu.Remove(3)
+                self.mainMenu.Insert(3, self.traipseSuite, "&Traipse Suite")
+            else:
+                self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'spotlight.png'))
+                self.traipseSuite.RemoveItem(self.debugConsole)
+                self.traipseSuite.AppendItem(self.debugConsole)
+
+    def TraipseSuiteWarnCleanup(self, menuitem):
+        ### Allows for portable cleanup of the 'Attention' menu.
+        ### component.get('frame').TraipseSuiteWarnCleanup('item') ### Portable
+        self.mainMenu.Remove(3)
+        self.mainMenu.Insert(3, self.traipseSuite, "&Traipse Suite")        
+        if menuitem == 'debug':
+            self.traipseSuite.RemoveItem(self.debugConsole)
+            self.debugConsole.SetBitmap(wx.Bitmap(dir_struct["icon"] + 'clear.gif'))
+            self.traipseSuite.AppendItem(self.debugConsole)
 
     def build_body(self):
         """ Create the ViewNotebook and logger. """

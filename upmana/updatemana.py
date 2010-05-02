@@ -83,26 +83,34 @@ class Updater(wx.Panel):
         self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 
     def OnTimer(self, event):
+        statbar.SetStatusText('Checking For Updates')
         self.count = self.count + 1
         self.buttons['progress_bar'].SetValue(self.count)
         if self.count == 100:
             self.timer.Stop()
-            statbar.SetStatusText('Checking For Updates')
+            statbar.SetStatusText('No Updates Available')
 
     def UpdateCheck(self):
         self.timer.Start(100)
         self.count = 3
         self.buttons['progress_bar'].SetValue(3)
-        doUpdate = commands.incoming(self.ui, self.repo, 
-                    manifest.GetString('default', 'repo', ''), force=True, bundle=False)
-        if doUpdate:
-            statbar.SetStatusText('No Updates Available')
+        try:
+            doUpdate = commands.incoming(self.ui, self.repo, 
+                        manifest.GetString('default', 'repo', ''), 
+                        force=True, bundle=False)
+            if doUpdate:
+                statbar.SetStatusText('No Updates Available')
+                self.buttons['progress_bar'].SetValue(100)
+                self.timer.Stop()
+            else:
+                statbar.SetStatusText('Refresh Repo For Updated Source')
+                self.buttons['progress_bar'].SetValue(100)
+                self.timer.Stop()
+        except:
+            statbar.SetStatusText('No Connection Found')
             self.buttons['progress_bar'].SetValue(100)
             self.timer.Stop()
-        else:
-            statbar.SetStatusText('Refresh Repo For Updated Source')
-            self.buttons['progress_bar'].SetValue(100)
-            self.timer.Stop()
+
 
     def ToggleAutoUpdate(self, event):
         if self.buttons['auto_check'].GetValue() == True:
@@ -149,11 +157,11 @@ class Updater(wx.Panel):
                 os.removedirs(temp+dir1)
 
     def LoadDoc(self):
-        ignore = open(self.filename)
+        manifest = open(self.filename)
         self.ignorelist = []
-        for i in ignore: self.ignorelist.append(str(i [:len(i)-1]))
-        manifest = ignore.readlines()
-        ignore.close()
+        ignore = manifest.readlines()
+        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        manifest.close()
 
     def Finish(self, evt=None):
         component.get('upmana-win').OnClose(None)
@@ -611,11 +619,11 @@ class Control(wx.Panel):
             dlg.Destroy(); pass
 
     def LoadDoc(self):
-        ignore = open(self.filename)
+        manifest = open(self.filename)
         self.ignorelist = []
-        for i in ignore: self.ignorelist.append(str(i [:len(i)-1]))
-        manifest = ignore.readlines()
-        ignore.close()
+        ignore = manifest.readlines()
+        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        manifest.close()
 
     def get_packages(self, type=None):
         #Can be cleaner
@@ -747,24 +755,24 @@ class updaterFrame(wx.Frame):
 
 class updateApp(wx.App):
     def OnInit(self):
-        self.main = False
-
+        self.main = False; self.autoUpdate = False; self.noUpdate = False
         logger._set_log_to_console(False)
         logger.note("Updater Start")
         component.add('validate', validate)
         self.updater = updaterFrame(self, "OpenRPG Update Manager 1.2", 
                                 component, manifest, self.main)
         if manifest.GetString("updatemana", "auto_update", "") == 'on' and self.main == False:
-            self.AutoUpdate(); self.OnExit()
+            self.AutoUpdate(); self.OnExit(); self.autoUpdate = True
         else: pass
         if manifest.GetString('updatemana', 'no_update', '') == 'on' and self.main == False: 
-            self.OnExit()
+            self.OnExit(); self.noUpdate = True
         else: pass
-        try:
-            self.updater.Show()
-            self.updater.Fit()
-        except: pass
-        if not self.main: self.updater.page1.UpdateCheck()
+        if not (self.autoUpdate or self.noUpdate):
+            try:
+                self.updater.Show()
+                self.updater.Fit()
+                if not self.main: self.updater.page1.UpdateCheck()
+            except: pass
         return True
 
     def AutoUpdate(self):
@@ -773,13 +781,16 @@ class updateApp(wx.App):
         self.c = self.repo.changectx('tip')
         self.current = self.repo.dirstate.branch()
 
-        capture = manifest.GetString('updaterepo', 'default', '')
+        capture = manifest.GetString('default', 'repo', '')
         if capture != '':
-            commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
+            try: commands.pull(self.ui, self.repo, capture, rev='', update=False, force=True)
+            except:
+                wx.MessageBox('No Connection Found.  Skipping Auto Update!', 'Info')
+                return
             filename = 'ignorelist.txt'
             self.filename = dir_struct["home"] + 'upmana' + os.sep + filename
             component.get('validate').config_file(filename, "default_ignorelist.txt")
-            self.mana = self.LoadDoc()
+            self.mana = self.LoadDoc(); ignored = []
             temp = dir_struct["home"] + 'upmana' + os.sep + 'tmp' + os.sep
             for ignore in self.ignorelist:
                 if len(ignore.split('/')) > 1:
@@ -788,25 +799,27 @@ class updateApp(wx.App):
                         dir1 += ignore.split('/')[gets] + os.sep
                         gets += 1
                     os.makedirs(temp+dir1)
-                shutil.copy(ignore, temp + dir1 + ignore.split('/')[len(ignore.split('/')) - 1])
+                ignoredfile = temp + dir1 + ignore.split('/')[len(ignore.split('/')) - 1]
+                ignored.append(ignoredfile)
+                shutil.copy(ignore, ignoredfile)
             hg.clean(self.repo, self.current)
             for ignore in self.ignorelist:
-                shutil.copyfile(temp + ignore.split('/')[len(ignore.split('/')) - 1], ignore)
-                os.remove(temp + ignore.split('/')[len(ignore.split('/')) - 1])
+                shutil.copyfile(ignored.index(ignore), ignore)
+                os.remove(ignored.index(ignore))
                 if len(ignore.split('/')) > 1:
                     gets = 0; dir1 = ''
                     while gets != len(ignore.split('/'))-1:
                         dir1 += ignore.split('/')[gets] + os.sep
                         gets += 1
                     os.removedirs(temp+dir1)
-        else: wx.MessageBox('No default Rpository set.  Skipping Auto Update!', 'Info')
+        else: wx.MessageBox('Default Repo Not Found.  Skipping Auto Update!', 'Info')
 
     def LoadDoc(self):
-        ignore = open(self.filename)
+        manifest = open(self.filename)
         self.ignorelist = []
-        for i in ignore: self.ignorelist.append(str(i [:len(i)-1]))
-        manifest = ignore.readlines()
-        ignore.close()
+        ignore = manifest.readlines()
+        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        manifest.close()
 
     def OnExit(self):
         imported = ['manifest', 'orpg.dirpath', 'orpg.orpgCore', 'orpg.orpg_version', 
