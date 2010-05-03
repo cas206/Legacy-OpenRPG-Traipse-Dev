@@ -321,7 +321,7 @@ class Connections(wx.ListCtrl):
                 BanMsg = wx.TextEntryDialog( self, "Enter A Message To Send:",
                                                  "Ban Message", message, wx.OK|wx.CANCEL|wx.CENTRE )
                 if BanMsg.ShowModal() == wx.ID_OK: message = BanMsg.GetValue()
-                else: message = ''
+                else: return
                 Silent = wx.MessageDialog(None, 'Silent Ban?', 'Question', 
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if Silent.ShowModal() == wx.ID_YES: silent = 1
@@ -330,14 +330,30 @@ class Connections(wx.ListCtrl):
                 self.remove( playerID )
             elif menuItem == 4:
                 msg = self.GetMessageInput( "Send a message to player" )
-                if len(msg): self.main.server.server.send( msg, playerID, str(groupID) )
+
+                broadcast = '<chat type="1" version="1.0"><font color="#FF0000">' +msg+ '</font></chat>'
+                chat = Element('chat')
+                chat.set('type', '1')
+                chat.set('version', '1.0')
+                chat.text = broadcast
+                msg = self.main.server.server.buildMsg(str(playerID), '0', '1', msg)
+
+                if len(msg): self.main.server.server.players[playerID].outbox.put(msg)
             #Leave this in for now.
             elif menuItem == 5:
                 msg = self.GetMessageInput( "Send message to room of this player")
+
+                broadcast = '<chat type="1" version="1.0"><font color="#FF0000">' +msg+ '</font></chat>'
+                chat = Element('chat')
+                chat.set('type', '1')
+                chat.set('version', '1.0')
+                chat.text = broadcast
+                msg = self.main.server.server.buildMsg('all', '0', '1', tostring(chat))
+
                 if len(msg): self.main.server.server.send_to_group('0', str(groupID), msg )
             elif menuItem == 6:
                 msg = self.GetMessageInput( "Broadcast Server Message" )
-                if len(msg): self.main.server.server.broadcast( msg )
+                if len(msg): self.main.server.server.broadcast(msg )
             elif menuItem == 3:
                 version_string = self.main.server.server.obtain_by_id(playerID, 'client_string')
                 if version_string: wx.MessageBox("Running client version " + version_string,"Version")
@@ -479,7 +495,6 @@ class ServerGUI(wx.Frame):
         else: self.debugger.Show()
 
     def TraipseSuiteWarn(self, menuitem):
-        print 'traipse warn' #logger.debug('traipse warn')
         ### Allows for the reuse of the 'Attention' menu.
         ### component.get('frame').TraipseSuiteWarn('item') ### Portable
         self.mainMenu.Remove(3)
@@ -595,7 +610,7 @@ class ServerGUI(wx.Frame):
         self.conns.updateRoom(data)
 
     def OnUpdateGroup(self, data):
-        (room, room_id, players) = data; print 'update group', data
+        (room, room_id, players) = data
         self.groups.UpdateGroup(data)
 
     def OnSetRole( self, data ):

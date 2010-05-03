@@ -1371,8 +1371,7 @@ class chat_panel(wx.Panel):
         alias = msg.get_alias()
         # who sent us the message?
         if alias: display_name = self.chat_display_name([alias, player[1], player[2]])
-        elif player: display_name = self.chat_display_name(player)
-        else: display_name = "Server Administrator"
+        else: display_name = self.chat_display_name(player)
 
         ######### START plugin_incoming_msg() ###########
         for plugin_fname in self.activeplugins.keys():
@@ -1595,10 +1594,10 @@ class chat_panel(wx.Panel):
     # This subroutine builds a chat display name.
     #
     def chat_display_name(self, player):
-        if self.settings.get_setting("ShowIDInChat") == "0":
-            display_name = player[0]
-        else:
-            display_name = "("+player[2]+") " + player[0]
+        if player == None:
+            player = ['<b><i><u>Server Administrator</u>-></i></b> ', '127.0.0.1', '0']
+        if self.settings.get_setting("ShowIDInChat") == "0": display_name = player[0]
+        else: display_name = "("+player[2]+") " + player[0]
         return display_name
 
     # This subroutine will get a hex color and return it, or return nothing

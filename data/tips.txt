@@ -43,3 +43,6 @@ Die roller notes are available on the Features Node. Right click on the top of t
 You can search your chat session by opening the text view of it (click the button to the right of the dice). Type in the search term and hit "find".
 
 The map has a tape measure. Hold down SHIFT and drag with the left mouse button down.
+
+Traipse's Namespace 2.0 offers much more control over your gametree references. With the Standard Namespace plugin you can play with your friends who use the older model
+

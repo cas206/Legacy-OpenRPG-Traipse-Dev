@@ -65,7 +65,7 @@ The fog layer hides the entire map from the prying eyes of players.
         </nodehandler>
       </nodehandler>
       <nodehandler class="tabber_handler" frame="400,400,424,101" icon="gear" map="Traipse OpenRPG::User Manual" module="containers" name="Game Tree" version="1.0">
-        <nodehandler class="tabber_handler" frame="400,400,275,122" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Introduction" version="1.0">
+        <nodehandler class="tabber_handler" frame="400,400,275,122" icon="labtop" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Introduction" version="1.0">
           <text hide_title="0" multiline="1" raw_mode="0" send_button="0">  Persistant users who wanted the stability of Traipse and the ease of Namespace have described to me how they envision Namespace should work. When I heard this I immediately realized that my method provided the aspects users wanted, but not simplicity in design this method would provide. The Traipse Namespace is a little different than Standard but it offers more stability in it's approach
 
   There are two methods provided with the Traipse Namespace, and these two allow you to a great deal of control when you choose to use Namespace to reference your nodes.
@@ -102,7 +102,7 @@ Usage: Namespace External is a different approach to Namespace. With Namespace E
           <text hide_title="0" multiline="1" raw_mode="0" send_button="1">Grids can now be called from by adding a Row, Column to the end of the grid reference.
 
 Example: !&amp;Abilities::2,2&amp;!</text>
-        </nodehandler><nodehandler class="tabber_handler" frame="527,400,259,85" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Ornery (past)" version="1.0"><nodehandler class="tabber_handler" frame="410,490,334,45" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)" module="containers" name="Reference Examples" version="1.0">
+        </nodehandler><nodehandler class="tabber_handler" frame="527,400,259,85" icon="book" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Ornery (past)" version="1.0"><nodehandler class="tabber_handler" frame="410,490,334,45" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)" module="containers" name="Reference Examples" version="1.0">
           <nodehandler class="textctrl_handler" frame="400,400,484,144" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)::Reference Examples" module="forms" name="Quick Help" version="1.0">
             <text hide_title="0" multiline="1" raw_mode="1" send_button="0">Quick Help:
 

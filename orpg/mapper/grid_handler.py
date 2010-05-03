@@ -40,13 +40,11 @@ class grid_handler(base_layer_handler):
         self.grid_snap = wx.CheckBox(self, wx.ID_ANY, " Snap")
         self.grid_size = wx.TextCtrl(self, wx.ID_ANY, size=(32,-1) )
         self.grid_ratio = wx.TextCtrl(self, wx.ID_ANY, size=(32,-1) )
-        #self.color_button = wx.Button(self, wx.ID_ANY, "Color", style=wx.BU_EXACTFIT)
-        self.color_button = createMaskedButton(self, dir_struct["icon"]+'grid.gif', 
+        self.color_button = createMaskedButton(self, dir_struct["icon"]+'grid.png', 
                                                     'Grid Color', wx.ID_ANY, '#bdbdbd', 
-                                                    wx.BITMAP_TYPE_GIF)
+                                                    wx.BITMAP_TYPE_PNG)
         self.apply_button = wx.Button(self, wx.ID_OK, "Apply", style=wx.BU_EXACTFIT)
         self.color_button.SetBackgroundColour(wx.BLACK)
-        self.color_button.SetForegroundColour(wx.WHITE)
         self.sizer.Add(wx.StaticText(self, -1, "Size: "), 0, wx.ALIGN_CENTER)
         self.sizer.Add(self.grid_size, 0, wx.ALIGN_CENTER)
         self.sizer.Add((6,0))
