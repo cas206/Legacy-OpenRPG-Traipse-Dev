@@ -929,10 +929,9 @@ class orpgFrame(wx.Frame):
         etreeEl = Element('msg')
         try: etreeEl.append(fromstring(data))
         except: etreeEl.text = data
-        if player: display_name = self.chat.chat_display_name(player)
-        else: display_name = "Server Administrator"
 
-        if etreeEl.text: self.chat.Post(etreeEl.text)
+        display_name = self.chat.chat_display_name(player)
+        if etreeEl.text:self.chat.Post(display_name+etreeEl.text)
 
         for child in etreeEl.getchildren():
             if child.tag == 'tree':
