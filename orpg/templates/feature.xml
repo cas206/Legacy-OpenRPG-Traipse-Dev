@@ -1,4 +1,4 @@
-<nodehandler class="tabber_handler" frame="630,400,0,48" icon="help" map="" module="containers" name="Traipse OpenRPG" version="1.0">
+<nodehandler class="tabber_handler" frame="400,400,0,48" icon="help" map="" module="containers" name="Traipse OpenRPG" version="1.0">
     <nodehandler class="tabber_handler" frame="636,449,368,80" icon="labtop" map="Traipse OpenRPG" module="containers" name="User Manual" version="1.0">
       <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Introduction" version="1.0">
         <text hide_title="0" multiline="1" raw_mode="0" send_button="0">Welcome to Traipse OpenRPG.
@@ -65,7 +65,7 @@ The fog layer hides the entire map from the prying eyes of players.
         </nodehandler>
       </nodehandler>
       <nodehandler class="tabber_handler" frame="400,400,424,101" icon="gear" map="Traipse OpenRPG::User Manual" module="containers" name="Game Tree" version="1.0">
-        <nodehandler class="tabber_handler" frame="400,400,275,122" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Introduction" version="1.0">
+        <nodehandler class="tabber_handler" frame="400,400,275,122" icon="labtop" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Introduction" version="1.0">
           <text hide_title="0" multiline="1" raw_mode="0" send_button="0">  Persistant users who wanted the stability of Traipse and the ease of Namespace have described to me how they envision Namespace should work. When I heard this I immediately realized that my method provided the aspects users wanted, but not simplicity in design this method would provide. The Traipse Namespace is a little different than Standard but it offers more stability in it's approach
 
   There are two methods provided with the Traipse Namespace, and these two allow you to a great deal of control when you choose to use Namespace to reference your nodes.
@@ -90,7 +90,7 @@ Usage: Namespace External is a different approach to Namespace. With Namespace E
   It is really easy to narrow down External. External doesn't work like a string, it works like a lightning bolt. To get a good example open up the 4e PC Sheet node that comes with Traipse and try some different commands in chat.
 
 &lt;b&gt;1:&lt;/b&gt; !&amp;4e PC Sheet::Slot 1&amp;!
-&lt;b&gt;2:&lt;/b&gt; !&amp;4e PC Sheet::Belt::Slot 1&amp;!
+&lt;b&gt;2:&lt;/b&gt; !&amp;4e PC Sheet::Belt:: Slot 1&amp;!
 &lt;b&gt;3:&lt;/b&gt; !&amp;4e PC Sheet::Inventory&amp;!
 &lt;b&gt;4:&lt;/b&gt; !&amp;4e PC Sheet::Inventory::Slot 1&amp;!
 
@@ -102,7 +102,7 @@ Usage: Namespace External is a different approach to Namespace. With Namespace E
           <text hide_title="0" multiline="1" raw_mode="0" send_button="1">Grids can now be called from by adding a Row, Column to the end of the grid reference.
 
 Example: !&amp;Abilities::2,2&amp;!</text>
-        </nodehandler><nodehandler class="tabber_handler" frame="527,400,259,85" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Ornery (past)" version="1.0"><nodehandler class="tabber_handler" frame="410,490,334,45" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)" module="containers" name="Reference Examples" version="1.0">
+        </nodehandler><nodehandler class="tabber_handler" frame="527,400,259,85" icon="book" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Ornery (past)" version="1.0"><nodehandler class="tabber_handler" frame="410,490,334,45" icon="tabber" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)" module="containers" name="Reference Examples" version="1.0">
           <nodehandler class="textctrl_handler" frame="400,400,484,144" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Ornery (past)::Reference Examples" module="forms" name="Quick Help" version="1.0">
             <text hide_title="0" multiline="1" raw_mode="1" send_button="0">Quick Help:
 
@@ -518,22 +518,20 @@ Is this the end already?</text>
     </nodehandler>
     <nodehandler border="1" class="group_handler" cols="1" icon="grid" map="Traipse OpenRPG" module="containers" name="Templates" status="useful" version="1.0">
       <nodehandler border="1" class="group_handler" cols="1" icon="knight" map="Traipse OpenRPG::Templates" module="containers" name="PC Sheets" version="1.0">
-        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3.5 Tool" version="1.0">
-          <file name="dnd3.5.xml" />
-        </nodehandler>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create 4e PC Sheet" version="1.0">
           <file name="4e_char_sheet.xml" />
         </nodehandler>
-        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create WH PC Sheet" version="1.0">
-  <file name="Warhammerv2CS2-Traipse.xml" />
-</nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3rd Edition Character Tool" version="1.0">
-          <file name="dnd3e.xml" />
+        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3.5 Tool" version="1.0">
+          <file name="dnd3.5.xml" />
         </nodehandler>
-        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create New d20 Character Tool" version="1.0">
-          <file name="d20character.xml" />
+        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3rd Edition Character Tool" version="1.0">
+          <file name="dnd3e.xml" />
         </nodehandler>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create New St*r W*rs Character Tool" version="1.0">
           <file name="StarWars_d20character.xml" />
+        </nodehandler>
+        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create New d20 Character Tool" version="1.0">
+          <file name="d20character.xml" />
         </nodehandler>
         </nodehandler>
       <nodehandler border="1" class="group_handler" cols="1" icon="flask" map="Traipse OpenRPG::Templates" module="containers" name="Nodes" status="useful" version="1.0">
