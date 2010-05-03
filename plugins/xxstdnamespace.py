@@ -18,8 +18,8 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         self.help = 'The Standard Namespace plugin allows for users of Traipse to use '
         self.help += 'the Standard Namespace syntax of !@ :: @!\n\n'
         self.help += 'This plugin modifies the External method, so context sensivity\n'
-        self.help += 'is not calculted when using the Standard syntax. References must\n'
-        self.help += 'a unique name.'
+        self.help += 'is not calculated when using the Standard syntax. References must '
+        self.help += 'have a unique name.'
 
         self.parseMethods = {'Traipse': Parse.NameSpaceE, 'Standard': self.NameSpaceS}
 

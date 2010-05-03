@@ -1869,11 +1869,14 @@ class mplay_server:
         to_id = xml_dom.get("to")
         from_id = xml_dom.get("from")
         group_id = xml_dom.get("group_id")
+
         ## Backwards compatibility with older clients
         end = data.find(">")
+        head = data[:end+1]
         msg = data[end+1:]
         if msg[-6:] == '</msg>': msg = msg[:-6]
-        data = msg
+        if head[end-1:] == '/>': head = head[:end-2]+'>'
+        data = head+msg+'</msg>'
 
         if from_id == "0" or len(from_id) == 0:
             print "WARNING!! Message received with an invalid from_id.  Message dropped."

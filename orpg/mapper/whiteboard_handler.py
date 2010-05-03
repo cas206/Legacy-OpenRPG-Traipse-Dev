@@ -57,9 +57,9 @@ class whiteboard_handler(base_layer_handler):
 
     def build_ctrls(self):
         base_layer_handler.build_ctrls(self)
-        self.color_button = createMaskedButton(self, dir_struct["icon"]+'draw.gif', 
+        self.color_button = createMaskedButton(self, dir_struct["icon"]+'draw.png', 
                                                     'Pen Color', wx.ID_ANY, '#bdbdbd', 
-                                                    wx.BITMAP_TYPE_GIF)
+                                                    wx.BITMAP_TYPE_PNG)
         self.color_button.SetBackgroundColour(wx.BLACK)
         self.color_button.SetForegroundColour(wx.WHITE)
         self.drawmode_ctrl = wx.Choice(self, wx.ID_ANY, choices = ["Freeform", "Polyline","Text", "Cone", "Circle"])
