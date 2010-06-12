@@ -37,6 +37,7 @@ import string
 import map_miniature_nodehandler
 import orpg.mapper.map_msg
 import orpg.minidom as minidom
+from orpg.tools.InterParse import Parse
 # import scriptkit
 
 # Constants
@@ -44,17 +45,6 @@ TO_MINILIB_MAP = {'path':'url', 'label':'name', 'id':None, 'action':None}
 FROM_MINILIB_MAP = {'url':'path', 'name':'label', 'unique':None}
 CORE_ATTRIBUTES = ['name', 'url', 'unique', 'posy', 'posx', 'hide', 'face', 'heading', 'align', 'locked', 'width', 'height']
 
-ATTRIBUTE_NAME = 'name'
-ATTRIBUTE_URL = 'url'
-ATTRIBUTE_UNIQUE = 'unique'
-ATTRIBUTE_ID = 'id'
-ATTRIBUTE_POSX = 'posx'
-ATTRIBUTE_POSY = 'posy'
-
-TAG_MINIATURE = 'miniature'
-
-COMPONENT_MAP = 'map'
-COMPONENT_SESSION = 'session'
 # <nodehandler name='?' module='minilib' class='minilib_handler'>
 #     <miniature name='?' url='?' unique='?'></miniature>
 # </nodehandler>
@@ -100,11 +90,11 @@ class minilib_handler( node_handler ):
         """
         str = '<table border="2" >'
         str += "<tr><th width='20%'>Label</th><th>Image</th><th width='65%'>URL</th><th>Unique</th></tr>"
-        for mini in self.xml.findall(TAG_MINIATURE):
-            url = mini.get(ATTRIBUTE_URL)
-            label = mini.get(ATTRIBUTE_NAME)
+        for mini in self.xml.findall('miniature'):
+            url = mini.get('url')
+            label = mini.get('name')
             flag = 0
-            try: flag = eval( mini.get(ATTRIBUTE_UNIQUE) )
+            try: flag = eval( mini.get('unique') )
             except: pass
             show = 'yes'
             if flag: show = 'no'
@@ -133,13 +123,13 @@ class minilib_handler( node_handler ):
             for attrib in obj.keys():
                 key = TO_MINILIB_MAP.get( attrib, attrib )
                 if key != None: dict[ key ] = obj.get( attrib )
-            dict[ ATTRIBUTE_UNIQUE ] = unique
+            dict[ 'unique' ] = unique
             self.new_mini( dict )
         else: node_handler.on_drop(self, evt)
 
 
     def new_mini( self, data={}, add=1 ):
-        mini = Element( TAG_MINIATURE )
+        mini = Element( 'miniature' )
         for key in data.keys(): mini.set( key, data[ key ] )
         for key in CORE_ATTRIBUTES:
             if mini.get( key ) == ('' or None): mini.set( key, '0' )
@@ -154,37 +144,39 @@ class minilib_handler( node_handler ):
     def add_leaf( self, mini, icon='gear' ):
         tree = self.tree
         icons = tree.icons
-        key = mini.get( ATTRIBUTE_NAME )
+        key = mini.get( 'name' )
         self.mydata.append( mini )
 
     def update_leaves( self ):
         self.mydata = []
-        for n in self.xml.findall(TAG_MINIATURE): self.add_leaf( n )
+        for n in self.xml.findall('miniature'): self.add_leaf( n )
 
     def on_drag( self, evt ):
         print 'drag event caught'
 
     def send_mini_to_map( self, mini, count=1, addName=True ):
         if mini == None: return
-        if mini.get( ATTRIBUTE_URL ) == '' or mini.get( ATTRIBUTE_URL ) == 'http://':
-            self.chat.ParsePost( self.chat.colorize(self.chat.syscolor, '"%s" is not a valid URL, the mini "%s" will not be added to the map' % ( mini.get( ATTRIBUTE_URL ), mini.get( ATTRIBUTE_NAME ) )) )
+        if mini.get( 'url' ) == '' or mini.get( 'url' ) == 'http://':
+            Parse.Post( self.chat.colorize(self.chat.syscolor, 
+                        '"%s" is not a valid URL, the mini "%s" will not be added to the map' % ( 
+                        mini.get( 'url' ), mini.get( 'name' ) )) )
             return
-        session = component.get( COMPONENT_SESSION )
+        session = component.get( 'session' )
         if (session.my_role() != session.ROLE_GM) and (session.my_role() != session.ROLE_PLAYER):
             component.get("chat").InfoPost("You must be either a player or GM to use the miniature Layer")
             return
-        map = component.get(COMPONENT_MAP)
+        canvas = component.get('map')
         for loop in range( count ):
             msg = self.get_miniature_XML( mini, addName)
             msg = str("<map action='update'><miniatures>" + msg + "</miniatures></map>")
-            map.new_data( msg )
+            canvas.new_data( msg )
             session.send( msg )
 
     def get_miniature_XML( self, mini_xml, addName = True ):
         msg = orpg.mapper.map_msg.mini_msg()
-        map = component.get( COMPONENT_MAP )
-        session = component.get( COMPONENT_SESSION )
-        msg.init_prop( ATTRIBUTE_ID, session.get_next_id() )
+        canvas = component.get( 'map' )
+        session = component.get( 'session' )
+        msg.init_prop( 'id', session.get_next_id() )
         msg.init_prop('selected', '1')# this will make the mini initially selected
         for k in mini_xml.keys():
             # translate our attributes to map attributes
@@ -193,24 +185,24 @@ class minilib_handler( node_handler ):
                 if not addName and k == 'name': pass
                 else: msg.init_prop( key, mini_xml.get( k ) )
         unique = self.is_unique( mini_xml )
-        if addName: label = mini_xml.get( ATTRIBUTE_NAME )
+        if addName: label = mini_xml.get( 'name' )
         else: label = ''
         return msg.get_all_xml()
 
     def is_unique( self, mini ):
-        unique = mini.get( ATTRIBUTE_UNIQUE )
+        unique = mini.get( 'unique' )
         val = 0
         try: val = eval( unique )
         except: val = len( unique )
         return val
 
     def sanity_check_nodes( self ):
-        for node in self.xml.findall(TAG_MINIATURE):
-            if node.get( ATTRIBUTE_POSX ) == '': node.set( ATTRIBUTE_POSX, '0' )
-            if node.get( ATTRIBUTE_POSY ) == '': node.set( ATTRIBUTE_POSY, '0' )
+        for node in self.xml.findall('miniature'):
+            if node.get( 'posx' ) == '': node.set( 'posx', '0' )
+            if node.get( 'posy' ) == '': node.set( 'posy', '0' )
 
     def get_mini( self, index ):
-        try: return self.xml.findall(TAG_MINIATURE)[index]
+        try: return self.xml.findall('miniature')[index]
         except: return None
 
 class mini_handler( node_handler ):
@@ -279,7 +271,7 @@ class minilib_use_panel(wx.Panel):
         """Returns a dictionary of label => game tree miniature DOM node mappings.
         """
         self.list = []
-        for mini in self.handler.xml.findall(TAG_MINIATURE): self.list.append( mini.get( ATTRIBUTE_NAME ) )
+        for mini in self.handler.xml.findall('miniature'): self.list.append( mini.get( 'name' ) )
         return self.list
 
     def on_close(self, evt):
@@ -407,7 +399,7 @@ class minilib_grid(wx.grid.Grid):
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.select_cell)
 
     def update_cols( self ):
-        for n in self.handler.xml.findall(TAG_MINIATURE):
+        for n in self.handler.xml.findall('miniature'):
             for k in n.keys():
                 if k not in self.keys: self.keys.append( k )
 
@@ -426,7 +418,7 @@ class minilib_grid(wx.grid.Grid):
         """Returns the list of 'miniature' DOM elements associated with this
         miniature library.
         """
-        return self.handler.xml.findall( TAG_MINIATURE )
+        return self.handler.xml.findall( 'miniature' )
 
     def add_row( self, count = 1 ):
         """creates a new miniature node, and then adds it to the current
@@ -434,8 +426,8 @@ class minilib_grid(wx.grid.Grid):
         """
         self.AppendRows( count )
         node = self.handler.new_mini( {
-          ATTRIBUTE_NAME :' ',
-          ATTRIBUTE_URL :'http://'} )# minidom.Element( TAG_MINIATURE )
+          'name' :' ',
+          'url' :'http://'} )# minidom.Element( 'miniature' )
         self.update_all()
         #self.handler.xml.append( node )
 
@@ -446,7 +438,7 @@ class minilib_grid(wx.grid.Grid):
         """
         if self.selectedRow > -1:
             pos = self.selectedRow
-            list = self.handler.xml.findall(TAG_MINIATURE)
+            list = self.handler.xml.findall('miniature')
             self.handler.xml.remove( list[pos] )
             self.DeleteRows( pos, 1 )
 
@@ -492,7 +484,7 @@ class minilib_grid(wx.grid.Grid):
         return self.GetTable().GetValue( self.selectedRow, 1 )
 
     def getSelectedSerial( self ):
-        """Returns the ATTRIBUTE_UNIQUE value for the selected row
+        """Returns the 'unique' value for the selected row
         """
         return self.GetTable().GetValue( self.selectedRow, 2 )
 

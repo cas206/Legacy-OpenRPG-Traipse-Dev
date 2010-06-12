@@ -658,19 +658,20 @@ class ServerGUI(wx.Frame):
                 wx.EndBusyCursor()
             else: self.show_error("Server is already running.", "Error Starting Server")
 
-    def OnStop(self, event = None):
+    def OnStop(self, event=None):
         """ Stop server. """
         if self.STATUS == SERVER_RUNNING:
-            self.OnUnregister()
+            self.OnUnregister(event)
             self.server.stop()
             self.STATUS = SERVER_STOPPED
-            self.sb.SetStatusText("Stopped", 3)
-            self.SetTitle(__appname__ + "- (stopped) - (unregistered)")
-            self.mainMenu.Enable(1, True)
-            self.mainMenu.Enable(2, False)
-            self.mainMenu.Enable(4, False)
-            self.mainMenu.Enable(5, False)
-            self.conns.DeleteAllItems()
+            if event != 'Quit':
+                self.sb.SetStatusText("Stopped", 3)
+                self.SetTitle(__appname__ + "- (stopped) - (unregistered)")
+                self.mainMenu.Enable(1, True)
+                self.mainMenu.Enable(2, False)
+                self.mainMenu.Enable(4, False)
+                self.mainMenu.Enable(5, False)
+                self.conns.DeleteAllItems()
 
     def OnRegister(self, event = None):
         """ Call into mplay_server's register() function.
@@ -695,11 +696,12 @@ class ServerGUI(wx.Frame):
         """
         wx.BeginBusyCursor()
         self.server.server.unregister()
-        self.sb.SetStatusText("Unregistered", 4)
-        self.mainMenu.Enable(5, False)
-        self.mainMenu.Enable(4, True)
-        #self.mainMenu.Enable( 2, True )
-        self.SetTitle(__appname__ + "- (running) - (unregistered)")
+        if event != 'Quit':
+            self.sb.SetStatusText("Unregistered", 4)
+            self.mainMenu.Enable(5, False)
+            self.mainMenu.Enable(4, True)
+            #self.mainMenu.Enable( 2, True )
+            self.SetTitle(__appname__ + "- (running) - (unregistered)")
         wx.EndBusyCursor()
 
     def ModifyBanList(self, event):
@@ -726,7 +728,7 @@ class ServerGUI(wx.Frame):
 
     def ExitConfirmed(self, event=None):
         """ Quit the program. """
-        self.OnStop()
+        self.OnStop('Quit')
         self.BanListDialog.Destroy()
         wx.CallAfter(self.Destroy)
 

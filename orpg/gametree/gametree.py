@@ -47,7 +47,7 @@ from nodehandlers import core
 import string, urllib, time, os
 from shutil import copytree, copystat, copy, copyfile
 
-from orpg.orpg_xml import xml
+#from orpg.orpg_xml import xml
 from orpg.tools.validate import validate
 from orpg.tools.orpg_log import logger, debug
 from orpg.tools.orpg_settings import settings

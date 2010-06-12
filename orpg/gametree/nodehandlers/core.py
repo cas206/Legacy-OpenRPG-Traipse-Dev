@@ -345,6 +345,7 @@ class text_edit_panel(wx.Panel):
             if bad_txt_found:
                 wx.MessageBox("Some non 7-bit ASCII characters found and stripped","Warning!")
             txt = u_txt
+            print txt, self.handler, self.handler.xml
             self.handler.text._set_nodeValue(txt)
 
 

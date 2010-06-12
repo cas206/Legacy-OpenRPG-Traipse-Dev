@@ -74,6 +74,7 @@ __docformat__ = "epytext"
 # Beginning Of FLATNOTEBOOK wxPython Code
 #----------------------------------------------------------------------
 
+print 'Flatnotebook'
 import wx
 import random
 import math

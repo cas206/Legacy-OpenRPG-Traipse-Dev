@@ -406,19 +406,20 @@ class grid_layer(layer_base):
         else: return ''
 
     def layerTakeDOM(self, xml_dom):
-        if xml_dom.hasAttribute("color"):
-            r,g,b = self.r_h.rgb_tuple(xml_dom.getAttribute("color"))
+        color = xml_dom.get('color')
+        if color != None:
+            r,g,b = self.r_h.rgb_tuple(color)
             self.set_color(cmpColour(r,g,b))
         #backwards compatible with non-isometric map formated clients
-        ratio = RATIO_DEFAULT
-        if xml_dom.hasAttribute("ratio"): ratio = xml_dom.getAttribute("ratio")
-        if xml_dom.hasAttribute("mode"):
-            self.SetMode(int(xml_dom.getAttribute("mode")))
-        if xml_dom.hasAttribute("size"):
-            self.unit_size = int(xml_dom.getAttribute("size"))
+        ratio = RATIO_DEFAULT if xml_dom.get("ratio") == None else xml_dom.get('ratio')
+        mode = xml_dom.get('mode')
+        if mode != None: self.SetMode(int(mode))
+        size = xml_dom.get('size')
+        if size != None:
+            self.unit_size = int(size)
             self.unit_size_y = self.unit_size
-        if xml_dom.hasAttribute("snap"):
-            if (xml_dom.getAttribute("snap") == 'True') or (xml_dom.getAttribute("snap") == "1"): self.snap = True
-            else: self.snap = False
-        if xml_dom.hasAttribute("line"):
-            self.SetLine(int(xml_dom.getAttribute("line")))
+        if (xml_dom.get("snap") == 'True') or (xml_dom.get("snap") == "1"): self.snap = True
+        else: self.snap = False
+        line = xml_dom.get('line')
+        if line != None: self.SetLine(int(line))
+

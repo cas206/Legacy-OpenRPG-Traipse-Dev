@@ -56,49 +56,54 @@ class img_helper:
         pos = string.rfind(file_name,'.')
         ext = string.lower(file_name[pos+1:])
         img_type = 0
-	recycle_bin = {"gif": wx.BITMAP_TYPE_GIF, "jpg": wx.BITMAP_TYPE_JPEG, 
+        recycle_bin = {"gif": wx.BITMAP_TYPE_GIF, "jpg": wx.BITMAP_TYPE_JPEG, 
         "jpeg": wx.BITMAP_TYPE_JPEG, "bmp": wx.BITMAP_TYPE_BMP, "png": wx.BITMAP_TYPE_PNG}
-	if recycle_bin.has_key(ext): img_type = recycle_bin[ext]
-	else: img_type = None
-	del recycle_bin; return img_type
+        if recycle_bin.has_key(ext): img_type = recycle_bin[ext]
+        else: img_type = None
+        del recycle_bin; return img_type
 
 ################################
 ## Tabs
 ################################
 class orpgTabberWnd(FNB.FlatNotebook):
-    def __init__(self, parent, closeable=False, size=wx.DefaultSize, style = False):
+    def __init__(self, parent, closeable=False, size=wx.DefaultSize, style=False):
         nbstyle = FNB.FNB_HIDE_ON_SINGLE_TAB|FNB.FNB_BACKGROUND_GRADIENT
+        if style: nbstyle |= style
         FNB.FlatNotebook.__init__(self, parent, -1, size=size, style=nbstyle)
         rgbcovert = orpg.tools.rgbhex.RGBHex()
         self.log = component.get("log")
         self.log.log("Enter orpgTabberWnd", ORPG_DEBUG)
         self.settings = component.get("settings")
-        tabtheme = self.settings.get_setting('TabTheme')
-        tabtext = self.settings.get_setting('TabTextColor')
+        tabtheme = self.settings.get('TabTheme')
+        tabtext = self.settings.get('TabTextColor')
         (tred, tgreen, tblue) = rgbcovert.rgb_tuple(tabtext)
-        tabbedwindows = component.get("tabbedWindows")
-        tabbedwindows.append(self)
-        component.add("tabbedWindows", tabbedwindows)
+        component.get("tabbedWindows").append(self)
 
         theme_dict = {'slanted&aqua': FNB.FNB_VC8, 'slanted&bw': FNB.FNB_VC8, 'flat&aqua': FNB.FNB_FANCY_TABS, 
-            'flat&bw': FNB.FNB_FANCY_TABS, 'customflat': FNB.FNB_FANCY_TABS, 'customslant': FNB.FNB_VC8, 
-            'slanted&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS, 'slant&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS}
-        nbstyle |= theme_dict[tabtheme]
-        if style: nbstyle |= style
-        self.SetWindowStyleFlag(nbstyle)
+            'flat&bw': FNB.FNB_FANCY_TABS, 'customflat': FNB.FNB_FANCY_TABS, 'customslant': FNB.FNB_VC8}
+            #'slanted&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS, 'slant&colorful': FNB.FNB_VC8|FNB.FNB_COLORFUL_TABS}
+        if theme_dict.has_key(tabtheme): style |= theme_dict[tabtheme]
+        else: style |= theme_dict['customflat']; self.settings.change('TabTheme', 'customflat')
+        self.SetWindowStyleFlag(style)
+
+        tabbg = self.settings.get('TabBackgroundGradient')
+        (red, green, blue) = rgbcovert.rgb_tuple(tabbg)
+        self.SetTabAreaColour(wx.Color(red, green, blue))
 
         # Tas - sirebral.  Planned changes to the huge statement below.  
         if tabtheme == 'slanted&aqua':
             self.SetGradientColourTo(wx.Color(0, 128, 255))
             self.SetGradientColourFrom(wx.WHITE)
+            self.SetNonActiveTabTextColour(wx.BLACK)
 
         elif tabtheme == 'slanted&bw':
             self.SetGradientColourTo(wx.WHITE)
             self.SetGradientColourFrom(wx.WHITE)
+            self.SetNonActiveTabTextColour(wx.BLACK)
 
         elif tabtheme == 'flat&aqua':
-            self.SetGradientColourFrom(wx.Color(0, 128, 255))
-            self.SetGradientColourTo(wx.WHITE)
+            self.SetGradientColourTo(wx.Color(0, 128, 255))
+            self.SetGradientColourFrom(wx.WHITE)
             self.SetNonActiveTabTextColour(wx.BLACK)
 
         elif tabtheme == 'flat&bw':
@@ -107,28 +112,21 @@ class orpgTabberWnd(FNB.FlatNotebook):
             self.SetNonActiveTabTextColour(wx.BLACK)
 
         elif tabtheme == 'customflat':
-            gfrom = self.settings.get_setting('TabGradientFrom')
-            (red, green, blue) = rgbcovert.rgb_tuple(gfrom)
-            self.SetGradientColourFrom(wx.Color(red, green, blue))
-
-            gto = self.settings.get_setting('TabGradientTo')
-            (red, green, blue) = rgbcovert.rgb_tuple(gto)
+            (red, green, blue) = rgbcovert.rgb_tuple(self.settings.get_setting('TabGradientTo'))
             self.SetGradientColourTo(wx.Color(red, green, blue))
+
+            (red, green, blue) = rgbcovert.rgb_tuple(self.settings.get_setting('TabGradientFrom'))
+            self.SetGradientColourFrom(wx.Color(red, green, blue))
             self.SetNonActiveTabTextColour(wx.Color(tred, tgreen, tblue))
 
         elif tabtheme == 'customslant':
-            gfrom = self.settings.get_setting('TabGradientFrom')
-            (red, green, blue) = rgbcovert.rgb_tuple(gfrom)
-            self.SetGradientColourFrom(wx.Color(red, green, blue))
-
-            gto = self.settings.get_setting('TabGradientTo')
-            (red, green, blue) = rgbcovert.rgb_tuple(gto)
+            (red, green, blue) = rgbcovert.rgb_tuple(self.settings.get_setting('TabGradientTo'))
             self.SetGradientColourTo(wx.Color(red, green, blue))
+
+            (red, green, blue) = rgbcovert.rgb_tuple(self.settings.get_setting('TabGradientFrom'))
+            self.SetGradientColourFrom(wx.Color(red, green, blue))
             self.SetNonActiveTabTextColour(wx.Color(tred, tgreen, tblue))
 
-        tabbg = self.settings.get_setting('TabBackgroundGradient')
-        (red, green, blue) = rgbcovert.rgb_tuple(tabbg)
-        self.SetTabAreaColour(wx.Color(red, green, blue))
         self.Refresh()
         self.log.log("Exit orpgTabberWnd", ORPG_DEBUG)
 

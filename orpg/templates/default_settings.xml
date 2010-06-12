@@ -2,9 +2,9 @@
     <tab name="General" type="tab">
         <tab name="Networking" type="grid">
             <Heartbeat options="bool" value="1" help="This sends a message to the server to keep alive your connection when idle." />
-            <MetaServerBaseURL help="This is the URL that contains the server list." options="URL" value="http://orpgmeta.appspot.com/"/>
+            <MetaServers help="Contains a list of Meta Servers" options=".xml file" value="metaservers.xml"/>
             <ImageServerBaseURL help="This is the URL that contains the server list." options="URL" value="http://openrpg.digitalxero.net/imgupload/index.php"/>
-            <LocalorRemote help="Decide to load files locally or remotely. CherryPy must be running for local files." options="Local | Remote" value="Local"/>
+            <LocalorRemote help="Decide to load files locally or remotely. CherryPy must be running for local files." options="Local | Remote" value="Remote"/>
         </tab>
         <tab name="Sound" type="grid">
             <UnixSoundPlayer help="This is the path to the executable used by unix clients to play sounds." options="path to executable" value=""/>

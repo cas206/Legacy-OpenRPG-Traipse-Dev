@@ -30,7 +30,7 @@
 
 import time
 from orpg.orpg_windows import *
-from orpg.orpg_xml import *
+#from orpg.orpg_xml import *
 from orpg.orpg_wx import *
 import orpg.chat.chat_msg
 
@@ -45,7 +45,7 @@ class scriptkit:
         self.map = component.get( 'map' )
         self.settings = component.get( 'settings' )
         self.session = component.get('session')
-        self.xml = component.get('xml')
+        #self.xml = component.get('xml')
 
     def addMiniatureToMap( self, min_label, min_url, unique=0 ):
         """Adds a new miniature icon to the map.  Miniature <em>will</em> be labeled unless autolabel is

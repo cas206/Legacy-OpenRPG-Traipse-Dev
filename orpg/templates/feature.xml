@@ -65,40 +65,84 @@ The fog layer hides the entire map from the prying eyes of players.
         </nodehandler>
       </nodehandler>
       <nodehandler class="tabber_handler" frame="400,400,424,101" icon="gear" map="Traipse OpenRPG::User Manual" module="containers" name="Game Tree" version="1.0">
-        <nodehandler class="tabber_handler" frame="400,400,275,122" icon="labtop" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Introduction" version="1.0">
-          <text hide_title="0" multiline="1" raw_mode="0" send_button="0">  Persistant users who wanted the stability of Traipse and the ease of Namespace have described to me how they envision Namespace should work. When I heard this I immediately realized that my method provided the aspects users wanted, but not simplicity in design this method would provide. The Traipse Namespace is a little different than Standard but it offers more stability in it's approach
+        <nodehandler class="tabber_handler" frame="400,400,472,75" icon="labtop" map="Traipse OpenRPG::User Manual::Game Tree" module="containers" name="Namespace 2.0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,393,95" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace 2.0" module="forms" name="Introduction" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Namespace 2.0
 
-  There are two methods provided with the Traipse Namespace, and these two allow you to a great deal of control when you choose to use Namespace to reference your nodes.
+Internal Namespace: !=NodeName=! or !=GridName::Row,Colum=!
+External Namespace: !&amp;Container::NodeName&amp;! or !&amp;Container::GridName::Row,Colum&amp;!
 
-There is only one difference in how these two methods work, so once you get the hang of Namespace, you will always know how it works. The difference is, External starts looking from the Game Tree and gets more narrow where as Internal starts from the node it is inside and searchs backwards getting more broad.
-</text>
-        </nodehandler><nodehandler class="textctrl_handler" frame="400,400,257,105" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace" module="forms" name="Usage" version="1.0">
-          <text hide_title="0" multiline="1" raw_mode="0" send_button="1">Namespace Internal: 
-(Syntax) !=Node=!
+Namespace 2.0 now has two different ways of finding nodes in your gametree: Internal and 
+External. The new version will find nodes differently based on which method you use. With External you start looking from the gametree but can define a "container" to be more specific. With Internal you start looking from the "node" the reference is in and look through the tree backwards. You can now reference cells within a grid using either.
 
-Usage: When you use Namespace Internal the software finds the tree map of the node and searches for the top node. Once that node is found it will iterate through the node and look for the reference you have assigned. If it cannot find it in that node, then it will iterate through the map, finding all successive nodes and searching them
+*An explanation of terms*
+Gametree: The list of objects on the left-hand side of the window that holds all your nodes.
+Node: Refers to any object in the gametree.
+Container: Refers only to those nodes that are capable of storing other nodes (Splitter, 
+Tabbers, Folder, Forms, etc.). Used here, it usually refers to the largest container, i.e. the 
+one that shows up in the gametree when fully collapsed. A Container can contain other 
+containers.
+</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,393,95" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace 2.0" module="forms" name="Internal" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Internal Namespace: !=NodeName=!
+-Used from within a node to call another node in the same container, such as a list node 
+calling a text node or grid. *Note* Will not work if multiple nodes within the same container 
+have the same name. Multiple nodes within the entirety of the gametree can have the same names 
+though as long as they are in different containers.
+-Uses the !=NodeName=! syntax for normal nodes.
+-Uses !=GridName::Row,Colum=! to reference cells within a grid
 
-  Namespace Internal is completely context sensitive. You can assign a reference using the Namespace Internal method and it will always find the correct PC Sheet to search in.
+Examples: 
+!=Strength=! 
+(Will find the node named &#8220;Strength&#8221; in the same container and insert it in place of 
+!=Strength=!)
 
-Namespace Internal must be used from within a node.
+!=Ability Scores::3,5=! 
+(Will find cell in Row number 3 and Colum number 5 and insert the information contained there 
+in place of !=Ability Scores::3,5=! )</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,393,95" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace 2.0" module="forms" name="External" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">External Namespace: !&amp;Container::NodeName&amp;!
+-Can only be used from chat (currently) to call a node from anywhere in the gametree. You must 
+specify the container the node is in. You only have to specify the &#8216;largest&#8217; container 
+(typically the one that shows in the gametree when fully collapsed). It doesn&#8217;t matter how 
+many smaller containers within the same container it&#8217;s in, you need only reference the 
+largest. *Note* Will not work if multiple nodes within the same container have the same name. 
+Multiple nodes within the entirety of the gametree can have the same names though as long as 
+they are in different containers.
+-Uses the !&amp;Container::NodeName&amp;! syntax for normal nodes.
+-Uses !&amp;Container::NodeName::Row,Colum&amp;! to reference cells within a grid.
 
-Namespace External: 
-(Syntax) !&amp;Top Node::Node&amp;!
+Examples:
+!&amp;3.5 Character Sheet::Strength&amp;!
+(Will find the node named &#8220;Strength&#8221; within the larger container &#8220;3.5 Character Sheet&#8221; and 
+insert it in place of !&amp;3.5 Character Sheet::Strength&amp;!)
 
-Usage: Namespace External is a different approach to Namespace. With Namespace External you can use the syntax in chat or in other nodes to cross reference nodes. Instead of External being context sensitive, External uses a broadscope that you can narrow down.
+!&amp;3.5 Character Sheet::Ability Scores::3,5&amp;!
+(Will find the cell in Row 3, Colum 5 in within the larger container &#8220;3.5 Character Sheet&#8221; and 
+insert its contents in place of !&amp;3.5 Character Sheet::Ability Scores::3,5&amp;!)</text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,393,95" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace 2.0" module="forms" name="Other Notes" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Other Notes:
+If you have similar nodes (i.e. have a lot of the same node names in them) located within the 
+same Larger container, Internal Namespace will still work as normal. With External Namespace, 
+you will have to specify which of the smaller containers you wish to call from.
 
-  It is really easy to narrow down External. External doesn't work like a string, it works like a lightning bolt. To get a good example open up the 4e PC Sheet node that comes with Traipse and try some different commands in chat.
+For example, if you have a folder container that has two nodes in it, Internal will still work 
+fine from within either. However, if you are trying to use External, it you will have to 
+specify which of smaller containers you want like so: 
+!&amp;LargerContainer::SmallerContainer::NodeName&amp;!
+
+I.E.:
+The Largest container is called &#8220;Character Sheets.&#8221; It contains three other, Smaller 
+containers called &#8220;Luke,&#8221; &#8220;Leia,&#8221; and &#8220;Vader.&#8221; If you want to call the &#8220;Strength&#8221; node located 
+in &#8220;Leia&#8221; you will have to specify it like so: !&amp;Character Sheets::Leia::Strength&amp;!. </text></nodehandler><nodehandler class="textctrl_handler" frame="400,400,392,87" icon="note" map="Traipse OpenRPG::User Manual::Game Tree::Namespace 2.0" module="forms" name="Author Notes" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="1">The Namespace 2.0 is so far my greatest gift to OpenRPG. Namespace 2.0 surpasses the other Namespaces styles because it has a lightning bolt effect.
+
+In 1.7.1 you could use a reference such as !@Name@! to get the name of the Behir (Example Node). The biggest problem with the Namespace was it would only look at the top most node.
+
+Traipse changes how Namespace works by allowing users to be more specific without needing to be too specific. Namespace 2.0 works in a similar fashion, by finding the top most node with a similar name and attempting to use it. Yet, if you want to be more specific you can add node names to the reference and Namespace will find them in order.
+
+Below are some examples uses of the new Namespace. To try them out, create a 4e PC Sheet node and press the Send button.
 
 &lt;b&gt;1:&lt;/b&gt; !&amp;4e PC Sheet::Slot 1&amp;!
-&lt;b&gt;2:&lt;/b&gt; !&amp;4e PC Sheet::Belt:: Slot 1&amp;!
+&lt;b&gt;2:&lt;/b&gt; !&amp;4e PC Sheet::Belt::Slot 1&amp;!
 &lt;b&gt;3:&lt;/b&gt; !&amp;4e PC Sheet::Inventory&amp;!
 &lt;b&gt;4:&lt;/b&gt; !&amp;4e PC Sheet::Inventory::Slot 1&amp;!
 
   Did you see what happened with the last two? Thankfully there is more than one way to get a node!
 
-(Create a 4e PC Sheet node from the Templates and press Send ---v to try it)</text>
-        </nodehandler>
-      </nodehandler><nodehandler class="textctrl_handler" frame="400,400,595,57" icon="note" map="Traipse OpenRPG::User Manual::Game Tree" module="forms" name="Grids" version="1.0">
+(Create a 4e PC Sheet node from the Templates and press Send ---v to try it)
+</text></nodehandler></nodehandler><nodehandler class="textctrl_handler" frame="400,400,595,57" icon="note" map="Traipse OpenRPG::User Manual::Game Tree" module="forms" name="Grids" version="1.0">
           <text hide_title="0" multiline="1" raw_mode="0" send_button="1">Grids can now be called from by adding a Row, Column to the end of the grid reference.
 
 Example: !&amp;Abilities::2,2&amp;!</text>
@@ -518,11 +562,13 @@ Is this the end already?</text>
     </nodehandler>
     <nodehandler border="1" class="group_handler" cols="1" icon="grid" map="Traipse OpenRPG" module="containers" name="Templates" status="useful" version="1.0">
       <nodehandler border="1" class="group_handler" cols="1" icon="knight" map="Traipse OpenRPG::Templates" module="containers" name="PC Sheets" version="1.0">
-        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create 4e PC Sheet" version="1.0">
-          <file name="4e_char_sheet.xml" />
-        </nodehandler>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3.5 Tool" version="1.0">
           <file name="dnd3.5.xml" />
+        </nodehandler>
+        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create WH PC Sheet" version="1.0">
+  <file name="Warhammerv2CS2-Traipse.xml" />
+</nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create 4e PC Sheet" version="1.0">
+          <file name="4e_char_sheet.xml" />
         </nodehandler>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3rd Edition Character Tool" version="1.0">
           <file name="dnd3e.xml" />

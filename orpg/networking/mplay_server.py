@@ -616,7 +616,7 @@ class mplay_server:
 
     def register_callback(instance, xml_dom = None, source=None):
         if xml_dom:    # if we get something
-            if source == getMetaServerBaseURL():    # if the source of this DOM is the authoritative meta
+            if source == getMetaServerList():    # if the source of this DOM is the authoritative meta
                 try:
                     metacache_lock.acquire()
                     curlist = getRawMetaList()      #  read the raw meta cache lines into a list
@@ -648,21 +648,22 @@ class mplay_server:
 
     def registerRooms(self, args=None):
         rooms = ''
-        id = '0'
-        time.sleep(500)
-        for rnum in self.groups.keys():
-            rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][name]":self.groups[rnum].name,
-                                        "room_data[rooms][" + str(rnum) + "][pwd]":str(self.groups[rnum].pwd != "")})+'&'
-            for pid in self.groups[rnum].players:
-                rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][players]["+str(pid)+"]":self.players[pid].name,})+'&'
+        serverId = '0'
+        x = 0
         for meta in self.metas.keys():
-            while id == '0':
-                id, cookie = self.metas[meta].getIdAndCookie()
-                data = urllib.urlencode( {"room_data[server_id]":id,
-                                        "act":'registerrooms'})
-            get_server_dom(data+'&'+rooms, self.metas[meta].path, string=True)
+            while serverId == '0':
+                serverId, cookie = self.metas[meta].getIdAndCookie()
+            if serverId != '0':
+                for rnum in self.groups.keys():
+                    rooms += urllib.urlencode({"room_data[rooms][" +str(rnum)+ "][name]":self.groups[rnum].name,
+                                            "room_data[rooms][" +str(rnum)+ "][pwd]":str(self.groups[rnum].pwd != ""),
+                                            "room_data[rooms][" +str(rnum)+ "][players]":str(len(self.groups[rnum].players))
+                                            })+'&'
+                data = urllib.urlencode({"room_data[server_id]":serverId,
+                                         "act":'registerrooms'})
+                get_server_dom(data+'&'+rooms, meta.get('url'), string=True)
 
-    def register(self,name_given=None):
+    def register(self, name_given=None):
         if name_given == None: name = self.name
         else: self.name = name = name_given
         name = self.clean_published_servername(name)
@@ -672,11 +673,10 @@ class mplay_server:
         else: num_players = 0
 
         #  request only Meta servers compatible with version 2
-        metalist = getMetaServers(versions=["2"])
+        metalist = getMetaServerList()
         if self.show_meta_messages != 0:
             self.log_msg("Found these valid metas:")
-            for meta in metalist: self.log_msg("Meta:" + meta)
-
+            for meta in metalist: self.log_msg("Meta:" + meta.get('url'))
         """
         #  Go through the list and see if there is already a running register
         #  thread for the meta.
@@ -686,7 +686,6 @@ class mplay_server:
         #  iterate through the currently running metas and prune any
         #  not currently listed in the Meta Server list.
         """
-
         if self.show_meta_messages != 0: self.log_msg( "Checking running register threads for outdated metas.")
         for meta in self.metas.keys():
             if self.show_meta_messages != 0: self.log_msg("meta:" + meta + ": ")
@@ -699,7 +698,7 @@ class mplay_server:
 
         #  Now call register() for alive metas or start one if we need one
         for meta in metalist:
-            if self.metas.has_key(meta) and self.metas[meta] and self.metas[meta].isAlive():
+            if (self.metas.has_key(meta) and self.metas[meta] and self.metas[meta].isAlive()):
                 self.metas[meta].register(name=name, 
                                         realHostName=self.server_address, 
                                         num_users=num_players)
@@ -1211,11 +1210,9 @@ class mplay_server:
                 self.log_msg(("update_group", (self.groups[LOBBY_ID].name, LOBBY_ID, len(self.groups[LOBBY_ID].players) ) ))
                 cmsg = ("connect", props) #################################################
                 self.log_msg(cmsg)
-
-                #  If already registered then re-register, thereby updating the Meta
-                #    on the number of players
-                if self.be_registered:
-                    self.register()
+                for meta in self.metas.keys():
+                    self.metas[meta].num_users = len(self.players)
+                thread.start_new_thread(self.registerRooms,(0,))
         except:
             traceback.print_exc()
 
@@ -1809,14 +1806,9 @@ class mplay_server:
             del self.players[id]
             self.log_msg(dmsg)
             self.log_msg(("disconnect",id))
-            """
-            #  If already registered then re-register, thereby updating the Meta
-            #    on the number of players
-            #  Note:  Upon server shutdown, the server is first unregistered, so
-            #           this code won't be repeated for each player being deleted.
-            """
-            if self.be_registered:
-                self.register()
+            for meta in self.metas.keys():
+                self.metas[meta].num_users = len(self.players)
+            thread.start_new_thread(self.registerRooms,(0,))
         except Exception, e: self.log_msg( ('exception', str(e)) )
         self.log_msg("Explicit garbage collection shows %s undeletable items." % str(gc.collect()))
 

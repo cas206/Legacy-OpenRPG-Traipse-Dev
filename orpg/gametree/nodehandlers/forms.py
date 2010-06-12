@@ -30,7 +30,7 @@ __version__ = "$Id: forms.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from containers import *
 import orpg.minidom as minidom
-from orpg.orpg_xml import xml
+#from orpg.orpg_xml import xml
 from wx.lib.scrolledpanel import ScrolledPanel
 from orpg.tools.settings import settings
 from orpg.tools.InterParse import Parse

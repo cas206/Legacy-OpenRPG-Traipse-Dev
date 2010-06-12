@@ -33,7 +33,8 @@ from rgbhex import *
 
 from orpg.tools.orpg_log import logger
 from orpg.tools.validate import validate
-from orpg.orpg_xml import xml
+from xml.etree.ElementTree import ElementTree, Element, parse
+from xml.etree.ElementTree import fromstring, tostring
 from orpg.tools.settings import settings
 
 class orpgSettingsWnd(wx.Dialog):
@@ -70,29 +71,28 @@ class orpgSettingsWnd(wx.Dialog):
     def build_gui(self):
         validate.config_file("settings.xml","default_settings.xml")
         filename = dir_struct["user"] + "settings.xml"
-        temp_file = open(filename)
-        temp_file.close()
-        children = self.settings.xml_dom._get_childNodes()
-        for c in children: self.build_window(c,self.tabber)
+        temp_file = parse(filename)
+        children = self.settings.xml_dom.getchildren()
+        for c in children: self.build_window(c, self.tabber)
 
     def build_window(self, xml_dom, parent_wnd):
-        name = xml_dom._get_nodeName()
+        name = xml_dom.tag
         #container = 0
         if name=="tab": temp_wnd = self.do_tab_window(xml_dom,parent_wnd)
         return temp_wnd
 
     def do_tab_window(self, xml_dom, parent_wnd):
-        type = xml_dom.getAttribute("type")
-        name = xml_dom.getAttribute("name")
+        type = xml_dom.get("type")
+        name = xml_dom.get("name")
 
         if type == "grid":
             temp_wnd = self.do_grid_tab(xml_dom, parent_wnd)
             parent_wnd.AddPage(temp_wnd, name, False)
         elif type == "tab":
             temp_wnd = orpgTabberWnd(parent_wnd, style=FNB.FNB_NO_X_BUTTON)
-            children = xml_dom._get_childNodes()
+            children = xml_dom.getchildren()
             for c in children:
-                if c._get_nodeName() == "tab": self.do_tab_window(c, temp_wnd)
+                if c.tag == "tab": self.do_tab_window(c, temp_wnd)
             temp_wnd.SetSelection(0)
             parent_wnd.AddPage(temp_wnd, name, False)
         elif type == "text":
@@ -103,12 +103,12 @@ class orpgSettingsWnd(wx.Dialog):
 
     def do_grid_tab(self, xml_dom, parent_wnd):
         settings = []
-        children = xml_dom._get_childNodes()
+        children = xml_dom.getchildren()
         for c in children:
-            name = c._get_nodeName()
-            value = c.getAttribute("value")
-            help = c.getAttribute("help")
-            options = c.getAttribute("options")
+            name = c.tag
+            value = c.get("value")
+            help = c.get("help")
+            options = c.get("options")
             settings.append([name, value, options, help])
         temp_wnd = settings_grid(parent_wnd, settings, self.changes)
         return temp_wnd
@@ -309,4 +309,3 @@ class settings_grid(wx.grid.Grid):
         for i in range(0,cols): self.SetColSize(i,col_w)
         self.Refresh()
 
-#settings = orpg.tools.settings.Settings()

@@ -31,7 +31,7 @@ import string
 from orpg.tools.orpg_log import logger, debug
 
 class xml:
-    debug('Developers note. Deprecated call to orpg_xml!!')
+    debug(('Developers note. Deprecated call to orpg_xml!!'), parents=True)
     def __init__(self):
         pass
 
