@@ -83,8 +83,7 @@ STATUS_SET_URL = 1
 def parseXml(data):
     debug(('Developers note. Deprecated call to parseXml!!'), parents=True)
     "parse and return doc"
-    doc = xml.parseXml(data)
-    doc.normalize()
+    doc = fromstring(data)
     return doc
 
 def myescape(data):

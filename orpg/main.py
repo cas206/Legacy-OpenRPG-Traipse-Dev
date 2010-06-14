@@ -935,12 +935,15 @@ class orpgFrame(wx.Frame):
         except: etreeEl.text = data
 
         display_name = self.chat.chat_display_name(player)
-        if etreeEl.text:self.chat.Post(display_name+etreeEl.text)
+        if etreeEl.text:
+            if "is creating room" in etreeEl.text: self.chat.Post(etreeEl.text)
+            else: self.chat.Post(display_name+etreeEl.text)
 
         for child in etreeEl.getchildren():
             if child.tag == 'tree':
-                dlg = wx.MessageDialog(None, component.strip_html(display_name) + ' is trying to send you a tree node. Accept?', 'Question', 
-                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+                dlg = wx.MessageDialog(None, 
+                    component.strip_html(display_name) + ' is trying to send you a tree node. Accept?', 
+                    'Question', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
                 if dlg.ShowModal() == wx.ID_YES:
                   dlg.Destroy()
                   self.tree.on_receive_data(tostring(child))

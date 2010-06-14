@@ -50,7 +50,7 @@ class fog_msg(map_element_msg_base):
                 point = Element( "point" )
                 point.set( "x", p[ 0 ] )
                 point.set( "y", p[ 1 ] )
-                elem.appendChild( point )
+                elem.append( point )
         return tostring(elem)
 
     # convenience method to use if only this line is modified

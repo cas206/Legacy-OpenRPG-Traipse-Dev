@@ -46,7 +46,7 @@ class WhiteboardText:
         self.scale = 1
         self.r_h = RGBHex()
         self.selected = False
-        self.text_string = text_string
+        self.text_string = text_string.replace('"', '&#34;').replace("'", '&#39;')
         self.id = id
         self.weight = int(weight)
         self.pointsize = int(pointsize)
@@ -95,7 +95,8 @@ class WhiteboardText:
         # Draw text
         (w,x,y,z) = self.get_rect(dc)
         dc.SetFont(self.font)
-        dc.DrawText(self.text_string, self.posx, self.posy)
+        text_string = self.text_string.replace('&#34;', '"').replace('&#39;', "'")
+        dc.DrawText(text_string, self.posx, self.posy)
         dc.SetTextForeground(wx.Colour(0,0,0))
 
     def toxml(self, action="update"):
@@ -369,7 +370,7 @@ class whiteboard_layer(layer_base):
 
     def add_text(self, text_string, pos, style, pointsize, weight, color="#000000"):
         id = 'text-' + self.canvas.session.get_next_id()
-        text = WhiteboardText(id,text_string, pos, style, pointsize, weight, color)
+        text = WhiteboardText(id, text_string, pos, style, pointsize, weight, color)
         self.texts.append(text)
         xml_str = "<map><whiteboard>"
         xml_str += text.toxml("new")

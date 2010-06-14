@@ -76,8 +76,6 @@ class die_base(UserList.UserList):
         return self.__lshift__(other)
 
     def __str__(self):
-        try: print "MY STRING", myStr
-        except: pass
         if len(self.data) > 0:
             myStr = "[" + str(self.data[0])
             for a in self.data[1:]:

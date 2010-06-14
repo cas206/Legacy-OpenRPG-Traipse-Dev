@@ -83,7 +83,7 @@ class background_handler(base_layer_handler):
             postdata = urllib.urlencode({'filename':filename, 'imgdata':imgdata, 'imgtype':imgtype})
 
             if self.settings.get_setting('LocalorRemote') == 'Remote':
-                thread.start_new_thread(self.canvas.layers['bg'].upload, 
+                thread.start_new_thread(self.upload, 
                     (postdata, dlg.GetPath(), self.bg_type.GetStringSelection()))
             else:
                 try: min_url = component.get("cherrypy") + filename
@@ -96,6 +96,13 @@ class background_handler(base_layer_handler):
                 self.update_info()
                 self.canvas.send_map_data()
                 self.canvas.Refresh(False)
+
+    def upload(self, postdata, filename, imgtype):
+        self.canvas.layers['bg'].upload(postdata, filename, imgtype)
+        self.update_info()
+        self.canvas.send_map_data()
+        self.canvas.Refresh(False)
+        return
 
     def update_info(self):
         bg_type = self.canvas.layers['bg'].get_type()

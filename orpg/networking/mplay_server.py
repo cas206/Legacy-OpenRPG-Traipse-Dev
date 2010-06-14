@@ -1827,6 +1827,7 @@ class mplay_server:
             del self.players[id]
             self.log_msg(dmsg)
             self.log_msg(("disconnect",id))
+            self.log_msg(("update_group", (self.groups[group_id].name, group_id, len(self.groups[group_id].players) )))
             for meta in self.metas.keys():
                 self.metas[meta].num_users = len(self.players)
             thread.start_new_thread(self.registerRooms,(0,))
@@ -2066,7 +2067,9 @@ class mplay_server:
 
         finally:
             try:
-                if xml_dom: xml_dom.unlink()
+                try: 
+                    if xml_dom: xml_dom.unlink()
+                except: pass
             except Exception, e:
                 traceback.print_exc()
                 self.log_msg('Exception in xml_dom.unlink() ' + str(e))

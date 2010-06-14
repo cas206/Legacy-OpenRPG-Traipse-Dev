@@ -677,11 +677,12 @@ class MapCanvas(wx.ScrolledWindow):
         except: pass
 
     def re_ids_in_xml(self, xml):
-        debug(('Developers note. Deprecated call to re_ids_in_xml!!'), parents=True)
+        exception = "\nDeprecated call to: Function re_ids_in_xml, line 679, map.py\nThis can mangle XML, please report!"
+        logger.exception(exception)
         new_xml = ""
         tmp_map = map_msg()
-        xml_dom = parseXml(str(xml))
-        node_list = xml_dom.getElementsByTagName("map")
+        xml_dom = fromstring(xml)
+        node_list = xml_dom.findall("map")
         if len(node_list) < 1: pass
         else:
             tmp_map.init_from_dom(node_list[0])
@@ -709,8 +710,7 @@ class MapCanvas(wx.ScrolledWindow):
                             elif l.tagname == 'circle': id = 'circle-' + self.frame.session.get_next_id()
                             l.init_prop("id", id)
             new_xml = tmp_map.get_all_xml()
-        if xml_dom: xml_dom.unlink()
-        return str(new_xml)
+        return new_xml
 
 class map_wnd(wx.Panel):
     def __init__(self, parent, id):
@@ -789,9 +789,9 @@ class map_wnd(wx.Panel):
         d = wx.FileDialog(self.GetParent(), "Select a file", dir_struct["user"], "", "*.xml", wx.OPEN)
         if d.ShowModal() == wx.ID_OK:
             f = open(d.GetPath())
-            map_string = f.read()
-            new_xml = self.canvas.re_ids_in_xml(map_string)
-            if new_xml:
+            new_xml = f.read()
+            f.close()
+            if new_xml != None:
                 self.canvas.takexml(new_xml)
                 self.canvas.send_map_data("new")
                 self.update_tools()

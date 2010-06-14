@@ -401,7 +401,7 @@ class registerThread(Thread):
             if name: self.name = name
             if num_users != None: 
                 try: self.num_users = len(num_users)
-                except: self.num_users = num_users; print num_users
+                except: self.num_users = num_users
             else: self.num_users = 0
             if realHostName: self.realHostName = realHostName
             # build POST data
@@ -448,9 +448,8 @@ class registerThread(Thread):
             #  If there is a DOM returned ....
             if etreeEl != None:
                 #  If there's an error, echo it to the console
-                print tostring(etreeEl), path.get('url')
                 if etreeEl.get("errmsg") != None:
-                    print "Error durring registration:  " + etreeEl.get("errmsg")
+                    print "Error durring registration at: " +path.get('url')+ " Error: " +etreeEl.get("errmsg")
                     if META_DEBUG: print data
                     if META_DEBUG: print
                 """
