@@ -273,6 +273,7 @@ class registerThread(Thread):
         self.destroy = 0                        #  Used to flag that this thread should die
         self.port = str(port)
         self.register_callback = register_callback  # set a method to call to report result of register
+        self.IdAttempts = 0
         """
           This thread will communicate with one and only one
           Meta.  If the Meta in ini.xml is changed after
@@ -447,7 +448,7 @@ class registerThread(Thread):
             #  If there is a DOM returned ....
             if etreeEl != None:
                 #  If there's an error, echo it to the console
-                print tostring(etreeEl)
+                print tostring(etreeEl), path.get('url')
                 if etreeEl.get("errmsg") != None:
                     print "Error durring registration:  " + etreeEl.get("errmsg")
                     if META_DEBUG: print data

@@ -650,10 +650,28 @@ class mplay_server:
         rooms = ''
         serverId = '0'
         x = 0
+        cache = {}
         for meta in self.metas.keys():
-            while serverId == '0':
+        # There is no point in wasting our planetary resources on attempting to register rooms to a meta
+        # that does not provide that service. When they eventually get their head out of the elitist clouds
+        # this work around can be removed.
+            if meta.get('url') != 'http://orpgmeta.appspot.com':
+                cache[meta] = self.metas[meta]
+        for meta in cache.keys():
+            self.log_msg("Registering rooms too: " +meta.get('url'))
+            self.log_msg("Obtaining Server ID from: " +meta.get('url'))
+            for x in range (1, 100):
                 serverId, cookie = self.metas[meta].getIdAndCookie()
+            if serverId == '0':
+                self.metas[meta].IdAttempts += 100
+                if self.metas[meta].IdAttempts > 1000:
+                    self.metas[meta].unregister()
+                    self.log_msg("Deleting Meta: " +meta.get('url')+ " after 1000 attempts.")
+                    del self.metas[meta]
+                    break
             if serverId != '0':
+                self.log_msg("Obtained Server ID: " +serverId+ " from: " +meta.get('url'))
+                self.metas[meta].IdAttempts = 0
                 for rnum in self.groups.keys():
                     rooms += urllib.urlencode({"room_data[rooms][" +str(rnum)+ "][name]":self.groups[rnum].name,
                                             "room_data[rooms][" +str(rnum)+ "][pwd]":str(self.groups[rnum].pwd != ""),
@@ -692,12 +710,14 @@ class mplay_server:
             if not meta in metalist:  # if the meta entry running is not in the list
                 if self.show_meta_messages != 0: self.log_msg( "Outdated.  Unregistering and removing")
                 self.metas[meta].unregister()
+                self.log_msg("Unregistering from: " +meta.get('url'))
                 del self.metas[meta]
             else: 
                 if self.show_meta_messages != 0: self.log_msg( "Found in current meta list.  Leaving intact.")
 
         #  Now call register() for alive metas or start one if we need one
         for meta in metalist:
+            self.log_msg("Registering too: " +meta.get('url'))
             if (self.metas.has_key(meta) and self.metas[meta] and self.metas[meta].isAlive()):
                 self.metas[meta].register(name=name, 
                                         realHostName=self.server_address, 
@@ -722,8 +742,9 @@ class mplay_server:
         #  Instead, loop through all existing meta threads and unregister them
         """
 
-        for meta in self.metas.values():
-            if meta and meta.isAlive(): meta.unregister()
+        for meta in self.metas.keys():
+            self.log_msg("Unregistering from: " +meta.get('url'))
+            if self.metas[meta] and self.metas[meta].isAlive(): self.metas[meta].unregister()
         self.be_registered = 0
 
         """
@@ -1817,30 +1838,32 @@ class mplay_server:
         act = xml_dom.get("action")
         group_id = self.players[id].group_id
         ip = self.players[id].ip
-        self.log_msg("Player with IP: " + str(ip) + " joined.")
         ServerPlugins.setPlayer(self.players[id])
         self.send_to_group(id,group_id,data)
         if act=="new":
             try:
                 self.send_player_list(id,group_id)
                 self.send_group_list(id)
+                self.log_msg("Player with IP: " + str(ip) + " connected.")
             except Exception, e: self.log_msg( ('exception', str(e)) ); traceback.print_exc()
         elif act=="del":
             self.del_player(id,group_id)
             self.check_group(id, group_id)
+            self.log_msg("Player with IP: " + str(ip) + " disconnected.")
         elif act=="update":
             self.players[id].take_dom(xml_dom)
+            self.log_msg("Player with IP: " + str(ip) + " updated.")
             self.log_msg(("update", {"id": id,
-                                     "name": xml_dom.get("name"),
-                                     "status": xml_dom.get("status"),
-                                     "role": xml_dom.get("role"),
-				     "ip":  str(ip),
-				     "group": xml_dom.get("group_id"),
-				     "room": xml_dom.get("name"),
-				     "boot": xml_dom.get("rm_boot"),
-				     "version": xml_dom.get("version"),
-				     "ping": xml_dom.get("time") \
-                                     }))
+                                    "name": xml_dom.get("name"),
+                                    "status": xml_dom.get("status"),
+                                    "role": xml_dom.get("role"),
+                                    "ip":  str(ip),
+                                    "group": xml_dom.get("group_id"),
+                                    "room": xml_dom.get("name"),
+                                    "boot": xml_dom.get("rm_boot"),
+                                    "version": xml_dom.get("version"),
+                                    "ping": xml_dom.get("time") \
+                                                 }))
 
     def strip_cheat_roll(self, string):
         try:

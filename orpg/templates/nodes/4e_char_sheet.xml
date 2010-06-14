@@ -104,7 +104,7 @@ It comes with a Back Pack text node that you can clone to make bags and other co
       <cell>Total</cell>
       <cell>!=AC Bonus::(3,2)=!+!=AC Bonus::(4,2)=!</cell>
     </row>
-  <row version="1.0"><cell>Armor</cell><cell>!!Armor::(2,2)!!</cell></row><row version="1.0"><cell>Misc</cell><cell>0</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
+  <row version="1.0"><cell>Armor</cell><cell>!=Armor::(2,2)=!</cell></row><row version="1.0"><cell>Misc</cell><cell>0</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>
