@@ -2004,7 +2004,7 @@ class mplay_server:
             given_boot_pwd = None
             try:
                 xml_dom = XML(msg)
-                given_boot_pwd = xml_dom.get("boot_pwd")
+                given_boot_pwd = xml_dom.find('boot').get("boot_pwd")
 
             except Exception, e:
                 print "Error in parse of boot message, Ignoring."
