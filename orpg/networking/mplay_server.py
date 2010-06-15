@@ -724,7 +724,7 @@ class mplay_server:
                                         num_users=num_players)
             else:
                 self.metas[meta] = registerThread(name=name, realHostName=self.server_address, 
-                                    num_users=num_players, MetaPath=meta, port=self.server_port, 
+                                    num_users=num_players, MetaPath=meta.get('url'), port=self.server_port, 
                                     register_callback=self.register_callback)
                 self.metas[meta].start()
 

@@ -423,27 +423,26 @@ class registerThread(Thread):
                                         "server_data[version]":PROTOCOL_VERSION,
                                         "server_data[num_users]":self.num_users,
                                         "act":"register"} )
-            for path in getMetaServerList():
-                try: # this POSTS the request and returns the result
-                    etreeEl = get_server_dom(data, path.get('url'))
-                except Exception, e:
-                    if META_DEBUG: print "Problem talking to server.  Setting interval for retry ..."
-                    if META_DEBUG: print data
-                    if META_DEBUG: print e
-                    self.interval = 0
-                    """
-                      If we are in the registerThread thread, then setting interval to 0
-                      will end up causing a retry in about 6 seconds (see self.run())
-                      If we are in the main thread, then setting interval to 0 will do one
-                      of two things:
-                      1)  Do the same as if we were in the registerThread
-                      2)  Cause the next, normally scheduled register() call to use the values
-                          provided in this call.
-                    
-                      Which case occurs depends on where the registerThread thread is when
-                      the main thread calls register().
-                    """
-                    return 0  # indicates that it was okay to call, not that no errors occurred
+            try: # this POSTS the request and returns the result
+                etreeEl = get_server_dom(data, self.path)
+            except Exception, e:
+                if META_DEBUG: print "Problem talking to server.  Setting interval for retry ..."
+                if META_DEBUG: print data
+                if META_DEBUG: print e
+                self.interval = 0
+                """
+                  If we are in the registerThread thread, then setting interval to 0
+                  will end up causing a retry in about 6 seconds (see self.run())
+                  If we are in the main thread, then setting interval to 0 will do one
+                  of two things:
+                  1)  Do the same as if we were in the registerThread
+                  2)  Cause the next, normally scheduled register() call to use the values
+                      provided in this call.
+                
+                  Which case occurs depends on where the registerThread thread is when
+                  the main thread calls register().
+                """
+                return 0  # indicates that it was okay to call, not that no errors occurred
 
             #  If there is a DOM returned ....
             if etreeEl != None:
