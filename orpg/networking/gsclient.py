@@ -350,7 +350,7 @@ class game_server_panel(wx.Panel):
         if (data[2]=="1") or (data[2]=="True"): pwd="yes"
         else: pwd="no"
         name = data[1].replace('&amp;', "&")
-        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;").replace('&quot;', '"').replace('&#39;', "'")
+        name = name.replace('&quot;', '"').replace('&#39;', "'").replace("&lt;", '<').replace("&gt;", '>')
         self.room_list.InsertStringItem(i, name)
         self.room_list.SetStringItem(i,1,data[3])
         self.room_list.SetStringItem(i,2,pwd)
@@ -444,7 +444,7 @@ class game_server_panel(wx.Panel):
             if (g[2]=="True") or (g[2]=="1") : pwd="yes"
             else: pwd="no"
             name = g[1].replace('&amp;', "&")
-            name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
+            name = name.replace('&quot;', '"').replace('&#39;', "'").replace("&lt;", '<').replace("&gt;", '>')
             self.room_list.InsertStringItem(i, name)
             self.room_list.SetStringItem(i, 1, g[3])
             self.room_list.SetStringItem(i, 2, pwd)
@@ -486,7 +486,7 @@ class game_server_panel(wx.Panel):
 
                     for room in rooms:
                         name = room.get('name').replace('&amp;', "&")
-                        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
+                        name = name.replace('&quot;', '"').replace('&#39;', "'").replace("&lt;", '<').replace("&gt;", '>')
                         self.rmList[address].append((room.get("id"), name, 
                                                     room.get("pwd"), room.get("num_users")))
                 self.svrList.sort(server_instance_compare)
