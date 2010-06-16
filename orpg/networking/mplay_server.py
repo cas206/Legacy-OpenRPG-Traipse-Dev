@@ -51,6 +51,7 @@ from mplay_client import *
 from mplay_client import MPLAY_LENSIZE
 from orpg.dirpath import dir_struct
 import orpg.tools.validate
+import htmlentitydefs
 
 from orpg.mapper.map_msg import *
 from threading import Lock, RLock
@@ -316,7 +317,7 @@ class mplay_server:
             self.banDoc = self.banDom.getroot()
 
             for element in self.banDom.findall('banned'):
-                playerName = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+                playerName = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "").replace(">", "&gt;")
                 playerIP = element.get('ip')
                 self.ban_list[playerIP] = {}
                 self.ban_list[playerIP]['ip'] = playerIP
@@ -336,7 +337,7 @@ class mplay_server:
             etreeEl = Element('server')
             for ip in self.ban_list:
                 el = Element('banned')
-                el.set('name', str(self.ban_list[ip]['name'].replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">")))
+                el.set('name', str(self.ban_list[ip]['name'].replace("&amp;", "&").replace("&lt;", "<").replace("", '"').replace("&gt;", ">")))
                 el.set('ip', str(self.ban_list[ip]['ip']))
                 etreeEl.append(el)
             file = open(self.userPath + self.banFile ,"w")
@@ -1691,33 +1692,8 @@ class mplay_server:
         # Check for & in name.  We want to allow this because of its common
         # use in d&d games.
         try:
-            loc = name.find("&")
-            oldloc = 0
-            while loc > -1:
-                loc = name.find("&",oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    value = b + "&amp;" + e
-                    oldloc = loc+1
-            loc = name.find("'")
-            oldloc = 0
-            while loc > -1:
-                loc = name.find("'",oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    name = b + "&#39;" + e
-                    oldloc = loc+1
-            loc = name.find('"')
-            oldloc = 0
-            while loc > -1:
-                loc = name.find('"',oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    name = b + "&quot;" + e
-                    oldloc = loc+1
+            name = name.replace('&', '&amp;')
+            name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
             oldroomname = self.groups[gid].name
             self.groups[gid].name = str(name)
             lmessage = "Room name changed to from \"" + oldroomname + "\" to \"" + name + "\""
@@ -1744,34 +1720,8 @@ class mplay_server:
 
         # Check for & in name.  We want to allow this because of its common
         # use in d&d games.
-
-        loc = name.find("&")
-        oldloc = 0
-        while loc > -1:
-            loc = name.find("&",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&amp;" + e
-                oldloc = loc+1
-        loc = name.find("'")
-        oldloc = 0
-        while loc > -1:
-            loc = name.find("'",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&#39;" + e
-                oldloc = loc+1
-        loc = name.find('"')
-        oldloc = 0
-        while loc > -1:
-            loc = name.find('"',oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&quot;" + e
-                oldloc = loc+1
+        name = name.replace('&', '&amp;')
+        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
         group_id = str(self.next_group_id)
         self.next_group_id += 1
 
@@ -2027,31 +1977,31 @@ class mplay_server:
                     """
                     if given_boot_pwd == server_admin_pwd:
                         # Send a message to everyone in the room, letting them know someone has been booted
-                        boot_msg = "<msg to='all' from='%s' group_id='%s'/><font color='#FF0000'>Booting '(%s) %s' from server...</font>" % (from_id, group_id, to_id, self.players[to_id].name)
+                        msg = '<font color="#FF0000">'
+                        msg += 'Booting (' +str(to_id)+ ') ' +self.players[to_id].name+ ' from server...</font>'
+
+                        boot_msg = self.buildMsg('all', '0', group_id, msg)
                         self.log_msg("boot_msg:" + boot_msg)
                         self.send_to_group( "0", group_id, boot_msg )
                         time.sleep( 1 )
                         self.log_msg("Booting player " + str(to_id) + " from server.")
-
                         #  Send delete player event to all
                         self.send_to_group("0",group_id,self.players[to_id].toxml("del"))
-
                         #  Remove the player from local data structures
                         self.del_player(to_id,group_id)
-
                         #  Refresh the group data
                         self.check_group(to_id, group_id)
 
                     elif actual_boot_pwd == given_boot_pwd:
                         # Send a message to everyone in the room, letting them know someone has been booted
-                        boot_msg = "<msg to='all' from='%s' group_id='%s'/><font color='#FF0000'>Booting '(%s) %s' from room...</font>" % (from_id, group_id, to_id, self.players[to_id].name)
+                        msg = '<font color="#FF0000">'
+                        msg += 'Booting (' +str(to_id)+ ') ' +self.players[to_id].name+ ' from server...</font>'
+                        boot_msg = self.buildMsg('all', from_id, group_id, msg)
                         self.log_msg("boot_msg:" + boot_msg)
                         self.send_to_group( "0", group_id, boot_msg )
                         time.sleep( 1 )
-
                         #dump player into the lobby
                         self.move_player(to_id,"0")
-
                         #  Refresh the group data
                         self.check_group(to_id, group_id)
                     else:
@@ -2112,7 +2062,7 @@ class mplay_server:
         configDom = parse(dir_struct["user"] + 'ban_list.xml')
         self.ban_list = {}
         for element in configDom.findall('banned'):
-            player = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+            player = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "").replace(">", "&gt;")
             ip = element.get('ip')
             self.ban_list[ip] = {}
             self.ban_list[ip]['ip'] = ip

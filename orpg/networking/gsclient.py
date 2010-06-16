@@ -349,7 +349,9 @@ class game_server_panel(wx.Panel):
         i = self.room_list.GetItemCount()
         if (data[2]=="1") or (data[2]=="True"): pwd="yes"
         else: pwd="no"
-        self.room_list.InsertStringItem(i,data[1])
+        name = data[1].replace('&amp;', "&")
+        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;").replace('&quot;', '"').replace('&#39;', "'")
+        self.room_list.InsertStringItem(i, name)
         self.room_list.SetStringItem(i,1,data[3])
         self.room_list.SetStringItem(i,2,pwd)
         self.room_list.SetItemData(i,int(data[0]))
@@ -441,7 +443,9 @@ class game_server_panel(wx.Panel):
             i = self.room_list.GetItemCount()
             if (g[2]=="True") or (g[2]=="1") : pwd="yes"
             else: pwd="no"
-            self.room_list.InsertStringItem(i, g[1])
+            name = g[1].replace('&amp;', "&")
+            name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
+            self.room_list.InsertStringItem(i, name)
             self.room_list.SetStringItem(i, 1, g[3])
             self.room_list.SetStringItem(i, 2, pwd)
             self.room_list.SetItemData(i, int(g[0]))
@@ -481,7 +485,9 @@ class game_server_panel(wx.Panel):
                     rooms = n.findall('room')
 
                     for room in rooms:
-                        self.rmList[address].append((room.get("id"), room.get("name"), 
+                        name = room.get('name').replace('&amp;', "&")
+                        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
+                        self.rmList[address].append((room.get("id"), name, 
                                                     room.get("pwd"), room.get("num_users")))
                 self.svrList.sort(server_instance_compare)
 
@@ -568,36 +574,7 @@ class game_server_panel(wx.Panel):
         name = self.texts["room_name"].GetValue()
         boot_pwd = self.texts["room_boot_pwd"].GetValue()
         minversion = self.texts["room_min_version"].GetValue()
-        #
-        # Check for & in name.  We want to allow this becaus of its common use in D&D.
-        #
-        loc = name.find("&")
-        oldloc=0
-        while loc > -1:
-            loc = name.find("&",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&amp;" + e
-                oldloc = loc+1
-        loc = name.find('"')
-        oldloc=0
-        while loc > -1:
-            loc = name.find('"',oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&quote;" + e
-                oldloc = loc+1
-        loc = name.find("'")
-        oldloc=0
-        while loc > -1:
-            loc = name.find("'",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&#39;" + e
-                oldloc = loc+1
+
         if self.buttons['gs_pwd'].GetValue(): pwd = self.texts["room_pwd"].GetValue()
         else: pwd = ""
         if name == "": wx.MessageBox("Invalid Name","Error");
