@@ -41,19 +41,20 @@ die_rollers.register(d20)
 class d20dc(std):
     def __init__(self,source=[],DC=10,mod=0):
         std.__init__(self,source)
+        print "Source", source
         self.DC = DC
         self.mod = mod
-        self.append(static_di(mod))
+        #self.append(static_di(mod))
 
     def is_success(self):
-        return ((self.sum() >= self.DC or self.data[0] == 20) and self.data[0] != 1)
+        return ((self.sum()+self.mod >= self.DC or self.data[0] == 20) and self.data[0] != 1)
 
     def __str__(self):
         myStr = "[" + str(self.data[0])
         for a in self.data[1:]:
-            myStr += ","
+            myStr += ", "
             myStr += str(a)
-        myStr += "] = (" + str(self.sum()) + ")"
+        myStr += ", "+str(self.mod)+ "] = (" + str(self.sum()+self.mod) + ")"
         myStr += " vs DC " + str(self.DC)
         if self.is_success(): myStr += " Success!"
         else: myStr += " Failure!"

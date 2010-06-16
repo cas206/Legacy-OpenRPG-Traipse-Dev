@@ -348,7 +348,10 @@ class Connections(wx.ListCtrl):
                 chat.set('type', '1')
                 chat.set('version', '1.0')
                 chat.text = broadcast
-                msg = self.main.server.server.buildMsg('all', '0', '1', tostring(chat))
+                msg = self.main.server.server.buildMsg('all', 
+                                                        '0', 
+                                                        str(self.main.server.server.players[playerID]), 
+                                                        tostring(chat))
 
                 if len(msg): self.main.server.server.send_to_group('0', str(groupID), msg )
             elif menuItem == 6:
@@ -420,6 +423,7 @@ class ServerGUI(wx.Frame):
         menu = wx.Menu()
         menu.Append(1, 'Start', 'Start server.')
         menu.Append(2, 'Stop', 'Shutdown server.')
+        menu.Append(16, 'Clear Log', 'Empty server log')
         menu.AppendSeparator()
         menu.Append(3, 'E&xit', 'Exit application.')
         self.Bind(wx.EVT_MENU, self.OnStart, id=1)
@@ -455,6 +459,7 @@ class ServerGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.StopPingPlayers, id=8)
         self.Bind(wx.EVT_MENU, self.ConfigPingInterval, id=9)
         self.Bind(wx.EVT_MENU, self.LogToggle, id=10)
+        self.Bind(wx.EVT_MENU, self.ClearLog, id=16)
         self.mainMenu.Append( menu, '&Configuration')
 
         # Traipse Suite of Additions.
@@ -562,6 +567,9 @@ class ServerGUI(wx.Frame):
     def LogToggle(self, event):
         self.do_log = event.IsChecked()
 
+    def ClearLog(self, event):
+        self.log.SetValue('')
+
     def OnLogMessage( self, event ):
         self.Log( event.message )
 
@@ -658,19 +666,20 @@ class ServerGUI(wx.Frame):
                 wx.EndBusyCursor()
             else: self.show_error("Server is already running.", "Error Starting Server")
 
-    def OnStop(self, event = None):
+    def OnStop(self, event=None):
         """ Stop server. """
         if self.STATUS == SERVER_RUNNING:
-            self.OnUnregister()
+            self.OnUnregister(event)
             self.server.stop()
             self.STATUS = SERVER_STOPPED
-            self.sb.SetStatusText("Stopped", 3)
-            self.SetTitle(__appname__ + "- (stopped) - (unregistered)")
-            self.mainMenu.Enable(1, True)
-            self.mainMenu.Enable(2, False)
-            self.mainMenu.Enable(4, False)
-            self.mainMenu.Enable(5, False)
-            self.conns.DeleteAllItems()
+            if event != 'Quit':
+                self.sb.SetStatusText("Stopped", 3)
+                self.SetTitle(__appname__ + "- (stopped) - (unregistered)")
+                self.mainMenu.Enable(1, True)
+                self.mainMenu.Enable(2, False)
+                self.mainMenu.Enable(4, False)
+                self.mainMenu.Enable(5, False)
+                self.conns.DeleteAllItems()
 
     def OnRegister(self, event = None):
         """ Call into mplay_server's register() function.
@@ -695,11 +704,12 @@ class ServerGUI(wx.Frame):
         """
         wx.BeginBusyCursor()
         self.server.server.unregister()
-        self.sb.SetStatusText("Unregistered", 4)
-        self.mainMenu.Enable(5, False)
-        self.mainMenu.Enable(4, True)
-        #self.mainMenu.Enable( 2, True )
-        self.SetTitle(__appname__ + "- (running) - (unregistered)")
+        if event != 'Quit':
+            self.sb.SetStatusText("Unregistered", 4)
+            self.mainMenu.Enable(5, False)
+            self.mainMenu.Enable(4, True)
+            #self.mainMenu.Enable( 2, True )
+            self.SetTitle(__appname__ + "- (running) - (unregistered)")
         wx.EndBusyCursor()
 
     def ModifyBanList(self, event):
@@ -726,7 +736,7 @@ class ServerGUI(wx.Frame):
 
     def ExitConfirmed(self, event=None):
         """ Quit the program. """
-        self.OnStop()
+        self.OnStop('Quit')
         self.BanListDialog.Destroy()
         wx.CallAfter(self.Destroy)
 

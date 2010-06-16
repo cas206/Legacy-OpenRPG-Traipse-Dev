@@ -38,7 +38,7 @@ from string import *
 from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
 
 from orpg.orpgCore import component
-from orpg.orpg_xml import xml
+#from orpg.orpg_xml import xml
 from orpg.tools.orpg_log import debug
 from orpg.tools.settings import settings
 
@@ -81,9 +81,9 @@ GROUP_UPDATE = 4
 STATUS_SET_URL = 1
 
 def parseXml(data):
+    debug(('Developers note. Deprecated call to parseXml!!'), parents=True)
     "parse and return doc"
-    doc = xml.parseXml(data)
-    doc.normalize()
+    doc = fromstring(data)
     return doc
 
 def myescape(data):
@@ -387,7 +387,6 @@ class mplay_client(client_base):
     def __init__(self,name,callbacks):
         client_base.__init__(self)
         component.add('mp_client', self)
-        self.xml = component.get('xml')
         self.set_name(name)
         self.on_receive = callbacks['on_receive']
         self.on_mplay_event = callbacks['on_mplay_event']

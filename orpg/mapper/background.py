@@ -211,28 +211,31 @@ class layer_back_ground(layer_base):
         else: return ''
 
     def layerTakeDOM(self, xml_dom):
-        type = BG_COLOR
-        color = xml_dom.getAttribute("color")
-        logger.debug("color=" + color)
-        path = urllib.unquote(xml_dom.getAttribute("path"))
-        logger.debug("path=" + path)
-        # Begin ted's map changes
-        if xml_dom.hasAttribute("color"):
-            r,g,b = self.r_h.rgb_tuple(xml_dom.getAttribute("color"))
+        bg_type = xml_dom.get("type")
+        urlpath = xml_dom.get('path')
+        color = xml_dom.get("color")
+
+        if urlpath != None:
+            path = urllib.unquote(xml_dom.get("path"))
+            logger.debug("path=" + path)
+
+        if color != None:
+            logger.debug("color=" + color)
+            r,g,b = self.r_h.rgb_tuple(color)
             self.set_color(cmpColour(r,g,b))
-        # End ted's map changes
-        if xml_dom.hasAttribute("type"):
-            type = int(xml_dom.getAttribute("type"))
-            logger.debug("type=" + str(type))
-        if type == BG_TEXTURE:
+
+        if bg_type != None:
+            logger.debug("type=" + bg_type)
+            bg_type = int(xml_dom.get("type"))
+        if bg_type == BG_TEXTURE:
             if path != "": self.set_texture(path)
-        elif type == BG_IMAGE:
+        elif bg_type == BG_IMAGE:
             if path != "": self.set_image(path, 1)
-        elif type == BG_NONE: self.clear()
-        if xml_dom.hasAttribute('local') and xml_dom.getAttribute('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.getAttribute('localPath'))):
-            self.localPath = urllib.unquote(xml_dom.getAttribute('localPath'))
+        elif bg_type == BG_NONE: self.clear()
+        if xml_dom.get('local') == 'True' and os.path.exists(urllib.unquote(xml_dom.get('localPath'))):
+            self.localPath = urllib.unquote(xml_dom.get('localPath'))
             self.local = True
-            self.localTime = int(xml_dom.getAttribute('localTime'))
+            self.localTime = int(xml_dom.get('localTime'))
             if self.localTime-time.time() <= 144000:
                 file = open(self.localPath, "rb")
                 imgdata = file.read()

@@ -53,17 +53,17 @@ class map_msg(map_element_msg_base):
 
     def init_from_dom(self,xml_dom):
         self.p_lock.acquire()
-        if xml_dom.tagName == self.tagname:
+        if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"
             # Notice we only do this when the root is a map tag
-            if self.tagname == "map" and xml_dom.hasAttribute("action") and xml_dom.getAttribute("action") == "new":
+            if self.tagname == "map" and xml_dom.get("action") == "new":
                 self.clear()
             # Process all of the properties in each tag
-            if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys():
-                    self.init_prop(k,xml_dom.getAttribute(k))
-            for c in xml_dom._get_childNodes():
-                name = c._get_nodeName()
+            if xml_dom.keys():
+                for k in xml_dom.keys():
+                    self.init_prop(k,xml_dom.get(k))
+            for c in xml_dom.getchildren():
+                name = c.tag
                 if not self.children.has_key(name):
                     if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
                     elif name == "grid": self.children[name] = grid_msg(self.p_lock)
@@ -84,16 +84,16 @@ class map_msg(map_element_msg_base):
 
     def set_from_dom(self,xml_dom):
         self.p_lock.acquire()
-        if xml_dom.tagName == self.tagname:
+        if xml_dom.tag == self.tagname:
             # If this is a map message, look for the "action=new"
             # Notice we only do this when the root is a map tag
-            if self.tagname == "map" and xml_dom.hasAttribute("action") and xml_dom.getAttribute("action") == "new":
+            if self.tagname == "map" and xml_dom.get("action") == "new":
                 self.clear()
             # Process all of the properties in each tag
-            if xml_dom.getAttributeKeys():
-                for k in xml_dom.getAttributeKeys(): self.set_prop(k,xml_dom.getAttribute(k))
-            for c in xml_dom._get_childNodes():
-                name = c._get_nodeName()
+            if xml_dom.keys():
+                for k in xml_dom.keys(): self.set_prop(k,xml_dom.get(k))
+            for c in xml_dom.getchildren():
+                name = c.tag
                 if not self.children.has_key(name):
                     if name == "miniatures": self.children[name] = minis_msg(self.p_lock)
                     elif name == "grid": self.children[name] = grid_msg(self.p_lock)

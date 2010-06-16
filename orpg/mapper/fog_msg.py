@@ -27,7 +27,7 @@ __version__ = "$Id: fog_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from base_msg import *
 from region import *
-from orpg.minidom import Element
+from xml.etree.ElementTree import Element, tostring
 import string
 
 class fog_msg(map_element_msg_base):
@@ -41,19 +41,17 @@ class fog_msg(map_element_msg_base):
 
     def get_line(self,outline,action,output_act):
         elem = Element( "poly" )
-        if ( output_act ): elem.setAttribute( "action", action )
-        if ( outline == 'all' ) or ( outline == 'none' ): elem.setAttribute( "outline", outline )
+        if ( output_act ): elem.set( "action", action )
+        if ( outline == 'all' ) or ( outline == 'none' ): elem.set( "outline", outline )
         else:
-            elem.setAttribute( "outline", "points" )
+            elem.set( "outline", "points" )
             for pair in string.split( outline, ";" ):
                 p = string.split( pair, "," )
                 point = Element( "point" )
-                point.setAttribute( "x", p[ 0 ] )
-                point.setAttribute( "y", p[ 1 ] )
-                elem.appendChild( point )
-        str = elem.toxml()
-        elem.unlink()
-        return str
+                point.set( "x", p[ 0 ] )
+                point.set( "y", p[ 1 ] )
+                elem.append( point )
+        return tostring(elem)
 
     # convenience method to use if only this line is modified
     #   outputs a <map/> element containing only the changes to this line
@@ -83,23 +81,18 @@ class fog_msg(map_element_msg_base):
                                          str(x2)+","+str(y1)+";"+
                                          str(x2)+","+str(y2)+";"+
                                          str(x1)+","+str(y2),action,output_action)
-        s = "<fog"
+        s = "<fog>"
         if fog_string:
-            s += ">"
             s += fog_string
-            s += "</fog>"
-        else: s+="/>"
+        s += "</fog>"
         return s
 
     def interpret_dom(self,xml_dom):
         self.use_fog=1
-        #print 'fog_msg.interpret_dom called'
-        children = xml_dom._get_childNodes()
-        #print "children",children
+        children = xml_dom.getchildren()
         for l in children:
-            action = l.getAttribute("action")
-            outline = l.getAttribute("outline")
-            #print "action/outline",action, outline
+            action = l.get("action")
+            outline = l.get("outline")
             if (outline=="all"):
                 polyline=[]
                 self.fogregion.Clear()
@@ -109,14 +102,13 @@ class fog_msg(map_element_msg_base):
                 self.fogregion.Clear()
             else:
                 polyline=[]
-                list = l._get_childNodes()
+                list = l.getchildren()
                 for node in list:
-                    polyline.append( IPoint().make( int(node.getAttribute("x")), int(node.getAttribute("y")) ) )
+                    polyline.append( IPoint().make( int(node.get("x")), int(node.get("y")) ) )
                     # pointarray = outline.split(";")
                     # for m in range(len(pointarray)):
                     #     pt=pointarray[m].split(",")
                     #     polyline.append(IPoint().make(int(pt[0]),int(pt[1])))
-                    #print "length of polyline", len(polyline)
             if (len(polyline)>2):
                 if action=="del": self.fogregion.FromPolygon(polyline,0)
                 else: self.fogregion.FromPolygon(polyline,1)

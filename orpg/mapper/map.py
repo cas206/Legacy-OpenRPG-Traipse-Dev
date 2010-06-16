@@ -45,6 +45,8 @@ from orpg.dirpath import dir_struct
 from images import ImageHandler
 from orpg.orpgCore import component
 from orpg.tools.orpg_settings import settings
+from xml.etree.ElementTree import ElementTree, Element, parse
+from xml.etree.ElementTree import fromstring, tostring
 
 # Various marker modes for player tools on the map
 MARKER_MODE_NONE = 0
@@ -259,21 +261,26 @@ class MapCanvas(wx.ScrolledWindow):
             dc.DrawRectangle(0,0,clientsize[0]+1,clientsize[1]+1)
             dc.SetDeviceOrigin(-topleft[0], -topleft[1])
             dc.SetUserScale(scale, scale)
+
+            layer_order = []
+            for i in xrange (0, len(self.parent.layer_handlers)-1):
+                if self.parent.layer_tabs.GetPageText(i) in ('Background', 'Fog', 'General'): pass
+                else: layer_order.append(self.parent.layer_tabs.GetPageText(i))
             self.layers['bg'].layerDraw(dc, scale, topleft, clientsize)
-            self.layers['grid'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
-                [clientsize[0]/scale, clientsize[1]/scale])
-            self.layers['miniatures'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
-                [clientsize[0]/scale, clientsize[1]/scale])
-            self.layers['whiteboard'].layerDraw(dc)
+
+            for layer in layer_order:
+                if layer == 'Grid': self.layers['grid'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
+                    [clientsize[0]/scale, clientsize[1]/scale])
+                if layer == 'Miniatures': self.layers['miniatures'].layerDraw(dc, [topleft[0]/scale, topleft[1]/scale], 
+                    [clientsize[0]/scale, clientsize[1]/scale])
+                if layer == 'Whiteboard': self.layers['whiteboard'].layerDraw(dc)
+
             self.layers['fog'].layerDraw(dc, topleft, clientsize)
             dc.SetPen(wx.NullPen)
             dc.SetBrush(wx.NullBrush)
-
-            dc.SelectObject(wx.NullBitmap)
-            del dc
+            dc.SelectObject(wx.NullBitmap); del dc
             wdc = self.preppaint()
             wdc.DrawBitmap(bmp, topleft[0], topleft[1])
-
             if settings.get_setting("AlwaysShowMapScale") == "1":
                 self.showmapscale(wdc)
         try: evt.Skip()
@@ -622,15 +629,16 @@ class MapCanvas(wx.ScrolledWindow):
            --Snowdog 5/27/03
         """
         try:
-            #parse the map DOM
-            xml_dom = parseXml(xml)
+            xml_dom = fromstring(xml)
             if xml_dom == None: return
-            node_list = xml_dom.getElementsByTagName("map")
+            node_list = xml_dom.findall("map")
+            if len(node_list) < 1: 
+                if xml_dom.tag == 'map': node_list = [xml_dom]
             if len(node_list) < 1: pass
             else:
                 # set map version to incoming data so layers can convert
-                self.map_version = node_list[0].getAttribute("version")
-                action = node_list[0].getAttribute("action")
+                self.map_version = node_list[0].get("version")
+                action = node_list[0].get("action")
                 if action == "new":
                     self.layers = {}
                     try: self.layers['bg'] = layer_back_ground(self)
@@ -643,37 +651,38 @@ class MapCanvas(wx.ScrolledWindow):
                     except: pass
                     try: self.layers['fog'] = fog_layer(self)
                     except: pass
-                sizex = node_list[0].getAttribute("sizex")
+                sizex = node_list[0].get("sizex") or ''
                 if sizex != "":
                     sizex = int(float(sizex))
                     sizey = self.size[1]
                     self.set_size((sizex,sizey))
                     self.size_changed = 0
-                sizey = node_list[0].getAttribute("sizey")
+                sizey = node_list[0].get("sizey") or ''
                 if sizey != "":
                     sizey = int(float(sizey))
                     sizex = self.size[0]
                     self.set_size((sizex,sizey))
                     self.size_changed = 0
-                children = node_list[0]._get_childNodes()
+                children = node_list[0].getchildren()
                 #fog layer must be computed first, so that no data is inadvertently revealed
                 for c in children:
-                    name = c._get_nodeName()
+                    name = c.tag
                     if name == "fog": self.layers[name].layerTakeDOM(c)
                 for c in children:
-                    name = c._get_nodeName()
+                    name = c.tag
                     if name != "fog": self.layers[name].layerTakeDOM(c)
                 # all map data should be converted, set map version to current version
                 self.map_version = MAP_VERSION
-                self.Refresh(False)
-            xml_dom.unlink()  # eliminate circular refs
+                self.Refresh(True)
         except: pass
 
     def re_ids_in_xml(self, xml):
+        exception = "\nDeprecated call to: Function re_ids_in_xml, line 679, map.py\nThis can mangle XML, please report!"
+        logger.exception(exception)
         new_xml = ""
         tmp_map = map_msg()
-        xml_dom = parseXml(str(xml))
-        node_list = xml_dom.getElementsByTagName("map")
+        xml_dom = fromstring(xml)
+        node_list = xml_dom.findall("map")
         if len(node_list) < 1: pass
         else:
             tmp_map.init_from_dom(node_list[0])
@@ -701,8 +710,7 @@ class MapCanvas(wx.ScrolledWindow):
                             elif l.tagname == 'circle': id = 'circle-' + self.frame.session.get_next_id()
                             l.init_prop("id", id)
             new_xml = tmp_map.get_all_xml()
-        if xml_dom: xml_dom.unlink()
-        return str(new_xml)
+        return new_xml
 
 class map_wnd(wx.Panel):
     def __init__(self, parent, id):
@@ -714,20 +722,23 @@ class map_wnd(wx.Panel):
         self.root_dir = os.getcwd()
         self.current_layer = 2
         self.layer_tabs = orpgTabberWnd(self, style=FNB.FNB_NO_X_BUTTON|FNB.FNB_BOTTOM|FNB.FNB_NO_NAV_BUTTONS)
+
         self.layer_handlers = []
-        self.layer_handlers.append(background_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[0],"Background")
-        self.layer_handlers.append(grid_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[1],"Grid")
-        self.layer_handlers.append(miniatures_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[2],"Miniatures", True)
-        self.layer_handlers.append(whiteboard_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[3],"Whiteboard")
-        self.layer_handlers.append(fog_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[4],"Fog")
-        self.layer_handlers.append(map_handler(self.layer_tabs,-1,self.canvas))
-        self.layer_tabs.AddPage(self.layer_handlers[5],"General")
+        self.layer_handlers.append(background_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[0], "Background")
+        self.layer_handlers.append(grid_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[1], "Grid")
+        self.layer_handlers.append(miniatures_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[2], "Miniatures", True)
+        self.layer_handlers.append(whiteboard_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[3], "Whiteboard")
+        self.layer_handlers.append(fog_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[4], "Fog")
+        self.layer_handlers.append(map_handler(self.layer_tabs, -1, self.canvas))
+        self.layer_tabs.AddPage(self.layer_handlers[5], "General")
         self.layer_tabs.SetSelection(2)
+
+        self.layer_order = {1: 'grid', 2: 'miniatures', 3: 'whiteboard'}
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, 1, wx.EXPAND)
         self.sizer.Add(self.layer_tabs, 0, wx.EXPAND)
@@ -778,9 +789,9 @@ class map_wnd(wx.Panel):
         d = wx.FileDialog(self.GetParent(), "Select a file", dir_struct["user"], "", "*.xml", wx.OPEN)
         if d.ShowModal() == wx.ID_OK:
             f = open(d.GetPath())
-            map_string = f.read()
-            new_xml = self.canvas.re_ids_in_xml(map_string)
-            if new_xml:
+            new_xml = f.read()
+            f.close()
+            if new_xml != None:
                 self.canvas.takexml(new_xml)
                 self.canvas.send_map_data("new")
                 self.update_tools()

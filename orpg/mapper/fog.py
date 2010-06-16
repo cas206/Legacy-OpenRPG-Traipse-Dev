@@ -27,7 +27,7 @@ import sys
 from base import *
 from random import Random
 from region import *
-from orpg.minidom import Element
+from xml.etree.ElementTree import Element, tostring
 import traceback
 COURSE = 10
 
@@ -47,8 +47,8 @@ class FogArea:
         for pairs in string.split( points, ';' ):
             pair = string.split( pairs, ',' )
             p = Element( "point" )
-            p.setAttribute( "x", pair[0] )
-            p.setAttribute( "y", pair[1] )
+            p.set( "x", pair[0] )
+            p.set( "y", pair[1] )
             result.append( p )
         return result
 
@@ -59,23 +59,20 @@ class FogArea:
             localOutline = "points"
         elem = Element( "poly" )
         if action == "del":
-            elem.setAttribute( "action", action )
-            elem.setAttribute( "outline", localOutline )
+            elem.set( "action", action )
+            elem.set( "outline", localOutline )
             if localOutline == 'points':
-                list = self.points_to_elements( self.outline )
-                for p in list: elem.appendChild( p )
-            str = elem.toxml()
-            elem.unlink()
-            return str
-        elem.setAttribute( "action", action )
+                foglist = self.points_to_elements( self.outline )
+                for p in foglist: elem.append( p )
+            return tostring(elem)
+        elem.set( "action", action )
         if  localOutline != None:
-            elem.setAttribute( "outline", localOutline )
+            elem.set( "outline", localOutline )
             if localOutline == 'points':
-                list = self.points_to_elements( self.outline )
-                for p in list: elem.appendChild( p )
-        xml_str = elem.toxml()
-        elem.unlink()
-        return xml_str
+                foglist = self.points_to_elements( self.outline )
+                for p in foglist: elem.append( p )
+        #xml_str = elem.toxml()
+        return tostring(elem)
 
 class fog_layer(layer_base):
     def __init__(self, canvas):
@@ -223,11 +220,12 @@ class fog_layer(layer_base):
             if not self.use_fog:
                 self.use_fog = True
                 self.recompute_fog()
-            if xml_dom.hasAttribute('serial'): self.serial_number = int(xml_dom.getAttribute('serial'))
-            children = xml_dom._get_childNodes()
+            serial = xml_dom.get('serial')
+            if serial != None: self.serial_number = int(serial)
+            children = xml_dom.getchildren()
             for l in children:
-                action = l.getAttribute("action")
-                outline = l.getAttribute("outline")
+                action = l.get("action")
+                outline = l.get("outline")
                 if (outline == "all"):
                     polyline = [IPoint().make(0,0), IPoint().make(self.width-1, 0),
                               IPoint().make(self.width-1, self.height-1),
@@ -240,10 +238,10 @@ class fog_layer(layer_base):
                     polyline = []
                     lastx = None
                     lasty = None
-                    list = l._get_childNodes()
+                    list = l.getchildren()
                     for point in list:
-                        x = point.getAttribute( "x" )
-                        y = point.getAttribute( "y" )
+                        x = point.get( "x" )
+                        y = point.get( "y" )
                         if (x != lastx or y != lasty):
                             polyline.append(IPoint().make(int(x), int(y)))
                         lastx = x

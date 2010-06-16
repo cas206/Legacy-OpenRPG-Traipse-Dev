@@ -29,7 +29,7 @@ __version__ = "$Id: base_msg.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 from threading import RLock
 from orpg.networking.mplay_client import *
-from xml.etree.ElementTree import ElementTree, Element
+from xml.etree.ElementTree import ElementTree, Element, fromstring
 
 class map_element_msg_base:
 #  This is a base class
@@ -216,20 +216,24 @@ class map_element_msg_base:
         self._from_dom(xml_dom,self.set_prop)
 
     def init_from_xml(self,xml):
-        xml_dom = parseXml(xml)
-        node_list = xml_dom.getElementsByTagName(self.tagname)
+        #xml_dom = parseXml(xml)
+        xml_dom = fromstring(xml)
+        #node_list = xml_dom.getElementsByTagName(self.tagname)
+        node_list = xml_dom.findall(self.tagname)
         if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
             while len(node_list): self.init_from_dom(node_list.pop())
-        if xml_dom: xml_dom.unlink()
+        #if xml_dom: xml_dom.unlink()
 
     def set_from_xml(self,xml):
-        xml_dom = parseXml(xml)
-        node_list = xml_dom.getElementsByTagName(self.tagname)
+        #xml_dom = parseXml(xml)
+        xml_dom = fromstring(xml)
+        #node_list = xml_dom.getElementsByTagName(self.tagname)
+        node_list = xml_dom.findall(self.tagname)
         if len(node_list) < 1: print "Warning: no <" + self.tagname + "/> elements found in DOM."
         else:
             while len(node_list): self.set_from_dom(node_list.pop())
-        if xml_dom: xml_dom.unlink()
+        #if xml_dom: xml_dom.unlink()
 
     # XML importers end
     #########################################

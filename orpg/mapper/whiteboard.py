@@ -46,7 +46,7 @@ class WhiteboardText:
         self.scale = 1
         self.r_h = RGBHex()
         self.selected = False
-        self.text_string = text_string
+        self.text_string = text_string.replace('"', '&#34;').replace("'", '&#39;')
         self.id = id
         self.weight = int(weight)
         self.pointsize = int(pointsize)
@@ -95,7 +95,8 @@ class WhiteboardText:
         # Draw text
         (w,x,y,z) = self.get_rect(dc)
         dc.SetFont(self.font)
-        dc.DrawText(self.text_string, self.posx, self.posy)
+        text_string = self.text_string.replace('&#34;', '"').replace('&#39;', "'")
+        dc.DrawText(text_string, self.posx, self.posy)
         dc.SetTextForeground(wx.Colour(0,0,0))
 
     def toxml(self, action="update"):
@@ -119,21 +120,21 @@ class WhiteboardText:
         else: return ''
 
     def takedom(self, xml_dom):
-        self.text_string = xml_dom.getAttribute("text_string")
-        self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("posy"): self.posy = int(xml_dom.getAttribute("posy"))
-        if xml_dom.hasAttribute("posx"): self.posx = int(xml_dom.getAttribute("posx"))
-        if xml_dom.hasAttribute("weight"):
-            self.weight = int(xml_dom.getAttribute("weight"))
+        self.text_string = xml_dom.get("text_string")
+        self.id = xml_dom.get("id")
+        if xml_dom.get("posy") != None: self.posy = int(xml_dom.get("posy"))
+        if xml_dom.get("posx") != None: self.posx = int(xml_dom.get("posx"))
+        if xml_dom.get("weight"):
+            self.weight = int(xml_dom.get("weight"))
             self.font.SetWeight(self.weight)
-        if xml_dom.hasAttribute("style"):
-            self.style = int(xml_dom.getAttribute("style"))
+        if xml_dom.get("style") != None:
+            self.style = int(xml_dom.get("style"))
             self.font.SetStyle(self.style)
-        if xml_dom.hasAttribute("pointsize"):
-            self.pointsize = int(xml_dom.getAttribute("pointsize"))
+        if xml_dom.get("pointsize") != None:
+            self.pointsize = int(xml_dom.get("pointsize"))
             self.font.SetPointSize(self.pointsize)
-        if xml_dom.hasAttribute("color") and xml_dom.getAttribute("color") != '':
-            self.textcolor = xml_dom.getAttribute("color")
+        if xml_dom.get("color") != None and xml_dom.get("color") != '':
+            self.textcolor = xml_dom.get("color")
             if self.textcolor == '#0000000': self.textcolor = '#000000'
 
 class WhiteboardLine:
@@ -231,16 +232,16 @@ class WhiteboardLine:
         return ''
 
     def takedom(self, xml_dom):
-        self.line_string = xml_dom.getAttribute("line_string")
-        self.id = xml_dom.getAttribute("id")
-        if xml_dom.hasAttribute("upperleftx"): self.upperleft.x = int(xml_dom.getAttribute("upperleftx"))
-        if xml_dom.hasAttribute("upperlefty"): self.upperleft.y = int(xml_dom.getAttribute("upperlefty"))
-        if xml_dom.hasAttribute("lowerrightx"): self.lowerright.x = int(xml_dom.getAttribute("lowerrightx"))
-        if xml_dom.hasAttribute("lowerrighty"): self.lowerright.y = int(xml_dom.getAttribute("lowerrighty"))
-        if xml_dom.hasAttribute("color") and xml_dom.getAttribute("color") != '':
-            self.linecolor = xml_dom.getAttribute("color")
+        self.line_string = xml_dom.get("line_string")
+        self.id = xml_dom.get("id")
+        if xml_dom.get("upperleftx") != None: self.upperleft.x = int(xml_dom.get("upperleftx"))
+        if xml_dom.get("upperlefty") != None: self.upperleft.y = int(xml_dom.get("upperlefty"))
+        if xml_dom.get("lowerrightx") != None: self.lowerright.x = int(xml_dom.get("lowerrightx"))
+        if xml_dom.get("lowerrighty") != None: self.lowerright.y = int(xml_dom.get("lowerrighty"))
+        if xml_dom.get("color") != None and xml_dom.get("color") != '':
+            self.linecolor = xml_dom.get("color")
             if self.linecolor == '#0000000': self.linecolor = '#000000'
-        if xml_dom.hasAttribute("width"): self.linewidth = int(xml_dom.getAttribute("width"))
+        if xml_dom.get("width") != None: self.linewidth = int(xml_dom.get("width"))
 
 ##-----------------------------
 ## whiteboard layer
@@ -369,7 +370,7 @@ class whiteboard_layer(layer_base):
 
     def add_text(self, text_string, pos, style, pointsize, weight, color="#000000"):
         id = 'text-' + self.canvas.session.get_next_id()
-        text = WhiteboardText(id,text_string, pos, style, pointsize, weight, color)
+        text = WhiteboardText(id, text_string, pos, style, pointsize, weight, color)
         self.texts.append(text)
         xml_str = "<map><whiteboard>"
         xml_str += text.toxml("new")
@@ -416,13 +417,13 @@ class whiteboard_layer(layer_base):
         else: return ""
 
     def layerTakeDOM(self, xml_dom):
-        serial_number = xml_dom.getAttribute('serial')
-        if serial_number != "": self.serial_number = int(serial_number)
-        children = xml_dom._get_childNodes()
+        serial_number = xml_dom.get('serial')
+        if serial_number != None: self.serial_number = int(serial_number)
+        children = xml_dom.getchildren()
         for l in children:
-            nodename = l._get_nodeName()
-            action = l.getAttribute("action")
-            id = l.getAttribute('id')
+            nodename = l.tag
+            action = l.get("action")
+            id = l.get('id')
             try:
                 if self.serial_number < int(id.split('-')[2]): self.serial_number = int(id.split('-')[2])
             except: pass
@@ -436,17 +437,17 @@ class whiteboard_layer(layer_base):
             elif action == "new":
                 if nodename == "line":
                     try:
-                        line_string = l.getAttribute('line_string')
-                        upperleftx = l.getAttribute('upperleftx')
-                        upperlefty = l.getAttribute('upperlefty')
-                        lowerrightx = l.getAttribute('lowerrightx')
-                        lowerrighty = l.getAttribute('lowerrighty')
+                        line_string = l.get('line_string')
+                        upperleftx = l.get('upperleftx')
+                        upperlefty = l.get('upperlefty')
+                        lowerrightx = l.get('lowerrightx')
+                        lowerrighty = l.get('lowerrighty')
                         upperleft = wx.Point(int(upperleftx),int(upperlefty))
                         lowerright = wx.Point(int(lowerrightx),int(lowerrighty))
-                        color = l.getAttribute('color')
+                        color = l.get('color')
                         if color == '#0000000': color = '#000000'
-                        id = l.getAttribute('id')
-                        width = int(l.getAttribute('width'))
+                        id = l.get('id')
+                        width = int(l.get('width'))
                     except:
                         line_string = upperleftx = upperlefty = lowerrightx = lowerrighty = color = 0
                         continue
@@ -454,15 +455,15 @@ class whiteboard_layer(layer_base):
                     self.lines.append(line)
                 elif nodename == "text":
                     try:
-                        text_string = l.getAttribute('text_string')
-                        style = l.getAttribute('style')
-                        pointsize = l.getAttribute('pointsize')
-                        weight = l.getAttribute('weight')
-                        color = l.getAttribute('color')
+                        text_string = l.get('text_string')
+                        style = l.get('style')
+                        pointsize = l.get('pointsize')
+                        weight = l.get('weight')
+                        color = l.get('color')
                         if color == '#0000000': color = '#000000'
-                        id = l.getAttribute('id')
-                        posx = l.getAttribute('posx')
-                        posy = l.getAttribute('posy')
+                        id = l.get('id')
+                        posx = l.get('posx')
+                        posy = l.get('posy')
                         pos = wx.Point(0,0)
                         pos.x = int(posx)
                         pos.y = int(posy)

@@ -42,15 +42,12 @@ class macro_handler(node_handler):
     def __init__(self,xml,tree_node):
         node_handler.__init__(self,xml,tree_node)
         self.xml = xml
-        self.text_elem = self.xml.find('text')
-        self.text = self.text_elem.text
 
-    def set_text(self,txt):
-        self.text = txt
+    def set_text(self, txt):
+        self.xml.find('text').text = txt
 
     def on_use(self,evt):
-        txt = self.text
-        actionlist = txt.split("\n")
+        actionlist = self.xml.find('text').text.split("\n")
         for line in actionlist:
             if(line != ""):
                 if line[0] != "/": ## it's not a slash command
@@ -65,8 +62,7 @@ class macro_handler(node_handler):
 
     def tohtml(self):
         title = self.xml.get("name")
-        txt = self.text
-        txt = string.replace(txt,'\n',"<br />")
+        txt = string.replace(self.xml.find('text').text,'\n',"<br />")
         return "<P><b>"+title+":</b><br />"+txt
 
 P_TITLE = wx.NewId()
@@ -80,7 +76,7 @@ class macro_edit_panel(wx.Panel):
         sizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, "Chat Macro"), wx.VERTICAL)
         self.text = {}
         self.text[P_TITLE] = wx.TextCtrl(self, P_TITLE, handler.xml.get('name'))
-        self.text[P_BODY] = wx.TextCtrl(self, P_BODY, handler.text, style=wx.TE_MULTILINE)
+        self.text[P_BODY] = wx.TextCtrl(self, P_BODY, handler.xml.find('text').text, style=wx.TE_MULTILINE)
         sizer.Add(wx.StaticText(self, -1, "Title:"), 0, wx.EXPAND)
         sizer.Add(self.text[P_TITLE], 0, wx.EXPAND)
         sizer.Add(wx.StaticText(self, -1, "Text Body:"), 0, wx.EXPAND)

@@ -32,27 +32,27 @@ Inside the 0 Level tabber for each Utility there is a text node that contains a 
 This bears repeating:
 It comes with a Back Pack text node that you can clone to make bags and other containers.</text></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="568,400,446,121" icon="tabber" map="4e PC Sheet" module="containers" name="Rollers" version="1.0"><nodehandler class="listbox_handler" frame="400,400,541,107" icon="gear" map="4e PC Sheet::Rollers" module="forms" name="Skills" version="1.0">
         <list raw_mode="1" send_button="1" type="2">
-          <option caption="Climb" selected="0" value="0">Climb [1d20+5+!=Abilities::(1,3)=!+(!=General::Level=!/2)]</option>
-          <option caption="Hide" selected="0" value="0">Hide [1d20+5+!=Abilities::(2,3)=!+(!=General::Level=!/2)]</option>
-          <option caption="Spot" selected="1" value="0">Spot [1d20+5+!=Abilities::(4,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Climb" selected="0" value="0">&lt;b&gt;Climb:&lt;/b&gt; [1d20+5+!=Abilities::(1,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Hide" selected="1" value="0">&lt;b&gt;Hide:&lt;/b&gt; [1d20+5+!=Abilities::(2,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Spot" selected="0" value="0">&lt;b&gt;Spot:&lt;/b&gt; [1d20+5+!=Abilities::(4,3)=!+(!=General::Level=!/2)]</option>
         </list>
       </nodehandler>
-      <nodehandler class="listbox_handler" frame="400,400,466,138" icon="gear" map="4e PC Sheet::Rollers" module="forms" name="Attacks" version="1.0">
+      <nodehandler class="listbox_handler" frame="400,400,450,100" icon="gear" map="4e PC Sheet::Rollers" module="forms" name="Attacks" version="1.0">
   <list raw_mode="1" send_button="1" type="1">
-    <option caption="Sword Attack" selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::2,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::2,2=!+!=Abilities::1,3!]</option>
-    <option caption="Mace Attack" selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::3,1=! [1d20+!Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::3,2=!+!=Abilities::1,3=!]</option>
+    <option caption="Sword Attack" selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::2,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::2,2=!+!=Abilities::1,3=!]</option>
+    <option caption="Mace Attack" selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::3,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::3,2=!+!=Abilities::1,3=!]</option>
     <option caption="Uncreated" selected="0" value="">Option Text III</option>
   </list>
 </nodehandler><nodehandler class="splitter_handler" frame="764,400,9,91" horizontal="0" icon="divider" map="4e PC Sheet::Rollers" module="containers" name="Powers" version="1.0">
     <nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="At Wills" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="At Will Power" selected="1" value="0">!=At Wills::At Will=!</option></list>
+    <option caption="At Will Power" selected="1" value="0">!=Utilities::At Wills::At Will=!</option></list>
 </nodehandler><nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="Encounters" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="Encounter" selected="1" value="0">!=Encounters::Encounter=!</option></list>
+    <option caption="Encounter" selected="1" value="0">!=Utilities::Encounters::Encounter=!</option></list>
 </nodehandler><nodehandler class="listbox_handler" frame="400,400,470,62" icon="gear" map="4e PC Sheet::Rollers::Powers" module="forms" name="Dailys" version="1.0">
   <list raw_mode="1" send_button="1" type="3">
-    <option caption="Daily" selected="1" value="0">!=Dailys::Daily=!</option></list>
+    <option caption="Daily" selected="1" value="0">!=Utilities::Dailys::Daily=!</option></list>
 </nodehandler></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,307,186" height="600" icon="form" map="4e PC Sheet" module="forms" name="General" version="1.0" width="400">
   <nodehandler class="textctrl_handler" icon="note" map="4e PC Sheet::General" module="forms" name="Name" version="1.0">
   <text multiline="0" raw_mode="1" send_button="0">text</text>
@@ -104,7 +104,7 @@ It comes with a Back Pack text node that you can clone to make bags and other co
       <cell>Total</cell>
       <cell>!=AC Bonus::(3,2)=!+!=AC Bonus::(4,2)=!</cell>
     </row>
-  <row version="1.0"><cell>Armor</cell><cell>!!Armor::(2,2)!!</cell></row><row version="1.0"><cell>Misc</cell><cell>0</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
+  <row version="1.0"><cell>Armor</cell><cell>!=Armor::(2,2)=!</cell></row><row version="1.0"><cell>Misc</cell><cell>0</cell></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row><row version="1.0"><cell /><cell /></row></grid>
   <macros>
     <macro name="" />
   </macros>

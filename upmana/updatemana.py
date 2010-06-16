@@ -160,7 +160,7 @@ class Updater(wx.Panel):
         manifest = open(self.filename)
         self.ignorelist = []
         ignore = manifest.readlines()
-        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        for i in ignore: self.ignorelist.append(str(i[:len(i)-1]))
         manifest.close()
 
     def Finish(self, evt=None):
@@ -194,7 +194,7 @@ class Updater(wx.Panel):
         for t in types:
             self.btnName = str(t)
             self.btn[self.id] = wx.RadioButton(dlg, wx.ID_ANY, str(t), name=self.btnName)
-            if self.btnName == self.current: self.btn[self.id].SetValue(True)
+            if self.btnName == self.current: self.btn[self.id].SetValue(True); self.current_id = self.id
             self.btnlist[self.id] = self.btnName
             dlgsizer.Add(self.btn[self.id], (row, col))
             col += 1; self.id += 1
@@ -212,7 +212,16 @@ class Updater(wx.Panel):
 
     def PackageSet(self, event):
         for btn in self.btn:
-            if self.btn[btn].GetValue() == True: self.current = self.btnlist[btn]
+            if self.btn[btn].GetValue() == True:
+                if self.btnlist[btn] == 'pious-paladin':
+                    try: from PyQt4 import QtCore
+                    except:
+                        error = "'Pious Paladin' requires PyQt 4.6. For stability you will not be able to update."
+                        dlg = wx.MessageDialog(None, error, 'Failed PyQt Test', wx.OK | wx.ICON_ERROR)
+                        dlg.ShowModal()
+                        self.btn[self.current_id].SetValue(True)
+                        self.current = self.btnlist[self.current_id]
+                else: self.current = self.btnlist[btn]
 
         branches = self.repo.branchtags()
         heads = dict.fromkeys(self.repo.heads(), 1)
@@ -622,7 +631,7 @@ class Control(wx.Panel):
         manifest = open(self.filename)
         self.ignorelist = []
         ignore = manifest.readlines()
-        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        for i in ignore: self.ignorelist.append(str(i[:len(i)-1]))
         manifest.close()
 
     def get_packages(self, type=None):
@@ -818,7 +827,7 @@ class updateApp(wx.App):
         manifest = open(self.filename)
         self.ignorelist = []
         ignore = manifest.readlines()
-        for i in ignore: print i; self.ignorelist.append(str(i[:len(i)-1]))
+        for i in ignore: self.ignorelist.append(str(i[:len(i)-1]))
         manifest.close()
 
     def OnExit(self):

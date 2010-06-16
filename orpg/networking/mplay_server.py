@@ -51,6 +51,7 @@ from mplay_client import *
 from mplay_client import MPLAY_LENSIZE
 from orpg.dirpath import dir_struct
 import orpg.tools.validate
+import htmlentitydefs
 
 from orpg.mapper.map_msg import *
 from threading import Lock, RLock
@@ -316,7 +317,7 @@ class mplay_server:
             self.banDoc = self.banDom.getroot()
 
             for element in self.banDom.findall('banned'):
-                playerName = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+                playerName = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "").replace(">", "&gt;")
                 playerIP = element.get('ip')
                 self.ban_list[playerIP] = {}
                 self.ban_list[playerIP]['ip'] = playerIP
@@ -336,7 +337,7 @@ class mplay_server:
             etreeEl = Element('server')
             for ip in self.ban_list:
                 el = Element('banned')
-                el.set('name', str(self.ban_list[ip]['name'].replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">")))
+                el.set('name', str(self.ban_list[ip]['name'].replace("&amp;", "&").replace("&lt;", "<").replace("", '"').replace("&gt;", ">")))
                 el.set('ip', str(self.ban_list[ip]['ip']))
                 etreeEl.append(el)
             file = open(self.userPath + self.banFile ,"w")
@@ -616,7 +617,7 @@ class mplay_server:
 
     def register_callback(instance, xml_dom = None, source=None):
         if xml_dom:    # if we get something
-            if source == getMetaServerBaseURL():    # if the source of this DOM is the authoritative meta
+            if source == getMetaServerList():    # if the source of this DOM is the authoritative meta
                 try:
                     metacache_lock.acquire()
                     curlist = getRawMetaList()      #  read the raw meta cache lines into a list
@@ -648,21 +649,40 @@ class mplay_server:
 
     def registerRooms(self, args=None):
         rooms = ''
-        id = '0'
-        time.sleep(500)
-        for rnum in self.groups.keys():
-            rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][name]":self.groups[rnum].name,
-                                        "room_data[rooms][" + str(rnum) + "][pwd]":str(self.groups[rnum].pwd != "")})+'&'
-            for pid in self.groups[rnum].players:
-                rooms += urllib.urlencode( {"room_data[rooms][" + str(rnum) + "][players]["+str(pid)+"]":self.players[pid].name,})+'&'
+        serverId = '0'
+        x = 0
+        cache = {}
         for meta in self.metas.keys():
-            while id == '0':
-                id, cookie = self.metas[meta].getIdAndCookie()
-                data = urllib.urlencode( {"room_data[server_id]":id,
-                                        "act":'registerrooms'})
-            get_server_dom(data+'&'+rooms, self.metas[meta].path, string=True)
+        # There is no point in wasting our planetary resources on attempting to register rooms to a meta
+        # that does not provide that service. When they eventually get their head out of the elitist clouds
+        # this work around can be removed.
+            if meta.get('url') != 'http://orpgmeta.appspot.com':
+                cache[meta] = self.metas[meta]
+        for meta in cache.keys():
+            self.log_msg("Registering rooms too: " +meta.get('url'))
+            self.log_msg("Obtaining Server ID from: " +meta.get('url'))
+            for x in range (1, 100):
+                serverId, cookie = self.metas[meta].getIdAndCookie()
+            if serverId == '0':
+                self.metas[meta].IdAttempts += 100
+                if self.metas[meta].IdAttempts > 1000:
+                    self.metas[meta].unregister()
+                    self.log_msg("Deleting Meta: " +meta.get('url')+ " after 1000 attempts.")
+                    del self.metas[meta]
+                    break
+            if serverId != '0':
+                self.log_msg("Obtained Server ID: " +serverId+ " from: " +meta.get('url'))
+                self.metas[meta].IdAttempts = 0
+                for rnum in self.groups.keys():
+                    rooms += urllib.urlencode({"room_data[rooms][" +str(rnum)+ "][name]":self.groups[rnum].name,
+                                            "room_data[rooms][" +str(rnum)+ "][pwd]":str(self.groups[rnum].pwd != ""),
+                                            "room_data[rooms][" +str(rnum)+ "][players]":str(len(self.groups[rnum].players))
+                                            })+'&'
+                data = urllib.urlencode({"room_data[server_id]":serverId,
+                                         "act":'registerrooms'})
+                get_server_dom(data+'&'+rooms, meta.get('url'), string=True)
 
-    def register(self,name_given=None):
+    def register(self, name_given=None):
         if name_given == None: name = self.name
         else: self.name = name = name_given
         name = self.clean_published_servername(name)
@@ -672,11 +692,10 @@ class mplay_server:
         else: num_players = 0
 
         #  request only Meta servers compatible with version 2
-        metalist = getMetaServers(versions=["2"])
+        metalist = getMetaServerList()
         if self.show_meta_messages != 0:
             self.log_msg("Found these valid metas:")
-            for meta in metalist: self.log_msg("Meta:" + meta)
-
+            for meta in metalist: self.log_msg("Meta:" + meta.get('url'))
         """
         #  Go through the list and see if there is already a running register
         #  thread for the meta.
@@ -686,26 +705,27 @@ class mplay_server:
         #  iterate through the currently running metas and prune any
         #  not currently listed in the Meta Server list.
         """
-
         if self.show_meta_messages != 0: self.log_msg( "Checking running register threads for outdated metas.")
         for meta in self.metas.keys():
             if self.show_meta_messages != 0: self.log_msg("meta:" + meta + ": ")
             if not meta in metalist:  # if the meta entry running is not in the list
                 if self.show_meta_messages != 0: self.log_msg( "Outdated.  Unregistering and removing")
                 self.metas[meta].unregister()
+                self.log_msg("Unregistering from: " +meta.get('url'))
                 del self.metas[meta]
             else: 
                 if self.show_meta_messages != 0: self.log_msg( "Found in current meta list.  Leaving intact.")
 
         #  Now call register() for alive metas or start one if we need one
         for meta in metalist:
-            if self.metas.has_key(meta) and self.metas[meta] and self.metas[meta].isAlive():
+            self.log_msg("Registering too: " +meta.get('url'))
+            if (self.metas.has_key(meta) and self.metas[meta] and self.metas[meta].isAlive()):
                 self.metas[meta].register(name=name, 
                                         realHostName=self.server_address, 
                                         num_users=num_players)
             else:
                 self.metas[meta] = registerThread(name=name, realHostName=self.server_address, 
-                                    num_users=num_players, MetaPath=meta, port=self.server_port, 
+                                    num_users=num_players, MetaPath=meta.get('url'), port=self.server_port, 
                                     register_callback=self.register_callback)
                 self.metas[meta].start()
 
@@ -723,8 +743,9 @@ class mplay_server:
         #  Instead, loop through all existing meta threads and unregister them
         """
 
-        for meta in self.metas.values():
-            if meta and meta.isAlive(): meta.unregister()
+        for meta in self.metas.keys():
+            self.log_msg("Unregistering from: " +meta.get('url'))
+            if self.metas[meta] and self.metas[meta].isAlive(): self.metas[meta].unregister()
         self.be_registered = 0
 
         """
@@ -1211,11 +1232,9 @@ class mplay_server:
                 self.log_msg(("update_group", (self.groups[LOBBY_ID].name, LOBBY_ID, len(self.groups[LOBBY_ID].players) ) ))
                 cmsg = ("connect", props) #################################################
                 self.log_msg(cmsg)
-
-                #  If already registered then re-register, thereby updating the Meta
-                #    on the number of players
-                if self.be_registered:
-                    self.register()
+                for meta in self.metas.keys():
+                    self.metas[meta].num_users = len(self.players)
+                thread.start_new_thread(self.registerRooms,(0,))
         except:
             traceback.print_exc()
 
@@ -1673,33 +1692,8 @@ class mplay_server:
         # Check for & in name.  We want to allow this because of its common
         # use in d&d games.
         try:
-            loc = name.find("&")
-            oldloc = 0
-            while loc > -1:
-                loc = name.find("&",oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    value = b + "&amp;" + e
-                    oldloc = loc+1
-            loc = name.find("'")
-            oldloc = 0
-            while loc > -1:
-                loc = name.find("'",oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    name = b + "&#39;" + e
-                    oldloc = loc+1
-            loc = name.find('"')
-            oldloc = 0
-            while loc > -1:
-                loc = name.find('"',oldloc)
-                if loc > -1:
-                    b = name[:loc]
-                    e = name[loc+1:]
-                    name = b + "&quot;" + e
-                    oldloc = loc+1
+            name = name.replace('&', '&amp;')
+            name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
             oldroomname = self.groups[gid].name
             self.groups[gid].name = str(name)
             lmessage = "Room name changed to from \"" + oldroomname + "\" to \"" + name + "\""
@@ -1726,34 +1720,8 @@ class mplay_server:
 
         # Check for & in name.  We want to allow this because of its common
         # use in d&d games.
-
-        loc = name.find("&")
-        oldloc = 0
-        while loc > -1:
-            loc = name.find("&",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&amp;" + e
-                oldloc = loc+1
-        loc = name.find("'")
-        oldloc = 0
-        while loc > -1:
-            loc = name.find("'",oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&#39;" + e
-                oldloc = loc+1
-        loc = name.find('"')
-        oldloc = 0
-        while loc > -1:
-            loc = name.find('"',oldloc)
-            if loc > -1:
-                b = name[:loc]
-                e = name[loc+1:]
-                name = b + "&quot;" + e
-                oldloc = loc+1
+        name = name.replace('&', '&amp;')
+        name = name.replace('"', '&quote;').replace("'", '&#39;').replace("<", "&lt;").replace(">", "&gt;")
         group_id = str(self.next_group_id)
         self.next_group_id += 1
 
@@ -1809,14 +1777,10 @@ class mplay_server:
             del self.players[id]
             self.log_msg(dmsg)
             self.log_msg(("disconnect",id))
-            """
-            #  If already registered then re-register, thereby updating the Meta
-            #    on the number of players
-            #  Note:  Upon server shutdown, the server is first unregistered, so
-            #           this code won't be repeated for each player being deleted.
-            """
-            if self.be_registered:
-                self.register()
+            self.log_msg(("update_group", (self.groups[group_id].name, group_id, len(self.groups[group_id].players) )))
+            for meta in self.metas.keys():
+                self.metas[meta].num_users = len(self.players)
+            thread.start_new_thread(self.registerRooms,(0,))
         except Exception, e: self.log_msg( ('exception', str(e)) )
         self.log_msg("Explicit garbage collection shows %s undeletable items." % str(gc.collect()))
 
@@ -1825,30 +1789,32 @@ class mplay_server:
         act = xml_dom.get("action")
         group_id = self.players[id].group_id
         ip = self.players[id].ip
-        self.log_msg("Player with IP: " + str(ip) + " joined.")
         ServerPlugins.setPlayer(self.players[id])
         self.send_to_group(id,group_id,data)
         if act=="new":
             try:
                 self.send_player_list(id,group_id)
                 self.send_group_list(id)
+                self.log_msg("Player with IP: " + str(ip) + " connected.")
             except Exception, e: self.log_msg( ('exception', str(e)) ); traceback.print_exc()
         elif act=="del":
             self.del_player(id,group_id)
             self.check_group(id, group_id)
+            self.log_msg("Player with IP: " + str(ip) + " disconnected.")
         elif act=="update":
             self.players[id].take_dom(xml_dom)
+            self.log_msg("Player with IP: " + str(ip) + " updated.")
             self.log_msg(("update", {"id": id,
-                                     "name": xml_dom.get("name"),
-                                     "status": xml_dom.get("status"),
-                                     "role": xml_dom.get("role"),
-				     "ip":  str(ip),
-				     "group": xml_dom.get("group_id"),
-				     "room": xml_dom.get("name"),
-				     "boot": xml_dom.get("rm_boot"),
-				     "version": xml_dom.get("version"),
-				     "ping": xml_dom.get("time") \
-                                     }))
+                                    "name": xml_dom.get("name"),
+                                    "status": xml_dom.get("status"),
+                                    "role": xml_dom.get("role"),
+                                    "ip":  str(ip),
+                                    "group": xml_dom.get("group_id"),
+                                    "room": xml_dom.get("name"),
+                                    "boot": xml_dom.get("rm_boot"),
+                                    "version": xml_dom.get("version"),
+                                    "ping": xml_dom.get("time") \
+                                                 }))
 
     def strip_cheat_roll(self, string):
         try:
@@ -1988,7 +1954,7 @@ class mplay_server:
             given_boot_pwd = None
             try:
                 xml_dom = XML(msg)
-                given_boot_pwd = xml_dom.get("boot_pwd")
+                given_boot_pwd = xml_dom.find('boot').get("boot_pwd")
 
             except Exception, e:
                 print "Error in parse of boot message, Ignoring."
@@ -2011,31 +1977,31 @@ class mplay_server:
                     """
                     if given_boot_pwd == server_admin_pwd:
                         # Send a message to everyone in the room, letting them know someone has been booted
-                        boot_msg = "<msg to='all' from='%s' group_id='%s'/><font color='#FF0000'>Booting '(%s) %s' from server...</font>" % (from_id, group_id, to_id, self.players[to_id].name)
+                        msg = '<font color="#FF0000">'
+                        msg += 'Booting (' +str(to_id)+ ') ' +self.players[to_id].name+ ' from server...</font>'
+
+                        boot_msg = self.buildMsg('all', '0', group_id, msg)
                         self.log_msg("boot_msg:" + boot_msg)
                         self.send_to_group( "0", group_id, boot_msg )
                         time.sleep( 1 )
                         self.log_msg("Booting player " + str(to_id) + " from server.")
-
                         #  Send delete player event to all
                         self.send_to_group("0",group_id,self.players[to_id].toxml("del"))
-
                         #  Remove the player from local data structures
                         self.del_player(to_id,group_id)
-
                         #  Refresh the group data
                         self.check_group(to_id, group_id)
 
                     elif actual_boot_pwd == given_boot_pwd:
                         # Send a message to everyone in the room, letting them know someone has been booted
-                        boot_msg = "<msg to='all' from='%s' group_id='%s'/><font color='#FF0000'>Booting '(%s) %s' from room...</font>" % (from_id, group_id, to_id, self.players[to_id].name)
+                        msg = '<font color="#FF0000">'
+                        msg += 'Booting (' +str(to_id)+ ') ' +self.players[to_id].name+ ' from server...</font>'
+                        boot_msg = self.buildMsg('all', from_id, group_id, msg)
                         self.log_msg("boot_msg:" + boot_msg)
                         self.send_to_group( "0", group_id, boot_msg )
                         time.sleep( 1 )
-
                         #dump player into the lobby
                         self.move_player(to_id,"0")
-
                         #  Refresh the group data
                         self.check_group(to_id, group_id)
                     else:
@@ -2051,7 +2017,9 @@ class mplay_server:
 
         finally:
             try:
-                if xml_dom: xml_dom.unlink()
+                try: 
+                    if xml_dom: xml_dom.unlink()
+                except: pass
             except Exception, e:
                 traceback.print_exc()
                 self.log_msg('Exception in xml_dom.unlink() ' + str(e))
@@ -2094,7 +2062,7 @@ class mplay_server:
         configDom = parse(dir_struct["user"] + 'ban_list.xml')
         self.ban_list = {}
         for element in configDom.findall('banned'):
-            player = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;")
+            player = element.get('name').replace("&", "&amp;").replace("<", "&lt;").replace('"', "").replace(">", "&gt;")
             ip = element.get('ip')
             self.ban_list[ip] = {}
             self.ban_list[ip]['ip'] = ip

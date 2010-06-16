@@ -31,7 +31,6 @@ __version__ = "$Id: voxchat.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 import re, os, string, core
 
 from orpg.orpg_windows import *
-import core
 import orpg.tools.scriptkit
 import orpg.tools.predTextCtrl
 import orpg.tools.rgbhex

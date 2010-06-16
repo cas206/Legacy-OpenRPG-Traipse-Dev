@@ -49,7 +49,7 @@ class InterParse():
         s = self.NameSpaceE(s)
         s = self.NameSpaceI(s, node)
         s = self.NodeMap(s, node)
-        s = self.NodeParent(s, node.get('map'))
+        s = self.NodeParent(s, node)
         return s
 
     def Normalize(self, s, tab):
@@ -159,7 +159,8 @@ class InterParse():
         namespace -- TaS, Prof. Ebral"""
         reg2 = re.compile("(!=(.*?)=!)")
         matches = reg1.findall(s) + reg2.findall(s)
-        tree_map = node.get('map')
+        try: tree_map = node.get('map')
+        except: return node
         for i in xrange(0,len(matches)):
             ## Build the new tree_map
             new_map = tree_map.split('::')
@@ -168,7 +169,8 @@ class InterParse():
             node = self.get_node(new_map)
             newstr = self.LocationCheck(node, tree_map, new_map, find)
             s = s.replace(matches[i][0], newstr, 1)
-            s = self.ParseLogic(s, node)
+            s = self.NodeMap(s, node)
+            s = self.NodeParent(s, node)
         return s
 
     def NameSpaceE(self, s):
@@ -231,8 +233,10 @@ class InterParse():
             s = self.NodeParent(s, tree_map)
         return s
 
-    def NodeParent(self, s, tree_map):
+    def NodeParent(self, s, node):
         """Parses player input for embedded nodes rolls"""
+        if node == 'Invalid Reference!': return node
+        tree_map = node.get('map')
         cur_loc = 0
         reg = re.compile("(!#(.*?)#!)")
         matches = reg.findall(s)
