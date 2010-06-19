@@ -48,8 +48,8 @@ class InterParse():
         'Nodes now parse through ParsLogic. Easily add new parse rules right here!!'
         s = self.NameSpaceE(s)
         s = self.NameSpaceI(s, node)
-        s = self.NodeMap(s, node)
-        s = self.NodeParent(s, node)
+        #s = self.NodeMap(s, node)
+        #s = self.NodeParent(s, node)
         return s
 
     def Normalize(self, s, tab):
@@ -158,7 +158,13 @@ class InterParse():
         anyone. Using !" :: "! will allow you to use an internal namespace from within another internal 
         namespace -- TaS, Prof. Ebral"""
         reg2 = re.compile("(!=(.*?)=!)")
-        matches = reg1.findall(s) + reg2.findall(s)
+        """Adding the Parent and Child references to Namespace Internal. Namespace 2.0 is powerful enough it
+        should be able to handle them with no problem. For future reference, if you are paying attention, Namespace
+        will include two methods for Internal and External. !@ :: @! and !& :: @! for External and !" :: "! and != :: =!
+        for Internal. See above Easter Egg for reasoning."""
+        reg3 = re.compile("(!!(.*?)!!)")
+        reg4 = re.compile("(!#(.*?)#!)")
+        matches = reg1.findall(s) + reg2.findall(s) + reg3.findall(s) + reg4.findall(s)
         try: tree_map = node.get('map')
         except: return node
         for i in xrange(0,len(matches)):
@@ -169,8 +175,9 @@ class InterParse():
             node = self.get_node(new_map)
             newstr = self.LocationCheck(node, tree_map, new_map, find)
             s = s.replace(matches[i][0], newstr, 1)
-            s = self.NodeMap(s, node)
-            s = self.NodeParent(s, node)
+            s = s.replace(u'\xa0', ' ')
+            #s = self.NodeMap(s, node)
+            #s = self.NodeParent(s, node)
         return s
 
     def NameSpaceE(self, s):
@@ -206,6 +213,7 @@ class InterParse():
                             else: break
             if not newstr: newstr = 'Invalid Reference!'
             s = s.replace(matches[i][0], newstr, 1)
+            s = s.replace(u'\xa0', ' ') #Required for XSLT sheets
             s = self.ParseLogic(s, node)
         return s
 
@@ -226,11 +234,12 @@ class InterParse():
         matches = reg.findall(s)
         for i in xrange(0,len(matches)):
             tree_map = node.get('map')
-            tree_map = tree_map + '::' + matches[i][1]
-            newstr = '!@'+ tree_map +'@!'
+            tree_map = str(tree_map + '::' + matches[i][1])
+            if tree_map[:2] == '::': tree_map = tree_map[2:]
+            newstr = '!@'+ str(tree_map) +'@!'
             s = s.replace(matches[i][0], newstr, 1)
             s = self.Node(s)
-            s = self.NodeParent(s, tree_map)
+            s = self.NodeParent(s, node)
         return s
 
     def NodeParent(self, s, node):

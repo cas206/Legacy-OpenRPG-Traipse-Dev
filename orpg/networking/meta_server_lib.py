@@ -134,8 +134,10 @@ def get_server_list(versions=None, sort_by="start"):
         #get the server's xml from the current meta
         bad_meta = 0
         #print "Getting server list from " + meta + "..."
-        try: xml_dom = get_server_dom(data, meta.get('url'))
-        except: bad_meta = 1; print "Trouble getting servers from " + meta.get('url') + "..."
+        try: meta_path = meta.get('url'); xml_dom = get_server_dom(data, meta_path)
+        except:
+            if meta_path == None: meta_path = 'No URL available'
+            bad_meta = 1; print "Trouble getting servers from " +meta_path+ "..."
         if bad_meta: continue
         node_list = xml_dom.findall('server')
         if len(node_list): 
@@ -151,9 +153,6 @@ def get_server_list(versions=None, sort_by="start"):
                 n.set('meta',meta)
                 end_point = str(address) + ":" + str(port)
                 if return_hash.has_key(end_point):
-                    print end_point
-                    print n
-                    
                     if META_DEBUG: print "Replacing duplicate server entry at " + end_point
                 return_hash[end_point] = n
     server_list = Element('servers')
@@ -363,9 +362,9 @@ class registerThread(Thread):
                                         "act":"unregister"} )
             for path in getMetaServerList():
                 try: # this POSTS the request and returns the result
-                    etreeEl = get_server_dom(data, path.get('url'))
+                    etreeEl = get_server_dom(data, self.path)
                     if etreeEl.get("errmsg") != None:
-                        print "Error durring unregistration:  " + etreeEl.get("errmsg")
+                        print "Error durring unregistration:  " +etreeEl.get("errmsg")
                 except Exception, e:
                     if META_DEBUG: print "Problem talking to Meta.  Will go ahead and die, letting Meta remove us."
                     if META_DEBUG: print e
@@ -448,7 +447,7 @@ class registerThread(Thread):
             if etreeEl != None:
                 #  If there's an error, echo it to the console
                 if etreeEl.get("errmsg") != None:
-                    print "Error durring registration at: " +path.get('url')+ " Error: " +etreeEl.get("errmsg")
+                    print "Error durring registration at: " +self.path+ " Error: " +etreeEl.get("errmsg")
                     if META_DEBUG: print data
                     if META_DEBUG: print
                 """

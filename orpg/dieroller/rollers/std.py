@@ -38,7 +38,7 @@ class std(die_base):
             if self.data[i].lastroll() >= num:
                 self.data[i].extraroll()
                 done = 0
-        if done: print self; return self
+        if done: return self
         else: return self.open(num)
 
     def minroll(self,min):

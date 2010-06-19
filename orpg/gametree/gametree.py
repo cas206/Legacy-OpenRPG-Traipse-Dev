@@ -700,6 +700,8 @@ class game_tree(wx.TreeCtrl):
     
     def load_xml(self, xml_element, parent_node, prev_node=None, drag_drop=False):
         if parent_node == self.root:
+            name = xml_element.get('name').replace(u'\xa0', ' ') #Required for XSLT sheets
+            xml_element.set('name', name)
             self.tree_map[xml_element.get('name')] = {}
             self.tree_map[xml_element.get('name')]['node'] = xml_element
             xml_element.set('map', '')

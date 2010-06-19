@@ -41,7 +41,6 @@ die_rollers.register(d20)
 class d20dc(std):
     def __init__(self,source=[],DC=10,mod=0):
         std.__init__(self,source)
-        print "Source", source
         self.DC = DC
         self.mod = mod
         #self.append(static_di(mod))
