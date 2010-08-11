@@ -38,6 +38,7 @@ from orpg.dieroller.base import *
 
 class wod(std):
     name = "wod"
+    regExpression = "[\(0-9\*\-\+\)]+[a-zA-Z]+[0-9]+"
 
     def __init__(self,source=[],target=0,targetthr=0):
         std.__init__(self,source)
@@ -81,13 +82,14 @@ class wod(std):
             else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
 
-    def non_stdDie(self, s):
+    def non_stdDie(self, match):
+        s = match.group(0)
         num_sides = s.split('v')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]
             sides = '10'; target = num_sides[1]
             ret = ['(', num.strip(), "**die_rollers['wod'](",
                     sides.strip(), ')).vs(', target, ')']
-            s = ''.join(ret); return str(eval(s))
+            s = ''.join(ret); return s
 
 die_rollers.register(wod)

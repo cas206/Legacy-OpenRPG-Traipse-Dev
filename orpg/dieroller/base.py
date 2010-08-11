@@ -126,6 +126,7 @@ class die_base(UserList.UserList):
         elif hasattr(other,"sum"): return  cmp(self.sum(), other.sum())
         else: return UserList.UserList.__cmp__(self,other)
 
+
     def __rcmp__(self,other):
         return self.__cmp__(other)
 
@@ -229,7 +230,7 @@ class die_base(UserList.UserList):
 ### di class to handle actual dice
 
 class di:
-    def __init__(self, sides, min=1):
+    def __init__(self,sides,min=1):
         self.sides = sides
         self.history = None
         self.value = None
@@ -262,6 +263,7 @@ class di:
 
     def __int__(self):
         return self.value
+
 
     def __lt__(self,other):
         if type(other) == type(3) or type(other) == type(3.0): return self.value < other

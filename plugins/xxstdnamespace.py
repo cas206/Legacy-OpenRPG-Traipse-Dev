@@ -69,10 +69,10 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     def plugin_toggle(self, evt):
         if self.toggle.IsChecked() == True: 
-            Parse.NameSpaceI = self.parseMethods['Standard']
+            Parse.NameSpaceE = self.parseMethods['Standard']
             self.plugindb.SetString('xxstdnamespace', 'Standard', 'True')
         if self.toggle.IsChecked() == False: 
-            Parse.NameSpaceI = self.parseMethods['Traipse']
+            Parse.NameSpaceE = self.parseMethods['Traipse']
             self.plugindb.SetString('xxstdnamespace', 'Standard', 'False')
         pass
 

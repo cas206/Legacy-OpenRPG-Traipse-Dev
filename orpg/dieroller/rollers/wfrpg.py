@@ -37,11 +37,13 @@ from orpg.dieroller.base import *
 
 class wfrpg(std):
     name = "wfrpg"
+    regExpression = "(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[a-zA-Z]+"
 
     def __init__(self, source=[]):
         std.__init__(self, source)
 
-    def non_stdDie(self, s):
+    def non_stdDie(self, match):
+        s = match.group(0)
         self.war_die = {'rec': self.reckless, 
                         'con': self.conservative, 
                         'chr': self.characteristic, 

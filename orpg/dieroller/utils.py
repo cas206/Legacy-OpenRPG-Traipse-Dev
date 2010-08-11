@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2000-2001 The OpenRPG Project
+# Copyright (C) 2000-2010 The OpenRPG Project
 #
-#       openrpg-dev@lists.sourceforge.net
+#       owner@madmathlabs.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,14 +20,12 @@
 #
 # File: dieroller/utils.py
 # Author: OpenRPG Team
-# Maintainer:
+# Maintainer (Traipse): Tyler Starke
 # Version:
 #   $Id: utils.py,v Traipse 'Ornery-Orc' prof.ebral Exp  $
 #
 # Description: Classes to help manage the die roller
 #
-
-__version__ = "$Id: utils.py,v Traipse 'Ornery-Orc' prof.ebral Exp  Exp $"
 
 import re
 
@@ -55,8 +53,12 @@ class roller_manager(object):
     def listRollers(self):
         return die_rollers.keys()
 
+    def completeMath(self, matches):
+        s = matches.group(0)
+        return str(eval(s))
+
     def stdDieToDClass(self, match):
-        s = match.group(0); self.eval = str(match.string)
+        s = match.group(0)
         num_sides = s.split('d')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]
@@ -67,38 +69,47 @@ class roller_manager(object):
             ret = ['(', num.strip(), "**die_rollers['", self.getRoller(), "'](",
                     sides.strip(), '))']
             s =  ''.join(ret)
-            self.eval = s
             return s
 
-        ## Portable Non Standard Die Characters #Prof-Ebral
-        else: s = die_rollers._rollers[self.getRoller()]().non_stdDie(s); return s
-
     #  Use this to convert ndm-style (3d6) dice to d_base format
-    def convertTheDieString(self,s):
+    def convertTheDieString(self, s):
+        """
+        Die Roller Changes:
+        I've made some changes for ease of reading. Below you see the new formula and the old depricated formula. The new formula is easier to understand
+        and works a little better with math. Try this: [(2+4)+4d(6+8)+(4*4)] with both formulas. Traipse succeeds, Standard (1.7.1) fails.
+
+        The new formula deals only with numbers of the Fudge roller. The math has a required process flow, which is unliked currently by me but I am not
+        going to spend more time on at currently to correct it. It occurs when using paranthesis on the facet. If paranthesis are used no modifier can be added
+        at the end, but you can added it before the roll.
+
+        This is the standard roller formula: (Math D Numbers or Math or Fudge). If that fails the new non_stdDie looks for a regExpression formula inside
+        the current die roller, set under the name. So all of that bloat to include the english language in the Gilcrease 1.8.0 remains bloat and Traipse's
+        dice can be liberated to do what they want, where they want, when they want.
+        """
         self.result = ''
-        reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[\dFf]+")
+        math = '[\(0-9\/\*\-\+\)]+'
+        reg = re.compile(math+'d\s*([0-9]+|'+math+'|[fF])')
+
+        #reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[\dFf]+") ## Original
         (result, num_matches) = reg.subn(self.stdDieToDClass, s)
+
         if num_matches == 0 or result is None:
-            reg = re.compile("(?:\d+|\([0-9\*/\-\+]+\))\s*[a-zA-Z]+\s*[a-zA-Z]+") ## Prof Ebral
-            (result, num_matches) = reg.subn(self.stdDieToDClass, s) ## Prof Ebral
-            """try: ## Kinda pointless when you can create new Regular Expressions
-                s2 = self.roller_class + "(0)." + s ## Broken method
-                test = eval(s2)
-                return s2
-            except Exception, e: print e; pass"""
-            self.result = result
-            try: return self.do_math(s)
+            reg = re.compile(math)
+            (result, math_matches) = reg.subn(self.completeMath, s)
+
+        if num_matches == 0 or result is None:
+            try:
+                reg = re.compile(die_rollers._rollers[self.getRoller()].regExpression)
+                (result, num_matches) = reg.subn(self.roller_class().non_stdDie, s)
+                self.result = result
             except: pass
         return result
-
-    def do_math(self, s):
-        return str(eval(s))
 
     def proccessRoll(self, s):
         v = self.convertTheDieString(s)
         try: b = str(eval(v))
         except: 
-            if v == self.eval: b = s
+            if v == '': b = s
             else: b = str(v) ##Fail safe for non standard dice.
         return b
 

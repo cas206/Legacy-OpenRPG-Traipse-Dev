@@ -239,7 +239,7 @@ class game_tree(wx.TreeCtrl):
             emsg = "Gametree Missing!\n"+filename+" cannot be found.\n\n"\
                  "Would you like to locate it?\n"\
                  "(Selecting 'No' will cause a new default gametree to be generated)"
-            self.locate_valid_tree("Gametree Error", emsg)
+            self.locate_valid_tree("Gametree Error", emsg, filename)
             return
         try:
             self.xml_root = False
@@ -265,7 +265,7 @@ class game_tree(wx.TreeCtrl):
             emsg = filename+" does not appear to be a valid gametree file.\n\n"\
                  "Would you like to select a different gametree file to use?\n"\
                  "(Selecting 'No' will cause a new default gametree to be generated)"
-            self.locate_valid_tree("Invalid Gametree!", emsg)
+            self.locate_valid_tree("Invalid Gametree!", emsg, filename)
             return
         try:
             # version = self.xml_root.get("version")
