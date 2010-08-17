@@ -222,8 +222,9 @@ class textctrl_handler(node_handler):
 
     def tohtml(self):
         txt = self.get_value()
-        txt = string.replace(txt,'\n',"<br />")
-        if not self.is_hide_title(): txt = "<b>"+self.xml.get("name")+":</b> "+txt
+        if txt == None: txt = ''
+        txt = txt.replace('\n','<br />')
+        if not self.is_hide_title(): txt = '<b>'+self.xml.get('name')+':</b> '+txt
         return txt
 
     def get_value(self):

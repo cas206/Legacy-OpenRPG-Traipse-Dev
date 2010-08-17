@@ -118,7 +118,6 @@ class sk(std):
         elif ( self.dieRoll <= self.score / 2 ): self.success = 'G'
         elif ( self.dieRoll <= self.score ): self.success = 'O'
         else: self.success = 'F'
-        if ( self.d20 == 20 ): self.success = 'CF'
         return myStr
 
     def __str__(self):
@@ -218,31 +217,17 @@ class ac(sk):
         
         myStr = " <b><font color='#E42217'>ACTION CHECK : </font></b>"+myStr
         successes = {'CS': " <b><font size=2 color='#8D38C9'>CRITICAL SUCCESS</font></b>",
-                    'CF': " <b><font size=2 color='#151B54'>CRITICAL FAILURE</font></b><BR> -2 Step make up bonus next Action Check",
+                    'CF': " <b><font size=2 color='#151B54'>CRITICAL FAILURE</font></b>",
                     'A': " <b><font size=2 color='#E42217'>AMAZING Success</font></b>",
                     'G': " <b><font size=2 color='#306EFF'>Good Success</font></b>",
                     'O': " <b><font size=2 color='#52D017'>Ordinary Success</font></b>",
                     'F': " <b><font size=2 color='#41627E'>Marginal failure</font></b>"}
-        if ( self.d20 == 1 ):  myStr += successes['CS'] # SEG Dec 19 2009
-        myStr += successes[self.success]
-        if ( self.d20 == 1 ) and (self.success == 'F') :
-            myStr += " final result ==> "
-            myStr += successes['O'] # SEG JAN 23 2010
-        if ( self.d20 != 1 ) and (self.success == 'F') :
-            myStr += "<BR> -1 Step make up bonus next Action Check"
-            
+        if self.d20 == 1: 
+            myStr += successes['CS']
+            myStr += ' (' +successes[self.success]+ ' )'
+        elif self.d20 == 20: 
+            myStr += successes['CF']
+            myStr += ' (' +successes[self.success]+ ' )'
+        else: myStr += successes[self.success]
         return myStr
-
-
-
-
-
-
-
-
-
-
-
-
-        
 

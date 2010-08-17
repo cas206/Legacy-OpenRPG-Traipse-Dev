@@ -214,7 +214,7 @@ class node_handler:
         pass
 
     def on_send_to_chat(self,evt):
-        self.chat.ParsePost(self.tohtml(),True,True)
+        Parse.Post(self.tohtml(),False)
 
     def on_drop(self, evt):
         drag_obj = self.tree.drag_obj

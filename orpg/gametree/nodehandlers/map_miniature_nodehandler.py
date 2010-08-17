@@ -124,7 +124,7 @@ class map_miniature_handler(node_handler):
 
     def tohtml(self):
         html_str = "<table><tr><td>"
-        html_str += "<center><img src='" + self.xml.get("path") + "'>"
+        html_str += "<center><img src='" + self.miniature_xml.get("path") + "'>"
         html_str += "</center></td></tr>\n"
         html_str += "<tr><td><center>" + self.xml.get("name") + "</center></td></tr></table>"
         return html_str

@@ -1,6 +1,8 @@
 import os, re, wx
 import orpg.pluginhandler
 from orpg.tools.InterParse import Parse
+from orpg.dieroller.base import die_rollers
+from orpg.dieroller.utils import roller_manager
 
 class Plugin(orpg.pluginhandler.PluginHandler):
     # Initialization subroutine.
@@ -21,7 +23,7 @@ class Plugin(orpg.pluginhandler.PluginHandler):
         #You can set variables below here. Always set them to a blank value in this section. Use plugin_enabled
         #to set their proper values.
         self.hiddenrolls = []
-        self.dicere = "\{([0-9]*d[0-9]*.+)\}"
+        #self.dicere = "\{([0-9]*d[0-9]*.+)\}"
 
     def plugin_menu(self):
         self.menu = wx.Menu()
@@ -40,12 +42,18 @@ class Plugin(orpg.pluginhandler.PluginHandler):
 
     def pre_parse(self, text):
         if self.toggle.IsChecked() == True:
-            m = re.search(self.dicere, text)
+            ## Changes added for non standard dice rolls. Prof.Ebral (TaS)
+            math = '[\(0-9\/\*\-\+\)]+'
+            dicere = '\{('+math+'d\s*([0-9]+|'+math+'|[fF]))\}'
+            m = re.search(dicere, text)
+            if m is None:
+                dicere = '\{('+die_rollers._rollers[roller_manager().getRoller()].regExpression+')\}'
+                m = re.search(dicere, text)
             while m:
                 roll = "[" + m.group(1) + "]"
                 self.hiddenrolls += [Parse.Dice(roll)]
                 text = text[:m.start()] + "(hidden roll)" + text[m.end():]
-                m = re.search(self.dicere, text)
+                m = re.search(dicere, text)
         return text
 
     def post_msg(self, text, myself):

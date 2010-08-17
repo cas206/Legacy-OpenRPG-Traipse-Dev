@@ -52,7 +52,8 @@ class InterParse():
         #s = self.NodeParent(s, node)
         return s
 
-    def Normalize(self, s, tab):
+    def Normalize(self, s, tab=False):
+        if not tab: tab = component.get('chat')
         for plugin_fname in tab.activeplugins.keys():
             plugin = tab.activeplugins[plugin_fname]
             try: s = plugin.pre_parse(s)

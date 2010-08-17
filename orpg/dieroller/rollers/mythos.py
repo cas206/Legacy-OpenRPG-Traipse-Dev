@@ -39,6 +39,7 @@ __version__ = "$Id: wod.py,v Traipse 'Ornery-Orc' prof.ebral Exp $"
 
 class mythos(std):
     name = "mythos"
+    regExpression = "[\(0-9\*\-\+\)]+[a-zA-Z]+[0-9]+"
 
     def __init__(self,source=[],target=0,targetthr=0):
         std.__init__(self,source)
@@ -85,7 +86,8 @@ class mythos(std):
             else: myStr += "] vs " +str(self.target)+" result of (" + str(self.sum()) + ")"
         return myStr
 
-    def non_stdDie(self, s):
+    def non_stdDie(self, match):
+        s = match.group(0)
         num_sides = s.split('v')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = num_sides[1]

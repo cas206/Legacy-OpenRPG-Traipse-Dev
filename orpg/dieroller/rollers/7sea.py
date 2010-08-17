@@ -38,12 +38,13 @@ from orpg.dieroller.base import *
 
 class seventhsea(std):
     name = "7sea"
+    regExpression = "[\(0-9\*\-\+\)]+[a-zA-Z]+[0-9]+"
 
     def __init__(self,source=[]):
         std.__init__(self,source)
 
-    def non_stdDie(self, s):
-        print '7th Sea'
+    def non_stdDie(self, match):
+        s = match.group(0)
         num_sides = s.split('k')
         if len(num_sides) > 1: 
             num_sides; num = num_sides[0]; sides = '10'; target = num_sides[1]
