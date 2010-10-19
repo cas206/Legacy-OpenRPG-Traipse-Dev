@@ -415,96 +415,6 @@ Is this the end already?</text>
           </nodehandler>
         </nodehandler>
         </nodehandler>
-      <nodehandler class="form_handler" frame="409,414,422,76" height="600" icon="wizard1" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Deck" version="1.0" width="400">
-        <nodehandler class="rpg_grid_handler" frame="400,400,425,69" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Deck" module="rpg_grid" name="52 Card Deck" version="1.0">
-          <grid autosize="1" border="1">
-            <row version="1.0">
-              <cell>AS</cell>
-              <cell>AD</cell>
-              <cell>AC</cell>
-              <cell>AH</cell>
-            </row>
-            <row version="1.0">
-              <cell>KS</cell>
-              <cell>KD</cell>
-              <cell>KC</cell>
-              <cell>KH</cell>
-            </row>
-            <row version="1.0">
-              <cell>QS</cell>
-              <cell>QD</cell>
-              <cell>QC</cell>
-              <cell>QH</cell>
-            </row>
-            <row version="1.0">
-              <cell>JS</cell>
-              <cell>JD</cell>
-              <cell>JC</cell>
-              <cell>JH</cell>
-            </row>
-            <row version="1.0">
-              <cell>10S</cell>
-              <cell>10D</cell>
-              <cell>10C</cell>
-              <cell>10H</cell>
-            </row>
-            <row version="1.0">
-              <cell>9S</cell>
-              <cell>9D</cell>
-              <cell>9C</cell>
-              <cell>9H</cell>
-            </row>
-            <row version="1.0">
-              <cell>8S</cell>
-              <cell>8D</cell>
-              <cell>8C</cell>
-              <cell>8H</cell>
-            </row>
-            <row version="1.0">
-              <cell>7S</cell>
-              <cell>7D</cell>
-              <cell>7C</cell>
-              <cell>7H</cell>
-            </row>
-            <row version="1.0">
-              <cell>6S</cell>
-              <cell>6D</cell>
-              <cell>6C</cell>
-              <cell>6H</cell>
-            </row>
-            <row version="1.0">
-              <cell>5S</cell>
-              <cell>5D</cell>
-              <cell>5C</cell>
-              <cell>5H</cell>
-            </row>
-            <row version="1.0">
-              <cell>4S</cell>
-              <cell>4D</cell>
-              <cell>4C</cell>
-              <cell>4H</cell>
-            </row>
-            <row version="1.0">
-              <cell>3S</cell>
-              <cell>3D</cell>
-              <cell>3C</cell>
-              <cell>3H</cell>
-            </row>
-            <row version="1.0">
-              <cell>2S</cell>
-              <cell>2D</cell>
-              <cell>2C</cell>
-              <cell>2H</cell>
-            </row>
-          </grid>
-          <macros>
-            <macro name="" />
-          </macros>
-        </nodehandler>
-        <nodehandler class="textctrl_handler" frame="400,90,320,145" icon="note" map="Traipse OpenRPG::Bonus Nodes::Deck" module="forms" name="Draw" version="1.0">
-          <text hide_title="0" multiline="0" raw_mode="1" send_button="1">!=52 Card Deck::([#1d13], [#1d4])=!</text>
-        </nodehandler>
-        </nodehandler>
       <nodehandler class="form_handler" frame="400,400,501,72" height="600" icon="orc" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Encounters" version="1.0" width="400">
         <nodehandler class="listbox_handler" frame="400,153,348,150" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="forms" name="Roll" version="1.0">
           <list hide_title="0" raw_mode="1" send_button="1" type="1">
@@ -552,7 +462,63 @@ Is this the end already?</text>
           </nodehandler>
         </nodehandler>
       <nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes" module="containers" name="Devin Knight Miniatures" version="1.0">
-  <nodehandler class="minilib_handler" frame="400,495,0,47" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="minilib" name="Kobolds" version="1.0"><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-VWFxAXmoTpYse2buZiS4SZpzatg/pv_deadKobold1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-KTugmfksrE56cHwgcV3PbC6Cg1o/pv_deadkobold2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-Ti3EZB9ADZfoRXw2uLMiVViQGj8/pv_koboldarcher1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-P-lXPtzQPE9guLwJk6D5zwusTn0/pv_koboldarcher2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 3" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-qnxWFx32WXZBCPi6zvxYt_MdBpw/pv_koboldarcher3.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Chief 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-n2QA3bBoWlJaMLV_uBFAbjrZEE8/pv_koboldchief1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Chief 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-O8solKliwBfGxEqV2xAxb4ZGZo0/pv_koboldchief2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-JlgEsTT3lksr0W26RfE7NduLMt8/pv_koboldfighter1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-sjN5rqyKKJ7rQyzrpo8ciKOsSZY/pv_koboldfighter2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 3" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-yYytJ5NBMbnupiR8-7-P15ML2PE/pv_koboldfighter3.png" width="0" /></nodehandler><nodehandler class="minilib_handler" frame="400,495,0,47" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="minilib" name="Goblins" version="1.0"><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-EbZhcvjWbMlu4OdaFoPxb0Vvzsg/pv_deadgoblin1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-wQYxU0aEuH9z6vP7c5ocH5NDL3g/pv_deadgoblin2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Cross Bow" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-pvrbiVb90pFepUrRGKFqOaGY01U/pv_goblinxbow1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-XxS8bDq5aquNE21bsjA6YI4m9j0/pv_goboarcher.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-DY0Ihjm1A3EnVee2QEN0w2KbJsc/pv_goboarcher2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-1b5FhrUFEwQKQFW6syNIIXjlJqI/pv_gobofighter.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-Vrcik3LLM_tTVV0zot9bTFt8E00/pv_gobofighter2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 3" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-6AElcQwzQQWFnWyrFgHdArcfboY/pv_gobofighter3.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 4" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-HvfD9Bi385v2reNtM5tBhbrkLSM/pv_gobofighter4.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 5" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-qDZgsrZCEJ7jOPnVEOEpVqetR8w/pv_gobofighter5.png" width="0" /></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="containers" name="Aliens" version="1.0">
+
+<nodehandler class="minilib_handler" frame="400,495,536,37" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="minilib" name="Kobolds" version="1.0">
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="deadKobold1.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/deadKobold1.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="deadkobold2.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/deadkobold2.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldarcher1.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldarcher1.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldarcher2.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldarcher2.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldarcher3.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldarcher3.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldchief1.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldchief1.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldchief2.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldchief2.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter1.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter1.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter2.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter2.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter3.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter3.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter4.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter4.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter5.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter5.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter6.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter6.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldfighter7.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldfighter7.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldshaman1.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldshaman1.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldshaman2.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldshaman2.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldshaman3.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldshaman3.png" width="0" zorder="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="koboldshaman4.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Kobolds/koboldshaman4.png" width="0" zorder="0" />
+</nodehandler>
+
+<nodehandler class="minilib_handler" frame="400,495,536,37" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="minilib" name="Towns Folk" version="1.0">
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_02.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_02.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_23.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_23.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_06.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_06.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_09.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_09.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_08.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_08.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_05.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_05.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_24.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_24.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_15.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_15.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_21.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_21.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_10.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_10.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_18.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_18.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_12.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_12.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_20.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_20.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_11.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_11.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_19.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_19.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_04.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_04.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_01.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_01.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_13.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_13.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_27.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_27.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_07.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_07.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_26.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_26.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_28.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_28.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_25.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_25.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_17.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_17.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_16.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_16.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_22.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_22.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_03.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_03.png" width="0" />
+    <miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="townsfolk_14.png" posx="0" posy="0" unique="0" url="http://www.knowledgearcana.com/images/traipse-images/Towns Folk/townsfolk_14.png" width="0" />
+</nodehandler>
+
+<nodehandler class="minilib_handler" frame="400,495,378,140" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="minilib" name="Goblins" version="1.0">
+<miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-EbZhcvjWbMlu4OdaFoPxb0Vvzsg/pv_deadgoblin1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Dead 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-wQYxU0aEuH9z6vP7c5ocH5NDL3g/pv_deadgoblin2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Cross Bow" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-pvrbiVb90pFepUrRGKFqOaGY01U/pv_goblinxbow1.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-XxS8bDq5aquNE21bsjA6YI4m9j0/pv_goboarcher.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Archer 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-DY0Ihjm1A3EnVee2QEN0w2KbJsc/pv_goboarcher2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-1b5FhrUFEwQKQFW6syNIIXjlJqI/pv_gobofighter.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-Vrcik3LLM_tTVV0zot9bTFt8E00/pv_gobofighter2.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 3" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-6AElcQwzQQWFnWyrFgHdArcfboY/pv_gobofighter3.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 4" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-HvfD9Bi385v2reNtM5tBhbrkLSM/pv_gobofighter4.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Fighter 5" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-qDZgsrZCEJ7jOPnVEOEpVqetR8w/pv_gobofighter5.png" width="0" /></nodehandler>
+
+<nodehandler border="1" class="group_handler" cols="1" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures" module="containers" name="Aliens" version="1.0">
   <nodehandler class="minilib_handler" frame="400,495,170,126" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Devin Knight Miniatures::Aliens" module="minilib" name="Green Aliens" version="1.0"><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV--RYuH3OGewjkqfxlypn0SkcweoI/pv_aliensGreenlo_33.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-gtgpviTFGC2nmyKrTNuXFGnPww4/pv_aliensGreenlo_34.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 3" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-4pQot88_GagRH_Pi5NhwHRWkDm0/pv_aliensGreenlo_35.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 4" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-u3ld_4ogWeJFqJvVme4VwUiJs6Y/pv_aliensGreenlo_36.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green Archer 1" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-gFpKPLnuvVRuubqu4naLxog3Miw/pv_aliensGreenlo_37.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green Archer 2" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-Zbnh_UgCs8y45e_Ued9LhNrSiqY/pv_aliensGreenlo_38.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green Magic User" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-GIWg-79YYQ0UtaHFBGRJPnfHYCI/pv_aliensGreenlo_39.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 5" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-WputA55KIvBPm_ePwOh4GWdvRF8/pv_aliensGreenlo_40.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 6" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-JEzg3yqjroxkFP-yDYf-m7q2_Ts/pv_aliensGreenlo_41.png" width="0" /><miniature align="0" face="0" heading="0" height="0" hide="0" locked="0" name="Green 7" posx="0" posy="0" unique="0" url="http://my.pogoplug.com/feeds/ewHgA4kMz3sZUz91kIGvFQ/XCEPV-dKZ_WoKKSt2_0Z849xT_kqhZ2WQ/pv_aliensGreenlo_42.png" width="0" /></nodehandler></nodehandler></nodehandler></nodehandler>
     <nodehandler class="file_loader" icon="book" map="Traipse OpenRPG" module="core" name="Load User Manual" version="1.0">
       <file name="Traipse_User_Guide.xml" />
@@ -565,7 +531,9 @@ Is this the end already?</text>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="3.5 Tool" version="1.0">
           <file name="dnd3.5.xml" />
         </nodehandler>
-        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create WH PC Sheet" version="1.0">
+        <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="IronClaw" version="1.0">
+  <file name="ironclaw.xml" />
+</nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create WH PC Sheet" version="1.0">
   <file name="Warhammerv2CS2-Traipse.xml" />
 </nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create 4e PC Sheet" version="1.0">
           <file name="4e_char_sheet.xml" />
