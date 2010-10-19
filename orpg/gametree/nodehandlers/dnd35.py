@@ -4,6 +4,7 @@ from string import *  #a 1.6003
 from inspect import *  #a 1.9001
 from orpg.dirpath import dir_struct
 from xml.etree.ElementTree import parse
+from orpg.tools.InterParse import Parse
 dnd35_EXPORT = wx.NewId()
 
 ############Global Stuff##############
@@ -396,7 +397,7 @@ class dnd35ability(class_char_child):
             else: mod1 = ""
             chat = self.chat
             txt = '%s check: [1d20%s%s]' % ( name, mod1, mod )
-            chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_mod(self,abbr):
         score = int(self.abilities[abbr].get('base'))
@@ -669,7 +670,7 @@ class dnd35saves(class_char_child):
             else: mod1 = ""
             chat = self.chat
             txt = '%s save: [1d20%s%s]' % (name, mod1, mod)
-            chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,save_grid,"Saves")
@@ -924,7 +925,7 @@ class dnd35skill(skills_char_child):
             chat = self.chat
             txt = '%s Skill Check: [1d20%s%s%s] %s' % (
                     name, mod1, mod, acCp, armor)
-            chat.ParsePost(txt,True,True)
+            Parse.Post(txt, self.chat, True, True)
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,skill_grid,"Skills")
@@ -1240,7 +1241,7 @@ class dnd35hp(combat_char_child):
         chp = self.xml.get('current')
         mhp = self.xml.get('max')
         txt = '((HP: %s / %s))' % ( chp, mhp )
-        self.chat.ParsePost( txt, True, True )
+        Parse.Post( txt, self.chat, True, True )
 
     def tohtml(self):
         html_str = "<table width=100% border=1 >"
@@ -1442,7 +1443,7 @@ class dnd35attacks(combat_char_child):
                 if monkLvl == None:     #a 1.5009
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True ) #a 1.5009
+                    Parse.Post( txt, self.chat, True, True ) #a 1.5009
                     return #a 1.5009
                 else:   #a 1.5009
                     lvl=int(monkLvl)
@@ -1456,7 +1457,7 @@ class dnd35attacks(combat_char_child):
                 if monkLvl == None:     #a 1.5009
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True ) #a 1.5009
+                    Parse.Post( txt, self.chat, True, True ) #a 1.5009
                     return #a 1.5009
                 else:   #a 1.5009
                     lvl=int(monkLvl)
@@ -1470,7 +1471,7 @@ class dnd35attacks(combat_char_child):
                 if monkLvl == None:     #a 1.5009
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True ) #a 1.5009
+                    Parse.Post( txt, self.chat, True, True ) #a 1.5009
                     return #a 1.5009
                 else:   #a 1.5009
                     lvl=int(monkLvl)
@@ -1515,7 +1516,7 @@ class dnd35attacks(combat_char_child):
                 if monkLvl == None:
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True ) #a 1.5009
+                    Parse.Post( txt, self.chat, True, True ) #a 1.5009
                     return
                 else:
                     lvl = int(monkLvl)
@@ -1548,7 +1549,7 @@ class dnd35attacks(combat_char_child):
             else: mod1 = ""
             txt = ' %s Attack Roll: <b>[1d20%s%s%s]</b>' % (name, mod1, base, flu)
             txt += ' ===> Damage: <b>[%s%s]</b>' % (dmg, aStrengthMod)
-            self.chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,attack_panel,"Attacks")
@@ -1918,7 +1919,7 @@ class dnd35armor(combat_char_child):
         fac = (int(ac)-(self.root.abilities.get_mod('Dex')))
 
         txt = '((AC: %s Normal, %s Flatfoot))' % ( ac, fac ) #a 1.5002
-        self.chat.ParsePost( txt, True, True )
+        Parse.Post( txt, self.chat, True, True ) #a 1.5009
 
     def tohtml(self):
         html_str = """<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 >

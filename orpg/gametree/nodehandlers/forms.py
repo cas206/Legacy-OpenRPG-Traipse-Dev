@@ -149,7 +149,7 @@ class form_edit_panel(ScrolledPanel):
         txt = self.text[id].GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == F_HEIGHT or id == F_WIDTH:
             try: int(txt)
@@ -422,7 +422,7 @@ class textctrl_edit_panel(wx.Panel):
         if id == P_TITLE:
             txt = self.title.GetValue()
             if not len(txt): return
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         if id == F_TEXT:
             txt = self.text.GetValue()
@@ -927,7 +927,7 @@ class listbox_edit_panel(wx.Panel):
         txt = self.text.GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 
     def on_send_button(self,evt):
@@ -1004,7 +1004,7 @@ class link_edit_panel(wx.Panel):
         txt = self.text[id].GetValue()
         if not len(txt): return
         if id == P_TITLE:
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
         elif id == P_URL: self.handler.link.set('href',txt)
 

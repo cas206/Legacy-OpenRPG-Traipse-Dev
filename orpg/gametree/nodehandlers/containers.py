@@ -186,7 +186,7 @@ class group_edit_panel(wx.Panel):
         if id == P_TITLE:
             txt = self.text[id].GetValue()
             if txt != "":
-                self.handler.xml.set('name',txt)
+                #self.handler.xml.set('name',txt)
                 self.handler.rename(txt)
 
 
@@ -248,7 +248,7 @@ class tabbed_edit_panel(wx.Panel):
     def on_text(self,evt):
         txt = self.title.GetValue()
         if txt != "":
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 
 
@@ -343,6 +343,6 @@ class splitter_panel(wx.Panel):
     def on_text(self,evt):
         txt = self.title.GetValue()
         if txt != "":
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 

@@ -358,7 +358,7 @@ class d20skill(d20_char_child):
                 else: mod1 = ""
                 txt = '%s Skill Check: [1d20%s%s]' % (name, mod1, mod)
             chat = self.chat
-            chat.ParsePost(txt,True,True)
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,skill_grid,"Skills")
@@ -409,7 +409,7 @@ class d20ability(d20_char_child):
             else: mod1 = ""
             chat = self.chat
             txt = '%s check: [1d20%s%s]' % ( name, mod1, mod )
-            chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_mod(self,abbr):
         score = int(self.abilities[abbr].get('base'))
@@ -477,7 +477,7 @@ class d20saves(d20_char_child):
             else: mod1 = ""
             chat = self.chat
             txt = '%s save: [1d20%s%s]' % (name, mod1, mod)
-            chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,save_grid,"Saves")
@@ -607,14 +607,14 @@ class d20spells(d20_char_child):
             left = eval( '%s - ( %s )' % ( memrz, use ) )
             if left < 0:
                 txt = '%s Tried to cast %s but has used all of them for today, "Please rest so I can cast more."' % ( cname, name )
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
             else:
                 txt = '%s casts %s ( level %s, "%s" )' % ( cname, name, level, descr )
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
                 s = ''
                 if left != 1: s = 's'
                 txt = '%s can cast %s %d more time%s' % ( cname, name, left, s )
-                self.chat.ParsePost( txt, False, False )
+                Parse.Post( txt, self.chat, False, False )
                 self.spells[ name ].set( 'used', `eval( use )` )
 
     def refresh_spells(self):
@@ -672,14 +672,14 @@ class d20divine(d20_char_child):
             left = eval( '%s - ( %s )' % ( memrz, use ) )
             if left < 0:
                 txt = '%s Tried to cast %s but has used all of them for today, "Please rest so I can cast more."' % ( cname, name )
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
             else:
                 txt = '%s casts %s ( level %s, "%s" )' % ( cname, name, level, descr )
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
                 s = ''
                 if left != 1: s = 's'
                 txt = '%s can cast %s %d more time%s' % ( cname, name, left, s )
-                self.chat.ParsePost( txt, False, False )
+                Parse.Post( txt, self.chat, False, False )
                 self.spells[ name ].set( 'used', `eval( use )` )
 
     def refresh_spells(self):
@@ -741,29 +741,29 @@ class d20powers(d20_char_child):
                 numcast = eval('%s / %s' % (left, points))
                 if left < 0:
                     txt = '%s doesnt have enough PowerPoints to use %s' % ( cname, name )
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                 else:
                     txt = '%s uses %s as a Free Talent ( level %s, "%s" )' % ( cname, name, level, descr )
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                     s = ''
                     if left != 1: s = 's'
                     txt = '%s can use %s %d more time%s' % ( cname, name, numcast, s )
-                    self.chat.ParsePost( txt, False, False )
+                    Parse.Post( txt, self.chat, False, False )
                     self.char_hander.set_char_pp('free', left)
             else:
                 left = eval('%s - ( %s )' % ( cpp, points ))
                 numcast = eval('%s / %s' % (left, points))
                 if left < 0:
                     txt = '%s doesnt have enough PowerPoints to use %s' % ( cname, name )
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                 else:
                     txt = '%s uses %s ( level %s, "%s" )' % ( cname, name, level, descr )
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                     s = ''
                     if left != 1: s = 's'
                     txt = '%s can use %s %d more time%s' % ( cname, name, numcast, s )
                     txt += ' - And has %d more Powerpoints left' % (left)
-                    self.chat.ParsePost( txt, False, False )
+                    Parse.Post( txt, self.chat, False, False )
                     self.char_hander.set_char_pp('current1', left)
 
     def refresh_powers(self):
@@ -1007,7 +1007,7 @@ class d20attacks(d20_char_child):
                         txt = 'Critical hit? [1d20%+d] ===> Damage: [%dd%d%+d%s]' \
                               % (bab[i] + attack_mod, crit_mult*num_damage_dice, \
                                  damage_die, crit_mult*damage_mod, extra_damage)
-                        self.chat.ParsePost( txt, True, True )
+                        Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,attack_panel,"Attacks")

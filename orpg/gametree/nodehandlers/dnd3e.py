@@ -33,6 +33,7 @@ from inspect import *  #a 1.9001
 from orpg.dirpath import dir_struct
 from orpg.tools.orpg_log import debug
 from xml.etree.ElementTree import parse
+from orpg.tools.InterParse import Parse
 
 dnd3e_EXPORT = wx.NewId()
 ############Global Stuff##############
@@ -763,7 +764,7 @@ class dnd3esaves(class_char_child):
             else: mod1 = ""
             chat = self.chat
             txt = '%s save: [1d20%s%s]' % (name, mod1, mod)
-            chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,save_grid,"Saves")
@@ -1016,7 +1017,7 @@ class dnd3eskill(skills_char_child):
             chat = self.chat
             txt = '%s Skill Check: [1d20%s%s%s] %s' % (
                     name, mod1, mod, acCp, armor)
-            chat.ParsePost(txt,True,True)
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,skill_grid,"Skills")
@@ -1318,7 +1319,7 @@ class dnd3ehp(combat_char_child):
         chp = self.xml.get('current')
         mhp = self.xml.get('max')
         txt = '((HP: %s / %s))' % ( chp, mhp )
-        self.chat.ParsePost( txt, True, True )
+        Parse.Post( txt, self.chat, True, True )
 
     def tohtml(self):
         html_str = "<table width=100% border=1 >"
@@ -1524,7 +1525,7 @@ class dnd3eattacks(combat_char_child):
                 if monkLvl == None:     #a 1.5009
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True ) #a 1.5009
+                    Parse.Post( txt, self.chat, True, True )
                     return #a 1.5009
                 else:   #a 1.5009
                     lvl=int(monkLvl)
@@ -1538,7 +1539,7 @@ class dnd3eattacks(combat_char_child):
                 if monkLvl == None:
                     txt = 'Attempting to use monk attack, but has no monk '
                     txt += 'levels, please choose a different attack.'
-                    chat.ParsePost( txt, True, True )
+                    Parse.Post( txt, self.chat, True, True )
                     return
                 else: 
                     lvl=int(monkLvl)
@@ -1583,7 +1584,7 @@ class dnd3eattacks(combat_char_child):
             txt = '%s ' % (spacer)
             txt += '%s Attack Roll: <b>[1d20%s%s%s]</b>' % (name, mod1, base, flu)
             txt += ' ===> Damage: <b>[%s%s]</b>' % (dmg, aStrengthMod)
-            self.chat.ParsePost( txt, True, True )
+            Parse.Post( txt, self.chat, True, True )
 
     def get_design_panel(self,parent):
         wnd = outline_panel(parent,self,attack_panel,"Attacks")
@@ -1948,7 +1949,7 @@ class dnd3earmor(combat_char_child):
         ac = self.get_armor_class()
         fac = (int(ac)-(self.root.abilities.get_mod('Dex')))
         txt = '((AC: %s Normal, %s Flatfoot))' % ( ac, fac ) #a 1.5002
-        self.chat.ParsePost( txt, True, True )
+        Parse.Post( txt, self.chat, True, True )
 
     def tohtml(self):
         html_str = """<table width=100% border=1 ><tr BGCOLOR=#E9E9E9 >
@@ -2168,14 +2169,14 @@ class dnd3espells(snp_char_child):
             if left < 0:
                 txt = '%s Tried to cast %s but has used all of them for today,'
                 txt +='"Please rest so I can cast more."' % ( charNameL, name ) #a 1.5002
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
             else:
                 txt = '%s casts %s ( level %s, "%s" )' % ( charNameL, name, level, descr )#a f 1.5002
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
                 s = ''
                 if left != 1: s = 's'
                 txt = '%s can cast %s %d more time%s' % ( charNameL, name, left, s ) #a 1.5002
-                self.chat.ParsePost( txt, False, False )
+                Parse.Post( txt, self.chat, False, False )
                 self.spells[ name ].set( 'used', `eval( use )` )
 
     def refresh_spells(self):
@@ -2257,7 +2258,8 @@ class spells_panel(wx.Panel):
         self.grid.SetCellValue(i,2,name)
         self.grid.SetReadOnly(i,2)
         self.grid.SetCellValue(i,3,type)
-        self.grid.SetReadOnly(i,3)        self.grid.SetCellValue(i,1,level)
+        self.grid.SetReadOnly(i,3)
+        self.grid.SetCellValue(i,1,level)
         self.grid.SetReadOnly(i,1)
 
     def on_remove(self,evt):
@@ -2344,14 +2346,14 @@ class dnd3edivine(snp_char_child):
             if left < 0:
                 txt = '%s Tried to cast %s but has used all of them for today,' #m 1.5002 break in 2.
                 txt += "Please rest so I can cast more."' % ( charNameL, name )' #a 1.5002
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
             else:
                 txt = '%s casts %s ( level %s, "%s" )' % ( charNameL, name, level, descr ) #a 5002
-                self.chat.ParsePost( txt, True, False )
+                Parse.Post( txt, self.chat, True, False )
                 s = ''
                 if left != 1: s = 's'
                 txt = '%s can cast %s %d more time%s' % ( charNameL, name, left, s ) #a 1.5002
-                self.chat.ParsePost( txt, False, False )
+                Parse.Post( txt, self.chat, False, False )
                 self.spells[ name ].set( 'used', `eval( use )` )
 
     def refresh_spells(self):
@@ -2401,7 +2403,8 @@ class divine_panel(wx.Panel):
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
         self.Fit()
-        self.Bind(wx.EVT_BUTTON, self.on_remove, id=10)
+
+        self.Bind(wx.EVT_BUTTON, self.on_remove, id=10)
         self.Bind(wx.EVT_BUTTON, self.on_add, id=20)
         self.Bind(wx.EVT_BUTTON, self.on_refresh_spells, id=30)
         self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.on_cell_change)
@@ -2531,25 +2534,25 @@ class dnd3epowers(snp_char_child):
                     #In theory you should never see this -mgt
                     txt = ('%s doesnt have enough PowerPoints to use %s'
                         % ( charNameL, name )) #a 1.5002
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                 else:
                     txt = ('%s uses %s as a Free Talent ( level %s, "%s" )'
                         % ( charNameL, name, level, descr )) #a 1.5002
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                     s = ''
                     if left != 1: s = 's'
                     txt = '%s has %d Free Talent%s left' % ( charNameL, numcast, s ) #a 1.5002
-                    self.chat.ParsePost( txt, False, False )
+                    Parse.Post( txt, self.chat, False, False )
                     self.root.pp.set_char_pp('free',left)       #a 1.5002
             else:
                 left = eval('%s - ( %s )' % ( cpp, points ))
                 #numcast = eval('%s / %s' % (left, points))
                 if left < 0:
                     txt = '%s doesnt have enough PowerPoints to use %s' % ( charNameL, name ) #m 1.5002
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                 else:
                     txt = '%s uses %s ( level %s, "%s" )' % ( charNameL, name, level, descr ) #m 1.5002
-                    self.chat.ParsePost( txt, True, False )
+                    Parse.Post( txt, self.chat, True, False )
                     s = ''
                     if left != 1:
                         s = 's'
@@ -2557,7 +2560,7 @@ class dnd3epowers(snp_char_child):
                     #txt = '%s can use %s %d more time%s' % ( charNameL, name, numcast, s ) #m 1.5002
                     #txt += ' - And has %d more PowerpointsP left' % (left)
                     txt = '%s has %d more Powerpoint%s' % ( charNameL, left, s ) #m 1.5002
-                    self.chat.ParsePost( txt, False, False )
+                    Parse.Post( txt, self.chat, False, False )
                     self.root.pp.set_char_pp('current1',left)   #a 1.5002
 
     def refresh_powers(self):

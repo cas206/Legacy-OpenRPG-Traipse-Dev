@@ -161,7 +161,7 @@ class InterParse():
         reg2 = re.compile("(!=(.*?)=!)")
         """Adding the Parent and Child references to Namespace Internal. Namespace 2.0 is powerful enough it
         should be able to handle them with no problem. For future reference, if you are paying attention, Namespace
-        will include two methods for Internal and External. !@ :: @! and !& :: @! for External and !" :: "! and != :: =!
+        will include two methods for Internal and External. !@ :: @! and !& :: &! for External and !" :: "! and != :: =!
         for Internal. See above Easter Egg for reasoning."""
         reg3 = re.compile("(!!(.*?)!!)")
         reg4 = re.compile("(!#(.*?)#!)")
@@ -180,6 +180,31 @@ class InterParse():
             #s = self.NodeMap(s, node)
             #s = self.NodeParent(s, node)
         return s
+
+    def NameSpaceXE(self, s):
+        reg = re.compile("(!&(.*?)&!)")
+        matches = reg.findall(s)
+        nodeable = ['rpg_grid_handler', 'container_handler', 
+                    'group_handler', 'tabber_handler', 
+                    'splitter_handler', 'form_handler', 'textctrl_handler']
+
+        for i in xrange(0,len(matches)):
+            find = matches[i][1].split('::')
+            node = component.get('tree').xml_root
+            for x in xrange(0, len(find)):
+                namespace = node.getiterator('nodehandler')
+                for node in namespace:
+                    if find[x] == node.get('name'):
+                        if node.get('class') not in nodeable: continue
+                        try:
+                            if self.FutureCheck(node, find[x+1]): break
+                            else: continue
+                        except:
+                            if x == len(find)-1:
+                                return node
+                                break
+                            else: break
+        return None
 
     def NameSpaceE(self, s):
         reg = re.compile("(!&(.*?)&!)")

@@ -702,8 +702,8 @@ class game_tree(wx.TreeCtrl):
         if parent_node == self.root:
             name = xml_element.get('name').replace(u'\xa0', ' ') #Required for XSLT sheets
             xml_element.set('name', name)
-            self.tree_map[xml_element.get('name')] = {}
-            self.tree_map[xml_element.get('name')]['node'] = xml_element
+            self.tree_map[str(xml_element.get('name'))] = {}
+            self.tree_map[str(xml_element.get('name'))]['node'] = xml_element
             xml_element.set('map', '')
         if parent_node != self.root:
             ## Loading XML seems to lag on Grids and Images need a cache for load speed ##
@@ -831,7 +831,8 @@ class game_tree(wx.TreeCtrl):
         self.rename_flag = 0
         if txt != "":
             obj = self.GetPyData(item)
-            obj.xml_root.set('name',txt)
+            #obj.xml.set('name', txt)
+            obj.rename(txt)
         else: evt.Veto()
     
     def on_label_begin(self, evt):

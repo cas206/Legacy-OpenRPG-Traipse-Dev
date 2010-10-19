@@ -543,7 +543,7 @@ class rpg_grid_edit_panel(wx.Panel):
     def on_text(self,evt):
         txt = self.title.GetValue()
         if txt != "":
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 
     def refresh_row(self,rowi):

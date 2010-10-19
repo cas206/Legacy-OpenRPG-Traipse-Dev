@@ -257,10 +257,28 @@ class node_handler:
         self.tree.Delete(self.mytree_node)
         return self.xml
 
-    def rename(self,name):
+    def rename(self, name):
         if len(name):
-            self.tree.SetItemText(self.mytree_node,name)
+            self.tree.SetItemText(self.mytree_node, name)
+            old_name = self.xml.get('name')
             self.xml.set('name', name)
+            family_tree = self.tree.get_tree_map(self.mytree_node)
+            family_tree.reverse()
+            self.remap_node(self.mytree_node)
+            if self.tree.tree_map.has_key(old_name):
+                del self.tree.tree_map[old_name]
+                self.tree.tree_map[self.xml.get('name')] = {}
+                self.tree.tree_map[self.xml.get('name')]['node'] = self.xml
+
+    def remap_node(self, xml_root):
+        child, cookie = self.tree.GetFirstChild(xml_root)
+        while child.IsOk():
+            family_tree = self.tree.get_tree_map(child)
+            family_tree.reverse(); family_tree.pop()
+            map_str = '::'.join(family_tree)
+            self.tree.GetPyData(child).xml.set('map', map_str)
+            self.remap_node(child)
+            child, cookie = self.tree.GetNextChild(xml_root, cookie)
 
     def change_icon(self,icon):
         self.xml.set("icon",icon)
@@ -345,7 +363,7 @@ class text_edit_panel(wx.Panel):
             if bad_txt_found:
                 wx.MessageBox("Some non 7-bit ASCII characters found and stripped","Warning!")
             txt = u_txt
-            print txt, self.handler, self.handler.xml
+            #print txt, self.handler, self.handler.xml
             self.handler.text._set_nodeValue(txt)
 
 

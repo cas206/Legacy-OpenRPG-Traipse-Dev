@@ -1,0 +1,87 @@
+<nodehandler class="tabber_handler" frame="730,490,139,134" icon="iron-claw" map="" module="containers" name="User Guide" version="1.0"><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="Introduction" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Iron Claw Interactive PC Sheet / Die Roller
+
+The Iron Claw PC Sheet comes with a user guide becuase it is a first of it's kind in Traipse OpenRPG. The PC sheet is designed to interact with the Iron Claw die roller. The die roller uses a set of text based commands to retrieve data from your PC sheet and uses that data to create die rolls and also to make modifications to the PC sheet when you tell it too.
+
+The PC sheet also updates it's data every time you use a command, allowing you to manually edit it and not worry if your changes will take effect.
+
+However, because of this design some restrictions are required to prevent breaking the die rollers interactivity. This small guide will help users get to know what the die roller / pc sheet combo can do, and what can break the roller.
+
+Special thanks goes to Sanguine Productions Ltd for providing the Iron Claw logo image to be used for this sheet. That is awesome!
+
+Ironclaw logo (tm) 1999, 2010 Sanguine Productions. Used with permission from Sanguine Productions Ltd to Knowledge Arcana Mad Mathematics Laboratories, all rights reserved.</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="What NOT To Do" version="1.0"><text hide_title="1" multiline="1" raw_mode="1" send_button="0">Firstly we should go over what can cause the PC Sheet / Die Roller combo to malfunction.
+
+The character sheet is open enough that users can make some modifications to it without fear of breaking it's interactivity with the die roller. Yet, there are certain changes that should not be made or the die roller will not work correctly.
+
+Changing Node Names: 
+In general, users should not change the names of nodes because these are a reference point for the die roller. 
+
+Users are encouraged to change the name of their node from IronClaw to their PC's name. Users are also encouraged to change the name of the Weapon nodes inside the Combat node.
+
+Note: To rename your sheet highlight it and press F2, or right click it and choose Design
+
+Modifying the Skills Grid: 
+Generally this will not be a problem as long as the Race, Careers, and Skills columns remain in their position.
+
+Nodes With the Same Name: 
+This can cause unpredictable problems. While the pc sheet remains open and users can add nodes, it is best to not add nodes with already assigned names.</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="Commands" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Using the die roller is  pretty simple. The die roller integrates NameSpace 2.0 making data retreival rather effeicient.
+
+PC Sheet First:
+Always place the PC sheet's node name first. The default is IronClaw, so that will be used for all examples. You can rename IronClaw. 
+
+Basics:
+The roller syntax is fairly basic. [IronClaw.option]. You will replace 'option' with the various options available, and can even add more options or basic dice rolls. The roller than gathers all of the dice, creating a list of dice to roll, and then rolls those dice.
+
+Example: [IronClaw.mind.2d4] Rolls IronClaw's Mind Dice and 2d4
+
+You can also modify the entire die list with a modifier. [IronClaw.body+3] rolls IronClaw's Body Dice with a +3 Modifier
+
+Basic Options
+.rest+/-# ; Rests a PC for # hours [IronClaw.rest+3]
+.wounds+/-# ; Adds or subtracts # wounds [IronClaw.wounds+3]
+.fatigue ; Works the same as wounds
+.denarii+/-# ; Adds or subtracts # Denarii [IronClaw.denarii+8]
+.aureals ; Works like .denarii for Aureals
+.magic+/-# ; Adds or subtracts # Current Magic [IronClaw.magic-2]
+.magic.#d# Adds #d# to Current Magic [IronClaw.magic.2d4]
+.passout ;  Rolls an Unconsiousness Check
+.meditate.#d# ; Rolls a meditate check vs #d# [IronClaw.meditate.2d4]
+.damage.#d# ; Rolls #d# as Damage Dice [IronClaw.damage.2d4]
+
+Advanced Commands
+.weapona ; Initiates an Attack with 'WeaponA' (See: Weapons &amp; Skills)
+.soak ; Rolls the Soak dice
+.dodge ; Rolls your Dodge dice. Additionally you can add .guard or .retreat
+.block ; Rolls your Block Dice. Additionally you can add .guard or .retreat
+.nocover ; Block and Dodge automatically add Cover unless you add .nocover
+.parry ; When rolled with a Weapon you use that weapon to parry [IronClaw.weapona.parry]</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="Sheet Setup" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Some of the PC Sheet integration will work out of the box with the Iron Claw roller. Other portions require some setup or you will return nothing. Setup is straight forward for the most part.
+
+The Basics:
+If you want your die roller to have the ability to roll ability checks or skill checks, you need to add the dice to their positions in the sheet. You can add multiple dice to one entry using commas (Example: 1d4, 1d8 = 1d4+1d8).
+
+PC Name:
+Be sure to change the Name node in the General form. 
+
+Defense:
+Block and Dodge are automatically filled in each time you use .block or .dodge. You can leave these alone. You will need to fill in Cover, Soak, and Resolve.
+
+Auto Updating:
+The die roller automatically updates some of the data in your node everytime you enter a command. Your Aureals and Denarii are automatically converted, Block and Dodge, and your Total node in Damage is automatically updated. You are free to manually modify your PC sheet and when you roll a die command again the sheet data will update.
+</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="Weapons &amp; Skills" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Weapons &amp; Skills are an extensible feature of the interactive Iron Claw PC sheet. There is no straight forward approach, only guidelines and some mandates that portions of the grids cannot be changed.
+
+Skills:
+With the Iron Claw die roller a user can roll any skill that is in the Skills grid. The default sheet shows only one empty row. Any number of rows can be added (through design mode). The name of the skill goes into the Skill Name column, and the different dice go into the Race, Careers, and Skill columns. Users should not move these columns around. The Favored, Total, Experience, and any columns added can change column positions though.
+
+When rolling a skill the user just rolls with their skill name. 
+Example: [IronClaw.hunter] rolls IronClaw's hunter skill.
+
+Weapons:
+Weapons can be a bit confusing. The weapon attack is Speed + the skill used to weild the weapon.  You need to make sure you have added a row to the Skills grid for the weapon's skill, then add that skill name to the Skill section of the weapon grid. Finally, be sure you have added the damage dice.
+
+To use your weapon the command is the name of the weapon grid. The defaults are weapona, weaponb, and weaponc .. but you can rename them. Note: To rename your weapon grid highlight it and press F2, or right click it and choose Design</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="User Guide" module="forms" name="NameSpace 2.0" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">The IronClaw dieroller also makes use of NameSpace 2.0. This allows you to find your sheet using NameSpace and also to call internal nodes using NameSpace. The syntax for this is extremely easy. Just use the basic roller commands with the NameSpace 2.0 sperator (::)
+
+Example Usage:
+For an example to find your character sheet if it is in the PCSheets folder node, use [PCSheet::IronClaw.command]
+
+You can find internal nodes in much the same way. To output the value of your Denarii node use [IronClaw.Purse::Denarii]
+
+NameSpace 2.0 is a really powerful advancement over it's predocessor in data is retrieved. If you want to know more about NameSpace 2.0 read the User Manual that comes with Traipse.</text></nodehandler></nodehandler>

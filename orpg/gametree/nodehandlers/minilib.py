@@ -375,7 +375,7 @@ class minpedit(wx.Panel):
     def on_text(self, evt):
         txt = self.text.GetValue()
         if txt != "":
-            self.handler.xml.set('name',txt)
+            #self.handler.xml.set('name',txt)
             self.handler.rename(txt)
 
 class minilib_grid(wx.grid.Grid):

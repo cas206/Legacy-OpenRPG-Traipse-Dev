@@ -1,0 +1,191 @@
+<nodehandler class="tabber_handler" frame="877,516,224,43" icon="iron-claw" map="" module="containers" name="IronClaw" version="1.0"><nodehandler class="tabber_handler" frame="730,490,139,134" icon="iron-claw" map="IronClaw" module="containers" name="User Guide" version="1.0"><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="Introduction" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Iron Claw Interactive PC Sheet / Die Roller
+
+The Iron Claw PC Sheet comes with a user guide becuase it is a first of it's kind in Traipse OpenRPG. The PC sheet is designed to interact with the Iron Claw die roller. The die roller uses a set of text based commands to retrieve data from your PC sheet and uses that data to create die rolls and also to make modifications to the PC sheet when you tell it too.
+
+The PC sheet also updates it's data every time you use a command, allowing you to manually edit it and not worry if your changes will take effect.
+
+However, because of this design some restrictions are required to prevent breaking the die rollers interactivity. This small guide will help users get to know what the die roller / pc sheet combo can do, and what can break the roller.
+
+Special thanks goes to Sanguine Productions Ltd for providing the Iron Claw logo image to be used for this sheet. That is awesome!
+
+Ironclaw logo (tm) 1999, 2010 Sanguine Productions. Used with permission from Sanguine Productions Ltd to Knowledge Arcana Mad Mathematics Laboratories, all rights reserved.</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="What NOT To Do" version="1.0"><text hide_title="1" multiline="1" raw_mode="1" send_button="0">Firstly we should go over what can cause the PC Sheet / Die Roller combo to malfunction.
+
+The character sheet is open enough that users can make some modifications to it without fear of breaking it's interactivity with the die roller. Yet, there are certain changes that should not be made or the die roller will not work correctly.
+
+Changing Node Names: 
+In general, users should not change the names of nodes because these are a reference point for the die roller. 
+
+Users are encouraged to change the name of their node from IronClaw to their PC's name. Users are also encouraged to change the name of the Weapon nodes inside the Combat node.
+
+Note: To rename your sheet highlight it and press F2, or right click it and choose Design
+
+Modifying the Skills Grid: 
+Generally this will not be a problem as long as the Race, Careers, and Skills columns remain in their position.
+
+Nodes With the Same Name: 
+This can cause unpredictable problems. While the pc sheet remains open and users can add nodes, it is best to not add nodes with already assigned names.</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="Commands" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Using the die roller is  pretty simple. The die roller integrates NameSpace 2.0 making data retreival rather effeicient.
+
+PC Sheet First:
+Always place the PC sheet's node name first. The default is IronClaw, so that will be used for all examples. You can rename IronClaw. 
+
+Basics:
+The roller syntax is fairly basic. [IronClaw.option]. You will replace 'option' with the various options available, and can even add more options or basic dice rolls. The roller than gathers all of the dice, creating a list of dice to roll, and then rolls those dice.
+
+Example: [IronClaw.mind.2d4] Rolls IronClaw's Mind Dice and 2d4
+
+You can also modify the entire die list with a modifier. [IronClaw.body+3] rolls IronClaw's Body Dice with a +3 Modifier
+
+Basic Options
+.rest+/-# ; Rests a PC for # hours [IronClaw.rest+3]
+.wounds+/-# ; Adds or subtracts # wounds [IronClaw.wounds+3]
+.fatigue ; Works the same as wounds
+.denarii+/-# ; Adds or subtracts # Denarii [IronClaw.denarii+8]
+.aureals ; Works like .denarii for Aureals
+.magic+/-# ; Adds or subtracts # Current Magic [IronClaw.magic-2]
+.magic.#d# Adds #d# to Current Magic [IronClaw.magic.2d4]
+.passout ;  Rolls an Unconsiousness Check
+.meditate.#d# ; Rolls a meditate check vs #d# [IronClaw.meditate.2d4]
+.damage.#d# ; Rolls #d# as Damage Dice [IronClaw.damage.2d4]
+
+Advanced Commands
+.weapona ; Initiates an Attack with 'WeaponA' (See: Weapons &amp; Skills)
+.soak ; Rolls the Soak dice
+.dodge ; Rolls your Dodge dice. Additionally you can add .guard or .retreat
+.block ; Rolls your Block Dice. Additionally you can add .guard or .retreat
+.nocover ; Block and Dodge automatically add Cover unless you add .nocover
+.parry ; When rolled with a Weapon you use that weapon to parry [IronClaw.weapona.parry]</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="Sheet Setup" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Some of the PC Sheet integration will work out of the box with the Iron Claw roller. Other portions require some setup or you will return nothing. Setup is straight forward for the most part.
+
+The Basics:
+If you want your die roller to have the ability to roll ability checks or skill checks, you need to add the dice to their positions in the sheet. You can add multiple dice to one entry using commas (Example: 1d4, 1d8 = 1d4+1d8).
+
+PC Name:
+Be sure to change the Name node in the General form. 
+
+Defense:
+Block and Dodge are automatically filled in each time you use .block or .dodge. You can leave these alone. You will need to fill in Cover, Soak, and Resolve.
+
+Auto Updating:
+The die roller automatically updates some of the data in your node everytime you enter a command. Your Aureals and Denarii are automatically converted, Block and Dodge, and your Total node in Damage is automatically updated. You are free to manually modify your PC sheet and when you roll a die command again the sheet data will update.
+</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="Weapons &amp; Skills" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">Weapons &amp; Skills are an extensible feature of the interactive Iron Claw PC sheet. There is no straight forward approach, only guidelines and some mandates that portions of the grids cannot be changed.
+
+Skills:
+With the Iron Claw die roller a user can roll any skill that is in the Skills grid. The default sheet shows only one empty row. Any number of rows can be added (through design mode). The name of the skill goes into the Skill Name column, and the different dice go into the Race, Careers, and Skill columns. Users should not move these columns around. The Favored, Total, Experience, and any columns added can change column positions though.
+
+When rolling a skill the user just rolls with their skill name. 
+Example: [IronClaw.hunter] rolls IronClaw's hunter skill.
+
+Weapons:
+Weapons can be a bit confusing. The weapon attack is Speed + the skill used to weild the weapon.  You need to make sure you have added a row to the Skills grid for the weapon's skill, then add that skill name to the Skill section of the weapon grid. Finally, be sure you have added the damage dice.
+
+To use your weapon the command is the name of the weapon grid. The defaults are weapona, weaponb, and weaponc .. but you can rename them. Note: To rename your weapon grid highlight it and press F2, or right click it and choose Design</text></nodehandler><nodehandler class="textctrl_handler" frame="334,152,398,69" icon="note" map="IronClaw::User Guide" module="forms" name="NameSpace 2.0" version="1.0"><text hide_title="1" multiline="1" raw_mode="0" send_button="0">The IronClaw dieroller also makes use of NameSpace 2.0. This allows you to find your sheet using NameSpace and also to call internal nodes using NameSpace. The syntax for this is extremely easy. Just use the basic roller commands with the NameSpace 2.0 sperator (::)
+
+Example Usage:
+For an example to find your character sheet if it is in the PCSheets folder node, use [PCSheet::IronClaw.command]
+
+You can find internal nodes in much the same way. To output the value of your Denarii node use [IronClaw.Purse::Denarii]
+
+NameSpace 2.0 is a really powerful advancement over it's predocessor in data is retrieved. If you want to know more about NameSpace 2.0 read the User Manual that comes with Traipse.</text></nodehandler></nodehandler><nodehandler class="textctrl_handler" frame="555,292,533,202" icon="note" map="IronClaw" module="forms" name="Introduction" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">Welcome to the Ironclaw interactive character sheet, made for use with the Ironclaw version 1 die roller.  To get started, input all information into the character sheet just as you would a standard character sheet.
+
+Be mindful of your spelling in the skills list, as it checks the name of the skill you put in when performing operations.  I.E. if you mispelled 'dodge' as 'dogde', and then your character dodges, the roller won't see the dodge skill, and you'll roll only your speed!  For that reason, make sure to use the 'favored' column to note favored uses, so that nothing else is in the "Skill Name" column.
+
+The roller will check for the name you've designated this sheet.  So to change the name from "IronClaw", which is default, right click on the Ironclaw character sheet and select 'Design'.  In the "Tabber" field which comes up, rename the title from "IronClaw" to whatever you prefer, usually your character's first name.
+
+Need more skill slots?  That's easy, press the plus button to the left of your Ironclaw interactive character sheet, right click the 'Skills' menu and select "Design".  From there it is as easy as clicking "Add Row" as often as is needed.
+
+If you don't want this introduction text in your character sheet anymore, expand your character sheet by pressing the plus button to the left of "IronClaw" once again, right click "Introduction" at the top, and select delete.</text></nodehandler><nodehandler class="tabber_handler" frame="400,433,449,113" icon="knight" map="IronClaw" module="containers" name="Character" version="1.0"><nodehandler class="form_handler" frame="339,318,404,57" height="600" icon="chess" map="IronClaw::Character" module="forms" name="General" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Name" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Insert a publically known name here, other names should be in your character background)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Race" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Insert your race, including racial dice, here.  Races are outlined beginning on page 25 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Habitat" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Your chosen habitat goes here, your choices are determined by your race)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Senses" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input your senses here, determined by chosen race and optional racial gifts)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Career 1" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Career type, including die size, goes here.  Career listings begin at page 48 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Career 2" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Career type, including die size, goes here.  Career listings begin at page 48 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Career 3" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Career type, including die size, goes here.  Career listings begin at page 48 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::General" module="forms" name="Career 4" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Career type, including die size, goes here.  Career listings begin at page 48 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,427,653,146" height="600" icon="thief" map="IronClaw::Character" module="forms" name="Abilities" version="1.0" width="400">
+  <nodehandler class="splitter_handler" frame="429,400,0,51" horizontal="0" icon="divider" map="IronClaw::Character::Abilities" module="containers" name="Body / Speed" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Body / Speed" module="forms" name="Body" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">("d#", separate dice by comma)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Body / Speed" module="forms" name="Speed" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">("d#", separate dice by comma)</text></nodehandler></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Abilities" module="containers" name="Mind / Will" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Mind / Will" module="forms" name="Mind" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">("d#", separate dice by comma)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Mind / Will" module="forms" name="Will" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">("d#", separate dice by comma)</text></nodehandler></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Height" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 11 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Size / Weight" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 11 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Dash" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 12 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Stride" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 12 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Lift Bonus" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 12 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities" module="forms" name="Strength Dice" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Rules on page 12 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Abilities" module="containers" name="Magic Points" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Magic Points" module="forms" name="Current" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">0</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Abilities::Magic Points" module="forms" name="Maximum" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Will trait+all wizard traits)</text></nodehandler></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,90,58" height="600" icon="oriental" map="IronClaw::Character" module="forms" name="Gifts / Flaws" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Gifts / Flaws" module="forms" name="Racial" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(List any racial gifts here.  Races are outlined beginning on page 25 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Gifts / Flaws" module="forms" name="Personal, Social, Esoteric" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(Gifts and flaws begin at page 79 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Gifts / Flaws" module="forms" name="External / Internal" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(Gifts and flaws begin at page 79 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,157,478,112" height="600" icon="orc" map="IronClaw::Character" module="forms" name="Damage" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Damage" module="forms" name="Fatigue" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">0</text></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Damage" module="containers" name="Wounds" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Damage::Wounds" module="forms" name="Current" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">0</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Damage::Wounds" module="forms" name="Maximum" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">12</text></nodehandler></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Damage" module="forms" name="Total" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">0</text></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,359,556,166" height="600" icon="questionhead" map="IronClaw::Character" module="forms" name="Self Improvement" version="1.0" width="400">
+  <nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Self Improvement" module="containers" name="Area 1" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 1" module="forms" name="Area" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input area of training)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 1" module="forms" name="Points" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input the total amount of rewards spent.  The self improvement list is explained on page 251 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Self Improvement" module="containers" name="Area 2" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 2" module="forms" name="Area" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input area of training)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 2" module="forms" name="Points" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input the total amount of rewards spent.  The self improvement list is explained on page 251 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Self Improvement" module="containers" name="Area 3" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 3" module="forms" name="Area" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input area of training)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 3" module="forms" name="Points" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input the total amount of rewards spent.  The self improvement list is explained on page 251 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="splitter_handler" horizontal="0" icon="divider" map="IronClaw::Character::Self Improvement" module="containers" name="Area 4" version="1.0">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 4" module="forms" name="Area" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input area of training)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Character::Self Improvement::Area 4" module="forms" name="Points" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input the total amount of rewards spent.  The self improvement list is explained on page 251 of the Ironclaw legacy book)</text></nodehandler></nodehandler></nodehandler></nodehandler><nodehandler class="rpg_grid_handler" frame="912,400,298,112" icon="grid" map="IronClaw" module="rpg_grid" name="Skills" version="1.0">
+  <grid autosize="1" border="1">
+    <row version="1.0">
+      <cell size="97">Skill Name</cell>
+      <cell size="89">Favored</cell>
+      <cell size="56">Total</cell>
+      <cell size="63">Race Die</cell>
+    <cell size="80">Career Die 1</cell><cell size="82">Career Die 2</cell><cell size="88">Career Die 3</cell><cell size="87">Career Die 4</cell><cell>Skill</cell><cell size="68">Experience</cell></row>
+    <row version="1.0">
+      <cell />
+      <cell />
+      <cell />
+    <cell /><cell /><cell /><cell /><cell /><cell /><cell /></row>
+  <row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row><row version="1.0"><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="tabber_handler" frame="400,189,635,126" icon="sword" map="IronClaw" module="containers" name="Combat" version="1.0"><nodehandler class="rpg_grid_handler" frame="416,139,700,381" icon="grid" map="IronClaw::Combat" module="rpg_grid" name="WeaponA" version="1.0">
+  <grid autosize="1" border="1">
+    <row version="1.0">
+      <cell>Name</cell>
+      <cell />
+    </row>
+    <row version="1.0">
+      <cell>Skill</cell>
+      <cell />
+    </row>
+  <row version="1.0"><cell>Damage</cell><cell /></row><row version="1.0"><cell>Special</cell><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="415,142,405,368" icon="grid" map="IronClaw::Combat" module="rpg_grid" name="WeaponB" version="1.0">
+  <grid autosize="1" border="1">
+    <row version="1.0">
+      <cell>Name</cell>
+      <cell />
+    </row>
+    <row version="1.0">
+      <cell>Skill</cell>
+      <cell />
+    </row>
+  <row version="1.0"><cell>Damage</cell><cell /></row><row version="1.0"><cell>Special</cell><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="414,140,700,381" icon="grid" map="IronClaw::Combat" module="rpg_grid" name="WeaponC" version="1.0">
+  <grid autosize="1" border="1">
+    <row version="1.0">
+      <cell>Name</cell>
+      <cell />
+    </row>
+    <row version="1.0">
+      <cell>Skill</cell>
+      <cell />
+    </row>
+  <row version="1.0"><cell>Damage</cell><cell /></row><row version="1.0"><cell>Special</cell><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler></nodehandler><nodehandler class="form_handler" frame="400,130,607,169" height="600" icon="spears" map="IronClaw" module="forms" name="Defense" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Initiative" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input your initiative roll in the form of "d#, d#", initiative is Speed and Mind, or Leadership and tactics, as outlined on page 163 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Block" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(This field will automatically update)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Dodge" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(This field will automatically update)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Cover" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input any cover currently provided from cloaks, shields or the like.  Detailed on page 161 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Soak" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input body dice, modified by gifts or flaws, and armor dice.  Detailed on page 165 of the Ironclaw legacy book)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Defense" module="forms" name="Resolve" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Normally Will dice added to the resolve skill, if any.  Detailed on page 164 of the Ironclaw legacy book)</text></nodehandler></nodehandler><nodehandler class="form_handler" frame="468,575,573,77" height="600" icon="flask" map="IronClaw" module="forms" name="Equipment" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Good Hand" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Weapon in your primary hand)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Off Hand" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Weapon in your off hand)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Head" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Place head armor here)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Body" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Place armor worn on the body here)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Backup" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Place backup weapon here)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Pack" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(List all other items aside from Aureals and Denarii that are in your possession here.  Make sure to calculate your total weight in stones for equipment, so as to be able to work out encumbrance)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Equipment" module="forms" name="Encumbrance" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(points away from being encumbered must be expressed as a negative, points of actual encumbrance should be expressed as a positive, use decimals not fractions)</text></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,76,0,51" height="600" icon="book" map="IronClaw" module="forms" name="Purse" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Purse" module="forms" name="Aureals" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input aureals here as a number, the sheet will automatically convert denarii to aureals if the character gains 24 or more during a transaction)</text></nodehandler><nodehandler class="textctrl_handler" frame="334,115,288,148" icon="note" map="IronClaw::Purse" module="forms" name="Denarii" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">(Input denarii here as a number, the sheet will automatically convert aureals to denarii if the character's denarii go below 0 during a transaction)</text></nodehandler></nodehandler><nodehandler class="textctrl_handler" frame="990,625,224,43" icon="note" map="IronClaw" module="forms" name="Character Background" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(This area can be used to write in the history of your character)</text></nodehandler><nodehandler class="textctrl_handler" frame="583,262,288,148" icon="note" map="IronClaw" module="forms" name="Character Description" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="1">(Use this field to create a physical description of what other people see when they look at your character, clicking the 'SEND' button will send that description ot the chat.)</text></nodehandler><nodehandler class="textctrl_handler" frame="400,454,288,148" icon="note" map="IronClaw" module="forms" name="Notes" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">(This is where you can put adventuring notes, iether to keep a tally of adventures past, or as a reminder of things you still need to do.  I.E. - "Pick up eggs, and milk.  Destroy demon overlord.  Stop for mead on the way home.")</text></nodehandler><nodehandler class="textctrl_handler" frame="400,454,288,148" icon="note" map="IronClaw" module="forms" name="Miniatures" version="1.0"><text hide_title="0" multiline="1" raw_mode="0" send_button="0">At the bottom of your character sheet is a folder called "Mini Sizes".  These are meant to be filled with mini's for use with the map.
+
+To put miniatures into the folders, first you must create or have a web-ready image.  Once you have created an image to represent your character and uploaded it to a web address, then go to the map and select the "Miniatures" tab.
+
+Paste the image URL into the url bar there and then click 'Add Miniature'.  The miniature will appear on the map screen.  Once there, right click the image on the map screen and choose 'To Gametree'.  Expand the applicable character sheet, then click and drag the image to the correct size category in the "Miniatures" section of the character sheet, when asked to add it as a child, select yes.  For best results, scale the image in an image manipulation program first, then upload.  However, having Traipse scale the image automatically is possible.  This is achieved through right clicking the image on the map, choosing 'properties' and then changing the numbers for pixel size.  This will result in a less clear image, but also requires less work to get the image to the size you want.
+
+Image sizes:
+There are 3 sizes listed in the mini's folder.  However, you can add more or use less depending on what your game requires.
+
+500 Pixels - This size is for show.  It can be useful in close-up conversations or to help people best understand how the character looks.  Not recommended for use with grids.
+
+90 pixels - Large form mini's are meant for smaller battles with less opponents, allowing for greater detailed mini's to be shown. Recommended for 120 point grids.
+
+50 pixels - Small form mini's are meant for larger battles with a greater number of opponents, the smaller size means more of the battle can be seen on the map at one time.  Recommended for 80 point grids.</text></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="IronClaw" module="containers" name="Mini Sizes" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Mini Sizes" module="containers" name="500 Pixels" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Miniatures" module="containers" name="Group_1" version="1.0">
+  </nodehandler></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Mini Sizes" module="containers" name="90 Pixels" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Miniatures" module="containers" name="Group_1" version="1.0">
+  </nodehandler></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Mini Sizes" module="containers" name="40 Pixels" version="1.0">
+  <nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Miniatures" module="containers" name="Group_1" version="1.0">
+  </nodehandler></nodehandler><nodehandler border="1" class="group_handler" cols="1" map="IronClaw::Miniatures" module="containers" name="50 Pixels" version="1.0">
+  </nodehandler></nodehandler></nodehandler>
