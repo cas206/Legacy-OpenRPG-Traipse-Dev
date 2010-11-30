@@ -473,21 +473,25 @@ class AliasLib(wx.Frame):
         filters = xml_dom.findall("filter")
         flist = []
         self.regExList = []
-        for filter in filters:
-            flist.append(filter.get("name"))
-            rules = filter.findall("rule")
+        for f in filters:
+            flist.append(f.get("name"))
+            rules = f.findall("rule")
             sub = []
-            for rule in rules: sub.append([self.MakeSafeHTML(rule.get("match")), 
+            for rule in rules: 
+                sub.append([self.MakeSafeHTML(rule.get("match")), 
                                         self.MakeSafeHTML(rule.get("sub"))])
             self.regExList.append(sub)
         self.filterList = flist
         self.alias = 0
         self.filter = 0
 
-    def MakeSafeHTML(self, str):
-        return str.replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">").replace("&#39;", "'")
-    def MakeHTMLSafe(self, str):
-        return str.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;").replace("'", "&#39;")
+    def MakeSafeHTML(self, s):
+        if s == None: return ''
+        return s.replace("&amp;", "&").replace("&lt;", "<").replace("&quot;", '"').replace("&gt;", ">").replace("&#39;", "'")
+
+    def MakeHTMLSafe(self, s):
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").replace(">", "&gt;").replace("'", "&#39;")
+
     def ImportFromTree(self, xml_dom):
         oldfilename = self.filename
         if xml_dom.get('name') == 'Alias Library':

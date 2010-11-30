@@ -44,9 +44,9 @@ class InterParse():
         tab.set_colors()
         tab.Post(s, send, myself)
 
-    def ParseLogic(self, s, node):
+    def ParseLogic(self, s, node=None):
         'Nodes now parse through ParsLogic. Easily add new parse rules right here!!'
-        s = self.NameSpaceE(s)
+        if not node: s = self.NameSpaceE(s)
         s = self.NameSpaceI(s, node)
         #s = self.NodeMap(s, node)
         #s = self.NodeParent(s, node)
@@ -171,14 +171,14 @@ class InterParse():
         for i in xrange(0,len(matches)):
             ## Build the new tree_map
             new_map = tree_map.split('::')
+            if new_map == ['']: new_map = [node.get('name')]
             find = matches[i][1].split('::')
             ## Backwards Reference the Parent Children
             node = self.get_node(new_map)
             newstr = self.LocationCheck(node, tree_map, new_map, find)
             s = s.replace(matches[i][0], newstr, 1)
             s = s.replace(u'\xa0', ' ')
-            #s = self.NodeMap(s, node)
-            #s = self.NodeParent(s, node)
+            s = self.NameSpaceI(s, node)
         return s
 
     def NameSpaceXE(self, s):

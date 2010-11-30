@@ -292,8 +292,8 @@ class ironclaw(std):
                 f += 1
                 if f > t: 
                     f -= 1; cW += 1
-                    if (cW >= 6) and not tie:
-                        deathTest = self.deathTest(cW, body)
+                    if (cW >= mW-6) and not tie:
+                        deathTest = self.deathTest(cW+(12-mW), body)
                         if deathTest[0] == 'Dead': tie = True; myStr += deathTest[1]
                         if deathTest[2] in ['failure', 'riposte', 'tie', 'botch']: tie = True; myStr += deathTest[1]
                         else: myStr += deathTest[1]
@@ -302,8 +302,8 @@ class ironclaw(std):
             if mod > 0:
                 for x in xrange(0, mod):
                     cW += 1
-                    if (cW >= 6) and not tie:
-                        deathTest = self.deathTest(cW, body)
+                    if (cW >= mW-6) and not tie:
+                        deathTest = self.deathTest(cW+(12-mW), body)
                         if deathTest[0] == 'Dead': tie = True; myStr += deathTest[1]
                         if deathTest[2] in ['failure', 'riposte', 'tie', 'botch']: tie = True; myStr += deathTest[1]
                         else: myStr += deathTest[1]

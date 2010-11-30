@@ -276,7 +276,7 @@ class inventory_pane(wx.Panel):
             nodeName = 'Languages'
             value = self.lang.GetValue()
         for node in self.n_list:
-            if node._get_tagName() == nodeName: node.text = value
+            if node.tag == nodeName: node.text = value
 
     def saveMoney(self, row, col):
         value = self.grid.GetCellValue(row, col)
