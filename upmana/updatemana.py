@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import wx, sys, os #just .sep maybe
 from manifest import manifest
 import shutil
