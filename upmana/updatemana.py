@@ -129,6 +129,21 @@ class Updater(wx.Panel):
         else: manifest.SetString("updatemana", "no_update", "off")
 
     def Update(self, evt=None):
+        with open(sys.path[2]+os.sep+'location.py', 'rb') as f: old_location = f.read()
+        ## This new location file update allows for a more portable way to start Traipse. It's aimed at Linux users.
+        new_location = """import sys
+import os
+
+dyn_dir = 'System'
+_home = sys.path[0]
+_userbase_dir = _home + os.sep + dyn_dir
+sys.path.append(_userbase_dir)
+try: os.chdir(_userbase_dir)
+except: print 'Failed to find ' + _userbase_dir + '\\nHopefuly you are running setup.py which would make this error normal.'"""
+
+        if new_location != old_location:
+            with open(sys.path[2]+os.sep+'location.py', 'w') as f: f.write(new_location)
+
         self.ui = ui.ui()
         self.repo = hg.repository(self.ui, ".")
         self.c = self.repo.changectx('tip')

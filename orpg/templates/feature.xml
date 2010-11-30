@@ -1,4 +1,4 @@
-<nodehandler class="tabber_handler" frame="400,400,0,48" icon="help" map="" module="containers" name="Traipse OpenRPG" version="1.0">
+<nodehandler class="tabber_handler" frame="400,400,1,48" icon="help" map="" module="containers" name="Traipse OpenRPG" version="1.0">
     <nodehandler class="tabber_handler" frame="636,449,368,80" icon="labtop" map="Traipse OpenRPG" module="containers" name="User Manual" version="1.0">
       <nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="Traipse OpenRPG::User Manual" module="forms" name="Introduction" version="1.0">
         <text hide_title="0" multiline="1" raw_mode="0" send_button="0">Welcome to Traipse OpenRPG.
@@ -533,6 +533,8 @@ Is this the end already?</text>
         </nodehandler>
         <nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="IronClaw" version="1.0">
   <file name="ironclaw.xml" />
+</nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Shape Shifter" version="1.0">
+  <file name="ShapeShifter.xml" />
 </nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create WH PC Sheet" version="1.0">
   <file name="Warhammerv2CS2-Traipse.xml" />
 </nodehandler><nodehandler class="file_loader" icon="d20" map="Traipse OpenRPG::Templates::PC Sheets" module="core" name="Create 4e PC Sheet" version="1.0">

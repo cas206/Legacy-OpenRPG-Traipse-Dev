@@ -1,0 +1,229 @@
+<nodehandler class="tabber_handler" frame="808,494,370,88" icon="cyborg" map="" module="containers" name="ShapeShifter" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,336,156" icon="note" map="ShapeShifter" module="forms" name="The Shape Shifter" version="1.0"><text hide_title="0" multiline="1" raw_mode="1" send_button="0">What is the Shape Shifter
+
+The Shape Shifter node is a special node based off the 4e PC Sheet that comes with Traipse. The shape shifter uses a special feature in Traipse's Namespace 2.0 that allows it to reference nodes from inside another reference.
+
+How does this node work?
+
+The Abilities grid actually references the Shapes::Shape node to find the Shape your PC is currently in. The default is Human. Inside the Shapes container different grids for Abilities can be placed and the text inside the Shape can be changed to use a new Abilities grid.
+
+Using the Node:
+
+Using the node is simple. Just clone the 'Human' grid, modify the base ability scores, and then rename the grid to the desired shape. When you want your character to become that shape, change the text in the Shape node to the name of the desired shape.
+
+When making references always reference the Abilities grid as that is the one that will update with the current shape.</text></nodehandler><nodehandler class="tabber_handler" frame="568,400,446,121" icon="tabber" map="ShapeShifter" module="containers" name="Rollers" version="1.0"><nodehandler class="listbox_handler" frame="400,400,541,107" icon="gear" map="ShapeShifter::Rollers" module="forms" name="Skills" version="1.0">
+        <list raw_mode="1" send_button="1" type="2">
+          <option caption="Climb" selected="0" value="0">Climb [1d20+5+!=Abilities::(1,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Hide" selected="1" value="0">Hide [1d20+5+!=Abilities::(2,3)=!+(!=General::Level=!/2)]</option>
+          <option caption="Spot" selected="0" value="0">Spot [1d20+5+!=Abilities::(4,3)=!+(!=General::Level=!/2)]</option>
+        </list>
+      </nodehandler>
+      <nodehandler class="listbox_handler" frame="400,400,203,152" icon="gear" map="ShapeShifter::Rollers" module="forms" name="Attacks" version="1.0">
+  <list raw_mode="1" send_button="1" type="1">
+    <option caption="Sword Attack" selected="1" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::2,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::2,2=!+!=Abilities::1,3=!]</option>
+    <option caption="Mace Attack" selected="0" value="">&lt;b&gt;Attack&lt;/b&gt; !=Combat::Weapons::3,1=! [1d20+!=Combat::To Hit::2,2=!] &lt;b&gt;Damage:&lt;/b&gt; [1!=Combat::Weapons::3,2=!+!=Abilities::1,3=!]</option>
+    <option caption="Uncreated" selected="0" value="">Option Text III</option>
+  </list>
+</nodehandler><nodehandler class="splitter_handler" frame="764,400,9,91" horizontal="0" icon="divider" map="ShapeShifter::Rollers" module="containers" name="Powers" version="1.0">
+    <nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="ShapeShifter::Rollers::Powers" module="forms" name="At Wills" version="1.0">
+  <list raw_mode="1" send_button="1" type="3">
+    <option caption="At Will Power" selected="1" value="0">!=Utilities::At Wills::At Will=!</option></list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,236,66" icon="gear" map="ShapeShifter::Rollers::Powers" module="forms" name="Encounters" version="1.0">
+  <list raw_mode="1" send_button="1" type="3">
+    <option caption="Encounter" selected="1" value="0">!=Utilities::Encounters::Encounter=!</option></list>
+</nodehandler><nodehandler class="listbox_handler" frame="400,400,470,62" icon="gear" map="ShapeShifter::Rollers::Powers" module="forms" name="Dailys" version="1.0">
+  <list raw_mode="1" send_button="1" type="3">
+    <option caption="Daily" selected="1" value="0">!=Utilities::Dailys::Daily=!</option></list>
+</nodehandler></nodehandler></nodehandler><nodehandler class="form_handler" frame="400,400,307,186" height="600" icon="form" map="ShapeShifter" module="forms" name="General" version="1.0" width="400">
+  <nodehandler class="textctrl_handler" icon="note" map="ShapeShifter::General" module="forms" name="Name" version="1.0">
+  <text multiline="0" raw_mode="1" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="ShapeShifter::General" module="forms" name="Player" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="ShapeShifter::General" module="forms" name="Race" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" icon="note" map="ShapeShifter::General" module="forms" name="Class" version="1.0">
+  <text multiline="0" send_button="0">text</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="ShapeShifter::General" module="forms" name="Level" version="1.0">
+  <text multiline="0" raw_mode="1" send_button="0">1</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,0,48" icon="note" map="ShapeShifter::General" module="forms" name="Tier" version="1.0">
+  <text multiline="0" raw_mode="1" send_button="0">1</text>
+</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="603,400,9,91" icon="tabber" map="ShapeShifter" module="containers" name="Combat" version="1.0"><nodehandler class="rpg_grid_handler" frame="400,400,269,110" icon="grid" map="ShapeShifter::Combat" module="rpg_grid" name="Weapons" version="1.0">
+  <grid autosize="1" border="1">
+    <row map="ShapeShifter::Combat::Weapons" version="1.0">
+      <cell>Weapon</cell>
+      <cell>Damage</cell>
+    </row>
+    <row map="ShapeShifter::Combat::Weapons" version="1.0">
+      <cell>Sword</cell>
+      <cell>d6</cell>
+    </row>
+  <row map="ShapeShifter::Combat::Weapons" version="1.0"><cell>Mace</cell><cell>d8</cell></row><row map="ShapeShifter::Combat::Weapons" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Weapons" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Weapons" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Weapons" version="1.0"><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="ShapeShifter::Combat" module="rpg_grid" name="To Hit" version="1.0">
+  <grid autosize="1" border="1">
+    <row map="ShapeShifter::Combat::To Hit" version="1.0">
+      <cell>Armor</cell>
+      <cell size="360">Bonus</cell>
+    </row>
+    <row map="ShapeShifter::Combat::To Hit" version="1.0">
+      <cell>Total</cell>
+      <cell>!=To Hit::3,2=! + !=To Hit::4,2=!</cell>
+    </row>
+  <row map="ShapeShifter::Combat::To Hit" version="1.0"><cell>BAB</cell><cell>15</cell></row><row map="ShapeShifter::Combat::To Hit" version="1.0"><cell>Str Mod</cell><cell>!=Abilities::(1,3)=!</cell></row><row map="ShapeShifter::Combat::To Hit" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::To Hit" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::To Hit" version="1.0"><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="ShapeShifter::Combat" module="rpg_grid" name="AC Bonus" version="1.0">
+  <grid autosize="1" border="1">
+    <row map="ShapeShifter::Combat::AC Bonus" version="1.0">
+      <cell>Armor</cell>
+      <cell size="225">Bonus</cell>
+    </row>
+    <row map="ShapeShifter::Combat::AC Bonus" version="1.0">
+      <cell>Total</cell>
+      <cell>!=AC Bonus::3,2=!+!=AC Bonus::4,2=!</cell>
+    </row>
+  <row map="ShapeShifter::Combat::AC Bonus" version="1.0"><cell>Armor</cell><cell>!=Armor::2,2=!</cell></row><row map="ShapeShifter::Combat::AC Bonus" version="1.0"><cell>Misc</cell><cell>0</cell></row><row map="ShapeShifter::Combat::AC Bonus" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::AC Bonus" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::AC Bonus" version="1.0"><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="ShapeShifter::Combat" module="rpg_grid" name="Armor" version="1.0">
+  <grid autosize="1" border="1">
+    <row map="ShapeShifter::Combat::Armor" version="1.0">
+      <cell>Armor</cell>
+      <cell size="183">Bonus</cell>
+    </row>
+    <row map="ShapeShifter::Combat::Armor" version="1.0">
+      <cell>Total</cell>
+      <cell>!=Armor::3,2=!</cell>
+    </row>
+  <row map="ShapeShifter::Combat::Armor" version="1.0"><cell>Base</cell><cell>10</cell></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell>Armor</cell><cell /></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell>Shield</cell><cell /></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell /><cell /></row><row map="ShapeShifter::Combat::Armor" version="1.0"><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,354,98" icon="grid" map="ShapeShifter::Combat" module="rpg_grid" name="Feats" version="1.0">
+  <grid autosize="1" border="1">
+    <row map="ShapeShifter::Combat::Feats" version="1.0">
+      <cell>Armor</cell>
+      <cell size="106">Bonus</cell>
+    <cell>Descripton</cell></row>
+    <row map="ShapeShifter::Combat::Feats" version="1.0">
+      <cell>Total</cell>
+      <cell>!=Feats::3,2=!</cell>
+    <cell /></row>
+  <row map="ShapeShifter::Combat::Feats" version="1.0"><cell>Feat</cell><cell>0</cell><cell /></row><row map="ShapeShifter::Combat::Feats" version="1.0"><cell /><cell /><cell /></row><row map="ShapeShifter::Combat::Feats" version="1.0"><cell /><cell /><cell /></row><row map="ShapeShifter::Combat::Feats" version="1.0"><cell /><cell /><cell /></row><row map="ShapeShifter::Combat::Feats" version="1.0"><cell /><cell /><cell /></row></grid>
+  <macros>
+    <macro name="" />
+  </macros>
+</nodehandler></nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,285,109" icon="grid" map="ShapeShifter" module="rpg_grid" name="Abilities" version="1.0">
+        <grid autosize="1" border="1">
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Str</cell>
+            <cell size="154">!=!"Shape"!::1,2=!</cell>
+          <cell size="197">(!=Abilities::(1,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Dex</cell>
+            <cell>!=!"Shape"!::2,2=!</cell>
+          <cell>(!=Abilities::(2,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Con</cell>
+            <cell>!=!"Shape"!::3,2=!</cell>
+          <cell>(!=Abilities::(3,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Int</cell>
+            <cell>!=!"Shape"!::4,2=!</cell>
+          <cell>(!=Abilities::(4,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Wis</cell>
+            <cell>!=!"Shape"!::5,2=!</cell>
+          <cell>(!=Abilities::(5,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Abilities" version="1.0">
+            <cell>Cha</cell>
+            <cell>!=!"Shape"!::6,2=!</cell>
+          <cell>(!=Abilities::(6,2)=!-10)/2</cell></row>
+        </grid>
+        <macros>
+          <macro name="" />
+        </macros>
+      </nodehandler><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter" module="containers" name="Shapes" version="1.0"><nodehandler class="textctrl_handler" frame="334,115,539,196" icon="note" map="ShapeShifter::Shapes" module="forms" name="Shape" version="1.0"><text hide_title="0" multiline="0" raw_mode="0" send_button="0">Human</text></nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,488,115" icon="grid" map="ShapeShifter::Shapes" module="rpg_grid" name="Bear" version="1.0">
+        <grid autosize="1" border="1">
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Str</cell>
+            <cell>24</cell>
+          <cell size="197">(!=!"Shape"!::(1,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Dex</cell>
+            <cell>24</cell>
+          <cell>(!=!"Shape"!::(2,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Con</cell>
+            <cell>24</cell>
+          <cell>(!=!"Shape"!::(3,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Int</cell>
+            <cell>24</cell>
+          <cell>(!=!"Shape"!::(4,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Wis</cell>
+            <cell>24</cell>
+          <cell>(!=!"Shape"!::(5,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Bear" version="1.0">
+            <cell>Cha</cell>
+            <cell>24</cell>
+          <cell>(!=!"Shape"!::(6,2)=!-10)/2</cell></row>
+        </grid>
+        <macros>
+          <macro name="" />
+        </macros>
+      </nodehandler><nodehandler class="rpg_grid_handler" frame="400,400,774,157" icon="grid" map="ShapeShifter::Shapes" module="rpg_grid" name="Human" version="1.0">
+        <grid autosize="1" border="1">
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Str</cell>
+            <cell>8</cell>
+          <cell size="197">(!=!"Shape"!::(1,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Dex</cell>
+            <cell>8</cell>
+          <cell>(!=!"Shape"!::(2,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Con</cell>
+            <cell>8</cell>
+          <cell>(!=!"Shape"!::(3,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Int</cell>
+            <cell>8</cell>
+          <cell>(!=!"Shape"!::(4,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Wis</cell>
+            <cell>8</cell>
+          <cell>(!=!"Shape"!::(5,2)=!-10)/2</cell></row>
+          <row map="ShapeShifter::Shapes::Human" version="1.0">
+            <cell>Cha</cell>
+            <cell>8</cell>
+          <cell>(!=!"Shape"!::(6,2)=!-10)/2</cell></row>
+        </grid>
+        <macros>
+          <macro name="" />
+        </macros>
+      </nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,407,67" icon="tabber" map="ShapeShifter" module="containers" name="Utilities" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities" module="containers" name="At Wills" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::At Wills" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="ShapeShifter::Utilities::At Wills::0" module="forms" name="At Will" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="1">/me uses an At Will
+&lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
+&lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::At Wills" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities" module="containers" name="Encounters" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::Encounters" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="ShapeShifter::Utilities::Encounters::0" module="forms" name="Encounter" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="1">/me uses an Encounter
+&lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
+&lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::Encounters" module="containers" name="1" version="1.0" /></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="ShapeShifter::Utilities" module="containers" name="Dailys" version="1.0"><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::Dailys" module="containers" name="0" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,426,47" icon="note" map="ShapeShifter::Utilities::Dailys::0" module="forms" name="Daily" version="1.0">
+  <text multiline="1" raw_mode="1" send_button="1">/me uses an Daily
+&lt;b&gt;Attack:&lt;/b&gt; [1d20+2+!#Abilities::(2,3)#!] 
+&lt;b&gt;Damage:&lt;/b&gt; [2!#Combat::Weapons::(2,2)#!]</text>
+</nodehandler></nodehandler><nodehandler class="tabber_handler" icon="tabber" map="ShapeShifter::Utilities::Dailys" module="containers" name="1" version="1.0" /></nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="ShapeShifter" module="containers" name="Inventory" version="1.0"><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="ShapeShifter::Inventory" module="containers" name="Back pack" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="ShapeShifter::Inventory::Back pack" module="forms" name="Slot 1" version="1.0">
+  <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="ShapeShifter::Inventory::Back pack" module="forms" name="Slot 2" version="1.0">
+  <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
+</nodehandler></nodehandler><nodehandler class="tabber_handler" frame="400,400,9,91" icon="tabber" map="ShapeShifter::Inventory" module="containers" name="Belt" version="1.0"><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="ShapeShifter::Inventory::Belt" module="forms" name="Slot 1" version="1.0">
+  <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
+</nodehandler><nodehandler class="textctrl_handler" frame="400,400,115,115" icon="note" map="ShapeShifter::Inventory::Belt" module="forms" name="Slot 2" version="1.0">
+  <text multiline="1" raw_mode="0" send_button="0">Nothing</text>
+</nodehandler></nodehandler></nodehandler></nodehandler>
