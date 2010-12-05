@@ -415,7 +415,96 @@ Is this the end already?</text>
           </nodehandler>
         </nodehandler>
         </nodehandler>
-      <nodehandler class="form_handler" frame="400,400,501,72" height="600" icon="orc" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Encounters" version="1.0" width="400">
+      <nodehandler class="form_handler" frame="409,414,422,76" height="600" icon="wizard1" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Deck" version="1.0" width="400">
+        <nodehandler class="rpg_grid_handler" frame="400,400,425,69" icon="grid" map="Traipse OpenRPG::Bonus Nodes::Deck" module="rpg_grid" name="52 Card Deck" version="1.0">
+          <grid autosize="1" border="1">
+            <row version="1.0">
+              <cell>AS</cell>
+              <cell>AD</cell>
+              <cell>AC</cell>
+              <cell>AH</cell>
+            </row>
+            <row version="1.0">
+              <cell>KS</cell>
+              <cell>KD</cell>
+              <cell>KC</cell>
+              <cell>KH</cell>
+            </row>
+            <row version="1.0">
+              <cell>QS</cell>
+              <cell>QD</cell>
+              <cell>QC</cell>
+              <cell>QH</cell>
+            </row>
+            <row version="1.0">
+              <cell>JS</cell>
+              <cell>JD</cell>
+              <cell>JC</cell>
+              <cell>JH</cell>
+            </row>
+            <row version="1.0">
+              <cell>10S</cell>
+              <cell>10D</cell>
+              <cell>10C</cell>
+              <cell>10H</cell>
+            </row>
+            <row version="1.0">
+              <cell>9S</cell>
+              <cell>9D</cell>
+              <cell>9C</cell>
+              <cell>9H</cell>
+            </row>
+            <row version="1.0">
+              <cell>8S</cell>
+              <cell>8D</cell>
+              <cell>8C</cell>
+              <cell>8H</cell>
+            </row>
+            <row version="1.0">
+              <cell>7S</cell>
+              <cell>7D</cell>
+              <cell>7C</cell>
+              <cell>7H</cell>
+            </row>
+            <row version="1.0">
+              <cell>6S</cell>
+              <cell>6D</cell>
+              <cell>6C</cell>
+              <cell>6H</cell>
+            </row>
+            <row version="1.0">
+              <cell>5S</cell>
+              <cell>5D</cell>
+              <cell>5C</cell>
+              <cell>5H</cell>
+            </row>
+            <row version="1.0">
+              <cell>4S</cell>
+              <cell>4D</cell>
+              <cell>4C</cell>
+              <cell>4H</cell>
+            </row>
+            <row version="1.0">
+              <cell>3S</cell>
+              <cell>3D</cell>
+              <cell>3C</cell>
+              <cell>3H</cell>
+            </row>
+            <row version="1.0">
+              <cell>2S</cell>
+              <cell>2D</cell>
+              <cell>2C</cell>
+              <cell>2H</cell>
+            </row>
+          </grid>
+          <macros>
+            <macro name="" />
+          </macros>
+        </nodehandler>
+        <nodehandler class="textctrl_handler" frame="400,90,320,145" icon="note" map="Traipse OpenRPG::Bonus Nodes::Deck" module="forms" name="Draw" version="1.0">
+          <text hide_title="0" multiline="0" raw_mode="1" send_button="1">!=52 Card Deck::([#1d13], [#1d4])=!</text>
+        </nodehandler>
+        </nodehandler><nodehandler class="form_handler" frame="400,400,501,72" height="600" icon="orc" map="Traipse OpenRPG::Bonus Nodes" module="forms" name="Encounters" version="1.0" width="400">
         <nodehandler class="listbox_handler" frame="400,153,348,150" icon="gear" map="Traipse OpenRPG::Bonus Nodes::Encounters" module="forms" name="Roll" version="1.0">
           <list hide_title="0" raw_mode="1" send_button="1" type="1">
             <option caption="" selected="0" value="">!=Chart::([#1d3],1)=!</option>

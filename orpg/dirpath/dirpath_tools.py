@@ -1,12 +1,4 @@
-import sys
-import os
-import errno
-from orpg.orpg_wx import *
-
-if WXLOADED:
-    class tmpApp(wx.App):
-        def OnInit(self):
-            return True
+import sys, os, errno
 
 #-------------------------------------------------------
 # void load_paths( dir_struct_reference )
@@ -91,6 +83,8 @@ def verify_file(abs_path):
 def get_user_located_root():
     """Notify the user of directory problems
     and show directory selection dialog """
+
+    #from orpg.orpg_wx import *
 
     if WXLOADED:
         app = tmpApp(0)

@@ -61,7 +61,7 @@ from meta_server_lib import *
 from xml.etree.ElementTree import ElementTree, Element, iselement
 from xml.etree.ElementTree import fromstring, tostring, parse, XML
 
-from orpg.tools.orpg_log import logger, crash, debug
+from orpg.tools.orpg_log import logger#, crash, debug
 from orpg.tools.decorators import debugging
 
 # Snag the version number
@@ -363,9 +363,9 @@ class mplay_server:
                 if self.configDoc.get("admin"): self.boot_pwd = self.configDoc.get("admin") 
                 elif self.configDoc.get("boot"): self.boot_pwd = self.configDoc.get("boot") 
                 if len(self.boot_pwd) < 1: self.boot_pwd = raw_input("Enter admin password:  ")
-            if not hasattr(self, 'reg') and self.configDoc.get("register"):
+            if not hasattr(self, 'reg'):
                 self.reg = self.configDoc.get("register")
-            if not len(self.reg) > 0 or self.reg[0].upper() not in ("Y", "N"):
+            if (not len(self.reg) > 0) or (self.reg[0].upper() not in ("Y", "N")) or (self.reg == None):
                 opt = raw_input("Do you want to post your server to the OpenRPG Meta Server list? (y,n) ")
                 if len(opt) and (opt[0].upper() == 'Y'): self.reg = 'Y'
                 else: self.reg = 'N'

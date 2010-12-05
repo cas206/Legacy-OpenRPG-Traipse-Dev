@@ -44,7 +44,7 @@ from threading import *
 from random import uniform
 import urllib2
 from urllib import urlopen, urlencode
-from orpg.tools.orpg_log import debug
+#from orpg.tools.orpg_log import debug
 
 from xml.etree.ElementTree import Element, fromstring, parse, tostring
 metacache_lock = RLock()

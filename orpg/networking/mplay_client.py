@@ -39,7 +39,7 @@ from orpg.orpg_version import CLIENT_STRING, PROTOCOL_VERSION, VERSION
 
 from orpg.orpgCore import component
 #from orpg.orpg_xml import xml
-from orpg.tools.orpg_log import debug
+#from orpg.tools.orpg_log import debug
 from orpg.tools.settings import settings
 
 from xml.etree.ElementTree import ElementTree, Element, iselement

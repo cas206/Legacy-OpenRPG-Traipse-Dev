@@ -326,8 +326,10 @@ class ironclaw(std):
             magicPoints = self.NameSpaceVI('magic points', character)
             cMagic = self.NameSpaceXI('current', magicPoints); cM = int(cMagic.text)
             mMagic = self.NameSpaceXI('maximum', magicPoints); mM = int(mMagic.text)
-            vsDice = self.getSkillDice(skills['meditate']) if skills.has_key('meditate') else self.getSkillDice(skills['meditation'])
-            vsDice += vsDice; vsDice.pop()
+            vsDice = self.getSkillDice(skills['meditate'], [3,8]) if skills.has_key('meditate') else self.getSkillDice(skills['meditation'], [3,8])
+            vsDice += vsDice
+            skDice = self.getSkillDice(skills['meditate'], [3,4,5,6,7]) if skills.has_key('meditate') else self.getSkillDice(skills['meditation'], [3,4,5,6,7])
+            if skDice != 'No Dice Found!': vsDice += skDice
             myStr = 'Meditates, '
             condition = 'easy'
             vsCondition = []
